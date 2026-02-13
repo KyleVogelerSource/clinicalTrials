@@ -1,0 +1,332 @@
+{
+    "totalCount": 3787,
+    "studies": [
+        {
+            "protocolSection": {
+                "identificationModule": {
+                    "nctId": "NCT00711542",
+                    "orgStudyIdInfo": {
+                        "id": "2007-08-16 REPAIR-ACS"
+                    },
+                    "organization": {
+                        "fullName": "Johann Wolfgang Goethe University Hospital",
+                        "class": "OTHER"
+                    },
+                    "briefTitle": "Effects of Intracoronary Progenitor Cell Therapy on Coronary Flow Reserve After Acute MI",
+                    "officialTitle": "Reinfusion of Enriched Progenitor Cells And Infarct Remodeling in Acute Coronary Syndrome: REPAIR - ACS",
+                    "acronym": "REPAIR-ACS"
+                },
+                "statusModule": {
+                    "statusVerifiedDate": "2017-01",
+                    "overallStatus": "TERMINATED",
+                    "whyStopped": "Slow recruitment",
+                    "expandedAccessInfo": {
+                        "hasExpandedAccess": false
+                    },
+                    "startDateStruct": {
+                        "date": "2008-09"
+                    },
+                    "primaryCompletionDateStruct": {
+                        "date": "2014-12",
+                        "type": "ACTUAL"
+                    },
+                    "completionDateStruct": {
+                        "date": "2015-12",
+                        "type": "ACTUAL"
+                    },
+                    "studyFirstSubmitDate": "2008-07-08",
+                    "studyFirstSubmitQcDate": "2008-07-08",
+                    "studyFirstPostDateStruct": {
+                        "date": "2008-07-09",
+                        "type": "ESTIMATED"
+                    },
+                    "lastUpdateSubmitDate": "2017-01-11",
+                    "lastUpdatePostDateStruct": {
+                        "date": "2017-01-12",
+                        "type": "ESTIMATED"
+                    }
+                },
+                "sponsorCollaboratorsModule": {
+                    "responsibleParty": {
+                        "type": "PRINCIPAL_INVESTIGATOR",
+                        "investigatorFullName": "A. M. Zeiher",
+                        "investigatorTitle": "Prof. Dr. Andreas M. Zeiher",
+                        "investigatorAffiliation": "Johann Wolfgang Goethe University Hospital"
+                    },
+                    "leadSponsor": {
+                        "name": "Johann Wolfgang Goethe University Hospital",
+                        "class": "OTHER"
+                    },
+                    "collaborators": [
+                        {
+                            "name": "University of Leipzig",
+                            "class": "OTHER"
+                        }
+                    ]
+                },
+                "oversightModule": {
+                    "oversightHasDmc": false
+                },
+                "descriptionModule": {
+                    "briefSummary": "Coronary flow reserve is an important measure of the integrity of the coronary microcirculation. Moreover, impaired coronary flow reserve is a predictor of future cardiovascular events and poor prognosis in patients after acute myocardial infarction.\n\nAfter acute myocardial infarction, coronary flow reserve remains significantly reduced. A previous randomized, double-blind Placebo-controlled trial (REPAIR-AMI) demonstrated complete normalization of coronary flow reserve after intracoronary application of autologous bone marrow-derived progenitor cells (but no effect in the placebo group) in patients with ST segment elevation myocardial infarction. The current study is planned to extend these findings to patients with Non-ST segment elevation myocardial infarction, since these patients have an equally reduced outcome.",
+                    "detailedDescription": "Improvement of neovascularization is a key mechanism of functional improvement of intracoronary application of progenitor cells after acute myocardial infarction. Since capillary density cannot be assessed histological in patients, measurement of coronary flow reserve is an exact means for estimating capillary density and assessing coronary microvascular function. With the help of an intracoronary Doppler Wire, coronary hemodynamics can be assessed at baseline and, for example, adenosin-induced maximal vasodilation. Calculation of the minimal vascular resistance indices allows to estimate the cross-sectional area, reflecting capillary density, and, in comparison with the time of the acute myocardial infarction, estimation of improved neovascularization at a later timepoint.\n\nIn order to improve neovascularization, which may then be associated with improved left ventricular contractility, we initiated the current trial."
+                },
+                "conditionsModule": {
+                    "conditions": [
+                        "Coronary Artery Disease",
+                        "Acute Myocardial Infarction"
+                    ],
+                    "keywords": [
+                        "intracoronary progenitor cell therapy",
+                        "NSTEMI",
+                        "coronary flow reserve",
+                        "randomized doubleblind Placebo-controlled trial"
+                    ]
+                },
+                "designModule": {
+                    "studyType": "INTERVENTIONAL",
+                    "phases": [
+                        "PHASE1",
+                        "PHASE2"
+                    ],
+                    "designInfo": {
+                        "allocation": "RANDOMIZED",
+                        "interventionModel": "PARALLEL",
+                        "primaryPurpose": "TREATMENT",
+                        "maskingInfo": {
+                            "masking": "QUADRUPLE",
+                            "whoMasked": [
+                                "PARTICIPANT",
+                                "CARE_PROVIDER",
+                                "INVESTIGATOR",
+                                "OUTCOMES_ASSESSOR"
+                            ]
+                        }
+                    },
+                    "enrollmentInfo": {
+                        "count": 31,
+                        "type": "ACTUAL"
+                    }
+                },
+                "armsInterventionsModule": {
+                    "armGroups": [
+                        {
+                            "label": "1",
+                            "type": "ACTIVE_COMPARATOR",
+                            "description": "Intracoronary infusion of autologous bone marrow-derived progenitor cells after NSTEMI",
+                            "interventionNames": [
+                                "Biological: autologous bone marrow-derived progenitor cells"
+                            ]
+                        },
+                        {
+                            "label": "2",
+                            "type": "PLACEBO_COMPARATOR",
+                            "description": "Intracoronary infusion of Placebo after NSTEMI",
+                            "interventionNames": [
+                                "Biological: placebo medium"
+                            ]
+                        }
+                    ],
+                    "interventions": [
+                        {
+                            "type": "BIOLOGICAL",
+                            "name": "autologous bone marrow-derived progenitor cells",
+                            "description": "intracoronary infusion of autologous bone marrow-derived progenitor cells isolated from 50 ml bone marrow aspirate",
+                            "armGroupLabels": [
+                                "1"
+                            ]
+                        },
+                        {
+                            "type": "BIOLOGICAL",
+                            "name": "placebo medium",
+                            "description": "intracoronary infusion of placebo medium",
+                            "armGroupLabels": [
+                                "2"
+                            ]
+                        }
+                    ]
+                },
+                "outcomesModule": {
+                    "primaryOutcomes": [
+                        {
+                            "measure": "Improvement of coronary flow reserve in the infarct vessel",
+                            "timeFrame": "4 months"
+                        }
+                    ],
+                    "secondaryOutcomes": [
+                        {
+                            "measure": "Improvement of relative coronary flow reserve",
+                            "timeFrame": "4 months"
+                        },
+                        {
+                            "measure": "Improvement of global and regional left ventricular ejection fraction",
+                            "timeFrame": "4 months"
+                        },
+                        {
+                            "measure": "Major adverse cardiac events (death, MI, rehospitalization for heart failure, revascularization)",
+                            "timeFrame": "4 months"
+                        },
+                        {
+                            "measure": "Major adverse cardiac events (death, MI, rehospitalization for heart failure, revascularization)",
+                            "timeFrame": "12 months"
+                        }
+                    ]
+                },
+                "eligibilityModule": {
+                    "eligibilityCriteria": "Inclusion Criteria:\n\nPatients with acute coronary syndrome (ST-depression in at least 2 leads \\> 0,1 mV), or T-wave inversion, with or without elevated myocardial biomarkers (Troponin T oder I), together with typical clinical presentation), treated as follows:\n\n* Acute percutaneous revascularization with stent implantation within 48 hours after symptom onset.\n* Successful acute PCI (residual stenosis \\< 30%, TIMI flow \\> 2).\n* Hemodynamic stability\n* Age 18 - 80 years\n* Written informed consent\n* Active contraception in women of childbearing age\n\nExclusion Criteria:\n\n* Patients with STEMI (ST elevation in 2 leads above 0,2 mV in lead V1, V2 oder V3 or above 0,1 mV in the other leads)\n* Necessity of additional PCI in non-infarct vessel at the time of study therapy (multi-vessel PCI in the acute event is possible)\n* Heart failure (LVEF ≤ 30 %).\n* Arteriovenous malformation or aneurysms\n* Active infection (C-reactive protein \\> 10 mg/dl), or fever, or diarrhoea within the last 4 weeks\n* Chronic inflammatory disease\n* HIV infection or active hepatitis\n* Neoplastic disease without documented complete remission within the last 5 years\n* Recent stroke within the last 3 months\n* Impaired kidney function (creatinin \\> 2,5 mg/dl) at the time of treatment\n* Significant liver disease (GOT \\> 2x upper normal value or spontaneous INR \\> 1,5.\n* Hematopoetic disease (anaemia with Hb\\< 8.5 mg/dl; thrombocytopenia \\< 100.000/µl; splenomegaly\n* Known allergies to Clopidogrel, Heparin or Abciximab\n* History of bleeding disorder\n* GI bleeding within the last 3 months\n* Major surgery or trauma within the last 2 months\n* Uncontrolled hypertension\n* Pregnancy\n* Mental disability\n* Previous progenitor cell therapy\n* Participation in a different clinical trial within the last 30 days",
+                    "healthyVolunteers": false,
+                    "sex": "ALL",
+                    "minimumAge": "18 Years",
+                    "maximumAge": "80 Years",
+                    "stdAges": [
+                        "ADULT",
+                        "OLDER_ADULT"
+                    ]
+                },
+                "contactsLocationsModule": {
+                    "overallOfficials": [
+                        {
+                            "name": "Andreas M Zeiher, MD",
+                            "affiliation": "Goethe University",
+                            "role": "PRINCIPAL_INVESTIGATOR"
+                        }
+                    ],
+                    "locations": [
+                        {
+                            "facility": "Med. Klinik III; Kardiologie",
+                            "city": "Frankfurt",
+                            "zip": "60590",
+                            "country": "Germany",
+                            "geoPoint": {
+                                "lat": 49.68333,
+                                "lon": 10.53333
+                            }
+                        },
+                        {
+                            "facility": "Universität Leipzig / Herzzentrum",
+                            "city": "Leipzig",
+                            "zip": "04289",
+                            "country": "Germany",
+                            "geoPoint": {
+                                "lat": 51.33962,
+                                "lon": 12.37129
+                            }
+                        }
+                    ]
+                },
+                "referencesModule": {
+                    "references": [
+                        {
+                            "pmid": "17620510",
+                            "type": "BACKGROUND",
+                            "citation": "Erbs S, Linke A, Schachinger V, Assmus B, Thiele H, Diederich KW, Hoffmann C, Dimmeler S, Tonn T, Hambrecht R, Zeiher AM, Schuler G. Restoration of microvascular function in the infarct-related artery by intracoronary transplantation of bone marrow progenitor cells in patients with acute myocardial infarction: the Doppler Substudy of the Reinfusion of Enriched Progenitor Cells and Infarct Remodeling in Acute Myocardial Infarction (REPAIR-AMI) trial. Circulation. 2007 Jul 24;116(4):366-74. doi: 10.1161/CIRCULATIONAHA.106.671545. Epub 2007 Jul 9."
+                        },
+                        {
+                            "pmid": "17098754",
+                            "type": "BACKGROUND",
+                            "citation": "Schachinger V, Erbs S, Elsasser A, Haberbosch W, Hambrecht R, Holschermann H, Yu J, Corti R, Mathey DG, Hamm CW, Suselbeck T, Werner N, Haase J, Neuzner J, Germing A, Mark B, Assmus B, Tonn T, Dimmeler S, Zeiher AM; REPAIR-AMI Investigators. Improved clinical outcome after intracoronary administration of bone-marrow-derived progenitor cells in acute myocardial infarction: final 1-year results of the REPAIR-AMI trial. Eur Heart J. 2006 Dec;27(23):2775-83. doi: 10.1093/eurheartj/ehl388. Epub 2006 Nov 10."
+                        },
+                        {
+                            "pmid": "16990384",
+                            "type": "BACKGROUND",
+                            "citation": "Schachinger V, Erbs S, Elsasser A, Haberbosch W, Hambrecht R, Holschermann H, Yu J, Corti R, Mathey DG, Hamm CW, Suselbeck T, Assmus B, Tonn T, Dimmeler S, Zeiher AM; REPAIR-AMI Investigators. Intracoronary bone marrow-derived progenitor cells in acute myocardial infarction. N Engl J Med. 2006 Sep 21;355(12):1210-21. doi: 10.1056/NEJMoa060186."
+                        },
+                        {
+                            "pmid": "17951319",
+                            "type": "BACKGROUND",
+                            "citation": "Dimmeler S, Burchfield J, Zeiher AM. Cell-based therapy of myocardial infarction. Arterioscler Thromb Vasc Biol. 2008 Feb;28(2):208-16. doi: 10.1161/ATVBAHA.107.155317. Epub 2007 Oct 19."
+                        },
+                        {
+                            "pmid": "16598441",
+                            "type": "BACKGROUND",
+                            "citation": "Schachinger V, Assmus B, Honold J, Lehmann R, Hofmann WK, Martin H, Dimmeler S, Zeiher AM. Normalization of coronary blood flow in the infarct-related artery after intracoronary progenitor cell therapy: intracoronary Doppler substudy of the TOPCARE-AMI trial. Clin Res Cardiol. 2006 Jan;95(1):13-22. doi: 10.1007/s00392-006-0314-x."
+                        },
+                        {
+                            "pmid": "15489105",
+                            "type": "BACKGROUND",
+                            "citation": "Schachinger V, Assmus B, Britten MB, Honold J, Lehmann R, Teupe C, Abolmaali ND, Vogl TJ, Hofmann WK, Martin H, Dimmeler S, Zeiher AM. Transplantation of progenitor cells and regeneration enhancement in acute myocardial infarction: final one-year results of the TOPCARE-AMI Trial. J Am Coll Cardiol. 2004 Oct 19;44(8):1690-9. doi: 10.1016/j.jacc.2004.08.014."
+                        },
+                        {
+                            "pmid": "12473544",
+                            "type": "BACKGROUND",
+                            "citation": "Assmus B, Schachinger V, Teupe C, Britten M, Lehmann R, Dobert N, Grunwald F, Aicher A, Urbich C, Martin H, Hoelzer D, Dimmeler S, Zeiher AM. Transplantation of Progenitor Cells and Regeneration Enhancement in Acute Myocardial Infarction (TOPCARE-AMI). Circulation. 2002 Dec 10;106(24):3009-17. doi: 10.1161/01.cir.0000043246.74879.cd."
+                        }
+                    ]
+                }
+            },
+            "derivedSection": {
+                "miscInfoModule": {
+                    "versionHolder": "2026-02-12"
+                },
+                "conditionBrowseModule": {
+                    "meshes": [
+                        {
+                            "id": "D003324",
+                            "term": "Coronary Artery Disease"
+                        },
+                        {
+                            "id": "D000072658",
+                            "term": "Non-ST Elevated Myocardial Infarction"
+                        }
+                    ],
+                    "ancestors": [
+                        {
+                            "id": "D003327",
+                            "term": "Coronary Disease"
+                        },
+                        {
+                            "id": "D017202",
+                            "term": "Myocardial Ischemia"
+                        },
+                        {
+                            "id": "D006331",
+                            "term": "Heart Diseases"
+                        },
+                        {
+                            "id": "D002318",
+                            "term": "Cardiovascular Diseases"
+                        },
+                        {
+                            "id": "D001161",
+                            "term": "Arteriosclerosis"
+                        },
+                        {
+                            "id": "D001157",
+                            "term": "Arterial Occlusive Diseases"
+                        },
+                        {
+                            "id": "D014652",
+                            "term": "Vascular Diseases"
+                        },
+                        {
+                            "id": "D009203",
+                            "term": "Myocardial Infarction"
+                        },
+                        {
+                            "id": "D007238",
+                            "term": "Infarction"
+                        },
+                        {
+                            "id": "D007511",
+                            "term": "Ischemia"
+                        },
+                        {
+                            "id": "D010335",
+                            "term": "Pathologic Processes"
+                        },
+                        {
+                            "id": "D013568",
+                            "term": "Pathological Conditions, Signs and Symptoms"
+                        },
+                        {
+                            "id": "D009336",
+                            "term": "Necrosis"
+                        }
+                    ]
+                }
+            },
+            "hasResults": false
+        }
+    ],
+    "nextPageToken": "ZVNj7o2Elu8o3lppVtqgtbrumpOQJJxuZfel0A"
+}
