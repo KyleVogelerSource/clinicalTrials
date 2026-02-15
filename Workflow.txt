@@ -1,0 +1,56 @@
+┌────────────────────────┐
+│  User / Researcher     │
+│  Enters Trial Details  │
+└────────────┬───────────┘
+             │
+┌────────────────────────┐
+│ Frontend App (React)   │
+│ Trial Input Form       │
+└────────────┬───────────┘
+             │ API Request
+┌────────────────────────────────────┐
+│ Backend API (TypeScript)           │
+│ Trial Comparison Service           │
+└────────────┬───────────────────────┘
+             │
+             │ Build Search Query
+┌────────────────────────────────────┐
+│ ClinicalTrials.gov API             │
+│ Fetch Similar Studies              │
+└────────────┬───────────────────────┘
+             │ JSON Studies Data
+┌────────────────────────────────────┐
+│ Data Processing Layer              │
+│ • Normalize data                   │
+│ • Extract features                 │
+│ • Prepare comparison dataset       │
+└────────────┬───────────────────────┘
+             │
+┌────────────────────────────────────┐
+│ AI Implementation                  │
+│                                    │
+│ Compare trial vs historical data:  │
+│ • Eligibility criteria             │
+│ • Sample size                      │
+│ • Study design                     │
+│ • Outcomes                         │
+│ • Duration / phases                │
+└────────────┬───────────────────────┘
+             │
+┌────────────────────────────────────┐
+│Insights Generator                  │
+│ • Similarity score                 │
+│ • Risk flags                       │
+│ • Recommendations?                 │
+└────────────┬───────────────────────┘
+             │
+┌────────────────────────────────────┐
+│ Results API Response               │
+└────────────┬───────────────────────┘
+             │
+┌────────────────────────────────────┐
+│ Frontend Visualization             │
+│ • Similar trials list              │
+│ • Charts & comparison tables       │
+│ • AI assessment report             │
+└────────────────────────────────────┘
