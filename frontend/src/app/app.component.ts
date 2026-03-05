@@ -1,46 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, HttpClientModule],
+  imports: [CommonModule, RouterOutlet],
   template: `
-    <div class="container">
-      <header>
-        <h1>Clinical Trials</h1>
-        <p>Welcome to the Clinical Trials Management System</p>
-      </header>
-
-      <main>
-        <section class="info">
-          <h2>System Status</h2>
-          <p class="status-good">✓ Frontend is running (Angular {{ version }})</p>
-          <p class="status-good">✓ Backend API is available</p>
-          <p class="status-good">✓ Database connection established</p>
-        </section>
-
-        <section class="features">
-          <h2>Available Features</h2>
-          <ul>
-            <li>Clinical trial search and discovery</li>
-            <li>Trial details and eligibility criteria</li>
-            <li>Participant enrollment tracking</li>
-            <li>Data management and reporting</li>
-          </ul>
-        </section>
-
-        <section class="next-steps">
-          <h2>Next Steps</h2>
-          <p>To get started, navigate through the application menu above.</p>
-        </section>
-      </main>
-
-      <footer>
-        <p>&copy; 2026 Clinical Trials Management System</p>
-      </footer>
-    </div>
+    <router-outlet></router-outlet>
   `,
   styles: [`
     :host {
