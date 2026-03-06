@@ -1,0 +1,47 @@
+.header-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px;
+    color: #193F6A; /* Deep blue from your logo */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    border-bottom: solid 1px gray;
+}
+
+.text-container {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.cardinal {
+    font-size: 1.5rem;
+    font-weight: 900;
+    margin: 0;
+    letter-spacing: 0.05em;
+    font-family: Arial, sans-serif;
+}
+
+.trials-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    color: #555;
+    width: 100%;
+}
+
+.trials {
+    font-size: .8rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: 0.4em;
+    padding-left: 0.4em;
+}
+
+.accent-line {
+    height: 2px;
+    flex: 1;
+    min-width: 20px;
+    max-width: 100px;
+}

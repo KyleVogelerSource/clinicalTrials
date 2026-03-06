@@ -1,0 +1,92 @@
+<svg width="500" height="500" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .brand-blue { fill: #1A3668; }
+      .brand-blue-stroke { stroke: #1A3668; stroke-width: 20; fill: none; }
+      .brand-teal { fill: #138A8A; }
+      .brand-red-light { fill: #DE1F26; }
+      .brand-red-dark { fill: #B30B1C; }
+      .brand-shadow { fill: #112444; }
+      .mask-white { fill: white; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="500" height="500" fill="white" />
+
+  <!-- 1. Single Continuous Outer Circle -->
+  <circle cx="250" cy="250" r="190" class="brand-blue-stroke" />
+
+  <!-- 2. Pointers (Drawn before masks to allow "breaking through") -->
+  <g transform="translate(250, 250)">
+    <!-- Ordinal Points (NE, SE, SW, NW) - Contained -->
+    <g transform="rotate(45)">
+      <path d="M -45,0 L 0,-165 L 45,0 Z" class="brand-blue" />
+      <path d="M 0,0 L 0,-165 L 45,0 Z" class="brand-shadow" />
+    </g>
+    <g transform="rotate(135)">
+      <path d="M -45,0 L 0,-165 L 45,0 Z" class="brand-blue" />
+      <path d="M 0,0 L 0,-165 L 45,0 Z" class="brand-shadow" />
+    </g>
+    <g transform="rotate(225)">
+      <path d="M -45,0 L 0,-165 L 45,0 Z" class="brand-blue" />
+      <path d="M 0,0 L 0,-165 L 45,0 Z" class="brand-shadow" />
+    </g>
+    <g transform="rotate(315)">
+      <path d="M -45,0 L 0,-165 L 45,0 Z" class="brand-blue" />
+      <path d="M 0,0 L 0,-165 L 45,0 Z" class="brand-shadow" />
+    </g>
+
+    <!-- Cardinal Points (E, S, W) - Breaking the ring -->
+    <g transform="rotate(90)">
+      <path d="M -65,0 L 0,-212 L 65,0 Z" class="brand-blue" />
+      <path d="M 0,0 L 0,-212 L 65,0 Z" class="brand-shadow" />
+    </g>
+    <g transform="rotate(180)">
+      <path d="M -65,0 L 0,-212 L 65,0 Z" class="brand-blue" />
+      <path d="M 0,0 L 0,-212 L 65,0 Z" class="brand-shadow" />
+    </g>
+    <g transform="rotate(270)">
+      <path d="M -65,0 L 0,-212 L 65,0 Z" class="brand-blue" />
+      <path d="M 0,0 L 0,-212 L 65,0 Z" class="brand-shadow" />
+    </g>
+
+    <!-- North Point (Red, Largest) -->
+    <path d="M -75,0 L 0,-265 L 0,0 Z" class="brand-red-light" />
+    <path d="M 75,0 L 0,-265 L 0,0 Z" class="brand-red-dark" />
+  </g>
+
+  <!-- 3. White "Breaking" Lines (Masks) -->
+  <!-- These rectangles sit OVER the circle but UNDER the tips of the pointers to create the gap -->
+  <g transform="translate(250, 250)">
+    <!-- Vertical North Gap -->
+    <rect x="-65" y="-210" width="130" height="40" class="mask-white" />
+    <!-- Vertical South Gap -->
+    <rect x="-55" y="170" width="110" height="40" class="mask-white" />
+    <!-- Horizontal East Gap -->
+    <rect x="170" y="-55" width="40" height="110" class="mask-white" />
+    <!-- Horizontal West Gap -->
+    <rect x="-210" y="-55" width="40" height="110" class="mask-white" />
+    
+    <!-- Ordinal Gaps (to separate points from the ring internally) -->
+    <g transform="rotate(45)"><rect x="-40" y="-210" width="80" height="40" class="mask-white" /></g>
+    <g transform="rotate(135)"><rect x="-40" y="-210" width="80" height="40" class="mask-white" /></g>
+    <g transform="rotate(225)"><rect x="-40" y="-210" width="80" height="40" class="mask-white" /></g>
+    <g transform="rotate(315)"><rect x="-40" y="-210" width="80" height="40" class="mask-white" /></g>
+  </g>
+
+  <!-- 4. Re-draw North Point Tip (To ensure it stays on top of the mask) -->
+  <g transform="translate(250, 250)">
+     <path d="M -75,0 L 0,-265 L 0,0 Z" class="brand-red-light" />
+     <path d="M 75,0 L 0,-265 L 0,0 Z" class="brand-red-dark" />
+     <!-- Re-draw tips of breaking blue pointers too -->
+     <g transform="rotate(90)"><path d="M -65,0 L 0,-212 L 65,0 Z" class="brand-blue" /><path d="M 0,0 L 0,-212 L 65,0 Z" class="brand-shadow" /></g>
+     <g transform="rotate(180)"><path d="M -65,0 L 0,-212 L 65,0 Z" class="brand-blue" /><path d="M 0,0 L 0,-212 L 65,0 Z" class="brand-shadow" /></g>
+     <g transform="rotate(270)"><path d="M -65,0 L 0,-212 L 65,0 Z" class="brand-blue" /><path d="M 0,0 L 0,-212 L 65,0 Z" class="brand-shadow" /></g>
+  </g>
+
+  <!-- 5. Elegant Inner Hub -->
+  <circle cx="250" cy="250" r="88" fill="white" />
+  <circle cx="250" cy="250" r="68" class="brand-teal" />
+  <circle cx="250" cy="250" r="28" fill="white" />
+</svg>
