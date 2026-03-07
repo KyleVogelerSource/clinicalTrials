@@ -1,0 +1,8 @@
+.top-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    border-bottom: solid 1px var(--app-gray);
+}

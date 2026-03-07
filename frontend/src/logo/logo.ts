@@ -2,12 +2,12 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 
 @Component({
-    selector: 'app-head',
+    selector: 'app-logo',
     imports: [NgOptimizedImage],
-    templateUrl: './header.html',
-    styleUrl: `./header.css`,
+    templateUrl: './logo.html',
+    styleUrl: `./logo.css`,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class Header {
+export class Logo {
 
 }
