@@ -5,13 +5,12 @@
     gap: .25em;
     padding: .25em;
     color: var(--app-blue);
-    
-    >img, >svg {
-        height: 3em;
-        width: auto;
-    }
 }
 
+.logo {
+    height: 3em;
+    width: auto;
+}
 
 .text-container {
     display: flex;
