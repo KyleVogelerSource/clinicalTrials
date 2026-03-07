@@ -1,9 +1,9 @@
 <div class="app-header">
-  <a href=""><app-logo/></a>
+  <a [routerLink]="['/']"><app-logo/></a>
   <nav class="top-nav">
     <ul>
-      <li><a href="">Home</a></li>
-      <li><a href="designer">Designer</a></li>
+      <li><a [routerLink]="['/']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a></li>
+      <li><a [routerLink]="['designer']" routerLinkActive="active">Designer</a></li>
     </ul>
   </nav>
 </div>
