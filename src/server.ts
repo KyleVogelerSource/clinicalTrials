@@ -23,5 +23,3 @@ app.get("/api/clinical-trials/empty-response", (_req: Request, res: Response) =>
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
-
-//http://localhost:3000/api/clinical-trials/empty-response
