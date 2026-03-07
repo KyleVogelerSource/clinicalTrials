@@ -6,4 +6,12 @@
     --app-red2: #B90B27;
     --app-teal: #088989;
     --app-gray: #555;
+
+    --text-color: #16171C;
+}
+
+body {
+    color: var(--text-color);
+    background-color: #EEF1F8;
+    font-family: Arial, Helvetica, sans-serif;
 }
