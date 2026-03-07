@@ -14,8 +14,19 @@
     padding: 0;
     gap: 2em;
 
-    li {
+    li a{
         text-decoration: none;
+        text-underline-offset: .25em;
         font-weight: 500;
+        color: var(--app-blue);
+        transition: color .2s ease-in-out;
+
+        &:visited {
+            color: var(--app-blue);
+        }
+
+        &:hover,&:focus-visible {
+            color: var(--app-teal);
+        }
     }
 }
