@@ -1,12 +1,17 @@
-.header-container {
-    display: flex;
+:host {
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 4px;
-    color: #193F6A; /* Deep blue from your logo */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    border-bottom: solid 1px gray;
+    font-size: 16px;
+    gap: .25em;
+    padding: .25em;
+    color: var(--app-blue);
+    
+    >img, >svg {
+        height: 3em;
+        width: auto;
+    }
 }
+
 
 .text-container {
     display: flex;
@@ -26,9 +31,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 2px;
-    color: #555;
-    width: 100%;
+    gap: .125em;
+    color: var(--app-gray);
 }
 
 .trials {
@@ -40,8 +44,9 @@
 }
 
 .accent-line {
-    height: 2px;
+    height: .125em;
     flex: 1;
-    min-width: 20px;
-    max-width: 100px;
+    min-width: 1.25em;
+    max-width: 5em;
+    padding-top: .125em;
 }

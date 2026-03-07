@@ -1,1 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
+:root {
+    --app-blue: #193F6A;
+    --app-blue2: #072E5D;
+    --app-red: #DC344D;
+    --app-red2: #B90B27;
+    --app-teal: #088989;
+    --app-gray: #555;
+}
