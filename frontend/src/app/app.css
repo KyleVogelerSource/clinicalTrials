@@ -21,6 +21,11 @@
         color: var(--app-blue);
         transition: color .2s ease-in-out;
 
+        &.active {
+            text-decoration: underline;
+            font-weight: 700;
+        }
+
         &:visited {
             color: var(--app-blue);
         }
