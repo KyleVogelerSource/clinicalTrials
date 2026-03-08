@@ -1,9 +1,11 @@
-<div class="keyword-selector" (click)="onInsideClick($event)">
+<div class="keyword-selector">
     <div class="input-wrapper">
         <input 
             type="text" 
             [formControl]="queryControl" 
             [placeholder]="placeholderText()"
+            (focus)="onFocus()"
+            (keydown.escape)="onEscape()"
             (keydown.enter)="$event.preventDefault(); onSelectSuggestion(queryControl.value || '')"
         />
         

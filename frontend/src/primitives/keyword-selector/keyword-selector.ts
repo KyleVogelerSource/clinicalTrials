@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, inject, signal, ElementRef } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { ClinicalStudyService } from "../../services/clinical-study.service";
@@ -24,6 +24,7 @@ export class KeywordSelector {
     suggestions = signal<string[]>([]);
 
     clinicalStudyService = inject(ClinicalStudyService);
+    elementRef = inject(ElementRef);
 
     queryControl = new FormControl('');
 
@@ -32,34 +33,43 @@ export class KeywordSelector {
             debounceTime(300),
             distinctUntilChanged()
         ).subscribe(value => {
-            if (value) {
-                let keywords = this.clinicalStudyService.getSuggestedKeywords(value);
-                this.suggestions.set(keywords);
-            } else {
-                this.suggestions.set([]);
-            }
+            this.search(value);
         });
+    }
+
+    private search(value: string | null) {
+        if (value && value.trim().length > 0) {
+            let keywords = this.clinicalStudyService.getSuggestedKeywords(value);
+            this.suggestions.set(keywords);
+        } else {
+            this.suggestions.set([]);
+        }
     }
 
     onSelectSuggestion(suggestion: string) {
         if (suggestion.trim()) {
             this.addKeyword.emit(suggestion.trim());
         }
-        this.queryControl.setValue('', { emitEvent: false }); // Don't trigger search again
-        this.suggestions.set([]); // Force close
+        this.queryControl.setValue('', { emitEvent: false });
+        this.suggestions.set([]);
     }
 
     onRemove(keyword: string) {
         this.removeKeyword.emit(keyword);
     }
 
-    // Close the dropdown if clicking outside the component
-    onDocumentClick(event: MouseEvent) {
+    onFocus() {
+        this.search(this.queryControl.value);
+    }
+
+    onEscape() {
         this.suggestions.set([]);
     }
 
-    // Stop propagation so clicking inside doesn't close it immediately
-    onInsideClick(event: MouseEvent) {
-        event.stopPropagation();
+    onDocumentClick(event: MouseEvent) {
+        // If the click was outside this specific component instance, close its suggestions
+        if (!this.elementRef.nativeElement.contains(event.target)) {
+            this.suggestions.set([]);
+        }
     }
 }
