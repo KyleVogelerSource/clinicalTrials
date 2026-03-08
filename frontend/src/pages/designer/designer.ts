@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from "@angular/core";
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from "@angular/forms";
 import { ProgressTrack } from "../../primitives/progress-track/progress-track";
+import { KeywordSelector } from "../../primitives/keyword-selector/keyword-selector";
 import { debounceTime, distinctUntilChanged, map } from "rxjs";
 import { ClinicalStudyService } from "../../services/clinical-study.service";
 
+// TODO: These should likely be shared enums
 export enum PhaseEnum {
     PHASE_1 = 'Phase I',
     PHASE_2 = 'Phase II',
@@ -27,13 +29,14 @@ export enum AllocationEnum {
     selector: "app-designer",
     templateUrl: "./designer.html",
     styleUrl: "./designer.css",
-    imports: [ ReactiveFormsModule, ProgressTrack ],
+    imports: [ ReactiveFormsModule, ProgressTrack, KeywordSelector ],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Designer {
     clinicalStudiesService = inject(ClinicalStudyService);
 
     conditionMatches = signal<string[]>([]);
+    keywords = signal<string[]>([]);
 
     phaseOptions = Object.values(PhaseEnum);
     sexOptions = Object.values(SexEnum);
@@ -58,7 +61,17 @@ export class Designer {
         ).subscribe(matches => this.conditionMatches.set(matches));
     }
 
+    onAddKeyword(tag: string) {
+        if (!this.keywords().includes(tag)) {
+            this.keywords.update(tags => [...tags, tag]);
+        }
+    }
+
+    onRemoveKeyword(tag: string) {
+        this.keywords.update(tags => tags.filter(t => t !== tag));
+    }
+
     onNext() {
-        console.log('Form data:', this.inputForm.value);
+        console.log('Form data:', this.inputForm.value, 'Keywords:', this.keywords());
     }
 }

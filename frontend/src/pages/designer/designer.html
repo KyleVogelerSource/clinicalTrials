@@ -80,7 +80,13 @@
 
                 <div class="form-group">
                     <label for="required">Disease/Condition</label>
-                    <input id="required" type="text" formControlName="condition" placeholder="e.g., High Blood Pressure" />
+                    <input id="required" type="text" formControlName="condition" placeholder="" />
+                    <app-keyword-selector 
+                        [selectedKeywords]="keywords()" 
+                        placeholderText="e.g., High Blood Pressure"
+                        (addKeyword)="onAddKeyword($event)"
+                        (removeKeyword)="onRemoveKeyword($event)"
+                    />
                 </div>
 
                 <div class="form-group">
