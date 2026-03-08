@@ -8,6 +8,4 @@ import { NgOptimizedImage } from '@angular/common';
     styleUrl: `./logo.css`,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class Logo {
-
-}
+export class Logo { }

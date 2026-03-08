@@ -8,6 +8,7 @@
     --app-gray: #555;
 
     --text-color: #16171C;
+    --shadow-color: rgba(25, 63, 106, 0.3);
 }
 
 body {
