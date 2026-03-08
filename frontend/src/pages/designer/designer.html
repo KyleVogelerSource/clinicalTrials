@@ -79,19 +79,25 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="required">Disease/Condition</label>
-                    <input id="required" type="text" formControlName="condition" placeholder="" />
+                    <label for="required">Required Disease/Condition</label>
                     <app-keyword-selector 
-                        [selectedKeywords]="keywords()" 
+                        id="required"
+                        [selectedKeywords]="requiredConditions()" 
                         placeholderText="e.g., High Blood Pressure"
-                        (addKeyword)="onAddKeyword($event)"
-                        (removeKeyword)="onRemoveKeyword($event)"
+                        (addKeyword)="onAddRequired($event)"
+                        (removeKeyword)="onRemoveRequired($event)"
                     />
                 </div>
 
                 <div class="form-group">
-                    <label for="ineligable">Disease/Condition</label>
-                    <input id="ineligable" type="text" formControlName="condition" placeholder="e.g., Congestive Heart Failure" />
+                    <label for="ineligible">Ineligible Disease/Condition</label>
+                    <app-keyword-selector 
+                        id="ineligible"
+                        [selectedKeywords]="ineligibleConditions()" 
+                        placeholderText="e.g., Congestive Heart Failure"
+                        (addKeyword)="onAddIneligible($event)"
+                        (removeKeyword)="onRemoveIneligible($event)"
+                    />
                 </div>
 
             </div>

@@ -5,10 +5,14 @@ import { ClinicalStudyService } from "../../services/clinical-study.service";
 
 @Component({
     selector: 'app-keyword-selector',
+    standalone: true,
     imports: [ReactiveFormsModule],
     templateUrl: './keyword-selector.html',
     styleUrl: './keyword-selector.css',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    host: {
+        '(document:click)': 'onDocumentClick($event)'
+    }
 })
 export class KeywordSelector {
     placeholderText = input<string>('');
@@ -31,16 +35,31 @@ export class KeywordSelector {
             if (value) {
                 let keywords = this.clinicalStudyService.getSuggestedKeywords(value);
                 this.suggestions.set(keywords);
+            } else {
+                this.suggestions.set([]);
             }
         });
     }
 
     onSelectSuggestion(suggestion: string) {
-        this.addKeyword.emit(suggestion);
-        this.queryControl.setValue('');
+        if (suggestion.trim()) {
+            this.addKeyword.emit(suggestion.trim());
+        }
+        this.queryControl.setValue('', { emitEvent: false }); // Don't trigger search again
+        this.suggestions.set([]); // Force close
     }
 
     onRemove(keyword: string) {
         this.removeKeyword.emit(keyword);
+    }
+
+    // Close the dropdown if clicking outside the component
+    onDocumentClick(event: MouseEvent) {
+        this.suggestions.set([]);
+    }
+
+    // Stop propagation so clicking inside doesn't close it immediately
+    onInsideClick(event: MouseEvent) {
+        event.stopPropagation();
     }
 }
