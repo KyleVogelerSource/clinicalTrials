@@ -2,6 +2,7 @@
     <div class="input-wrapper">
         <input 
             type="text" 
+            [id]="inputId()"
             [formControl]="queryControl" 
             [placeholder]="placeholderText()"
             (focus)="onFocus()"
