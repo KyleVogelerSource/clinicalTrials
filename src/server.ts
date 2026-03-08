@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { createEmptyClinicalTrialStudiesResponse } from "./clinicalTrials/services/ClinicalTrialsService";
+import { createEmptyClinicalTrialStudiesResponse } from "../backend/src/services/ClinicalTrialsService";
 
 const app = express();
 const port = 3000;
