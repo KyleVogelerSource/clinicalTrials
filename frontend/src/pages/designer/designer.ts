@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, inject, signal } from "@angular/core";
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from "@angular/forms";
 import { ProgressTrack } from "../../primitives/progress-track/progress-track";
 import { debounceTime, distinctUntilChanged, map } from "rxjs";
+import { ClinicalStudyService } from "../../services/clinical-study.service";
 
 export enum PhaseEnum {
     PHASE_1 = 'Phase I',
@@ -30,6 +31,8 @@ export enum AllocationEnum {
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Designer {
+    clinicalStudiesService = inject(ClinicalStudyService);
+
     conditionMatches = signal<string[]>([]);
 
     phaseOptions = Object.values(PhaseEnum);
@@ -51,7 +54,7 @@ export class Designer {
         this.inputForm.controls.condition.valueChanges.pipe(
             debounceTime(300),
             distinctUntilChanged(),
-            map(val => [val + 'test', val + 'one', val + 'two', val + 'three'])
+            map(val => this.clinicalStudiesService.getMatchingConditions(val))
         ).subscribe(matches => this.conditionMatches.set(matches));
     }
 
