@@ -81,7 +81,7 @@
                 <div class="form-group">
                     <label for="required">Required Disease/Condition</label>
                     <app-keyword-selector 
-                        id="required"
+                        inputId="required"
                         [selectedKeywords]="requiredConditions()" 
                         placeholderText="e.g., High Blood Pressure"
                         (addKeyword)="onAddRequired($event)"
@@ -92,7 +92,7 @@
                 <div class="form-group">
                     <label for="ineligible">Ineligible Disease/Condition</label>
                     <app-keyword-selector 
-                        id="ineligible"
+                        inputId="ineligible"
                         [selectedKeywords]="ineligibleConditions()" 
                         placeholderText="e.g., Congestive Heart Failure"
                         (addKeyword)="onAddIneligible($event)"

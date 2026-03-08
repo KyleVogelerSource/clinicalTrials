@@ -15,6 +15,7 @@ import { ClinicalStudyService } from "../../services/clinical-study.service";
     }
 })
 export class KeywordSelector {
+    inputId = input<string>('');
     placeholderText = input<string>('');
     selectedKeywords = input<string[]>([]);
 
