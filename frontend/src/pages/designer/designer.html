@@ -12,7 +12,12 @@
 
                 <div class="form-group">
                     <label for="condition">Disease/Condition</label>
-                    <input id="condition" type="text" formControlName="condition" placeholder="e.g., Type 2 Diabetes" />
+                    <input id="condition" type="text" formControlName="condition" list="condition-list" placeholder="e.g., Type 2 Diabetes" />
+                    <datalist id="condition-list">
+                        @for(match of conditionMatches(); track match) {
+                            <option [value]="match"></option>
+                        }
+                    </datalist>
                 </div>
 
                 <div class="form-group">
