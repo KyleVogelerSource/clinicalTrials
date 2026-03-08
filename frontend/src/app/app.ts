@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { Logo } from '../logo/logo';
+import { Logo } from '../primitives/logo/logo';
 
 @Component({
   selector: 'app-root',

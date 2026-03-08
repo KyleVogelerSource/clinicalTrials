@@ -1,0 +1,73 @@
+<div class="designer-container">
+  <div class="header">
+    <h1>Design your clinical trial</h1>
+    <app-progress-track [activeStep]="1" />
+  </div>
+
+  <form [formGroup]="inputForm" class="designer-form">
+    <div class="form-section">
+      <h3>General Information</h3>
+      <div class="form-group">
+        <label for="condition">Disease/Condition</label>
+        <input id="condition" type="text" formControlName="condition" placeholder="e.g., Type 2 Diabetes" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="phase">Current Phase</label>
+          <select id="phase" formControlName="phase">
+            <option [ngValue]="null">Select Phase</option>
+            @for (option of phaseOptions; track option) {
+              <option [value]="option">{{ option }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="sex">Patient Sex</label>
+          <select id="sex" formControlName="sex">
+            @for (option of sexOptions; track option) {
+              <option [value]="option">{{ option }}</option>
+            }
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Study Design</h3>
+      <div class="form-group">
+        <label for="allocationType">Patient Allocation Type</label>
+        <select id="allocationType" formControlName="allocationType">
+          <option [ngValue]="null">Select Allocation</option>
+          @for (option of allocationOptions; track option) {
+            <option [value]="option">{{ option }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="minAge">Min Age (Years)</label>
+          <input id="minAge" type="number" formControlName="minAge" />
+        </div>
+        <div class="form-group">
+          <label for="maxAge">Max Age (Years)</label>
+          <input id="maxAge" type="number" formControlName="maxAge" />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section placeholder-section">
+      <h3>Keyword Matching</h3>
+      <div class="placeholder-box">
+        <!-- Placeholder for the "special keyword matching component" -->
+        <p>Special Keyword Matching Component will go here</p>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn btn-primary" (click)="onNext()">Next</button>
+    </div>
+  </form>
+</div>
