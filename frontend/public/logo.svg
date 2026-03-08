@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Adobe Illustrator 29.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="360px" height="360px" viewBox="0 0 360 360" style="enable-background:new 0 0 360 360;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:none;stroke:#072D5C;stroke-width:14;stroke-miterlimit:10;}
+	.st2{fill:#193F6A;}
+	.st3{fill:#072E5D;}
+	.st4{fill:#DC344D;}
+	.st5{fill:#B90B27;}
+	.st6{fill:none;stroke:#088989;stroke-width:20;stroke-miterlimit:10;}
+</style>
+<defs>
+	<!-- Mask for the outer ring to create gaps where points pass through -->
+	<mask id="ringMask">
+		<rect width="100%" height="100%" fill="white"/>
+		<path fill="black" d="M268.31,162.5l55.38,17.5l-55.38,17.5V162.5 M260.31,151.58v10.92v35v10.92l10.41-3.29l55.38-17.5l24.14-7.63 l-24.14-7.63l-55.38-17.5L260.31,151.58L260.31,151.58z"/>
+		<path fill="black" d="M91.69,162.5v35L36.31,180L91.69,162.5 M99.69,151.58l-10.41,3.29l-55.38,17.5L9.76,180l24.14,7.63l55.38,17.5 l10.41,3.29V197.5v-35V151.58L99.69,151.58z"/>
+		<path fill="black" d="M197.5,268.3L180,323.69l-17.5-55.38H197.5 M208.42,260.3H197.5h-35h-10.92l3.29,10.41l17.5,55.38l7.63,24.14 l7.63-24.14l17.5-55.38L208.42,260.3L208.42,260.3z"/>
+		<path fill="black" d="M180,5.3l17.5,55.38h-35L180,5.3 M180-21.25l-7.63,24.14l-17.5,55.38l-3.29,10.41h10.92h35h10.92l-3.29-10.41 l-17.5-55.38L180-21.25L180-21.25z"/>
+	</mask>
+	<!-- Mask for the compass points to create a gap around the center circle -->
+	<mask id="pointsMask">
+		<rect width="100%" height="100%" fill="white"/>
+		<circle fill="none" stroke="black" stroke-width="19" cx="180" cy="180" r="49.43"/>
+	</mask>
+</defs>
+
+<circle class="st0" cx="180" cy="180" r="135" mask="url(#ringMask)"/>
+
+<g mask="url(#pointsMask)">
+	<g id="East">
+		<polygon class="st2" points="323.51,180 216.49,145.82 227.49,180 	"/>
+		<polygon class="st3" points="323.51,180 216.49,214.18 227.49,180 	"/>
+	</g>
+	<g id="West">
+		<polygon class="st3" points="36.49,180 143.51,214.18 132.51,180 	"/>
+		<polygon class="st2" points="36.49,180 143.51,145.82 132.51,180 	"/>
+	</g>
+	<g id="South">
+		<polygon class="st3" points="180,323.51 214.18,216.49 180,227.49 	"/>
+		<polygon class="st3" points="180,323.51 145.82,216.49 180,227.49 	"/>
+	</g>
+	<polygon id="NE" class="st3" points="250.52,109.48 211.6,132.65 227.35,148.4 "/>
+	<polygon id="SE" class="st3" points="250.52,250.52 227.35,211.6 211.6,227.35 "/>
+	<polygon id="SW" class="st3" points="109.48,250.52 148.4,227.35 132.65,211.6 "/>
+	<polygon id="NW" class="st3" points="109.48,109.48 132.65,148.4 148.4,132.65 "/>
+	<g id="North">
+		<polygon class="st4" points="180,6.24 136.08,143.76 180,129.63 	"/>
+		<polygon class="st5" points="180,6.24 223.92,143.76 180,129.63 	"/>
+	</g>
+</g>
+
+<circle id="Center" class="st6" cx="180" cy="180" r="29.48"/>
+</svg>
