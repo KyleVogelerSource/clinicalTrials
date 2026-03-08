@@ -36,7 +36,8 @@ export class Designer {
     clinicalStudiesService = inject(ClinicalStudyService);
 
     conditionMatches = signal<string[]>([]);
-    keywords = signal<string[]>([]);
+    requiredConditions = signal<string[]>([]);
+    ineligibleConditions = signal<string[]>([]);
 
     phaseOptions = Object.values(PhaseEnum);
     sexOptions = Object.values(SexEnum);
@@ -50,7 +51,10 @@ export class Designer {
         blindingType: new FormControl(''),
         minAge: new FormControl<number | null>(null, [Validators.min(0), Validators.max(150)]),
         maxAge: new FormControl<number | null>(null, [Validators.min(0), Validators.max(150)]),
-        sex: new FormControl<SexEnum>(SexEnum.Any)
+        sex: new FormControl<SexEnum>(SexEnum.Any),
+        // hidden fields
+        required: new FormControl<string[]>([]),
+        ineligible: new FormControl<string[]>([]),
     });
 
     constructor() {
@@ -61,17 +65,43 @@ export class Designer {
         ).subscribe(matches => this.conditionMatches.set(matches));
     }
 
-    onAddKeyword(tag: string) {
-        if (!this.keywords().includes(tag)) {
-            this.keywords.update(tags => [...tags, tag]);
+    onAddRequired(tag: string) {
+        if (!this.requiredConditions().includes(tag)) {
+            this.requiredConditions.update(tags => {
+                const updated = [...tags, tag];
+                this.inputForm.controls.required.setValue(updated);
+                return updated;
+            });
         }
     }
 
-    onRemoveKeyword(tag: string) {
-        this.keywords.update(tags => tags.filter(t => t !== tag));
+    onRemoveRequired(tag: string) {
+        this.requiredConditions.update(tags => {
+            const updated = tags.filter(t => t !== tag);
+            this.inputForm.controls.required.setValue(updated);
+            return updated;
+        });
+    }
+
+    onAddIneligible(tag: string) {
+        if (!this.ineligibleConditions().includes(tag)) {
+            this.ineligibleConditions.update(tags => {
+                const updated = [...tags, tag];
+                this.inputForm.controls.ineligible.setValue(updated);
+                return updated;
+            });
+        }
+    }
+
+    onRemoveIneligible(tag: string) {
+        this.ineligibleConditions.update(tags => {
+            const updated = tags.filter(t => t !== tag);
+            this.inputForm.controls.ineligible.setValue(updated);
+            return updated;
+        });
     }
 
     onNext() {
-        console.log('Form data:', this.inputForm.value, 'Keywords:', this.keywords());
+        console.log('Form data:', this.inputForm.value);
     }
 }
