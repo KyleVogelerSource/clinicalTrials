@@ -59,7 +59,7 @@
 
 .step {
     &.active .circle {
-        background-color: var(--app-teal);
+        background-color: var(--app-teal2);
         color: white;
         box-shadow: 0 0 10px 2px var(--shadow-color);
     }
@@ -71,7 +71,7 @@
 
     &.completed .circle {
         background-color: var(--app-teal);
-        border-color: var(--app-blue);
+        border-color: var(--app-teal);
         color: var(--app-teal);
     }
 }
