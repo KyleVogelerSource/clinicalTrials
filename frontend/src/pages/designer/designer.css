@@ -87,6 +87,11 @@ select:focus {
   background-color: #fff;
 }
 
+input.ng-invalid.ng-touched {
+    border-color: var(--app-red);
+    background-color: var(--field-invalid);
+}
+
 .actions {
   grid-column: 1 / -1; /* Spans both columns */
   display: flex;
@@ -102,6 +107,11 @@ select:focus {
   cursor: pointer;
   transition: all 0.2s;
   border: none;
+
+  &:disabled {
+    cursor: not-allowed;
+    background-color: var(--app-gray);
+  }
 }
 
 .btn-primary {
@@ -109,7 +119,7 @@ select:focus {
   color: white;
 }
 
-.btn-primary:hover {
+.btn-primary:not(:disabled):hover {
   background-color: var(--app-teal2);
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
