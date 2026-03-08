@@ -36,7 +36,7 @@ export class Designer {
     inputForm = new FormGroup({
         condition: new FormControl<string>(''),
         phase: new FormControl<PhaseEnum | null>(null),
-        allocationType: new FormControl<AllocationEnum | null>(null),
+        allocationType: new FormControl<AllocationEnum>(AllocationEnum.NA),
         interventionModel: new FormControl(''),
         blindingType: new FormControl(''),
         minAge: new FormControl<number | null>(null),

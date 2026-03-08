@@ -1,10 +1,10 @@
 .designer-container {
-  max-width: 900px;
-  margin: 0 auto;
+  max-width: 1200px;
+  margin: 12px auto;
   padding: 2rem;
   background: white;
   min-height: 80vh;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 15px var(--shadow-color);
   border-radius: 8px;
 }
 
@@ -18,14 +18,27 @@
   margin-bottom: 1rem;
 }
 
+/* The Two-Column Grid */
 .designer-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two main columns */
+  gap: 3rem;
+  align-items: start;
+}
+
+.form-left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.form-right-col {
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }
 
 .form-section {
-  border-bottom: 1px solid #eee;
   padding-bottom: 1.5rem;
 }
 
@@ -74,19 +87,12 @@ select:focus {
   background-color: #fff;
 }
 
-.placeholder-box {
-  background-color: #f9f9f9;
-  border: 2px dashed #ddd;
-  padding: 2rem;
-  text-align: center;
-  color: #888;
-  border-radius: 8px;
-}
-
 .actions {
+  grid-column: 1 / -1; /* Spans both columns */
   display: flex;
   justify-content: flex-end;
   padding-top: 1rem;
+  border-top: 2px solid #f0f0f0;
 }
 
 .btn {
@@ -99,12 +105,20 @@ select:focus {
 }
 
 .btn-primary {
-  background-color: var(--app-blue);
+  background-color: var(--app-teal);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: var(--app-blue2);
+  background-color: var(--app-teal2);
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Optional: Stack only when it gets very narrow (under 800px) */
+@media (max-width: 800px) {
+  .designer-form {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
 }
