@@ -1,0 +1,112 @@
+<div class="designer-container">
+    <div class="header">
+        <app-progress-track [activeStep]="1" />
+    </div>
+
+    <form [formGroup]="inputForm" class="designer-form">
+
+        <!-- Left Column -->
+        <div class="form-left-col">
+            <div class="form-section">
+                <h3>Study Design</h3>
+
+                <div class="form-group">
+                    <label for="condition">Disease/Condition</label>
+                    <input id="condition" type="text" formControlName="condition" list="condition-list" placeholder="e.g., Type 2 Diabetes" />
+                    <datalist id="condition-list">
+                        @for(match of conditionMatches(); track match) {
+                            <option [value]="match"></option>
+                        }
+                    </datalist>
+                </div>
+
+                <div class="form-group">
+                    <label for="phase">Current Phase</label>
+                    <select id="phase" formControlName="phase">
+                        <option [ngValue]="null">Select Phase</option>
+                        @for (option of phaseOptions; track option) {
+                            <option [value]="option">{{ option }}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="allocationType">Patient Allocation Type</label>
+                    <select id="allocationType" formControlName="allocationType">
+                        @for (option of allocationOptions; track option) {
+                            <option [value]="option">{{ option }}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="intervention">Intervention Model</label>
+                    <input id="intervention" type="text" formControlName="interventionModel" />
+                </div>
+
+                <div class="form-group">
+                    <label for="blinding">Blinding/Masking Type</label>
+                    <input id="blinding" type="text" formControlName="blindingType" />
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="form-right-col">
+            <div class="form-section">
+                <h3>Demographics</h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="minAge">Min Age (Years)</label>
+                        <input id="minAge" type="number" min="0" max="150" formControlName="minAge" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="maxAge">Max Age (Years)</label>
+                        <input id="maxAge" type="number" min="0" max="150" formControlName="maxAge" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="sex">Patient Sex</label>
+                    <select id="sex" formControlName="sex">
+                        @for (option of sexOptions; track option) {
+                            <option [value]="option">{{ option }}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="required">Required Disease/Condition</label>
+                    <app-keyword-selector 
+                        inputId="required"
+                        [selectedKeywords]="requiredConditions()" 
+                        placeholderText="e.g., High Blood Pressure"
+                        (addKeyword)="onAddRequired($event)"
+                        (removeKeyword)="onRemoveRequired($event)"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="ineligible">Ineligible Disease/Condition</label>
+                    <app-keyword-selector 
+                        inputId="ineligible"
+                        [selectedKeywords]="ineligibleConditions()" 
+                        placeholderText="e.g., Congestive Heart Failure"
+                        (addKeyword)="onAddIneligible($event)"
+                        (removeKeyword)="onRemoveIneligible($event)"
+                    />
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Bottom Bar -->
+        <div class="actions">
+            <button type="button" class="btn btn-primary" (click)="onNext()" [disabled]="!inputForm.valid">Next</button>
+        </div>
+
+    </form>
+</div>
