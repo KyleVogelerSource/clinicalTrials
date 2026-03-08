@@ -1,0 +1,77 @@
+:host {
+    --progress-track-max-width: 800px;
+    --progress-track-circle-width: 14px;
+    --progress-track-line-thickness: 4px;
+}
+
+.track-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+  width: 100%;
+  max-width: var(--progress-track-max-width);
+  margin: 20px auto;
+  padding: 0 20px;
+}
+
+/* The connecting line */
+.track-container::before {
+  content: '';
+  position: absolute;
+  top: calc(1px + var(--progress-track-circle-width) / 2);
+  left: 18%;
+  right: 18%;
+  height: var(--progress-track-line-thickness);
+  background-color: var(--app-teal);
+  z-index: 1;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  flex: 1;
+}
+
+.circle {
+  width: var(--progress-track-circle-width);
+  height: var(--progress-track-circle-width);
+  border-radius: 50%;
+  background-color: white;
+  border: 4px solid var(--app-teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: .8em;
+  transition: all 0.3s ease;
+  margin-bottom: 8px;
+}
+
+.label {
+  font-size: 12px;
+  color: var(--app-blue);
+  text-align: center;
+}
+
+.step {
+    &.active .circle {
+        background-color: var(--app-teal2);
+        color: white;
+        box-shadow: 0 0 10px 2px var(--shadow-color);
+    }
+
+    &.active .label {
+        color: var(--app-blue);
+        font-weight: bold;
+    }
+
+    &.completed .circle {
+        background-color: var(--app-teal);
+        border-color: var(--app-teal);
+        color: var(--app-teal);
+    }
+}

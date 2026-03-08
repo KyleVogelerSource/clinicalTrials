@@ -1,0 +1,8 @@
+<div class="track-container">
+  @for (step of steps; track step.id) {
+    <div class="step" [class.active]="activeStep() === step.id" [class.completed]="activeStep() > step.id">
+      <div class="circle"></div>
+      <div class="label">{{ step.label }}</div>
+    </div>
+  }
+</div>

@@ -1,0 +1,34 @@
+<div class="keyword-selector">
+    <div class="input-wrapper">
+        <input 
+            type="text" 
+            [id]="inputId()"
+            [formControl]="queryControl" 
+            [placeholder]="placeholderText()"
+            (focus)="onFocus()"
+            (keydown)="onKeyDown($event)"
+            (keydown.enter)="$event.preventDefault(); onSelectSuggestion(queryControl.value || '')"
+        />
+        
+        @if (suggestions().length > 0) {
+            <ul class="suggestions-list">
+                @for (suggestion of suggestions(); track suggestion; let i = $index) {
+                    <li 
+                        [class.highlighted]="highlightedIndex() === i"
+                        (mouseover)="highlightedIndex.set(i)"
+                        (click)="onSelectSuggestion(suggestion)"
+                    >{{ suggestion }}</li>
+                }
+            </ul>
+        }
+    </div>
+
+    <div class="selected-tags">
+        @for (tag of selectedKeywords(); track tag) {
+            <span class="tag">
+                {{ tag }}
+                <button type="button" class="remove-btn" (click)="onRemove(tag)">&times;</button>
+            </span>
+        }
+    </div>
+</div>

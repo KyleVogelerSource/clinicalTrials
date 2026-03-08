@@ -5,9 +5,12 @@
     --app-red: #DC344D;
     --app-red2: #B90B27;
     --app-teal: #088989;
+    --app-teal2: #35c0c0;
     --app-gray: #555;
 
     --text-color: #16171C;
+    --shadow-color: rgba(25, 63, 106, 0.3);
+    --field-invalid: #fff9f9;
 }
 
 body {
