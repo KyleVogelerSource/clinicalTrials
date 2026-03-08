@@ -6,14 +6,18 @@
             [formControl]="queryControl" 
             [placeholder]="placeholderText()"
             (focus)="onFocus()"
-            (keydown.escape)="onEscape()"
+            (keydown)="onKeyDown($event)"
             (keydown.enter)="$event.preventDefault(); onSelectSuggestion(queryControl.value || '')"
         />
         
         @if (suggestions().length > 0) {
             <ul class="suggestions-list">
-                @for (suggestion of suggestions(); track suggestion) {
-                    <li (click)="onSelectSuggestion(suggestion)">{{ suggestion }}</li>
+                @for (suggestion of suggestions(); track suggestion; let i = $index) {
+                    <li 
+                        [class.highlighted]="highlightedIndex() === i"
+                        (mouseover)="highlightedIndex.set(i)"
+                        (click)="onSelectSuggestion(suggestion)"
+                    >{{ suggestion }}</li>
                 }
             </ul>
         }
