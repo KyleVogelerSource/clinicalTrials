@@ -1,0 +1,27 @@
+<div class="keyword-selector">
+  <div class="input-wrapper">
+    <input 
+      type="text" 
+      [formControl]="queryControl" 
+      [placeholder]="placeholderText()"
+      (keydown.enter)="$event.preventDefault(); onSelectSuggestion(queryControl.value || '')"
+    />
+    
+    @if (suggestions().length > 0) {
+      <ul class="suggestions-list">
+        @for (suggestion of suggestions(); track suggestion) {
+          <li (click)="onSelectSuggestion(suggestion)">{{ suggestion }}</li>
+        }
+      </ul>
+    }
+  </div>
+
+  <div class="selected-tags">
+    @for (tag of selectedKeywords(); track tag) {
+      <span class="tag">
+        {{ tag }}
+        <button type="button" class="remove-btn" (click)="onRemove(tag)">&times;</button>
+      </span>
+    }
+  </div>
+</div>

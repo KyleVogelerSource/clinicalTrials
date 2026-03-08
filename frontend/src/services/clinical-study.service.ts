@@ -19,4 +19,17 @@ export class ClinicalStudyService {
 
         return result;
     }
+
+    getSuggestedKeywords(input: string) : string[] {
+        let result: string[] = [];
+
+        // TODO: Hit the backend/cache
+        result = [
+            input + ' (tag)', 
+            input + ' (category)',
+            input + ' (topic)'
+        ];
+
+        return result;
+    }
 }
