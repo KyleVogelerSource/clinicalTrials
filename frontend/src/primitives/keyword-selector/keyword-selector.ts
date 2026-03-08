@@ -23,6 +23,7 @@ export class KeywordSelector {
     removeKeyword = output<string>();
 
     suggestions = signal<string[]>([]);
+    highlightedIndex = signal<number>(-1);
 
     clinicalStudyService = inject(ClinicalStudyService);
     elementRef = inject(ElementRef);
@@ -42,8 +43,44 @@ export class KeywordSelector {
         if (value && value.trim().length > 0) {
             let keywords = this.clinicalStudyService.getSuggestedKeywords(value);
             this.suggestions.set(keywords);
+            this.highlightedIndex.set(-1); // Reset highlight when results change
         } else {
             this.suggestions.set([]);
+            this.highlightedIndex.set(-1);
+        }
+    }
+
+    onKeyDown(event: KeyboardEvent) {
+        const count = this.suggestions().length;
+
+        if (count > 0) {
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                this.highlightedIndex.update(i => {
+                    if (i == -1)
+                        return 0;
+
+                    return (i + 1 >= count ? -1 : i + 1);
+                });
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                this.highlightedIndex.update(i => {
+                    if (i == -1)
+                        return count - 1;
+
+                    return (i <= 0 ? -1 : i - 1);
+                });
+            } else if (event.key === 'Enter') {
+                const index = this.highlightedIndex();
+                if (index >= 0) {
+                    event.preventDefault();
+                    this.onSelectSuggestion(this.suggestions()[index]);
+                }
+            }
+        }
+        
+        if (event.key === 'Escape') {
+            this.onEscape();
         }
     }
 
@@ -53,6 +90,7 @@ export class KeywordSelector {
         }
         this.queryControl.setValue('', { emitEvent: false });
         this.suggestions.set([]);
+        this.highlightedIndex.set(-1);
     }
 
     onRemove(keyword: string) {
@@ -65,12 +103,13 @@ export class KeywordSelector {
 
     onEscape() {
         this.suggestions.set([]);
+        this.highlightedIndex.set(-1);
     }
 
     onDocumentClick(event: MouseEvent) {
-        // If the click was outside this specific component instance, close its suggestions
         if (!this.elementRef.nativeElement.contains(event.target)) {
             this.suggestions.set([]);
+            this.highlightedIndex.set(-1);
         }
     }
 }
