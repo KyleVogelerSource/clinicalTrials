@@ -17,6 +17,7 @@ export class AutoCompleteInput {
     inputId = input<string>('');
     placeholderText = input<string>('');
     suggestions = input.required<string[]>();
+    clearOnSelect = input<boolean>(true);
 
     searchQueryChange = output<string>();
     itemSelected = output<string>();
@@ -78,7 +79,12 @@ export class AutoCompleteInput {
             this.itemSelected.emit(value);
         }
         
-        this.queryControl.setValue('', { emitEvent: false });
+        if (this.clearOnSelect()) {
+            this.queryControl.setValue('', { emitEvent: false });
+        } else {
+            this.queryControl.setValue(value, { emitEvent: false });
+        }
+        
         this.isOpen.set(false);
         this.highlightedIndex.set(-1);
     }

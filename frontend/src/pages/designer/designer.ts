@@ -3,7 +3,6 @@ import { ReactiveFormsModule, FormGroup, FormControl, Validators } from "@angula
 import { ProgressTrack } from "../../primitives/progress-track/progress-track";
 import { KeywordSelector } from "../../primitives/keyword-selector/keyword-selector";
 import { AutoCompleteInput } from "../../primitives/auto-complete-input/auto-complete-input";
-import { debounceTime, distinctUntilChanged, map } from "rxjs";
 import { ClinicalStudyService } from "../../services/clinical-study.service";
 
 @Component({
@@ -40,12 +39,18 @@ export class Designer {
         ineligible: new FormControl<string[]>([]),
     });
 
-    constructor() {
-        this.inputForm.controls.condition.valueChanges.pipe(
-            debounceTime(300),
-            distinctUntilChanged(),
-            map(val => this.clinicalStudiesService.getMatchingConditions(val))
-        ).subscribe(matches => this.conditionMatches.set(matches));
+    onConditionSearch(query: string) {
+        if (query && query.trim().length > 0) {
+            const matches = this.clinicalStudiesService.getMatchingConditions(query.trim());
+            this.conditionMatches.set(matches);
+        } else {
+            this.conditionMatches.set([]);
+        }
+    }
+
+    onConditionSelected(condition: string) {
+        this.inputForm.controls.condition.setValue(condition);
+        this.conditionMatches.set([]);
     }
 
     onAddRequired(tag: string) {
