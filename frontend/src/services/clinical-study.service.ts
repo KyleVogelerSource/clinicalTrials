@@ -50,32 +50,17 @@ export class ClinicalStudyService {
         return Array.from(uniqueNames);
     }
 
-    getInterventionModels(): string[] {
-        return trialDesignOptions.interventionModels;
-    }
-
-    getMaskingTypes(): string[] {
-        return trialDesignOptions.maskingTypes;
-    }
-
-    getMaskingRoles(): string[] {
-        return trialDesignOptions.maskingRoles;
-    }
-
-    getPrimaryPurposes(): string[] {
-        return trialDesignOptions.primaryPurposes;
-    }
-
-    getAllocations(): string[] {
-        return trialDesignOptions.allocations;
-    }
-
-    getEnrollmentTypes(): string[] {
-        return trialDesignOptions.enrollmentTypes;
-    }
-
-    getPhases(): string[] {
-        return trialDesignOptions.phases;
-    }
+    getInterventionModels = () => trialDesignOptions.interventionModels;
+    getMaskingTypes = () => trialDesignOptions.maskingTypes;
+    getDefaultMaskingType = () => trialDesignOptions.defaultMaskingType;
+    getMaskingRoles = () => trialDesignOptions.maskingRoles;
+    getPrimaryPurposes = () => trialDesignOptions.primaryPurposes;
+    getAllocations = () => trialDesignOptions.allocations;
+    getDefaultAllocation = () => trialDesignOptions.defaultAllocation;
+    getEnrollmentTypes = () => trialDesignOptions.enrollmentTypes;
+    getPhases = () => trialDesignOptions.phases;
+    getDefaultPhase = () => trialDesignOptions.defaultPhase;
+    getSexes = () => trialDesignOptions.sexes;
+    getDefautlSex = () => trialDesignOptions.defaultSex;
 }
 

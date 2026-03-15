@@ -6,6 +6,7 @@
     "Factorial Assignment",
     "Sequential Assignment"
   ],
+  "defaultMaskingType": "None (Open Label)",
   "maskingTypes": [
     "None (Open Label)",
     "Single",
@@ -30,6 +31,7 @@
     "Device Feasibility",
     "Other"
   ],
+  "defaultAllocation": "N/A",
   "allocations": [
     "Randomized",
     "Non-Randomized",
@@ -39,6 +41,7 @@
     "Anticipated",
     "Actual"
   ],
+  "defaultPhase": "N/A",
   "phases": [
     "Early Phase 1",
     "Phase 1",
@@ -48,5 +51,11 @@
     "Phase 3",
     "Phase 4",
     "N/A"
+  ],
+  "defaultSex": "All",
+  "sexes": [
+    "All",
+    "Female",
+    "Male"
   ]
 }
