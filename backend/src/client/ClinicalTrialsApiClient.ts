@@ -76,12 +76,18 @@ export class ClinicalTrialsApiClient {
   buildUrl(request: ClinicalTrialSearchRequest): string {
     const p = new URLSearchParams();
 
-    if (request.term)              p.set("query.term",   request.term);
-    if (request.condition)         p.set("query.cond",   request.condition);
-    if (request.intervention)      p.set("query.intr",   request.intervention);
-    if (request.sponsor)           p.set("query.spons",  request.sponsor);
-    if (request.investigator)      p.set("query.invest", request.investigator);
-    if (request.location)          p.set("query.locn",   request.location);
+    if (request.term)
+      p.set("query.term", request.term);
+    if (request.condition)
+      p.set("query.cond", request.condition);
+    if (request.intervention)
+      p.set("query.intr", request.intervention);
+    if (request.sponsor)
+      p.set("query.spons", request.sponsor);
+    if (request.investigator)
+      p.set("query.invest", request.investigator);
+    if (request.location)
+      p.set("query.locn", request.location);
 
     if (request.overallStatus) {
       p.set("filter.overallStatus", request.overallStatus);
@@ -94,7 +100,7 @@ export class ClinicalTrialsApiClient {
 
     const pageSize = Math.min(request.pageSize ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
     p.set("pageSize", String(pageSize));
-    if (request.pageToken)           p.set("pageToken",   request.pageToken);
+    if (request.pageToken) p.set("pageToken", request.pageToken);
     if (request.countTotal !== undefined) p.set("countTotal", String(request.countTotal));
 
     p.set("format", "json");
@@ -107,11 +113,11 @@ export class ClinicalTrialsApiClient {
   private buildAdvancedFilter(request: ClinicalTrialSearchRequest): string {
     const clauses: string[] = [];
 
-    if (request.phase)             clauses.push(`AREA[Phase]${request.phase}`);
-    if (request.studyType)         clauses.push(`AREA[StudyType]${request.studyType}`);
+    if (request.phase) clauses.push(`AREA[Phase]${request.phase}`);
+    if (request.studyType) clauses.push(`AREA[StudyType]${request.studyType}`);
     if (request.interventionModel) clauses.push(`AREA[InterventionModel]${request.interventionModel}`);
-    if (request.primaryPurpose)    clauses.push(`AREA[PrimaryPurpose]${request.primaryPurpose}`);
-    if (request.sex)               clauses.push(`AREA[Sex]${request.sex}`);
+    if (request.primaryPurpose) clauses.push(`AREA[PrimaryPurpose]${request.primaryPurpose}`);
+    if (request.sex) clauses.push(`AREA[Sex]${request.sex}`);
 
     if (request.healthyVolunteers !== undefined) {
       clauses.push(`AREA[HealthyVolunteers]${request.healthyVolunteers ? "Y" : "N"}`);
@@ -121,8 +127,8 @@ export class ClinicalTrialsApiClient {
     }
 
     if (request.minAge !== undefined || request.maxAge !== undefined) {
-      const lo = request.minAge  ?? "MIN";
-      const hi = request.maxAge  ?? "MAX";
+      const lo = request.minAge ?? "MIN";
+      const hi = request.maxAge ?? "MAX";
       clauses.push(`AREA[MinimumAge]RANGE[${lo},${hi}]`);
     }
 
@@ -134,13 +140,13 @@ export class ClinicalTrialsApiClient {
 
     if (request.startDateFrom || request.startDateTo) {
       const from = request.startDateFrom ?? "MIN";
-      const to   = request.startDateTo   ?? "MAX";
+      const to = request.startDateTo ?? "MAX";
       clauses.push(`AREA[StartDate]RANGE[${from},${to}]`);
     }
 
     if (request.completionDateFrom || request.completionDateTo) {
       const from = request.completionDateFrom ?? "MIN";
-      const to   = request.completionDateTo   ?? "MAX";
+      const to = request.completionDateTo ?? "MAX";
       clauses.push(`AREA[CompletionDate]RANGE[${from},${to}]`);
     }
 
