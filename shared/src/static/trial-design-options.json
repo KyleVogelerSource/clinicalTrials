@@ -1,0 +1,52 @@
+{
+  "interventionModels": [
+    "Single Group Assignment",
+    "Parallel Assignment",
+    "Crossover Assignment",
+    "Factorial Assignment",
+    "Sequential Assignment"
+  ],
+  "maskingTypes": [
+    "None (Open Label)",
+    "Single",
+    "Double",
+    "Triple",
+    "Quadruple"
+  ],
+  "maskingRoles": [
+    "Participant",
+    "Care Provider",
+    "Investigator",
+    "Outcomes Assessor"
+  ],
+  "primaryPurposes": [
+    "Treatment",
+    "Prevention",
+    "Diagnostic",
+    "Supportive Care",
+    "Screening",
+    "Health Services Research",
+    "Basic Science",
+    "Device Feasibility",
+    "Other"
+  ],
+  "allocations": [
+    "Randomized",
+    "Non-Randomized",
+    "N/A"
+  ],
+  "enrollmentTypes": [
+    "Anticipated",
+    "Actual"
+  ],
+  "phases": [
+    "Early Phase 1",
+    "Phase 1",
+    "Phase 1/Phase 2",
+    "Phase 2",
+    "Phase 2/Phase 3",
+    "Phase 3",
+    "Phase 4",
+    "N/A"
+  ]
+}
