@@ -5,12 +5,6 @@ import { KeywordSelector } from "../../primitives/keyword-selector/keyword-selec
 import { debounceTime, distinctUntilChanged, map } from "rxjs";
 import { ClinicalStudyService } from "../../services/clinical-study.service";
 
-export enum SexEnum {
-    Any = 'Any',
-    Male = 'Male',
-    Female = 'Female'
-}
-
 @Component({
     selector: "app-designer",
     templateUrl: "./designer.html",
@@ -29,17 +23,17 @@ export class Designer {
     allocationOptions = this.clinicalStudiesService.getAllocations();
     interventionOptions = this.clinicalStudiesService.getInterventionModels();
     blindingOptions = this.clinicalStudiesService.getMaskingTypes();
-    sexOptions = Object.values(SexEnum);
+    sexOptions = this.clinicalStudiesService.getSexes();
 
     inputForm = new FormGroup({
         condition: new FormControl<string>('', [Validators.required]),
-        phase: new FormControl<string | null>(null, [Validators.required]),
-        allocationType: new FormControl<string | null>(null, [Validators.required]),
-        interventionModel: new FormControl<string | null>(null, [Validators.required]),
-        blindingType: new FormControl<string | null>(null, [Validators.required]),
+        phase: new FormControl<string>(this.clinicalStudiesService.getDefaultPhase(), [Validators.required]),
+        allocationType: new FormControl<string>(this.clinicalStudiesService.getDefaultAllocation(), [Validators.required]),
+        interventionModel: new FormControl<string | null>(null),
+        blindingType: new FormControl<string>(this.clinicalStudiesService.getDefaultMaskingType(), [Validators.required]),
         minAge: new FormControl<number | null>(null, [Validators.min(0), Validators.max(150)]),
         maxAge: new FormControl<number | null>(null, [Validators.min(0), Validators.max(150)]),
-        sex: new FormControl<SexEnum>(SexEnum.Any),
+        sex: new FormControl<string>(this.clinicalStudiesService.getDefautlSex()),
         // hidden fields
         required: new FormControl<string[]>([]),
         ineligible: new FormControl<string[]>([]),
