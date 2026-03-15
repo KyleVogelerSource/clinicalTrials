@@ -94,7 +94,8 @@ export class ClinicalTrialsApiClient {
 
     const pageSize = Math.min(request.pageSize ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
     p.set("pageSize", String(pageSize));
-    if (request.pageToken) p.set("pageToken", request.pageToken);
+    if (request.pageToken)           p.set("pageToken",   request.pageToken);
+    if (request.countTotal !== undefined) p.set("countTotal", String(request.countTotal));
 
     p.set("format", "json");
 

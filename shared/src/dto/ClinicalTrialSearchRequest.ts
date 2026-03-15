@@ -6,21 +6,22 @@ export interface ClinicalTrialSearchRequest {
   investigator?: string;       // query.invest
   location?: string;           // query.locn
   overallStatus?: string;      // filter.overallStatus
-  studyType?: string;          // filter.studyType
-  phase?: string;              // filter.phase
-  interventionModel?: string;  // filter.interventionModel
-  primaryPurpose?: string;     // filter.primaryPurpose
-  sex?: string;                // filter.sex
-  minAge?: number;             // filter.age RANGE lower bound
-  maxAge?: number;             // filter.age RANGE upper bound
-  healthyVolunteers?: boolean; // filter.healthyVolunteers
-  startDateFrom?: string;      // filter.startDate RANGE lower bound (YYYY-MM-DD or YYYY-MM)
-  startDateTo?: string;        // filter.startDate RANGE upper bound (YYYY-MM-DD or YYYY-MM)
-  completionDateFrom?: string; // filter.completionDate RANGE lower bound (YYYY-MM-DD or YYYY-MM)
-  completionDateTo?: string;   // filter.completionDate RANGE upper bound (YYYY-MM-DD or YYYY-MM)
-  minEnrollment?: number;      // filter.enrollment RANGE lower bound
-  maxEnrollment?: number;      // filter.enrollment RANGE upper bound
-  hasResults?: boolean;        // filter.hasResults
+  studyType?: string;          // filter.advanced AREA[StudyType]
+  phase?: string;              // filter.advanced AREA[Phase]
+  interventionModel?: string;  // filter.advanced AREA[InterventionModel]
+  primaryPurpose?: string;     // filter.advanced AREA[PrimaryPurpose]
+  sex?: string;                // filter.advanced AREA[Sex]
+  minAge?: number;             // filter.advanced AREA[MinimumAge] RANGE lower bound
+  maxAge?: number;             // filter.advanced AREA[MinimumAge] RANGE upper bound
+  healthyVolunteers?: boolean; // filter.advanced AREA[HealthyVolunteers]
+  startDateFrom?: string;      // filter.advanced AREA[StartDate] RANGE lower bound (YYYY-MM-DD or YYYY-MM)
+  startDateTo?: string;        // filter.advanced AREA[StartDate] RANGE upper bound (YYYY-MM-DD or YYYY-MM)
+  completionDateFrom?: string; // filter.advanced AREA[CompletionDate] RANGE lower bound (YYYY-MM-DD or YYYY-MM)
+  completionDateTo?: string;   // filter.advanced AREA[CompletionDate] RANGE upper bound (YYYY-MM-DD or YYYY-MM)
+  minEnrollment?: number;      // filter.advanced AREA[EnrollmentCount] RANGE lower bound
+  maxEnrollment?: number;      // filter.advanced AREA[EnrollmentCount] RANGE upper bound
+  hasResults?: boolean;        // filter.advanced AREA[HasResults]
   pageSize?: number;           // pageSize (max 100)
   pageToken?: string;          // pageToken for pagination
+  countTotal?: boolean;        // countTotal - request total match count in response
 }
