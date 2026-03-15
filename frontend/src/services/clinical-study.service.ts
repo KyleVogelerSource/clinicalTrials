@@ -1,35 +1,52 @@
 import { Injectable } from '@angular/core';
+import meshData from '../../../shared/src/static/combined-mesh-data.json';
+import conditionData from '../../../shared/src/static/common-disease-conditions.json';
+import Fuse from 'fuse.js'; // A fuzzy match library
+
+interface MeshEntry {
+    id: string;
+    name: string;
+    synonyms: string[];
+}
 
 @Injectable({
     providedIn: 'root',
 })
 export class ClinicalStudyService {
-    getMatchingConditions(input: string | null): string[] {
-        let result: string[] = [];
+    private keywords: Fuse<MeshEntry>;
+    private conditions: Fuse<MeshEntry>;
 
-        // TODO: Hit the backend/cache
-        if (input !== null) {
-            result = [
-                input + '_test',
-                input + '_one',
-                input + '_two',
-                input + '_3'
-            ];
-        }
+    constructor() {
+        this.keywords = new Fuse(meshData as MeshEntry[], {
+            keys: ['name', 'synonyms'],
+            threshold: 0.3,
+        });
 
-        return result;
+        this.conditions = new Fuse(conditionData as MeshEntry[], {
+            keys: ['name', 'synonyms'],
+            threshold: 0.3
+        });
     }
 
-    getSuggestedKeywords(input: string) : string[] {
-        let result: string[] = [];
+    getSuggestedKeywords(input: string): string[] {
+        return input ? this.search(input, this.keywords) : [];
+    }
 
-        // TODO: Hit the backend/cache
-        result = [
-            input + ' (tag)', 
-            input + ' (category)',
-            input + ' (topic)'
-        ];
+    getMatchingConditions(input: string | null): string[] {
+        return input ? this.search(input, this.conditions) : [];
+    }
 
-        return result;
+    private search(input: string, dataSet: Fuse<MeshEntry>): string[] {
+        const results = dataSet.search(input);
+        const uniqueNames = new Set<string>();
+
+        for (const result of results) {
+            uniqueNames.add(result.item.name);
+            if (uniqueNames.size >= 10) {
+                break;
+            }
+        }
+        return Array.from(uniqueNames);
     }
 }
+
