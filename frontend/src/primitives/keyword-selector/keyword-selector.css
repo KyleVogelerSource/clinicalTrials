@@ -5,46 +5,6 @@
     width: 100%;
 }
 
-.input-wrapper {
-    position: relative;
-}
-
-input {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
-}
-
-.suggestions-list {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: white;
-    border: 1px solid #ddd;
-    border-top: none;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    z-index: 10;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 0 0 4px 4px;
-}
-
-.suggestions-list li {
-    padding: 0.75rem;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.suggestions-list li:hover,
-.suggestions-list li.highlighted {
-    background-color: var(--app-blue);
-    color: white;
-}
-
 .selected-tags {
     display: flex;
     flex-wrap: wrap;
@@ -73,5 +33,5 @@ input {
 }
 
 .remove-btn:hover {
-    color: #ffcccc;
+    color: var(--app-red);
 }
