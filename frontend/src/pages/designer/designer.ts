@@ -5,24 +5,10 @@ import { KeywordSelector } from "../../primitives/keyword-selector/keyword-selec
 import { debounceTime, distinctUntilChanged, map } from "rxjs";
 import { ClinicalStudyService } from "../../services/clinical-study.service";
 
-// TODO: These should likely be shared enums
-export enum PhaseEnum {
-    PHASE_1 = 'Phase I',
-    PHASE_2 = 'Phase II',
-    PHASE_3 = 'Phase III',
-    PHASE_4 = 'Phase IV',
-}
-
 export enum SexEnum {
     Any = 'Any',
     Male = 'Male',
     Female = 'Female'
-}
-
-export enum AllocationEnum {
-    RANDOMIZED = 'Randomized',
-    NON_RANDOMIZED = 'Non-Randomized',
-    NA = 'N/A'
 }
 
 @Component({
@@ -39,16 +25,18 @@ export class Designer {
     requiredConditions = signal<string[]>([]);
     ineligibleConditions = signal<string[]>([]);
 
-    phaseOptions = Object.values(PhaseEnum);
+    phaseOptions = this.clinicalStudiesService.getPhases();
+    allocationOptions = this.clinicalStudiesService.getAllocations();
+    interventionOptions = this.clinicalStudiesService.getInterventionModels();
+    blindingOptions = this.clinicalStudiesService.getMaskingTypes();
     sexOptions = Object.values(SexEnum);
-    allocationOptions = Object.values(AllocationEnum);
 
     inputForm = new FormGroup({
-        condition: new FormControl<string>(''),
-        phase: new FormControl<PhaseEnum | null>(null),
-        allocationType: new FormControl<AllocationEnum>(AllocationEnum.NA),
-        interventionModel: new FormControl(''),
-        blindingType: new FormControl(''),
+        condition: new FormControl<string>('', [Validators.required]),
+        phase: new FormControl<string | null>(null, [Validators.required]),
+        allocationType: new FormControl<string | null>(null, [Validators.required]),
+        interventionModel: new FormControl<string | null>(null, [Validators.required]),
+        blindingType: new FormControl<string | null>(null, [Validators.required]),
         minAge: new FormControl<number | null>(null, [Validators.min(0), Validators.max(150)]),
         maxAge: new FormControl<number | null>(null, [Validators.min(0), Validators.max(150)]),
         sex: new FormControl<SexEnum>(SexEnum.Any),
