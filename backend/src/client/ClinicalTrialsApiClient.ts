@@ -35,6 +35,9 @@ export class ClinicalTrialsApiClient {
     request: ClinicalTrialSearchRequest
   ): Promise<ClinicalTrialStudiesResponse> {
     const url = this.buildUrl(request);
+
+    console.log("[ClinicalTrialsApiClient] GET", url);
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
 
@@ -45,6 +48,8 @@ export class ClinicalTrialsApiClient {
       });
 
       if (!response.ok) {
+        const body = await response.text();
+        console.error("[ClinicalTrialsApiClient] Error response body:", body);
         throw new ClinicalTrialsApiClientError(
           `ClinicalTrials.gov API responded with status ${response.status}: ${response.statusText}`
         );
@@ -71,63 +76,74 @@ export class ClinicalTrialsApiClient {
   buildUrl(request: ClinicalTrialSearchRequest): string {
     const p = new URLSearchParams();
 
-    if (request.term)              p.set("query.term",    request.term);
-    if (request.condition)         p.set("query.cond",    request.condition);
-    if (request.intervention)      p.set("query.intr",    request.intervention);
-    if (request.sponsor)           p.set("query.spons",   request.sponsor);
-    if (request.investigator)      p.set("query.invest",  request.investigator);
-    if (request.location)          p.set("query.locn",    request.location);
+    if (request.term)              p.set("query.term",   request.term);
+    if (request.condition)         p.set("query.cond",   request.condition);
+    if (request.intervention)      p.set("query.intr",   request.intervention);
+    if (request.sponsor)           p.set("query.spons",  request.sponsor);
+    if (request.investigator)      p.set("query.invest", request.investigator);
+    if (request.location)          p.set("query.locn",   request.location);
 
-    if (request.overallStatus)     p.set("filter.overallStatus",     request.overallStatus);
-    if (request.studyType)         p.set("filter.studyType",         request.studyType);
-    if (request.phase)             p.set("filter.phase",             request.phase);
-    if (request.interventionModel) p.set("filter.interventionModel", request.interventionModel);
-    if (request.primaryPurpose)    p.set("filter.primaryPurpose",    request.primaryPurpose);
-    if (request.sex)               p.set("filter.sex",               request.sex);
-
-    if (request.healthyVolunteers !== undefined) {
-      p.set("filter.healthyVolunteers", String(request.healthyVolunteers));
+    if (request.overallStatus) {
+      p.set("filter.overallStatus", request.overallStatus);
     }
-    if (request.hasResults !== undefined) {
-      p.set("filter.hasResults", String(request.hasResults));
+
+    const advanced = this.buildAdvancedFilter(request);
+    if (advanced) {
+      p.set("filter.advanced", advanced);
     }
 
     const pageSize = Math.min(request.pageSize ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
     p.set("pageSize", String(pageSize));
-    if (request.pageToken)         p.set("pageToken", request.pageToken);
-    if (request.countTotal !== undefined) p.set("countTotal", String(request.countTotal));
+    if (request.pageToken) p.set("pageToken", request.pageToken);
 
     p.set("format", "json");
 
-    const raw: string[] = [];
+    const fields = "fields=ProtocolSection,DerivedSection,HasResults";
+
+    return `${BASE_URL}?${p.toString()}&${fields}`;
+  }
+
+  private buildAdvancedFilter(request: ClinicalTrialSearchRequest): string {
+    const clauses: string[] = [];
+
+    if (request.phase)             clauses.push(`AREA[Phase]${request.phase}`);
+    if (request.studyType)         clauses.push(`AREA[StudyType]${request.studyType}`);
+    if (request.interventionModel) clauses.push(`AREA[InterventionModel]${request.interventionModel}`);
+    if (request.primaryPurpose)    clauses.push(`AREA[PrimaryPurpose]${request.primaryPurpose}`);
+    if (request.sex)               clauses.push(`AREA[Sex]${request.sex}`);
+
+    if (request.healthyVolunteers !== undefined) {
+      clauses.push(`AREA[HealthyVolunteers]${request.healthyVolunteers ? "Y" : "N"}`);
+    }
+    if (request.hasResults !== undefined) {
+      clauses.push(`AREA[HasResults]${request.hasResults ? "Y" : "N"}`);
+    }
 
     if (request.minAge !== undefined || request.maxAge !== undefined) {
-      const lo = request.minAge ?? "MIN";
-      const hi = request.maxAge ?? "MAX";
-      raw.push(`filter.age=RANGE[${lo},${hi}]`);
-    }
-
-    if (request.startDateFrom || request.startDateTo) {
-      const from = request.startDateFrom ?? "MIN";
-      const to   = request.startDateTo   ?? "MAX";
-      raw.push(`filter.startDate=RANGE[${from},${to}]`);
-    }
-
-    if (request.completionDateFrom || request.completionDateTo) {
-      const from = request.completionDateFrom ?? "MIN";
-      const to   = request.completionDateTo   ?? "MAX";
-      raw.push(`filter.completionDate=RANGE[${from},${to}]`);
+      const lo = request.minAge  ?? "MIN";
+      const hi = request.maxAge  ?? "MAX";
+      clauses.push(`AREA[MinimumAge]RANGE[${lo},${hi}]`);
     }
 
     if (request.minEnrollment !== undefined || request.maxEnrollment !== undefined) {
       const lo = request.minEnrollment ?? "MIN";
       const hi = request.maxEnrollment ?? "MAX";
-      raw.push(`filter.enrollment=RANGE[${lo},${hi}]`);
+      clauses.push(`AREA[EnrollmentCount]RANGE[${lo},${hi}]`);
     }
 
-    raw.push("fields=protocolSection,derivedSection,hasResults");
+    if (request.startDateFrom || request.startDateTo) {
+      const from = request.startDateFrom ?? "MIN";
+      const to   = request.startDateTo   ?? "MAX";
+      clauses.push(`AREA[StartDate]RANGE[${from},${to}]`);
+    }
 
-    return `${BASE_URL}?${p.toString()}&${raw.join("&")}`;
+    if (request.completionDateFrom || request.completionDateTo) {
+      const from = request.completionDateFrom ?? "MIN";
+      const to   = request.completionDateTo   ?? "MAX";
+      clauses.push(`AREA[CompletionDate]RANGE[${from},${to}]`);
+    }
+
+    return clauses.join(" AND ");
   }
 
   private mapResponse(raw: any): ClinicalTrialStudiesResponse {
