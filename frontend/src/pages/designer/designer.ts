@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from "@angular/cor
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from "@angular/forms";
 import { ProgressTrack } from "../../primitives/progress-track/progress-track";
 import { KeywordSelector } from "../../primitives/keyword-selector/keyword-selector";
+import { AutoCompleteInput } from "../../primitives/auto-complete-input/auto-complete-input";
 import { debounceTime, distinctUntilChanged, map } from "rxjs";
 import { ClinicalStudyService } from "../../services/clinical-study.service";
 
@@ -9,7 +10,7 @@ import { ClinicalStudyService } from "../../services/clinical-study.service";
     selector: "app-designer",
     templateUrl: "./designer.html",
     styleUrl: "./designer.css",
-    imports: [ ReactiveFormsModule, ProgressTrack, KeywordSelector ],
+    imports: [ ReactiveFormsModule, ProgressTrack, KeywordSelector, AutoCompleteInput ],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Designer {
@@ -33,7 +34,7 @@ export class Designer {
         blindingType: new FormControl<string>(this.clinicalStudiesService.getDefaultMaskingType(), [Validators.required]),
         minAge: new FormControl<number | null>(null, [Validators.min(0), Validators.max(150)]),
         maxAge: new FormControl<number | null>(null, [Validators.min(0), Validators.max(150)]),
-        sex: new FormControl<string>(this.clinicalStudiesService.getDefautlSex()),
+        sex: new FormControl<string>(this.clinicalStudiesService.getDefaultSex()),
         // hidden fields
         required: new FormControl<string[]>([]),
         ineligible: new FormControl<string[]>([]),

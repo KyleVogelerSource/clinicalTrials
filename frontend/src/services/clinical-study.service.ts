@@ -61,6 +61,6 @@ export class ClinicalStudyService {
     getPhases = () => trialDesignOptions.phases;
     getDefaultPhase = () => trialDesignOptions.defaultPhase;
     getSexes = () => trialDesignOptions.sexes;
-    getDefautlSex = () => trialDesignOptions.defaultSex;
+    getDefaultSex = () => trialDesignOptions.defaultSex;
 }
 
