@@ -3,35 +3,15 @@ import { ReactiveFormsModule, FormGroup, FormControl, Validators } from "@angula
 import { Router } from "@angular/router";
 import { ProgressTrack } from "../../primitives/progress-track/progress-track";
 import { KeywordSelector } from "../../primitives/keyword-selector/keyword-selector";
-import { debounceTime, distinctUntilChanged, map } from "rxjs";
+import { AutoCompleteInput } from "../../primitives/auto-complete-input/auto-complete-input";
 import { ClinicalStudyService } from "../../services/clinical-study.service";
 import { TrialResultsRequest } from "../../../../shared/src/dto/TrialResultsRequest";
-
-// TODO: These should likely be shared enums
-export enum PhaseEnum {
-    PHASE_1 = 'Phase I',
-    PHASE_2 = 'Phase II',
-    PHASE_3 = 'Phase III',
-    PHASE_4 = 'Phase IV',
-}
-
-export enum SexEnum {
-    Any = 'Any',
-    Male = 'Male',
-    Female = 'Female'
-}
-
-export enum AllocationEnum {
-    RANDOMIZED = 'Randomized',
-    NON_RANDOMIZED = 'Non-Randomized',
-    NA = 'N/A'
-}
 
 @Component({
     selector: "app-designer",
     templateUrl: "./designer.html",
     styleUrl: "./designer.css",
-    imports: [ ReactiveFormsModule, ProgressTrack, KeywordSelector ],
+    imports: [ ReactiveFormsModule, ProgressTrack, KeywordSelector, AutoCompleteInput ],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Designer {
@@ -42,30 +22,38 @@ export class Designer {
     requiredConditions = signal<string[]>([]);
     ineligibleConditions = signal<string[]>([]);
 
-    phaseOptions = Object.values(PhaseEnum);
-    sexOptions = Object.values(SexEnum);
-    allocationOptions = Object.values(AllocationEnum);
+    phaseOptions = this.clinicalStudiesService.getPhases();
+    allocationOptions = this.clinicalStudiesService.getAllocations();
+    interventionOptions = this.clinicalStudiesService.getInterventionModels();
+    blindingOptions = this.clinicalStudiesService.getMaskingTypes();
+    sexOptions = this.clinicalStudiesService.getSexes();
 
     inputForm = new FormGroup({
-        condition: new FormControl<string>(''),
-        phase: new FormControl<PhaseEnum | null>(null),
-        allocationType: new FormControl<AllocationEnum>(AllocationEnum.NA),
-        interventionModel: new FormControl(''),
-        blindingType: new FormControl(''),
+        condition: new FormControl<string>('', [Validators.required]),
+        phase: new FormControl<string>(this.clinicalStudiesService.getDefaultPhase(), [Validators.required]),
+        allocationType: new FormControl<string>(this.clinicalStudiesService.getDefaultAllocation(), [Validators.required]),
+        interventionModel: new FormControl<string | null>(null),
+        blindingType: new FormControl<string>(this.clinicalStudiesService.getDefaultMaskingType(), [Validators.required]),
         minAge: new FormControl<number | null>(null, [Validators.min(0), Validators.max(150)]),
         maxAge: new FormControl<number | null>(null, [Validators.min(0), Validators.max(150)]),
-        sex: new FormControl<SexEnum>(SexEnum.Any),
+        sex: new FormControl<string>(this.clinicalStudiesService.getDefaultSex()),
         // hidden fields
         required: new FormControl<string[]>([]),
         ineligible: new FormControl<string[]>([]),
     });
 
-    constructor() {
-        this.inputForm.controls.condition.valueChanges.pipe(
-            debounceTime(300),
-            distinctUntilChanged(),
-            map(val => this.clinicalStudiesService.getMatchingConditions(val))
-        ).subscribe(matches => this.conditionMatches.set(matches));
+    onConditionSearch(query: string) {
+        if (query && query.trim().length > 0) {
+            const matches = this.clinicalStudiesService.getMatchingConditions(query.trim());
+            this.conditionMatches.set(matches);
+        } else {
+            this.conditionMatches.set([]);
+        }
+    }
+
+    onConditionSelected(condition: string) {
+        this.inputForm.controls.condition.setValue(condition);
+        this.conditionMatches.set([]);
     }
 
     onAddRequired(tag: string) {
