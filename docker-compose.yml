@@ -1,0 +1,33 @@
+services:
+  backend:
+    image: node:20-alpine
+    container_name: clinicaltrials-backend
+    working_dir: /app
+    command: sh -c "npm install && npm run dev"
+    volumes:
+      - ./backend:/app
+      - backend_node_modules:/app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+
+  frontend:
+    image: node:20-alpine
+    container_name: clinicaltrials-frontend
+    working_dir: /app
+    command: sh -c "npm install && npm run build -- --configuration development && npx -y http-server ./dist/frontend/browser -a 0.0.0.0 -p 4200"
+    volumes:
+      - ./frontend:/app
+      - ./shared:/shared:ro
+      - frontend_node_modules:/app/node_modules
+    ports:
+      - "80:4200"
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - backend
+
+volumes:
+  backend_node_modules:
+  frontend_node_modules:
