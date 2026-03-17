@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import meshData from '../../../shared/src/static/combined-mesh-data.json';
 import conditionData from '../../../shared/src/static/common-disease-conditions.json';
+import trialDesignOptions from '../../../shared/src/static/trial-design-options.json';
 import Fuse from 'fuse.js'; // A fuzzy match library
 
 interface MeshEntry {
@@ -48,5 +49,18 @@ export class ClinicalStudyService {
         }
         return Array.from(uniqueNames);
     }
+
+    getInterventionModels = () => trialDesignOptions.interventionModels;
+    getMaskingTypes = () => trialDesignOptions.maskingTypes;
+    getDefaultMaskingType = () => trialDesignOptions.defaultMaskingType;
+    getMaskingRoles = () => trialDesignOptions.maskingRoles;
+    getPrimaryPurposes = () => trialDesignOptions.primaryPurposes;
+    getAllocations = () => trialDesignOptions.allocations;
+    getDefaultAllocation = () => trialDesignOptions.defaultAllocation;
+    getEnrollmentTypes = () => trialDesignOptions.enrollmentTypes;
+    getPhases = () => trialDesignOptions.phases;
+    getDefaultPhase = () => trialDesignOptions.defaultPhase;
+    getSexes = () => trialDesignOptions.sexes;
+    getDefaultSex = () => trialDesignOptions.defaultSex;
 }
 
