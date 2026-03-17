@@ -1,4 +1,4 @@
-import { ClinicalTrialSearchRequest } from "../../../shared/src/dto/ClinicalTrialSearchRequest";
+import { ClinicalTrialSearchRequest } from "../../shared/src/dto/ClinicalTrialSearchRequest";
 import { ClinicalTrialsApiClient } from "../client/ClinicalTrialsApiClient";
 import { ClinicalTrialStudiesResponse } from "../models/ClinicalTrialStudiesResponse";
 

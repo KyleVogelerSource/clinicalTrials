@@ -1,4 +1,4 @@
-import { ClinicalTrialSearchRequest } from "../../../shared/src/dto/ClinicalTrialSearchRequest";
+import { ClinicalTrialSearchRequest } from "../../shared/src/dto/ClinicalTrialSearchRequest";
 import { ClinicalTrialStudiesResponse } from "../models/ClinicalTrialStudiesResponse";
 
 const BASE_URL = "https://clinicaltrials.gov/api/v2/studies";
