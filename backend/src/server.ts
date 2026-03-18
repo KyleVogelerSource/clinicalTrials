@@ -5,6 +5,7 @@ import { ClinicalTrialsApiClientError, ClinicalTrialsApiTimeoutError } from "./c
 import { validateSearchRequest } from "./validators/ClinicalTrialSearchValidator";
 import { ClinicalTrialSearchRequest } from "../shared/src/dto/ClinicalTrialSearchRequest";
 import { initializeDatabase, isDatabaseConnected } from "./storage/PostgresClient";
+import { registerUser, loginUser } from "./auth/AuthService";
 
 const app = express();
 const port = 3000;
@@ -82,6 +83,53 @@ app.get("/api/clinical-trials/empty-response", (_req: Request, res: Response) =>
 // POST /api/clinical-trials/results — placeholder for real implementation
 app.post("/api/clinical-trials/results", (_req: Request, res: Response) => {
     res.status(501).json({ message: "Not yet implemented" });
+});
+
+// POST /api/auth/register
+app.post("/api/auth/register", async (req: Request, res: Response) => {
+  const { username, password, firstName, lastName } = req.body as Record<string, string>;
+
+  if (!username?.trim() || !password || !firstName?.trim() || !lastName?.trim()) {
+    res.status(400).json({
+      error: "Bad Request",
+      message: "username, password, firstName, and lastName are required.",
+    });
+    return;
+  }
+
+  try {
+    const result = await registerUser({ username: username.trim(), password, firstName: firstName.trim(), lastName: lastName.trim() });
+    res.status(201).json(result);
+  } catch (err) {
+    if (err instanceof Error && err.message === "USERNAME_TAKEN") {
+      res.status(409).json({ error: "Conflict", message: "Username already taken." });
+      return;
+    }
+    console.error("Unexpected error in POST /api/auth/register:", err);
+    res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+  }
+});
+
+// POST /api/auth/login
+app.post("/api/auth/login", async (req: Request, res: Response) => {
+  const { username, password } = req.body as Record<string, string>;
+
+  if (!username?.trim() || !password) {
+    res.status(400).json({ error: "Bad Request", message: "username and password are required." });
+    return;
+  }
+
+  try {
+    const result = await loginUser({ username: username.trim(), password });
+    res.status(200).json(result);
+  } catch (err) {
+    if (err instanceof Error && err.message === "INVALID_CREDENTIALS") {
+      res.status(401).json({ error: "Unauthorized", message: "Invalid username or password." });
+      return;
+    }
+    console.error("Unexpected error in POST /api/auth/login:", err);
+    res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+  }
 });
 
 async function bootstrap() {

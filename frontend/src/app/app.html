@@ -6,7 +6,19 @@
       <li><a [routerLink]="['designer']" routerLinkActive="active">Designer</a></li>
     </ul>
   </nav>
+  <div class="auth-slot">
+    @if (authService.isLoggedIn()) {
+      <span class="user-greeting">Hi, {{ authService.currentUser()?.firstName }}</span>
+      <button class="btn-logout" (click)="authService.logout()">Log Out</button>
+    } @else {
+      <button class="btn-login" (click)="showLoginModal.set(true)">Log In</button>
+    }
+  </div>
 </div>
+
+@if (showLoginModal()) {
+  <app-login-modal (closed)="showLoginModal.set(false)" />
+}
 
 <router-outlet />
 
