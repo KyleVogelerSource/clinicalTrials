@@ -84,10 +84,6 @@ app.post("/api/clinical-trials/results", (_req: Request, res: Response) => {
     res.status(501).json({ message: "Not yet implemented" });
 });
 
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-});
-
 async function bootstrap() {
   await initializeDatabase();
 
