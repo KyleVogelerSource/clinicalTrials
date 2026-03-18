@@ -1,4 +1,4 @@
-import { ClinicalTrialSearchRequest } from "../../../shared/src/dto/ClinicalTrialSearchRequest";
+import { ClinicalTrialSearchRequest } from "../../shared/src/dto/ClinicalTrialSearchRequest";
 
 export interface ValidationError {
   field: string;
