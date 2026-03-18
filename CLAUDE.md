@@ -61,7 +61,19 @@ The frontend `ClinicalStudyService` loads MeSH terminology from `shared/src/stat
 Any type shared between frontend and backend belongs in `shared/src/dto/`. The `ClinicalTrialSearchRequest` interface maps directly to ClinicalTrials.gov API query/filter parameters (comments in the file indicate the corresponding API field names).
 
 ### Backend
-The Express server (`src/server.ts`) is minimal scaffolding. Current endpoints: `GET /api/health` and `GET /api/clinical-trials/empty-response`. Business logic lives in `backend/src/services/`.
+The Express server (`src/server.ts`) runs on port 3000. Current endpoints:
+- `GET /api/health`
+- `GET /api/clinical-trials/empty-response`
+- `POST /api/clinical-trials/search` — calls ClinicalTrials.gov API with validation and error handling
+- `POST /api/clinical-trials/results` — placeholder (returns 501, not yet implemented)
 
-### Planned pages
-The `ProgressTrack` primitive defines three steps: Input → Refine → Results. Only step 1 (Designer) is implemented. The Designer's `onNext()` currently logs to console and needs to be wired to navigate forward.
+Business logic lives in `backend/src/services/`. The API client and validators are in `backend/src/client/` and `backend/src/validators/`.
+
+### Results page
+The `ProgressTrack` primitive defines three steps: Input → Refine → Results. Steps 1 (Designer) and 3 (Results) are implemented; step 2 (Refine) is skipped for now.
+
+The Results page (`pages/results/`) displays three Chart.js histograms: termination reasons, recruitment velocity, and expected timeline. It currently uses mock data from `frontend/src/services/mock-trial-results.ts` via `ResultsApiService` — when ready to wire the real backend, swap `of(mockTrialResultsResponse)` back to `this.http.post(API_URL, request)` in that service.
+
+## Repository
+**GitHub:** https://github.com/KyleVogelerSource/clinicalTrials
+**Active branch:** `FE-histogram`
