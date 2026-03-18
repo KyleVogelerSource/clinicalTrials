@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from "@angular/core";
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from "@angular/forms";
+import { Router } from "@angular/router";
 import { ProgressTrack } from "../../primitives/progress-track/progress-track";
 import { KeywordSelector } from "../../primitives/keyword-selector/keyword-selector";
 import { AutoCompleteInput } from "../../primitives/auto-complete-input/auto-complete-input";
 import { ClinicalStudyService } from "../../services/clinical-study.service";
+import { TrialResultsRequest } from "../../../../shared/src/dto/TrialResultsRequest";
 
 @Component({
     selector: "app-designer",
@@ -14,6 +16,7 @@ import { ClinicalStudyService } from "../../services/clinical-study.service";
 })
 export class Designer {
     clinicalStudiesService = inject(ClinicalStudyService);
+    router = inject(Router);
 
     conditionMatches = signal<string[]>([]);
     requiredConditions = signal<string[]>([]);
@@ -90,6 +93,19 @@ export class Designer {
     }
 
     onNext() {
-        console.log('Form data:', this.inputForm.value);
+        const v = this.inputForm.value;
+        const request: TrialResultsRequest = {
+            condition: v.condition ?? null,
+            phase: v.phase ?? null,
+            allocationType: v.allocationType ?? null,
+            interventionModel: v.interventionModel ?? null,
+            blindingType: v.blindingType ?? null,
+            minAge: v.minAge ?? null,
+            maxAge: v.maxAge ?? null,
+            sex: v.sex ?? null,
+            requiredConditions: v.required ?? [],
+            ineligibleConditions: v.ineligible ?? [],
+        };
+        this.router.navigate(['/results'], { state: { request } });
     }
 }
