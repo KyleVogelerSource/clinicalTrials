@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { Logo } from '../primitives/logo/logo';
+import { DebugStatusResponse, DebugStatusService } from '../services/debug-status.service';
 
 @Component({
   selector: 'app-root',
@@ -10,5 +11,35 @@ import { Logo } from '../primitives/logo/logo';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class App {
-  protected readonly title = signal('frontend');
+  private readonly debugStatusService = inject(DebugStatusService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  protected readonly debugEnabled = signal(false);
+  protected readonly debugStatus = signal<DebugStatusResponse | null>(null);
+  protected readonly debugError = signal<string | null>(null);
+
+  constructor() {
+    const debugFlag = new URLSearchParams(window.location.search).get('debug') === 'true';
+    this.debugEnabled.set(debugFlag);
+
+    if (!debugFlag) {
+      return;
+    }
+
+    this.fetchDebugStatus();
+    const pollId = window.setInterval(() => this.fetchDebugStatus(), 10000);
+    this.destroyRef.onDestroy(() => window.clearInterval(pollId));
+  }
+
+  private fetchDebugStatus() {
+    this.debugStatusService.getStatus().subscribe({
+      next: (status) => {
+        this.debugStatus.set(status);
+        this.debugError.set(null);
+      },
+      error: () => {
+        this.debugError.set('Unable to reach backend debug status endpoint.');
+      }
+    });
+  }
 }

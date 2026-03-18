@@ -1,4 +1,21 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: clinicaltrials-postgres
+    environment:
+      - POSTGRES_DB=clinicaltrials
+      - POSTGRES_USER=clinicaltrials
+      - POSTGRES_PASSWORD=clinicaltrials
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clinicaltrials -d clinicaltrials"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   backend:
     image: node:20-alpine
     container_name: clinicaltrials-backend
@@ -11,23 +28,41 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=clinicaltrials
+      - DB_USER=clinicaltrials
+      - DB_PASSWORD=clinicaltrials
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   frontend:
     image: node:20-alpine
     container_name: clinicaltrials-frontend
     working_dir: /app
-    command: sh -c "npm install && npm run build -- --configuration development && npx -y http-server ./dist/frontend/browser -a 0.0.0.0 -p 4200"
+    command: sh -c "npm install && npm run build -- --configuration development && npx -y http-server ./dist/frontend/browser -a 0.0.0.0 -p 4200 -c-1"
     volumes:
       - ./frontend:/app
       - ./shared:/shared:ro
       - frontend_node_modules:/app/node_modules
-    ports:
-      - "80:4200"
     environment:
       - NODE_ENV=development
     depends_on:
       - backend
 
+  gateway:
+    image: nginx:1.27-alpine
+    container_name: clinicaltrials-gateway
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - backend
+
 volumes:
   backend_node_modules:
   frontend_node_modules:
+  postgres_data:
