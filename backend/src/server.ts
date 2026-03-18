@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
-import { searchClinicalTrials, createEmptyClinicalTrialStudiesResponse } from "../backend/src/services/ClinicalTrialsService";
-import { ClinicalTrialsApiClientError, ClinicalTrialsApiTimeoutError } from "../backend/src/client/ClinicalTrialsApiClient";
-import { validateSearchRequest } from "../backend/src/validators/ClinicalTrialSearchValidator";
+import { searchClinicalTrials, createEmptyClinicalTrialStudiesResponse } from "./services/ClinicalTrialsService";
+import { ClinicalTrialsApiClientError, ClinicalTrialsApiTimeoutError } from "./client/ClinicalTrialsApiClient";
+import { validateSearchRequest } from "./validators/ClinicalTrialSearchValidator";
 import { ClinicalTrialSearchRequest } from "../shared/src/dto/ClinicalTrialSearchRequest";
 
 const app = express();
