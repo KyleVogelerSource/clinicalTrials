@@ -17,9 +17,17 @@ export async function initializeDatabase() {
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
       username VARCHAR(100) UNIQUE NOT NULL,
+      password_hash VARCHAR(255) NOT NULL DEFAULT '',
+      first_name VARCHAR(100) NOT NULL DEFAULT '',
+      last_name VARCHAR(100) NOT NULL DEFAULT '',
       created_at TIMESTAMP NOT NULL DEFAULT NOW()
     )
   `);
+
+  // Migrate existing deployments that predate the auth columns
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255) NOT NULL DEFAULT ''`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS first_name VARCHAR(100) NOT NULL DEFAULT ''`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name VARCHAR(100) NOT NULL DEFAULT ''`);
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS roles (
