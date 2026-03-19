@@ -32,7 +32,14 @@ export interface AuthTokenPayload {
   username: string;
 }
 
-export async function registerUser(input: RegisterInput): Promise<AuthResult> {
+export interface CreatedUser {
+  id: number;
+  username: string;
+  firstName: string;
+  lastName: string;
+}
+
+export async function createUserAccount(input: RegisterInput): Promise<CreatedUser> {
   const pool = getDbPool();
 
   const existing = await pool.query("SELECT id FROM users WHERE username = $1", [input.username]);
@@ -50,13 +57,23 @@ export async function registerUser(input: RegisterInput): Promise<AuthResult> {
   );
 
   const user = result.rows[0];
+  return {
+    id: user.id,
+    username: user.username,
+    firstName: user.first_name,
+    lastName: user.last_name,
+  };
+}
+
+export async function registerUser(input: RegisterInput): Promise<AuthResult> {
+  const user = await createUserAccount(input);
   const token = jwt.sign(
     { userId: user.id, username: user.username } satisfies AuthTokenPayload,
     JWT_SECRET,
     { expiresIn: "1h" }
   );
 
-  return { token, username: user.username, firstName: user.first_name, lastName: user.last_name };
+  return { token, username: user.username, firstName: user.firstName, lastName: user.lastName };
 }
 
 export async function loginUser(input: LoginInput): Promise<AuthResult> {

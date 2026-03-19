@@ -1,40 +1,8 @@
-<div class="modal-backdrop" (click)="onBackdropClick($event)" role="dialog" aria-modal="true" [attr.aria-label]="mode() === 'login' ? 'Login' : 'Register'">
+<div class="modal-backdrop" (click)="onBackdropClick($event)" role="dialog" aria-modal="true" aria-label="Login">
   <div class="modal-card">
     <button class="modal-close" (click)="closed.emit()" aria-label="Close">&times;</button>
 
-    <div class="modal-tabs" role="tablist">
-      <button role="tab" [class.active]="mode() === 'login'" (click)="setMode('login')">Log In</button>
-      <button role="tab" [class.active]="mode() === 'register'" (click)="setMode('register')">Register</button>
-    </div>
-
     <form (ngSubmit)="submit()" #authForm="ngForm" novalidate>
-      @if (mode() === 'register') {
-        <div class="form-row">
-          <label for="firstName">First Name</label>
-          <input
-            id="firstName"
-            name="firstName"
-            type="text"
-            [(ngModel)]="firstName"
-            required
-            autocomplete="given-name"
-            placeholder="First name"
-          />
-        </div>
-        <div class="form-row">
-          <label for="lastName">Last Name</label>
-          <input
-            id="lastName"
-            name="lastName"
-            type="text"
-            [(ngModel)]="lastName"
-            required
-            autocomplete="family-name"
-            placeholder="Last name"
-          />
-        </div>
-      }
-
       <div class="form-row">
         <label for="username">Username</label>
         <input
@@ -66,7 +34,7 @@
       }
 
       <button type="submit" class="btn-primary" [disabled]="loading()">
-        @if (loading()) { Submitting… } @else { {{ mode() === 'login' ? 'Log In' : 'Create Account' }} }
+        @if (loading()) { Logging In… } @else { Log In }
       </button>
     </form>
   </div>

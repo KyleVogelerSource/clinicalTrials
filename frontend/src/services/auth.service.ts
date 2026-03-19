@@ -2,6 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 export interface AuthUser {
   username: string;
@@ -14,6 +15,11 @@ interface AuthResponse {
   username: string;
   firstName: string;
   lastName: string;
+}
+
+interface HasActionResponse {
+  action: string;
+  allowed: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -52,6 +58,12 @@ export class AuthService {
 
   getToken(): string | null {
     return this._token();
+  }
+
+  hasAction(action: string): Observable<boolean> {
+    return this.http
+      .get<HasActionResponse>(`/api/auth/has-action/${encodeURIComponent(action)}`)
+      .pipe(map((res) => res.allowed));
   }
 
   private saveSession(res: AuthResponse): void {
