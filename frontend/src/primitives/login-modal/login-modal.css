@@ -34,34 +34,6 @@
   &:hover { color: var(--app-blue); }
 }
 
-.modal-tabs {
-  display: flex;
-  gap: .5rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 2px solid #e2e6ef;
-  padding-bottom: 0;
-
-  button {
-    background: none;
-    border: none;
-    padding: .5rem .75rem;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--app-gray);
-    cursor: pointer;
-    border-bottom: 3px solid transparent;
-    margin-bottom: -2px;
-    transition: color .15s, border-color .15s;
-
-    &.active {
-      color: var(--app-blue);
-      border-bottom-color: var(--app-blue);
-    }
-
-    &:hover:not(.active) { color: var(--app-teal); }
-  }
-}
-
 .form-row {
   display: flex;
   flex-direction: column;

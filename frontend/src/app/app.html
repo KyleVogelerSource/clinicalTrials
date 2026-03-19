@@ -4,6 +4,9 @@
     <ul>
       <li><a [routerLink]="['/']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a></li>
       <li><a [routerLink]="['designer']" routerLinkActive="active">Designer</a></li>
+      @if (canAccessAdmin()) {
+        <li><a [routerLink]="['/admin']" routerLinkActive="active">Admin</a></li>
+      }
     </ul>
   </nav>
   <div class="auth-slot">

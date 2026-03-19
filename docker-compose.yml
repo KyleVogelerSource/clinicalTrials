@@ -41,7 +41,7 @@ services:
     image: node:20-alpine
     container_name: clinicaltrials-frontend
     working_dir: /app
-    command: sh -c "npm install && npm run build -- --configuration development && npx -y http-server ./dist/frontend/browser -a 0.0.0.0 -p 4200 -c-1"
+    command: sh -c "npm install && npm run build -- --configuration development && npx -y serve -s ./dist/frontend/browser -l 4200"
     volumes:
       - ./frontend:/app
       - ./shared:/shared:ro
