@@ -9,3 +9,25 @@
 </div>
 
 <router-outlet />
+
+@if (debugEnabled()) {
+  <div class="debug-bar" role="status" aria-live="polite">
+    @if (debugError()) {
+      <span class="debug-item debug-error">Debug: {{ debugError() }}</span>
+    } @else if (debugStatus(); as status) {
+      <span class="debug-item status-item">
+        <span class="status-dot" [class.is-on]="status.ok" [class.is-off]="!status.ok" aria-hidden="true"></span>
+        Backend: {{ status.ok ? 'UP' : 'DOWN' }}
+      </span>
+      <span class="debug-item status-item">
+        <span class="status-dot" [class.is-on]="status.databaseConnected" [class.is-off]="!status.databaseConnected" aria-hidden="true"></span>
+        DB: {{ status.databaseConnected ? 'CONNECTED' : 'DISCONNECTED' }}
+      </span>
+      <span class="debug-item">Service: {{ status.service }}</span>
+      <span class="debug-item">Uptime: {{ status.uptimeSeconds }}s</span>
+      <span class="debug-item">At: {{ status.timestamp }}</span>
+    } @else {
+      <span class="debug-item">Loading debug status...</span>
+    }
+  </div>
+}
