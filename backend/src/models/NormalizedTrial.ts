@@ -25,14 +25,53 @@ export interface NormalizedTrial {
     sponsor: string | null;
 }
 
+export interface ReferenceTrial {
+    phase?: string;
+    studyType?: string;
+    sex?: string;
+    conditions?: string[];
+    enrollmentCount?: number;
+}
+
+export type FilterReason =
+    | "missing_phase"
+    | "missing_enrollment"
+    | "missing_eligibility_criteria"
+    | "phase_mismatch"
+    | "study_type_mismatch"
+    | "sex_incompatible"
+    | "no_condition_overlap";
+
+export type ExclusionReason = "capped";
+
+export interface FilteredRecord {
+    nctId: string;
+    briefTitle: string;
+    reason: FilterReason;
+    detail?: string;
+}
+
+export interface ExcludedRecord {
+    nctId: string;
+    briefTitle: string;
+    reason: ExclusionReason;
+    rank: number;
+    enrollmentCount: number;
+    startDate: string | null;
+}
+
 export interface CandidatePool {
     trials: NormalizedTrial[];
     metadata: CandidatePoolMetadata;
+    filtered: FilteredRecord[];
+    excluded: ExcludedRecord[];
 }
 
 export interface CandidatePoolMetadata {
-    totalReturnedByApi: number;
+    totalFetchedFromApi: number;
+    totalPagesfetched: number;
     totalFiltered: number;
+    totalExcluded: number;
     totalInPool: number;
     cappedAt: number;
 }
