@@ -180,7 +180,7 @@ app.get(
   "/api/auth/has-action/:action",
   authenticateToken,
   async (req: AuthenticatedRequest, res: Response) => {
-    const action = req.params.action?.trim();
+    const action = (req.params.action as string)?.trim();
     if (!action) {
       res.status(400).json({ error: "Bad Request", message: "Action is required." });
       return;
