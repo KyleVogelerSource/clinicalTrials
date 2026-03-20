@@ -7,6 +7,45 @@
     border-bottom: solid 1px var(--app-gray);
 }
 
+.auth-slot {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding-right: .75rem;
+}
+
+.user-greeting {
+    font-size: .9rem;
+    font-weight: 600;
+    color: var(--app-blue);
+}
+
+.btn-login,
+.btn-logout {
+    padding: .4rem .95rem;
+    border-radius: 6px;
+    font-size: .9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .18s, color .18s;
+    border: 2px solid var(--app-blue);
+}
+
+.btn-login {
+    background: var(--app-blue);
+    color: #fff;
+
+    &:hover { background: var(--app-teal); border-color: var(--app-teal); }
+}
+
+.btn-logout {
+    background: transparent;
+    color: var(--app-blue);
+
+    &:hover { background: var(--app-blue); color: #fff; }
+}
+
 .top-nav ul {
     display: flex;
     list-style: none;
