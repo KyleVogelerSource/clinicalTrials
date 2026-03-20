@@ -1,0 +1,159 @@
+<section class="admin-page">
+  <h1>Admin</h1>
+
+  @if (loading()) {
+    <p>Checking permissions...</p>
+  } @else if (!authorized()) {
+    <p class="unauthorized">unauthorized action</p>
+  } @else {
+    <p class="authorized">Manage users, roles, and role-to-action assignments.</p>
+
+    @if (errorMessage()) {
+      <p class="feedback error">{{ errorMessage() }}</p>
+    }
+
+    @if (successMessage()) {
+      <p class="feedback success">{{ successMessage() }}</p>
+    }
+
+    <div class="admin-grid">
+      <section class="admin-card">
+        <h2>Create User</h2>
+        <form class="admin-form" (ngSubmit)="createUser()">
+          <label>
+            <span>Username</span>
+            <input [(ngModel)]="userUsername" name="userUsername" required />
+          </label>
+          <label>
+            <span>Password</span>
+            <input [(ngModel)]="userPassword" name="userPassword" type="password" required />
+          </label>
+          <label>
+            <span>First Name</span>
+            <input [(ngModel)]="userFirstName" name="userFirstName" required />
+          </label>
+          <label>
+            <span>Last Name</span>
+            <input [(ngModel)]="userLastName" name="userLastName" required />
+          </label>
+          <button type="submit">Create User</button>
+        </form>
+      </section>
+
+      <section class="admin-card">
+        <h2>Create Role</h2>
+        <form class="admin-form" (ngSubmit)="createRole()">
+          <label>
+            <span>Role Name</span>
+            <input [(ngModel)]="roleName" name="roleName" required />
+          </label>
+          <button type="submit">Create Role</button>
+        </form>
+      </section>
+
+      <section class="admin-card">
+        <h2>Assign Role To Action</h2>
+        <form class="admin-form" (ngSubmit)="assignRoleToAction()">
+          <label>
+            <span>Role</span>
+            <select [(ngModel)]="selectedRoleId" name="selectedRoleId" required>
+              @for (role of roles(); track role.id) {
+                <option [ngValue]="role.id">{{ role.name }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            <span>Action</span>
+            <select [(ngModel)]="selectedActionId" name="selectedActionId" required>
+              @for (action of actions(); track action.id) {
+                <option [ngValue]="action.id">{{ action.name }}</option>
+              }
+            </select>
+          </label>
+          <p class="help-text">Actions are business rules and can only be viewed or assigned here.</p>
+          <button type="submit">Assign Action</button>
+        </form>
+      </section>
+    </div>
+
+    <section class="admin-card table-card">
+      <h2>Users</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Name</th>
+            <th>Roles</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.id) {
+            <tr>
+              <td>{{ user.username }}</td>
+              <td>{{ user.firstName }} {{ user.lastName }}</td>
+              <td>{{ formatList(user.roles) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="admin-card table-card">
+      <h2>Roles</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (role of roles(); track role.id) {
+            <tr>
+              <td>{{ role.name }}</td>
+              <td>{{ formatList(role.actions) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="admin-card table-card">
+      <h2>Actions</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (action of actions(); track action.id) {
+            <tr>
+              <td>{{ action.name }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="admin-card table-card">
+      <h2>Role Actions</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (assignment of roleActions(); track assignment.roleId + '-' + assignment.actionId) {
+            <tr>
+              <td>{{ assignment.roleName }}</td>
+              <td>{{ assignment.actionName }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  }
+</section>
