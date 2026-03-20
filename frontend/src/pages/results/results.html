@@ -1,0 +1,126 @@
+<div class="results-container">
+
+    <!-- Top bar -->
+    <div class="results-header">
+        <app-progress-track [activeStep]="3" />
+    </div>
+
+    <!-- Loading state -->
+    @if (loadState() === 'loading') {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Analyzing clinical trials data...</p>
+        </div>
+    }
+
+    <!-- Error state -->
+    @else if (loadState() === 'error') {
+        <div class="error-state">
+            <p>{{ errorMessage() }}</p>
+            <button class="btn btn-primary" (click)="onBack()">Back to Designer</button>
+        </div>
+    }
+
+    <!-- Loaded state -->
+    @else {
+        <div class="results-layout">
+
+            <!-- Sticky sidebar nav -->
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#recruitment-velocity">Recruitment Velocity</a></li>
+                    <li><a href="#expected-timeline">Expected Timeline</a></li>
+                    <li><a href="#heatmap">Heatmap</a></li>
+                    <li><a href="#data-plot">Data Plot</a></li>
+                    <li><a href="#benchmarks">Benchmarks</a></li>
+                    <li><a href="#comparison-table">Comparison Table</a></li>
+                </ul>
+            </nav>
+
+            <!-- Scrollable main content -->
+            <main class="results-content">
+
+                <!-- Overview -->
+                <section id="overview" class="results-section">
+                    <h2>Overview</h2>
+                    <div class="overview-grid">
+                        <div class="score-ring">
+                            <span class="score-ring__value">{{ data()?.overallScore }}</span>
+                            <span class="score-ring__label">Score</span>
+                        </div>
+                        <p class="overview-description">
+                            Based on <strong>{{ data()?.totalTrialsFound }}</strong> previous trials
+                            for <strong>{{ data()?.queryCondition }}</strong>, the parameters you
+                            supplied for your clinical trial has a fair chance of completion.
+                        </p>
+                    </div>
+
+                    @if (terminationChartData(); as chartData) {
+                        <h3>Trials by Termination Reason</h3>
+                        <app-bar-chart
+                            [chartData]="chartData"
+                            xAxisLabel="Termination Reason"
+                            yAxisLabel="# of Trials"
+                        />
+                    }
+                </section>
+
+                <!-- Recruitment Velocity -->
+                <section id="recruitment-velocity" class="results-section">
+                    <h2>Recruitment Velocity</h2>
+                    <p class="section-stat">
+                        <strong>{{ data()?.avgRecruitmentDays }} days</strong> on average &nbsp;/&nbsp;
+                        <strong>{{ data()?.participantTarget }}</strong> participants
+                    </p>
+
+                    @if (recruitmentChartData(); as chartData) {
+                        <app-bar-chart
+                            [chartData]="chartData"
+                            [grouped]="true"
+                            xAxisLabel="Impact Level"
+                            yAxisLabel="Days / Participants"
+                        />
+                    }
+                </section>
+
+                <!-- Expected Timeline -->
+                <section id="expected-timeline" class="results-section">
+                    <h2>Expected Timeline</h2>
+
+                    @if (timelineChartData(); as chartData) {
+                        <app-bar-chart
+                            [chartData]="chartData"
+                            [grouped]="true"
+                            xAxisLabel="# of Patients"
+                            yAxisLabel="Days"
+                        />
+                    }
+                </section>
+
+                <!-- Placeholder sections -->
+                <section id="heatmap" class="results-section results-section--placeholder">
+                    <h2>Heatmap</h2>
+                    <p class="coming-soon">Coming soon</p>
+                </section>
+
+                <section id="data-plot" class="results-section results-section--placeholder">
+                    <h2>Data Plot</h2>
+                    <p class="coming-soon">Coming soon</p>
+                </section>
+
+                <section id="benchmarks" class="results-section results-section--placeholder">
+                    <h2>Benchmarks</h2>
+                    <p class="coming-soon">Coming soon</p>
+                </section>
+
+                <section id="comparison-table" class="results-section results-section--placeholder">
+                    <h2>Comparison Table</h2>
+                    <p class="coming-soon">Coming soon</p>
+                </section>
+
+            </main>
+        </div>
+    }
+
+</div>

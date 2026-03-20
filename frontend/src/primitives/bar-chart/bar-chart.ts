@@ -1,0 +1,97 @@
+import {
+    Component,
+    ChangeDetectionStrategy,
+    input,
+    effect,
+    viewChild,
+    ElementRef,
+    OnDestroy,
+} from '@angular/core';
+import {
+    Chart,
+    BarController,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    Tooltip,
+    Legend,
+    Title,
+} from 'chart.js';
+
+Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend, Title);
+
+export interface BarChartDataset {
+    label: string;
+    data: number[];
+    backgroundColor: string | string[];
+    borderColor?: string | string[];
+    borderWidth?: number;
+}
+
+export interface BarChartData {
+    labels: string[];
+    datasets: BarChartDataset[];
+}
+
+@Component({
+    selector: 'app-bar-chart',
+    standalone: true,
+    templateUrl: './bar-chart.html',
+    styleUrl: './bar-chart.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class BarChart implements OnDestroy {
+    chartData = input.required<BarChartData>();
+    xAxisLabel = input<string>('');
+    yAxisLabel = input<string>('');
+    grouped = input<boolean>(false);
+
+    canvasRef = viewChild<ElementRef<HTMLCanvasElement>>('chartCanvas');
+
+    private chart: Chart | null = null;
+
+    constructor() {
+        effect(() => {
+            const data = this.chartData();
+            const canvas = this.canvasRef();
+            if (!canvas) return;
+            this.renderChart(data, canvas.nativeElement);
+        });
+    }
+
+    private renderChart(data: BarChartData, canvas: HTMLCanvasElement): void {
+        this.chart?.destroy();
+        this.chart = new Chart(canvas, {
+            type: 'bar',
+            data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: data.datasets.length > 1 },
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: !!this.xAxisLabel(),
+                            text: this.xAxisLabel(),
+                            color: '#555',
+                        },
+                    },
+                    y: {
+                        title: {
+                            display: !!this.yAxisLabel(),
+                            text: this.yAxisLabel(),
+                            color: '#555',
+                        },
+                        beginAtZero: true,
+                    },
+                },
+            },
+        });
+    }
+
+    ngOnDestroy(): void {
+        this.chart?.destroy();
+    }
+}
