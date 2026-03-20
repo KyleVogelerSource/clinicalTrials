@@ -1,11 +1,11 @@
-import express, { Request, Response } from "express";
 import { searchClinicalTrials, createEmptyClinicalTrialStudiesResponse, searchAndBuildCandidatePool } from "./services/ClinicalTrialsService";
 import { ClinicalTrialsApiClientError, ClinicalTrialsApiTimeoutError } from "./client/ClinicalTrialsApiClient";
 import { validateSearchRequest } from "./validators/ClinicalTrialSearchValidator";
 import { ClinicalTrialSearchRequest } from "../shared/src/dto/ClinicalTrialSearchRequest";
 import { ReferenceTrial } from "../src/models/NormalizedTrial";
 import cors from "cors";
-import { initializeDatabase, isDatabaseConnected } from "./storage/PostgresClient";
+import express, { NextFunction, Request, Response } from "express";
+import { getDbPool, initializeDatabase, isDatabaseConnected } from "./storage/PostgresClient";
 import { registerUser, loginUser } from "./auth/AuthService";
 import { authenticateToken, AuthenticatedRequest, requireAction, userHasAction } from "./auth/authMiddleware";
 import { assignRoleAction, createAdminUser, createRole, getAdminSnapshot } from "./services/AdminService";
