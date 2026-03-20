@@ -6,6 +6,9 @@ import { ClinicalTrialSearchRequest } from "../shared/src/dto/ClinicalTrialSearc
 import { ReferenceTrial } from "../src/models/NormalizedTrial";
 import cors from "cors";
 import { initializeDatabase, isDatabaseConnected } from "./storage/PostgresClient";
+import { registerUser, loginUser } from "./auth/AuthService";
+import { authenticateToken, AuthenticatedRequest, requireAction, userHasAction } from "./auth/authMiddleware";
+import { assignRoleAction, createAdminUser, createRole, getAdminSnapshot } from "./services/AdminService";
 
 const app = express();
 const port = 3000;
@@ -14,10 +17,10 @@ app.use(express.json());
 app.use(cors());
 
 // Allow requests from the Angular dev server
-app.use((_req: Request, res: Response, next) => {
+app.use((_req: Request, res: Response, next: NextFunction) => {
     res.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
     if (_req.method === "OPTIONS") {
         res.sendStatus(204);
         return;
@@ -125,9 +128,190 @@ app.post("/api/clinical-trials/results", (_req: Request, res: Response) => {
     res.status(501).json({ message: "Not yet implemented" });
 });
 
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+// POST /api/auth/register
+app.post("/api/auth/register", async (req: Request, res: Response) => {
+  const { username, password, firstName, lastName } = req.body as Record<string, string>;
+
+  if (!username?.trim() || !password || !firstName?.trim() || !lastName?.trim()) {
+    res.status(400).json({
+      error: "Bad Request",
+      message: "username, password, firstName, and lastName are required.",
+    });
+    return;
+  }
+
+  try {
+    const result = await registerUser({ username: username.trim(), password, firstName: firstName.trim(), lastName: lastName.trim() });
+    res.status(201).json(result);
+  } catch (err) {
+    if (err instanceof Error && err.message === "USERNAME_TAKEN") {
+      res.status(409).json({ error: "Conflict", message: "Username already taken." });
+      return;
+    }
+    console.error("Unexpected error in POST /api/auth/register:", err);
+    res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+  }
 });
+
+// POST /api/auth/login
+app.post("/api/auth/login", async (req: Request, res: Response) => {
+  const { username, password } = req.body as Record<string, string>;
+
+  if (!username?.trim() || !password) {
+    res.status(400).json({ error: "Bad Request", message: "username and password are required." });
+    return;
+  }
+
+  try {
+    const result = await loginUser({ username: username.trim(), password });
+    res.status(200).json(result);
+  } catch (err) {
+    if (err instanceof Error && err.message === "INVALID_CREDENTIALS") {
+      res.status(401).json({ error: "Unauthorized", message: "Invalid username or password." });
+      return;
+    }
+    console.error("Unexpected error in POST /api/auth/login:", err);
+    res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+  }
+});
+
+// GET /api/auth/has-action/:action
+app.get(
+  "/api/auth/has-action/:action",
+  authenticateToken,
+  async (req: AuthenticatedRequest, res: Response) => {
+    const action = req.params.action?.trim();
+    if (!action) {
+      res.status(400).json({ error: "Bad Request", message: "Action is required." });
+      return;
+    }
+
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: "Unauthorized", message: "No user in token payload." });
+      return;
+    }
+
+    try {
+      const pool = getDbPool();
+      const allowed = await userHasAction(userId, action);
+
+      res.status(200).json({ action, allowed });
+    } catch (err) {
+      console.error("Unexpected error in GET /api/auth/has-action/:action:", err);
+      res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+    }
+  }
+);
+
+app.get(
+  "/api/admin/summary",
+  authenticateToken,
+  requireAction("user_roles"),
+  async (_req: AuthenticatedRequest, res: Response) => {
+    try {
+      const snapshot = await getAdminSnapshot();
+      res.status(200).json(snapshot);
+    } catch (err) {
+      console.error("Unexpected error in GET /api/admin/summary:", err);
+      res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+    }
+  }
+);
+
+app.post(
+  "/api/admin/users",
+  authenticateToken,
+  requireAction("user_roles"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    const { username, password, firstName, lastName } = req.body as Record<string, string>;
+
+    if (!username?.trim() || !password || !firstName?.trim() || !lastName?.trim()) {
+      res.status(400).json({
+        error: "Bad Request",
+        message: "username, password, firstName, and lastName are required.",
+      });
+      return;
+    }
+
+    try {
+      const user = await createAdminUser({
+        username: username.trim(),
+        password,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+      });
+      res.status(201).json(user);
+    } catch (err) {
+      if (err instanceof Error && err.message === "USERNAME_TAKEN") {
+        res.status(409).json({ error: "Conflict", message: "Username already taken." });
+        return;
+      }
+      console.error("Unexpected error in POST /api/admin/users:", err);
+      res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+    }
+  }
+);
+
+app.post(
+  "/api/admin/roles",
+  authenticateToken,
+  requireAction("user_roles"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    const { name } = req.body as Record<string, string>;
+
+    if (!name?.trim()) {
+      res.status(400).json({ error: "Bad Request", message: "Role name is required." });
+      return;
+    }
+
+    try {
+      const role = await createRole(name);
+      res.status(201).json(role);
+    } catch (err) {
+      if (err instanceof Error && err.message === "ROLE_EXISTS") {
+        res.status(409).json({ error: "Conflict", message: "Role already exists." });
+        return;
+      }
+      console.error("Unexpected error in POST /api/admin/roles:", err);
+      res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+    }
+  }
+);
+
+app.post(
+  "/api/admin/role-actions",
+  authenticateToken,
+  requireAction("user_roles"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    const { roleId, actionId } = req.body as { roleId?: number; actionId?: number };
+
+    if (!Number.isInteger(roleId) || !Number.isInteger(actionId)) {
+      res.status(400).json({ error: "Bad Request", message: "roleId and actionId are required integers." });
+      return;
+    }
+
+    try {
+      const roleAction = await assignRoleAction(Number(roleId), Number(actionId));
+      res.status(201).json(roleAction);
+    } catch (err) {
+      if (err instanceof Error && err.message === "ROLE_NOT_FOUND") {
+        res.status(404).json({ error: "Not Found", message: "Role not found." });
+        return;
+      }
+      if (err instanceof Error && err.message === "ACTION_NOT_FOUND") {
+        res.status(404).json({ error: "Not Found", message: "Action not found." });
+        return;
+      }
+      if (err instanceof Error && err.message === "ROLE_ACTION_EXISTS") {
+        res.status(409).json({ error: "Conflict", message: "Role is already assigned to this action." });
+        return;
+      }
+      console.error("Unexpected error in POST /api/admin/role-actions:", err);
+      res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+    }
+  }
+);
 
 async function bootstrap() {
   await initializeDatabase();

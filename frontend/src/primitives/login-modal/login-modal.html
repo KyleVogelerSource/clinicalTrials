@@ -1,0 +1,41 @@
+<div class="modal-backdrop" (click)="onBackdropClick($event)" role="dialog" aria-modal="true" aria-label="Login">
+  <div class="modal-card">
+    <button class="modal-close" (click)="closed.emit()" aria-label="Close">&times;</button>
+
+    <form (ngSubmit)="submit()" #authForm="ngForm" novalidate>
+      <div class="form-row">
+        <label for="username">Username</label>
+        <input
+          id="username"
+          name="username"
+          type="text"
+          [(ngModel)]="username"
+          required
+          autocomplete="username"
+          placeholder="Username"
+        />
+      </div>
+
+      <div class="form-row">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          [(ngModel)]="password"
+          required
+          autocomplete="current-password"
+          placeholder="Password"
+        />
+      </div>
+
+      @if (errorMessage()) {
+        <p class="form-error" role="alert">{{ errorMessage() }}</p>
+      }
+
+      <button type="submit" class="btn-primary" [disabled]="loading()">
+        @if (loading()) { Logging In… } @else { Log In }
+      </button>
+    </form>
+  </div>
+</div>
