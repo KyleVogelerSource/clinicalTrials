@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { apiUrl } from '../app/config/api.config';
 
 export interface AuthUser {
   username: string;
@@ -33,7 +34,7 @@ export class AuthService {
   readonly currentUser = this._user.asReadonly();
 
   login(username: string, password: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>('/api/auth/login', { username, password }).pipe(
+    return this.http.post<AuthResponse>(apiUrl('/api/auth/login'), { username, password }).pipe(
       tap(res => this.saveSession(res))
     );
   }
@@ -45,7 +46,7 @@ export class AuthService {
     lastName: string
   ): Observable<AuthResponse> {
     return this.http
-      .post<AuthResponse>('/api/auth/register', { username, password, firstName, lastName })
+      .post<AuthResponse>(apiUrl('/api/auth/register'), { username, password, firstName, lastName })
       .pipe(tap(res => this.saveSession(res)));
   }
 
@@ -62,7 +63,7 @@ export class AuthService {
 
   hasAction(action: string): Observable<boolean> {
     return this.http
-      .get<HasActionResponse>(`/api/auth/has-action/${encodeURIComponent(action)}`)
+      .get<HasActionResponse>(apiUrl(`/api/auth/has-action/${encodeURIComponent(action)}`))
       .pipe(map((res) => res.allowed));
   }
 

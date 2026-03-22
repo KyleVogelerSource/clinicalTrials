@@ -1,0 +1,10 @@
+variable "project_name" { type = string }
+variable "env_name" { type = string }
+variable "service_name" { type = string }
+variable "ecr_repository_url" { type = string }
+variable "image_tag" { type = string }
+variable "backend_port" { type = number }
+variable "vpc_connector_subnet_ids" { type = list(string) }
+variable "vpc_connector_security_groups" { type = list(string) }
+variable "environment_variables" { type = map(string) }
+variable "tags" { type = map(string) }
