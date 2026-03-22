@@ -1,0 +1,6 @@
+aws_region   = "us-east-1"
+github_owner = "KyleVogelerSource"
+github_repo  = "clinicalTrials"
+
+db_username = "app_user"
+db_password = "change-me-please"

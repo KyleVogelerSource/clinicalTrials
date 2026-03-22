@@ -36,6 +36,15 @@ ng build
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
 
+## API base URL configuration
+
+Frontend API calls are built from `src/environments/environment.ts` (`development`) and `src/environments/environment.production.ts` (`production`).
+
+- Keep `apiBaseUrl: ''` for local Docker Compose so requests continue to use relative `/api/...` paths.
+- Set `apiBaseUrl` in `src/environments/environment.production.ts` to your deployed backend URL before production builds (for example `https://api.your-domain.com`).
+
+Production builds automatically use the production environment file via Angular file replacement.
+
 ## Running unit tests
 
 To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
