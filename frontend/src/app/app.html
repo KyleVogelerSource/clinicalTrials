@@ -36,7 +36,12 @@
       </span>
       <span class="debug-item status-item">
         <span class="status-dot" [class.is-on]="status.databaseConnected" [class.is-off]="!status.databaseConnected" aria-hidden="true"></span>
-        DB: {{ status.databaseConnected ? 'CONNECTED' : 'DISCONNECTED' }}
+        <span
+          [class.db-disconnected]="!status.databaseConnected"
+          [attr.title]="!status.databaseConnected ? (status.databaseFailureMessage ?? status.databaseDiagnostics?.failure?.message ?? 'Database is disconnected but no additional error details were provided.') : null"
+        >
+          DB: {{ status.databaseConnected ? 'CONNECTED' : 'DISCONNECTED' }}
+        </span>
       </span>
       <span class="debug-item">Service: {{ status.service }}</span>
       <span class="debug-item">Uptime: {{ status.uptimeSeconds }}s</span>
