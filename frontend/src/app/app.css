@@ -112,6 +112,12 @@
     gap: .4rem;
 }
 
+.db-disconnected {
+    cursor: help;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+}
+
 .status-dot {
     width: 10px;
     height: 10px;

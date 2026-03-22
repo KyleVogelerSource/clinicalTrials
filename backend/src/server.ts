@@ -5,21 +5,38 @@ import { ClinicalTrialSearchRequest } from "../shared/src/dto/ClinicalTrialSearc
 import { ReferenceTrial } from "../src/models/NormalizedTrial";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
-import { getDbPool, initializeDatabase, isDatabaseConnected } from "./storage/PostgresClient";
+import { getDbPool, initializeDatabase, isDatabaseConnected, probeDatabaseConnection } from "./storage/PostgresClient";
 import { registerUser, loginUser } from "./auth/AuthService";
 import { authenticateToken, AuthenticatedRequest, requireAction, userHasAction } from "./auth/authMiddleware";
 import { assignRoleAction, createAdminUser, createRole, getAdminSnapshot } from "./services/AdminService";
 
 const app = express();
-const port = 3000;
+const port = Number(process.env.PORT ?? 3000);
+
+function requireDatabaseConnection(_req: Request, res: Response, next: NextFunction) {
+  if (!isDatabaseConnected()) {
+    res.status(503).json({
+      error: "Service Unavailable",
+      message: "Database is unavailable. Retry when database connectivity is restored.",
+    });
+    return;
+  }
+
+  next();
+}
 
 app.use(express.json());
 app.use(cors());
 
-// Allow requests from the Angular dev server
+const allowedOrigins = ["http://localhost:4200", "https://d8rtqu8bq9oyq.cloudfront.net"];
+
+// Allow requests from the Angular dev server and production CloudFront
 app.use((_req: Request, res: Response, next: NextFunction) => {
-    res.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  const origin = _req.headers.origin;
+  if (origin && allowedOrigins.includes(origin)) {
+      res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
     if (_req.method === "OPTIONS") {
         res.sendStatus(204);
@@ -36,13 +53,31 @@ app.get("/api/health", (_req: Request, res: Response) => {
   });
 });
 
-app.get("/api/debug/status", (_req: Request, res: Response) => {
+app.get("/api/debug/status", async (_req: Request, res: Response) => {
+  const databaseDiagnostics = await probeDatabaseConnection();
+  const databaseFailureMessage = !databaseDiagnostics.connected && databaseDiagnostics.failure
+    ? [
+      `Database connection probe failed at ${databaseDiagnostics.failure.capturedAt}.`,
+      `Operation: ${databaseDiagnostics.failure.operation}.`,
+      `Error: ${databaseDiagnostics.failure.name} - ${databaseDiagnostics.failure.message}.`,
+      databaseDiagnostics.failure.code ? `Code: ${databaseDiagnostics.failure.code}.` : null,
+      databaseDiagnostics.failure.detail ? `Detail: ${databaseDiagnostics.failure.detail}.` : null,
+      databaseDiagnostics.failure.hint ? `Hint: ${databaseDiagnostics.failure.hint}.` : null,
+      `Target: ${databaseDiagnostics.configuration.user}@${databaseDiagnostics.configuration.host}:${databaseDiagnostics.configuration.port}/${databaseDiagnostics.configuration.database}.`,
+      databaseDiagnostics.lastSuccessfulConnectionAt
+        ? `Last successful connection at ${databaseDiagnostics.lastSuccessfulConnectionAt}.`
+        : "No successful database connection has been recorded since startup.",
+    ].filter((part): part is string => Boolean(part)).join(" ")
+    : null;
+
   res.status(200).json({
     ok: true,
     service: "clinicaltrials-backend",
     timestamp: new Date().toISOString(),
     uptimeSeconds: Math.floor(process.uptime()),
     databaseConnected: isDatabaseConnected(),
+    databaseDiagnostics,
+    databaseFailureMessage,
   });
 });
 
@@ -129,7 +164,7 @@ app.post("/api/clinical-trials/results", (_req: Request, res: Response) => {
 });
 
 // POST /api/auth/register
-app.post("/api/auth/register", async (req: Request, res: Response) => {
+app.post("/api/auth/register", requireDatabaseConnection, async (req: Request, res: Response) => {
   const { username, password, firstName, lastName } = req.body as Record<string, string>;
 
   if (!username?.trim() || !password || !firstName?.trim() || !lastName?.trim()) {
@@ -154,7 +189,7 @@ app.post("/api/auth/register", async (req: Request, res: Response) => {
 });
 
 // POST /api/auth/login
-app.post("/api/auth/login", async (req: Request, res: Response) => {
+app.post("/api/auth/login", requireDatabaseConnection, async (req: Request, res: Response) => {
   const { username, password } = req.body as Record<string, string>;
 
   if (!username?.trim() || !password) {
@@ -178,6 +213,7 @@ app.post("/api/auth/login", async (req: Request, res: Response) => {
 // GET /api/auth/has-action/:action
 app.get(
   "/api/auth/has-action/:action",
+  requireDatabaseConnection,
   authenticateToken,
   async (req: AuthenticatedRequest, res: Response) => {
     const action = (req.params.action as string)?.trim();
@@ -193,7 +229,6 @@ app.get(
     }
 
     try {
-      const pool = getDbPool();
       const allowed = await userHasAction(userId, action);
 
       res.status(200).json({ action, allowed });
@@ -206,6 +241,7 @@ app.get(
 
 app.get(
   "/api/admin/summary",
+  requireDatabaseConnection,
   authenticateToken,
   requireAction("user_roles"),
   async (_req: AuthenticatedRequest, res: Response) => {
@@ -221,6 +257,7 @@ app.get(
 
 app.post(
   "/api/admin/users",
+  requireDatabaseConnection,
   authenticateToken,
   requireAction("user_roles"),
   async (req: AuthenticatedRequest, res: Response) => {
@@ -255,6 +292,7 @@ app.post(
 
 app.post(
   "/api/admin/roles",
+  requireDatabaseConnection,
   authenticateToken,
   requireAction("user_roles"),
   async (req: AuthenticatedRequest, res: Response) => {
@@ -281,6 +319,7 @@ app.post(
 
 app.post(
   "/api/admin/role-actions",
+  requireDatabaseConnection,
   authenticateToken,
   requireAction("user_roles"),
   async (req: AuthenticatedRequest, res: Response) => {
@@ -314,10 +353,14 @@ app.post(
 );
 
 async function bootstrap() {
-  await initializeDatabase();
+  try {
+    await initializeDatabase();
+  } catch (error) {
+    console.warn("Database initialization failed. Starting server without database connectivity.", error);
+  }
 
   app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+    console.log(`Server running on port ${port}`);
   });
 }
 
