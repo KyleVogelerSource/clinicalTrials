@@ -44,7 +44,7 @@
             </thead>
             <tbody>
                 @for (trial of trials(); track trial.nctId) {
-                    <tr>
+                    <tr [class.expanded-row-active]="expandedTrialId() === trial.nctId">
                         <td class="trial-title-cell">
                             <a [href]="'https://clinicaltrials.gov/study/' + trial.nctId" target="_blank" class="trial-link">
                                 {{ trial.briefTitle }}
@@ -56,9 +56,34 @@
                         <td class="date-cell">{{ trial.startDate | date:'MM/dd/yyyy' }} - {{ trial.completionDate | date:'MM/dd/yyyy' }}</td>
                         <td>{{ trial.sponsor }}</td>
                         <td>
-                            <button class="btn-link" (click)="viewSites(trial)">View Sites ▶</button>
+                            <button class="btn-link" (click)="toggleTrialExpansion(trial.nctId)">
+                                {{ expandedTrialId() === trial.nctId ? 'Hide Details ◀' : 'View Sites ▶' }}
+                            </button>
                         </td>
                     </tr>
+                    @if (expandedTrialId() === trial.nctId) {
+                        <tr class="detail-row">
+                            <td colspan="7">
+                                <div class="detail-content">
+                                    <div class="detail-header">
+                                        <span class="detail-label">Phase:</span> {{ trial.phase }}
+                                    </div>
+                                    <div class="detail-section">
+                                        <span class="detail-label">Description:</span>
+                                        <p>{{ trial.description }}</p>
+                                    </div>
+                                    <div class="detail-section">
+                                        <span class="detail-label">Clinical Sites:</span>
+                                        <ul class="sites-list">
+                                            @for (site of trial.sites; track site) {
+                                                <li>{{ site }}</li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
                 }
             </tbody>
         </table>

@@ -114,6 +114,58 @@ input[type="date"]:focus {
     background-color: #fcfdfe;
 }
 
+.expanded-row-active {
+    background-color: #f0f7ff !important;
+}
+
+.detail-row td {
+    padding: 0;
+    border-bottom: 1px solid #eef1f8;
+    background-color: #fdfdfd;
+}
+
+.detail-content {
+    padding: 1.5rem 2rem;
+    border-left: 4px solid var(--app-blue);
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.detail-label {
+    font-weight: 700;
+    color: var(--app-blue);
+    margin-right: 0.5rem;
+}
+
+.detail-section {
+    margin-top: 1rem;
+}
+
+.detail-section p {
+    margin: 0.5rem 0 0 0;
+    line-height: 1.6;
+    color: #555;
+    max-width: 800px;
+}
+
+.sites-list {
+    margin: 0.5rem 0 0 0;
+    padding-left: 1.25rem;
+    list-style-type: disc;
+    color: #555;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.sites-list li {
+    font-size: 0.9rem;
+}
+
 .trial-title-cell {
     max-width: 300px;
 }

@@ -13,6 +13,9 @@ interface MockTrial {
     startDate: string;
     completionDate: string;
     sponsor: string;
+    sites: string[];
+    phase: string;
+    description: string;
 }
 
 @Component({
@@ -29,6 +32,7 @@ export class Selection {
     filterWords = signal<string[]>([]);
     fromDate = signal<string>('');
     toDate = signal<string>('');
+    expandedTrialId = signal<string | null>(null);
 
     trials = signal<MockTrial[]>([
         {
@@ -39,7 +43,10 @@ export class Selection {
             location: 'Boston, USA',
             startDate: '2023-01-01',
             completionDate: '2025-12-31',
-            sponsor: 'PharmaCorp'
+            sponsor: 'PharmaCorp',
+            phase: 'Phase 3',
+            description: 'This study evaluates the safety and efficacy of a new oral medication for adults with Type 2 Diabetes who are not well-controlled on metformin.',
+            sites: ['Massachusetts General Hospital', 'Beth Israel Deaconess Medical Center', 'Tufts Medical Center']
         },
         {
             nctId: 'NCT00000002',
@@ -49,7 +56,10 @@ export class Selection {
             location: 'New York, USA',
             startDate: '2022-06-15',
             completionDate: '2024-06-15',
-            sponsor: 'HealthInst'
+            sponsor: 'HealthInst',
+            phase: 'N/A',
+            description: 'A longitudinal study observing the effects of a Mediterranean-style diet on blood pressure and cardiac event rates in high-risk populations.',
+            sites: ['Mount Sinai Hospital', 'NewYork-Presbyterian Hospital', 'NYU Langone Health']
         },
         {
             nctId: 'NCT00000003',
@@ -59,7 +69,10 @@ export class Selection {
             location: 'San Francisco, USA',
             startDate: '2021-03-10',
             completionDate: '2023-03-10',
-            sponsor: 'BioTech Solutions'
+            sponsor: 'BioTech Solutions',
+            phase: 'Phase 2',
+            description: 'Randomized, double-blind study to determine the optimal dose of Drug X for preventing severe asthma exacerbations.',
+            sites: ['UCSF Medical Center', 'California Pacific Medical Center', 'Stanford Health Care']
         },
         {
             nctId: 'NCT00000004',
@@ -69,7 +82,10 @@ export class Selection {
             location: 'London, UK',
             startDate: '2024-01-01',
             completionDate: '2028-12-31',
-            sponsor: 'GlobalPharma'
+            sponsor: 'GlobalPharma',
+            phase: 'Phase 3',
+            description: 'Multi-center trial evaluating a monoclonal antibody targeting amyloid plaques in patients with early-stage Alzheimer disease.',
+            sites: ['Guy\'s and St Thomas\' NHS Foundation Trust', 'University College London Hospitals', 'King\'s College Hospital']
         }
     ]);
 
@@ -91,8 +107,8 @@ export class Selection {
         this.toDate.set(input.value);
     }
 
-    viewSites(trial: MockTrial) {
-        console.log('Viewing sites for:', trial.nctId);
+    toggleTrialExpansion(trialId: string) {
+        this.expandedTrialId.update(current => current === trialId ? null : trialId);
     }
 
     onPrevious() {
