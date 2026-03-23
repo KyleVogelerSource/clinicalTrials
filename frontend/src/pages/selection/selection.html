@@ -26,7 +26,7 @@
     </div>
 
     <div class="results-meta">
-        <span class="results-count">{{ trials().length }} Results</span>
+        <span class="results-count">{{ filteredTrials().length }} of {{ trials().length }} Results</span>
     </div>
 
     <div class="table-container">
@@ -43,7 +43,7 @@
                 </tr>
             </thead>
             <tbody>
-                @for (trial of trials(); track trial.nctId) {
+                @for (trial of filteredTrials(); track trial.nctId) {
                     <tr [class.expanded-row-active]="expandedTrialId() === trial.nctId">
                         <td class="trial-title-cell">
                             <a [href]="'https://clinicaltrials.gov/study/' + trial.nctId" target="_blank" class="trial-link">

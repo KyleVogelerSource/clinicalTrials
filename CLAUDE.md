@@ -12,20 +12,32 @@ This is a monorepo with three sub-projects under `clinicalTrials/`:
 
 ```
 clinicalTrials/
-├── src/server.ts        # Express entry point (run from repo root)
-├── backend/src/         # Backend services and models
-├── shared/src/          # DTOs and static JSON data shared by both sides
-│   ├── dto/             # TypeScript interfaces (e.g. ClinicalTrialSearchRequest)
-│   └── static/          # MeSH terminology JSON files loaded at runtime
-└── frontend/            # Angular 21 SPA
-    └── src/
-        ├── app/         # Root shell, routing (app.routes.ts)
-        ├── pages/       # One component per route (home, designer)
-        ├── primitives/  # Reusable UI components (keyword-selector, progress-track, logo)
-        └── services/    # Singleton data services (ClinicalStudyService)
+├── backend/                    # Express.js backend
+│   ├── src/
+│   │   ├── auth/              # JWT authentication
+│   │   ├── client/            # ClinicalTrials.gov API client
+│   │   ├── models/            # Data models
+│   │   ├── services/          # Business logic
+│   │   ├── storage/           # PostgreSQL client
+│   │   ├── validators/        # Request validation
+│   │   └── server.ts          # Express entry point (port 3000)
+│   └── package.json
+├── frontend/                   # Angular 21 SPA
+│   └── src/
+│       ├── app/               # Root shell, routing (app.routes.ts)
+│       ├── pages/             # Route components (home, designer, selection, results, admin)
+│       ├── primitives/        # Reusable UI components
+│       ├── services/          # Singleton data services
+│       └── interceptors/      # HTTP interceptors (auth)
+├── shared/src/                 # Shared DTOs and static data
+│   ├── dto/                   # TypeScript interfaces
+│   └── static/                # MeSH terminology JSON files
+├── docker/                    # Nginx reverse proxy config
+├── terraform/                 # AWS infrastructure (AppRunner, RDS, CloudFront)
+└── docker-compose.yml         # Local dev stack (Postgres + backend + frontend + Nginx)
 ```
 
-The root `tsconfig.json` covers `src/`, `backend/src/`, and `shared/src/`. The frontend has its own `tsconfig.json`.
+The backend has its own `tsconfig.json` under `backend/`. The frontend has its own under `frontend/`.
 
 ## Commands
 
@@ -61,19 +73,37 @@ The frontend `ClinicalStudyService` loads MeSH terminology from `shared/src/stat
 Any type shared between frontend and backend belongs in `shared/src/dto/`. The `ClinicalTrialSearchRequest` interface maps directly to ClinicalTrials.gov API query/filter parameters (comments in the file indicate the corresponding API field names).
 
 ### Backend
-The Express server (`src/server.ts`) runs on port 3000. Current endpoints:
+The Express server (`backend/src/server.ts`) runs on port 3000. Current endpoints:
 - `GET /api/health`
-- `GET /api/clinical-trials/empty-response`
-- `POST /api/clinical-trials/search` — calls ClinicalTrials.gov API with validation and error handling
+- `GET /api/debug/status` — detailed health check including DB connectivity
+- `POST /api/auth/register` / `POST /api/auth/login` / `GET /api/auth/has-action/:action`
+- `GET/POST /api/admin/*` — user/role management (requires `user_roles` permission)
+- `POST /api/clinical-trials/search` — calls ClinicalTrials.gov API with validation
+- `POST /api/clinical-trials/candidate-pool` — builds candidate pool
 - `POST /api/clinical-trials/results` — placeholder (returns 501, not yet implemented)
 
-Business logic lives in `backend/src/services/`. The API client and validators are in `backend/src/client/` and `backend/src/validators/`.
+### Page flow
+The app follows a multi-step workflow managed by `TrialWorkflowService`:
 
-### Results page
-The `ProgressTrack` primitive defines three steps: Input → Refine → Results. Steps 1 (Designer) and 3 (Results) are implemented; step 2 (Refine) is skipped for now.
+```
+Designer (step 1) → Selection (step 2) → Results (step 3)
+```
 
-The Results page (`pages/results/`) displays three Chart.js histograms: termination reasons, recruitment velocity, and expected timeline. It currently uses mock data from `frontend/src/services/mock-trial-results.ts` via `ResultsApiService` — when ready to wire the real backend, swap `of(mockTrialResultsResponse)` back to `this.http.post(API_URL, request)` in that service.
+- **Designer** (`pages/designer/`) — collects search parameters, navigates to Selection
+- **Selection** (`pages/selection/`) — displays matched trials in a table with filter controls:
+  - **Date range**: filters by `startDate` (from/to, both optional)
+  - **Keywords**: must match ALL keywords against trial title + conditions (case-insensitive)
+  - `filteredTrials = computed()` derives from the full `trials` signal — full collection is never mutated, so filters are instantly reversible
+  - Counter shows "X of N Results" live
+- **Results** (`pages/results/`) — displays three Chart.js histograms using mock data from `frontend/src/services/mock-trial-results.ts` via `ResultsApiService`. To wire real backend: swap `of(mockTrialResultsResponse)` → `this.http.post(API_URL, request)` in that service.
+- **Admin** (`pages/admin/`) — lazy-loaded, visible only to users with `user_roles` permission
+
+### Authentication
+JWT-based auth. `AuthInterceptor` attaches Bearer tokens to all HTTP requests. `AuthService` manages login state with Angular signals. Login/register via `LoginModal` primitive in the app header.
+
+### Debug mode
+Add `?debug=true` to the URL to show a debug bar polling `/api/debug/status` every 10s.
 
 ## Repository
 **GitHub:** https://github.com/KyleVogelerSource/clinicalTrials
-**Active branch:** `FE-histogram`
+**Active branch:** `FE-Faceted-Search`
