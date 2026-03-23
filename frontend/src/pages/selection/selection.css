@@ -1,0 +1,251 @@
+app-progress-track {
+    display: block;
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.selection-controls {
+    margin-bottom: 2.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #444;
+}
+
+.date-range-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+input[type="date"] {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: #fcfcfc;
+    transition: border-color 0.2s;
+}
+
+input[type="date"]:focus {
+    outline: none;
+    border-color: var(--app-blue);
+    background-color: #fff;
+}
+
+.date-separator {
+    color: #888;
+    font-weight: bold;
+}
+
+.results-meta {
+    margin-bottom: 1.5rem;
+}
+
+.results-count {
+    font-weight: 600;
+    color: var(--app-gray);
+    font-size: 1.1rem;
+}
+
+/* Table Styles */
+.table-container {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 500px; /* Limit height for independent scrolling */
+    margin-bottom: 3rem;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    background: white;
+}
+
+.trials-table {
+    width: 100%;
+    border-collapse: separate; /* Use separate for sticky header borders */
+    border-spacing: 0;
+    text-align: left;
+}
+
+.trials-table th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: #f8faff;
+    padding: 1.25rem 1rem;
+    border-bottom: 2px solid #eef1f8;
+    font-weight: 600;
+    color: var(--app-blue);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.trials-table td {
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: top;
+    font-size: 0.95rem;
+    color: #444;
+}
+
+.trials-table tr:last-child td {
+    border-bottom: none;
+}
+
+.trials-table tr:hover {
+    background-color: #fcfdfe;
+}
+
+.expanded-row-active {
+    background-color: #f0f7ff !important;
+}
+
+.detail-row {
+    /* Removed visibility: collapse to allow smooth closing transition */
+}
+
+.detail-row td {
+    padding: 0;
+    border-bottom: 1px solid #eef1f8;
+    background-color: #fdfdfd;
+}
+
+.detail-wrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s ease-in-out;
+}
+
+.detail-row.expanded .detail-wrapper {
+    grid-template-rows: 1fr;
+}
+
+.detail-content {
+    overflow: hidden;
+    padding: 0 2rem;
+    border-left: 4px solid var(--app-blue);
+    transition: padding 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    opacity: 0;
+}
+
+.detail-row.expanded .detail-content {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+    opacity: 1;
+}
+
+.triangle {
+    display: inline-block;
+    font-size: 0.75rem;
+    transition: transform 0.3s ease;
+    margin-left: 0.25rem;
+}
+
+.triangle.rotated {
+    transform: rotate(90deg);
+}
+
+.detail-label {
+    font-weight: 700;
+    color: var(--app-blue);
+    margin-right: 0.5rem;
+}
+
+.detail-section {
+    margin-top: 1rem;
+}
+
+.detail-section p {
+    margin: 0.5rem 0 0 0;
+    line-height: 1.6;
+    color: #555;
+    max-width: 800px;
+}
+
+.sites-list {
+    margin: 0.5rem 0 0 0;
+    padding-left: 1.25rem;
+    list-style-type: disc;
+    color: #555;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.sites-list li {
+    font-size: 0.9rem;
+}
+
+.trial-title-cell {
+    max-width: 300px;
+}
+
+.trial-link {
+    color: var(--app-blue);
+    text-decoration: none;
+    font-weight: 600;
+    display: block;
+    line-height: 1.4;
+}
+
+.trial-link:hover {
+    color: var(--app-teal);
+    text-decoration: underline;
+}
+
+.date-cell {
+    white-space: nowrap;
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: var(--app-blue);
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    white-space: nowrap;
+}
+
+.btn-link:hover {
+    color: var(--app-teal);
+}
+
+/* Action Buttons */
+.actions {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 2rem;
+    border-top: 2px solid #f0f0f0;
+    margin-top: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+}

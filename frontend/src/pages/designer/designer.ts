@@ -6,6 +6,7 @@ import { KeywordSelector } from "../../primitives/keyword-selector/keyword-selec
 import { AutoCompleteInput } from "../../primitives/auto-complete-input/auto-complete-input";
 import { ClinicalStudyService } from "../../services/clinical-study.service";
 import { TrialResultsRequest } from "../../../../shared/src/dto/TrialResultsRequest";
+import { TrialWorkflowService } from "../../services/trial-workflow-service";
 
 @Component({
     selector: "app-designer",
@@ -16,6 +17,7 @@ import { TrialResultsRequest } from "../../../../shared/src/dto/TrialResultsRequ
 })
 export class Designer {
     clinicalStudiesService = inject(ClinicalStudyService);
+    workflowService = inject(TrialWorkflowService);
     router = inject(Router);
 
     conditionMatches = signal<string[]>([]);
@@ -94,18 +96,7 @@ export class Designer {
 
     onNext() {
         const v = this.inputForm.value;
-        const request: TrialResultsRequest = {
-            condition: v.condition ?? null,
-            phase: v.phase ?? null,
-            allocationType: v.allocationType ?? null,
-            interventionModel: v.interventionModel ?? null,
-            blindingType: v.blindingType ?? null,
-            minAge: v.minAge ?? null,
-            maxAge: v.maxAge ?? null,
-            sex: v.sex ?? null,
-            requiredConditions: v.required ?? [],
-            ineligibleConditions: v.ineligible ?? [],
-        };
-        this.router.navigate(['/results'], { state: { request } });
+        this.workflowService.setInputs(v);
+        this.router.navigate(['/selection']);
     }
 }

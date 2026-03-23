@@ -1,9 +1,7 @@
-<div class="results-container">
+<div class="app-container">
 
     <!-- Top bar -->
-    <div class="results-header">
-        <app-progress-track [activeStep]="3" />
-    </div>
+    <app-progress-track [activeStep]="3" />
 
     <!-- Loading state -->
     @if (loadState() === 'loading') {

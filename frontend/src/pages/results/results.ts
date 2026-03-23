@@ -12,6 +12,7 @@ import { BarChart, BarChartData } from '../../primitives/bar-chart/bar-chart';
 import { ResultsApiService } from '../../services/results-api.service';
 import { TrialResultsRequest } from '../../../../shared/src/dto/TrialResultsRequest';
 import { TrialResultsResponse } from '../../../../shared/src/dto/TrialResultsResponse';
+import { TrialWorkflowService } from '../../services/trial-workflow-service';
 
 type LoadState = 'loading' | 'loaded' | 'error';
 
@@ -26,6 +27,7 @@ type LoadState = 'loading' | 'loaded' | 'error';
 export class Results implements OnInit {
     private router = inject(Router);
     private apiService = inject(ResultsApiService);
+    private workflowService = inject(TrialWorkflowService);
 
     loadState = signal<LoadState>('loading');
     data = signal<TrialResultsResponse | null>(null);
@@ -85,7 +87,7 @@ export class Results implements OnInit {
     });
 
     ngOnInit(): void {
-        const request = history.state?.request as TrialResultsRequest | undefined;
+        const request = this.workflowService.getForResults();
 
         if (!request) {
             this.router.navigate(['/designer']);
