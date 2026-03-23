@@ -39,7 +39,7 @@
                     <th>Location</th>
                     <th>Date</th>
                     <th>Company</th>
-                    <th>Location Sites</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -57,13 +57,14 @@
                         <td>{{ trial.sponsor }}</td>
                         <td>
                             <button class="btn-link" (click)="toggleTrialExpansion(trial.nctId)">
-                                {{ expandedTrialId() === trial.nctId ? 'Hide Details ◀' : 'View Sites ▶' }}
+                                {{ expandedTrialId() === trial.nctId ? 'Hide Details' : 'Details' }}
+                                <span class="triangle" [class.rotated]="expandedTrialId() === trial.nctId">▶</span>
                             </button>
                         </td>
                     </tr>
-                    @if (expandedTrialId() === trial.nctId) {
-                        <tr class="detail-row">
-                            <td colspan="7">
+                    <tr class="detail-row" [class.expanded]="expandedTrialId() === trial.nctId">
+                        <td colspan="7">
+                            <div class="detail-wrapper">
                                 <div class="detail-content">
                                     <div class="detail-header">
                                         <span class="detail-label">Phase:</span> {{ trial.phase }}
@@ -81,9 +82,9 @@
                                         </ul>
                                     </div>
                                 </div>
-                            </td>
-                        </tr>
-                    }
+                            </div>
+                        </td>
+                    </tr>
                 }
             </tbody>
         </table>
