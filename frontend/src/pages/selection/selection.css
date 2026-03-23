@@ -67,20 +67,26 @@ input[type="date"]:focus {
 /* Table Styles */
 .table-container {
     overflow-x: auto;
+    overflow-y: auto;
+    max-height: 500px; /* Limit height for independent scrolling */
     margin-bottom: 3rem;
     border-radius: 8px;
     border: 1px solid #eee;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    background: white;
 }
 
 .trials-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate; /* Use separate for sticky header borders */
+    border-spacing: 0;
     text-align: left;
-    background: white;
 }
 
 .trials-table th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     background-color: #f8faff;
     padding: 1.25rem 1rem;
     border-bottom: 2px solid #eef1f8;
