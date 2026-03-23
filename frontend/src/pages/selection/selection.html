@@ -1,0 +1,72 @@
+<div class="app-container">
+    
+    <app-progress-track [activeStep]="2" />
+
+    <div class="selection-controls">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="keyword-lookup">Keyword Lookup</label>
+                <app-keyword-selector
+                    inputId="keyword-lookup"
+                    [selectedKeywords]="filterWords()"
+                    (addKeyword)="onAddKeyword($event)"
+                    (removeKeyword)="onRemoveKeyword($event)"
+                />
+            </div>
+
+            <div class="form-group">
+                <label>Date Range</label>
+                <div class="date-range-inputs">
+                    <input type="date" [value]="fromDate()" (change)="onFromDateChange($event)" aria-label="From Date">
+                    <span class="date-separator">-</span>
+                    <input type="date" [value]="toDate()" (change)="onToDateChange($event)" aria-label="To Date">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="results-meta">
+        <span class="results-count">{{ trials().length }} Results</span>
+    </div>
+
+    <div class="table-container">
+        <table class="trials-table">
+            <thead>
+                <tr>
+                    <th>Trial</th>
+                    <th>Disease/Condition</th>
+                    <th>Count</th>
+                    <th>Location</th>
+                    <th>Date</th>
+                    <th>Company</th>
+                    <th>Location Sites</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (trial of trials(); track trial.nctId) {
+                    <tr>
+                        <td class="trial-title-cell">
+                            <a [href]="'https://clinicaltrials.gov/study/' + trial.nctId" target="_blank" class="trial-link">
+                                {{ trial.briefTitle }}
+                            </a>
+                        </td>
+                        <td>{{ trial.conditions.join(', ') }}</td>
+                        <td>{{ trial.enrollmentCount | number }}</td>
+                        <td>{{ trial.location }}</td>
+                        <td class="date-cell">{{ trial.startDate | date:'MM/dd/yyyy' }} - {{ trial.completionDate | date:'MM/dd/yyyy' }}</td>
+                        <td>{{ trial.sponsor }}</td>
+                        <td>
+                            <button class="btn-link" (click)="viewSites(trial)">View Sites ▶</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="actions">
+        <button type="button" class="btn" (click)="onPrevious()">Previous</button>
+        <button type="button" class="btn btn-primary" (click)="onNext()">Process</button>
+    </div>
+</div>
