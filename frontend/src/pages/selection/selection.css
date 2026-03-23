@@ -1,0 +1,165 @@
+app-progress-track {
+    display: block;
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.selection-controls {
+    margin-bottom: 2.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #444;
+}
+
+.date-range-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+input[type="date"] {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: #fcfcfc;
+    transition: border-color 0.2s;
+}
+
+input[type="date"]:focus {
+    outline: none;
+    border-color: var(--app-blue);
+    background-color: #fff;
+}
+
+.date-separator {
+    color: #888;
+    font-weight: bold;
+}
+
+.results-meta {
+    margin-bottom: 1.5rem;
+}
+
+.results-count {
+    font-weight: 600;
+    color: var(--app-gray);
+    font-size: 1.1rem;
+}
+
+/* Table Styles */
+.table-container {
+    overflow-x: auto;
+    margin-bottom: 3rem;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.trials-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    background: white;
+}
+
+.trials-table th {
+    background-color: #f8faff;
+    padding: 1.25rem 1rem;
+    border-bottom: 2px solid #eef1f8;
+    font-weight: 600;
+    color: var(--app-blue);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.trials-table td {
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: top;
+    font-size: 0.95rem;
+    color: #444;
+}
+
+.trials-table tr:last-child td {
+    border-bottom: none;
+}
+
+.trials-table tr:hover {
+    background-color: #fcfdfe;
+}
+
+.trial-title-cell {
+    max-width: 300px;
+}
+
+.trial-link {
+    color: var(--app-blue);
+    text-decoration: none;
+    font-weight: 600;
+    display: block;
+    line-height: 1.4;
+}
+
+.trial-link:hover {
+    color: var(--app-teal);
+    text-decoration: underline;
+}
+
+.date-cell {
+    white-space: nowrap;
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: var(--app-blue);
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    white-space: nowrap;
+}
+
+.btn-link:hover {
+    color: var(--app-teal);
+}
+
+/* Action Buttons */
+.actions {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 2rem;
+    border-top: 2px solid #f0f0f0;
+    margin-top: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+}

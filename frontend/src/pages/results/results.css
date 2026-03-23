@@ -1,14 +1,5 @@
-.results-container {
-    max-width: 1400px;
-    margin: 12px auto;
-    padding: 2rem;
-    background: white;
-    min-height: 80vh;
-    box-shadow: 0 4px 15px var(--shadow-color);
-    border-radius: 8px;
-}
-
-.results-header {
+app-progress-track {
+    display: block;
     text-align: center;
     margin-bottom: 2rem;
 }
@@ -157,24 +148,6 @@
 
 @keyframes spin {
     to { transform: rotate(360deg); }
-}
-
-.btn {
-    padding: 0.75rem 2rem;
-    border-radius: 4px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s;
-}
-
-.btn-primary {
-    background-color: var(--app-teal);
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: var(--app-teal2);
 }
 
 /* Responsive */
