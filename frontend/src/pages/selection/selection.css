@@ -118,21 +118,49 @@ input[type="date"]:focus {
     background-color: #f0f7ff !important;
 }
 
+.detail-row {
+    /* Removed visibility: collapse to allow smooth closing transition */
+}
+
 .detail-row td {
     padding: 0;
     border-bottom: 1px solid #eef1f8;
     background-color: #fdfdfd;
 }
 
-.detail-content {
-    padding: 1.5rem 2rem;
-    border-left: 4px solid var(--app-blue);
-    animation: slideDown 0.2s ease-out;
+.detail-wrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s ease-in-out;
 }
 
-@keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+.detail-row.expanded .detail-wrapper {
+    grid-template-rows: 1fr;
+}
+
+.detail-content {
+    overflow: hidden;
+    padding: 0 2rem;
+    border-left: 4px solid var(--app-blue);
+    transition: padding 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    opacity: 0;
+}
+
+.detail-row.expanded .detail-content {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+    opacity: 1;
+}
+
+.triangle {
+    display: inline-block;
+    font-size: 0.75rem;
+    transition: transform 0.3s ease;
+    margin-left: 0.25rem;
+}
+
+.triangle.rotated {
+    transform: rotate(90deg);
 }
 
 .detail-label {
