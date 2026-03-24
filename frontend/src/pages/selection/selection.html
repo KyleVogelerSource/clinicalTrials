@@ -33,6 +33,9 @@
         <table class="trials-table">
             <thead>
                 <tr>
+                    <th class="selection-cell">
+                        <input type="checkbox" [checked]="isAllSelected()" (change)="toggleAllSelection()" aria-label="Select all trials">
+                    </th>
                     <th>Trial</th>
                     <th>Disease/Condition</th>
                     <th>Count</th>
@@ -44,7 +47,10 @@
             </thead>
             <tbody>
                 @for (trial of filteredTrials(); track trial.nctId) {
-                    <tr [class.expanded-row-active]="expandedTrialId() === trial.nctId">
+                    <tr [class.expanded-row-active]="expandedTrialId() === trial.nctId" [class.selected-row]="isTrialSelected(trial.nctId)">
+                        <td class="selection-cell">
+                            <input type="checkbox" [checked]="isTrialSelected(trial.nctId)" (change)="toggleTrialSelection(trial.nctId)" aria-label="Select trial">
+                        </td>
                         <td class="trial-title-cell">
                             <a [href]="'https://clinicaltrials.gov/study/' + trial.nctId" target="_blank" class="trial-link">
                                 {{ trial.briefTitle }}
@@ -63,7 +69,7 @@
                         </td>
                     </tr>
                     <tr class="detail-row" [class.expanded]="expandedTrialId() === trial.nctId">
-                        <td colspan="7">
+                        <td colspan="8">
                             <div class="detail-wrapper">
                                 <div class="detail-content">
                                     <div class="detail-header">
@@ -93,6 +99,6 @@
     <!-- Bottom Bar -->
     <div class="actions">
         <button type="button" class="btn" (click)="onPrevious()">Previous</button>
-        <button type="button" class="btn btn-primary" (click)="onNext()">Process</button>
+        <button type="button" class="btn btn-primary" (click)="onNext()" [disabled]="selectedTrialIds().length === 0">Process</button>
     </div>
 </div>

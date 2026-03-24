@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ProgressTrack } from '../../primitives/progress-track/progress-track';
 import { KeywordSelector } from '../../primitives/keyword-selector/keyword-selector';
 import { Router } from '@angular/router';
@@ -14,10 +14,9 @@ import { ClinicalStudyService, StudyTrial } from '../../services/clinical-study.
     imports: [ProgressTrack, KeywordSelector, CommonModule, DecimalPipe, DatePipe],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class Selection implements OnInit {
+export class Selection {
     router = inject(Router);
     workflowService = inject(TrialWorkflowService);
-    clinicalStudyService = inject(ClinicalStudyService);
 
     // Proxy signals from the service
     foundTrials = this.workflowService.foundTrials;
@@ -26,13 +25,7 @@ export class Selection implements OnInit {
     toDate = this.workflowService.toDate;
 
     expandedTrialId = signal<string | null>(null);
-
-    ngOnInit() {
-        // Initialize foundTrials with mock data if empty
-        if (this.workflowService.foundTrials().length === 0) {
-            this.workflowService.foundTrials.set(this.clinicalStudyService.getMockTrials());
-        }
-    }
+    selectedTrialIds = this.workflowService.selectedTrialIds;
 
     filteredTrials = computed<StudyTrial[]>(() => {
         const keywords = this.workflowService.filterWords();
@@ -54,6 +47,40 @@ export class Selection implements OnInit {
             return true;
         });
     });
+
+    isAllSelected = computed(() => {
+        const filtered = this.filteredTrials();
+        const selected = this.selectedTrialIds();
+        if (filtered.length === 0) return false;
+        return filtered.every(trial => selected.includes(trial.nctId));
+    });
+
+    isTrialSelected(id: string): boolean {
+        return this.selectedTrialIds().includes(id);
+    }
+
+    toggleTrialSelection(id: string) {
+        this.selectedTrialIds.update(ids => {
+            if (ids.includes(id)) {
+                return ids.filter(i => i !== id);
+            } else {
+                return [...ids, id];
+            }
+        });
+    }
+
+    toggleAllSelection() {
+        if (this.isAllSelected()) {
+            const filteredIds = this.filteredTrials().map(t => t.nctId);
+            this.selectedTrialIds.update(ids => ids.filter(id => !filteredIds.includes(id)));
+        } else {
+            const filteredIds = this.filteredTrials().map(t => t.nctId);
+            this.selectedTrialIds.update(ids => {
+                const newIds = new Set([...ids, ...filteredIds]);
+                return Array.from(newIds);
+            });
+        }
+    }
 
     onAddKeyword(keyword: string) {
         this.workflowService.filterWords.update(keywords => [...keywords, keyword]);
@@ -82,6 +109,7 @@ export class Selection implements OnInit {
     }
 
     onNext() {
+        this.workflowService.processResults();
         this.router.navigate(['/results']);
     }
 }

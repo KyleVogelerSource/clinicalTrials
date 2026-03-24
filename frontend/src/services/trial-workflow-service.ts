@@ -1,5 +1,8 @@
-import { Injectable, signal } from "@angular/core";
+import { Injectable, signal, inject } from "@angular/core";
 import { TrialResultsRequest } from "../../../shared/src/dto/TrialResultsRequest";
+import { ClinicalStudyService } from "./clinical-study.service";
+import { ResultsApiService } from "./results-api.service";
+import { TrialResultsResponse } from "../../../shared/src/dto/TrialResultsResponse";
 
 /**
  * Contains local state for user's input
@@ -9,18 +12,21 @@ import { TrialResultsRequest } from "../../../shared/src/dto/TrialResultsRequest
     providedIn: 'root'
 })
 export class TrialWorkflowService {
+    private clinicalStudyService = inject(ClinicalStudyService);
+    private apiService = inject(ResultsApiService);
+
     // Designer state
     inputParams = signal<any | null>(null);
-    
+
     // Selection state
     foundTrials = signal<any[]>([]);
     filterWords = signal<string[]>([]);
     fromDate = signal<string>("");
     toDate = signal<string>("");
-    
+
     // Results state
-    selectedTrials = signal<any>([]);
-    results = signal<any | null>(null);
+    selectedTrialIds = signal<string[]>([]);
+    results = signal<TrialResultsResponse | null>(null);
 
     reset() {
         this.inputParams.set(null);
@@ -28,12 +34,32 @@ export class TrialWorkflowService {
         this.filterWords.set([]);
         this.fromDate.set("");
         this.toDate.set("");
-        this.selectedTrials.set([]);
+        this.selectedTrialIds.set([]);
         this.results.set(null);
     }
 
     setInputs(obj : any) { // TODO: use a type
         this.inputParams.set(obj);
+    }
+
+    searchTrials() {
+        // Logic for fetching trials based on inputParams goes here
+        // For now, we utilize the mock data from the service
+        const trials = this.clinicalStudyService.getMockTrials();
+        this.foundTrials.set(trials);
+        // Clear previous selections on new search
+        this.selectedTrialIds.set([]);
+    }
+
+    processResults() {
+        const request = this.getForResults();
+        if (!request) return;
+
+        // In a real app, this would be an observable we subscribe to
+        // For now, we just call the mock API
+        this.apiService.getResults(request).subscribe(response => {
+            this.results.set(response);
+        });
     }
 
     getForResults() : TrialResultsRequest | undefined {
@@ -52,8 +78,9 @@ export class TrialWorkflowService {
             sex: input.sex ?? null,
             requiredConditions: input.required ?? [],
             ineligibleConditions: input.ineligible ?? [],
+            selectedTrialIds: this.selectedTrialIds(),
         };
-        
+
         return request;
     }
 }
