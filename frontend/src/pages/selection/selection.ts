@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal, effect } from '@angular/core';
 import { ProgressTrack } from '../../primitives/progress-track/progress-track';
 import { KeywordSelector } from '../../primitives/keyword-selector/keyword-selector';
 import { Router } from '@angular/router';
@@ -27,6 +27,8 @@ export class Selection {
     expandedTrialId = signal<string | null>(null);
     selectedTrialIds = this.workflowService.selectedTrialIds;
 
+    DISPLAY_THRESHOLD = 1000;
+
     filteredTrials = computed<StudyTrial[]>(() => {
         const keywords = this.workflowService.filterWords();
         const from = this.workflowService.fromDate();
@@ -54,6 +56,27 @@ export class Selection {
         if (filtered.length === 0) return false;
         return filtered.every(trial => selected.includes(trial.nctId));
     });
+
+    constructor() {
+        // Automatically select all if filtered count is below threshold
+        effect(() => {
+            const filtered = this.filteredTrials();
+            const currentSelected = this.selectedTrialIds();
+
+            if (filtered.length < this.DISPLAY_THRESHOLD) {
+                const filteredIds = filtered.map(t => t.nctId);
+                // If selection is empty, auto-select all
+                if (currentSelected.length === 0 && filteredIds.length > 0) {
+                     this.selectedTrialIds.set(filteredIds);
+                }
+            } else {
+                // If over threshold, clear selection as table is hidden and filtering is required
+                if (currentSelected.length > 0) {
+                    this.selectedTrialIds.set([]);
+                }
+            }
+        });
+    }
 
     isTrialSelected(id: string): boolean {
         return this.selectedTrialIds().includes(id);
