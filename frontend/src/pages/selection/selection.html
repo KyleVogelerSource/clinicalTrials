@@ -12,6 +12,15 @@
                     (addKeyword)="onAddKeyword($event)"
                     (removeKeyword)="onRemoveKeyword($event)"
                 />
+                
+                @if (smartSuggestions().length > 0) {
+                    <div class="smart-suggestions">
+                        <span class="suggestion-label">Suggested:</span>
+                        @for (kw of smartSuggestions(); track kw) {
+                            <button class="suggestion-tag" (click)="onAddKeyword(kw)">+ {{ kw }}</button>
+                        }
+                    </div>
+                }
             </div>
 
             <div class="form-group">
@@ -26,73 +35,91 @@
     </div>
 
     <div class="results-meta">
-        <span class="results-count">{{ filteredTrials().length }} of {{ trials().length }} Results</span>
+        <span class="results-count">{{ filteredTrials().length }} of {{ foundTrials().length }} Results</span>
     </div>
 
-    <div class="table-container">
-        <table class="trials-table">
-            <thead>
-                <tr>
-                    <th>Trial</th>
-                    <th>Disease/Condition</th>
-                    <th>Count</th>
-                    <th>Location</th>
-                    <th>Date</th>
-                    <th>Company</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (trial of filteredTrials(); track trial.nctId) {
-                    <tr [class.expanded-row-active]="expandedTrialId() === trial.nctId">
-                        <td class="trial-title-cell">
-                            <a [href]="'https://clinicaltrials.gov/study/' + trial.nctId" target="_blank" class="trial-link">
-                                {{ trial.briefTitle }}
-                            </a>
-                        </td>
-                        <td>{{ trial.conditions.join(', ') }}</td>
-                        <td>{{ trial.enrollmentCount | number }}</td>
-                        <td>{{ trial.location }}</td>
-                        <td class="date-cell">{{ trial.startDate | date:'MM/dd/yyyy' }} - {{ trial.completionDate | date:'MM/dd/yyyy' }}</td>
-                        <td>{{ trial.sponsor }}</td>
-                        <td>
-                            <button class="btn-link" (click)="toggleTrialExpansion(trial.nctId)">
-                                {{ expandedTrialId() === trial.nctId ? 'Hide Details' : 'Details' }}
-                                <span class="triangle" [class.rotated]="expandedTrialId() === trial.nctId">▶</span>
-                            </button>
-                        </td>
+    @if (filteredTrials().length < DISPLAY_THRESHOLD) {
+        <div class="table-container">
+            <table class="trials-table">
+                <thead>
+                    <tr>
+                        <th class="selection-cell">
+                            <input type="checkbox" [checked]="isAllSelected()" (change)="toggleAllSelection()" aria-label="Select all trials">
+                        </th>
+                        <th>Trial</th>
+                        <th>Disease/Condition</th>
+                        <th>Count</th>
+                        <th>Location</th>
+                        <th>Date</th>
+                        <th>Company</th>
+                        <th></th>
                     </tr>
-                    <tr class="detail-row" [class.expanded]="expandedTrialId() === trial.nctId">
-                        <td colspan="7">
-                            <div class="detail-wrapper">
-                                <div class="detail-content">
-                                    <div class="detail-header">
-                                        <span class="detail-label">Phase:</span> {{ trial.phase }}
-                                    </div>
-                                    <div class="detail-section">
-                                        <span class="detail-label">Description:</span>
-                                        <p>{{ trial.description }}</p>
-                                    </div>
-                                    <div class="detail-section">
-                                        <span class="detail-label">Clinical Sites:</span>
-                                        <ul class="sites-list">
-                                            @for (site of trial.sites; track site) {
-                                                <li>{{ site }}</li>
-                                            }
-                                        </ul>
+                </thead>
+                <tbody>
+                    @for (trial of filteredTrials(); track trial.nctId) {
+                        <tr [class.expanded-row-active]="expandedTrialId() === trial.nctId" [class.selected-row]="isTrialSelected(trial.nctId)">
+                            <td class="selection-cell">
+                                <input type="checkbox" [checked]="isTrialSelected(trial.nctId)" (change)="toggleTrialSelection(trial.nctId)" aria-label="Select trial">
+                            </td>
+                            <td class="trial-title-cell">
+                                <a [href]="'https://clinicaltrials.gov/study/' + trial.nctId" target="_blank" class="trial-link">
+                                    {{ trial.briefTitle }}
+                                </a>
+                            </td>
+                            <td>{{ trial.conditions.join(', ') }}</td>
+                            <td>{{ trial.enrollmentCount | number }}</td>
+                            <td>{{ trial.location }}</td>
+                            <td class="date-cell">{{ trial.startDate | date:'MM/dd/yyyy' }} - {{ trial.completionDate | date:'MM/dd/yyyy' }}</td>
+                            <td>{{ trial.sponsor }}</td>
+                            <td>
+                                <button class="btn-link" (click)="toggleTrialExpansion(trial.nctId)">
+                                    {{ expandedTrialId() === trial.nctId ? 'Hide Details' : 'Details' }}
+                                    <span class="triangle" [class.rotated]="expandedTrialId() === trial.nctId">▶</span>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr class="detail-row" [class.expanded]="expandedTrialId() === trial.nctId">
+                            <td colspan="8">
+                                <div class="detail-wrapper">
+                                    <div class="detail-content">
+                                        <div class="detail-header">
+                                            <span class="detail-label">Phase:</span> {{ trial.phase }}
+                                        </div>
+                                        <div class="detail-section">
+                                            <span class="detail-label">Description:</span>
+                                            <p>{{ trial.description }}</p>
+                                        </div>
+                                        <div class="detail-section">
+                                            <span class="detail-label">Clinical Sites:</span>
+                                            <ul class="sites-list">
+                                                @for (site of trial.sites; track site) {
+                                                    <li>{{ site }}</li>
+                                                }
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    } @else {
+        <div class="too-many-results">
+            <div class="alert-box">
+                <span class="alert-icon">⚠️</span>
+                <div class="alert-text">
+                    <h3>Too many results to display</h3>
+                    <p>There are {{ filteredTrials().length | number }} trials matching your filters. Please apply more specific keywords or a narrower date range to reduce the results below {{ DISPLAY_THRESHOLD | number }} to select individual trials.</p>
+                </div>
+            </div>
+        </div>
+    }
 
     <!-- Bottom Bar -->
     <div class="actions">
         <button type="button" class="btn" (click)="onPrevious()">Previous</button>
-        <button type="button" class="btn btn-primary" (click)="onNext()">Process</button>
+        <button type="button" class="btn btn-primary" (click)="onNext()" [disabled]="selectedTrialIds().length === 0">Process</button>
     </div>
 </div>

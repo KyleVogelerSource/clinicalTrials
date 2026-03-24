@@ -1,5 +1,8 @@
-import { Injectable, signal } from "@angular/core";
+import { Injectable, signal, inject } from "@angular/core";
 import { TrialResultsRequest } from "../../../shared/src/dto/TrialResultsRequest";
+import { ClinicalStudyService } from "./clinical-study.service";
+import { ResultsApiService } from "./results-api.service";
+import { TrialResultsResponse } from "../../../shared/src/dto/TrialResultsResponse";
 
 /**
  * Contains local state for user's input
@@ -9,15 +12,29 @@ import { TrialResultsRequest } from "../../../shared/src/dto/TrialResultsRequest
     providedIn: 'root'
 })
 export class TrialWorkflowService {
+    private clinicalStudyService = inject(ClinicalStudyService);
+    private apiService = inject(ResultsApiService);
+
+    // Designer state
     inputParams = signal<any | null>(null);
-    foundTrials = signal<any | null>(null);
-    selectedTrials = signal<any>([]);
-    results = signal<any | null>(null);
+
+    // Selection state
+    foundTrials = signal<any[]>([]);
+    filterWords = signal<string[]>([]);
+    fromDate = signal<string>("");
+    toDate = signal<string>("");
+
+    // Results state
+    selectedTrialIds = signal<string[]>([]);
+    results = signal<TrialResultsResponse | null>(null);
 
     reset() {
         this.inputParams.set(null);
-        this.foundTrials.set(null);
-        this.selectedTrials.set([]);
+        this.foundTrials.set([]);
+        this.filterWords.set([]);
+        this.fromDate.set("");
+        this.toDate.set("");
+        this.selectedTrialIds.set([]);
         this.results.set(null);
     }
 
@@ -25,20 +42,45 @@ export class TrialWorkflowService {
         this.inputParams.set(obj);
     }
 
+    searchTrials() {
+        // Logic for fetching trials based on inputParams goes here
+        // For now, we utilize the mock data from the service
+        const trials = this.clinicalStudyService.getMockTrials();
+        this.foundTrials.set(trials);
+        // Clear previous selections on new search
+        this.selectedTrialIds.set([]);
+    }
+
+    processResults() {
+        const request = this.getForResults();
+        if (!request) return;
+
+        // In a real app, this would be an observable we subscribe to
+        // For now, we just call the mock API
+        this.apiService.getResults(request).subscribe(response => {
+            this.results.set(response);
+        });
+    }
+
     getForResults() : TrialResultsRequest | undefined {
-        const v = this.inputParams();
+        const input = this.inputParams();
+        if (!input) 
+            return undefined;
+        
         const request: TrialResultsRequest = {
-            condition: v.condition ?? null,
-            phase: v.phase ?? null,
-            allocationType: v.allocationType ?? null,
-            interventionModel: v.interventionModel ?? null,
-            blindingType: v.blindingType ?? null,
-            minAge: v.minAge ?? null,
-            maxAge: v.maxAge ?? null,
-            sex: v.sex ?? null,
-            requiredConditions: v.required ?? [],
-            ineligibleConditions: v.ineligible ?? [],
+            condition: input.condition ?? null,
+            phase: input.phase ?? null,
+            allocationType: input.allocationType ?? null,
+            interventionModel: input.interventionModel ?? null,
+            blindingType: input.blindingType ?? null,
+            minAge: input.minAge ?? null,
+            maxAge: input.maxAge ?? null,
+            sex: input.sex ?? null,
+            requiredConditions: input.required ?? [],
+            ineligibleConditions: input.ineligible ?? [],
+            selectedTrialIds: this.selectedTrialIds(),
         };
+
         return request;
     }
 }

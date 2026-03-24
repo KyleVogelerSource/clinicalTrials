@@ -1,22 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal, effect } from '@angular/core';
 import { ProgressTrack } from '../../primitives/progress-track/progress-track';
 import { KeywordSelector } from '../../primitives/keyword-selector/keyword-selector';
 import { Router } from '@angular/router';
 import { CommonModule, DecimalPipe, DatePipe } from '@angular/common';
-
-interface MockTrial {
-    nctId: string;
-    briefTitle: string;
-    conditions: string[];
-    enrollmentCount: number;
-    location: string;
-    startDate: string;
-    completionDate: string;
-    sponsor: string;
-    sites: string[];
-    phase: string;
-    description: string;
-}
+import { TrialWorkflowService } from '../../services/trial-workflow-service';
+import { ClinicalStudyService, StudyTrial } from '../../services/clinical-study.service';
 
 @Component({
     selector: 'app-selection',
@@ -28,216 +16,59 @@ interface MockTrial {
 })
 export class Selection {
     router = inject(Router);
+    workflowService = inject(TrialWorkflowService);
 
-    filterWords = signal<string[]>([]);
-    fromDate = signal<string>('');
-    toDate = signal<string>('');
+    // Proxy signals from the service
+    foundTrials = this.workflowService.foundTrials;
+    filterWords = this.workflowService.filterWords;
+    fromDate = this.workflowService.fromDate;
+    toDate = this.workflowService.toDate;
+
     expandedTrialId = signal<string | null>(null);
+    selectedTrialIds = this.workflowService.selectedTrialIds;
 
-    trials = signal<MockTrial[]>([
-        {
-            nctId: 'NCT00000001',
-            briefTitle: 'A Study of New Treatment for Diabetes',
-            conditions: ['Type 2 Diabetes'],
-            enrollmentCount: 150,
-            location: 'Boston, USA',
-            startDate: '2023-01-01',
-            completionDate: '2025-12-31',
-            sponsor: 'PharmaCorp',
-            phase: 'Phase 3',
-            description: 'This study evaluates the safety and efficacy of a new oral medication for adults with Type 2 Diabetes who are not well-controlled on metformin.',
-            sites: ['Massachusetts General Hospital', 'Beth Israel Deaconess Medical Center', 'Tufts Medical Center']
-        },
-        {
-            nctId: 'NCT00000002',
-            briefTitle: 'Evaluation of Diet on Heart Health',
-            conditions: ['Heart Disease', 'Hypertension'],
-            enrollmentCount: 500,
-            location: 'New York, USA',
-            startDate: '2022-06-15',
-            completionDate: '2024-06-15',
-            sponsor: 'HealthInst',
-            phase: 'N/A',
-            description: 'A longitudinal study observing the effects of a Mediterranean-style diet on blood pressure and cardiac event rates in high-risk populations.',
-            sites: ['Mount Sinai Hospital', 'NewYork-Presbyterian Hospital', 'NYU Langone Health']
-        },
-        {
-            nctId: 'NCT00000003',
-            briefTitle: 'Safety and Efficacy of Drug X in Asthma',
-            conditions: ['Asthma'],
-            enrollmentCount: 250,
-            location: 'San Francisco, USA',
-            startDate: '2021-03-10',
-            completionDate: '2023-03-10',
-            sponsor: 'BioTech Solutions',
-            phase: 'Phase 2',
-            description: 'Randomized, double-blind study to determine the optimal dose of Drug X for preventing severe asthma exacerbations.',
-            sites: ['UCSF Medical Center', 'California Pacific Medical Center', 'Stanford Health Care']
-        },
-        {
-            nctId: 'NCT00000004',
-            briefTitle: 'Phase III Trial of New Alzheimer Treatment',
-            conditions: ['Alzheimer Disease'],
-            enrollmentCount: 1200,
-            location: 'London, UK',
-            startDate: '2024-01-01',
-            completionDate: '2028-12-31',
-            sponsor: 'GlobalPharma',
-            phase: 'Phase 3',
-            description: 'Multi-center trial evaluating a monoclonal antibody targeting amyloid plaques in patients with early-stage Alzheimer disease.',
-            sites: ['Guy\'s and St Thomas\' NHS Foundation Trust', 'University College London Hospitals', 'King\'s College Hospital']
-        },
-        {
-            nctId: 'NCT00000005',
-            briefTitle: 'Insulin Resistance Reduction in Obese Adolescents',
-            conditions: ['Type 2 Diabetes', 'Obesity'],
-            enrollmentCount: 320,
-            location: 'Chicago, USA',
-            startDate: '2020-09-01',
-            completionDate: '2022-09-01',
-            sponsor: 'PedsResearch',
-            phase: 'Phase 2',
-            description: 'A randomized controlled trial examining lifestyle interventions to reduce insulin resistance in obese adolescents aged 12-18.',
-            sites: ['Lurie Children\'s Hospital', 'Rush University Medical Center']
-        },
-        {
-            nctId: 'NCT00000006',
-            briefTitle: 'Metformin vs Placebo in Pre-Diabetes',
-            conditions: ['Pre-Diabetes'],
-            enrollmentCount: 400,
-            location: 'Houston, USA',
-            startDate: '2019-04-15',
-            completionDate: '2021-04-15',
-            sponsor: 'DiabetesCare Inc',
-            phase: 'Phase 3',
-            description: 'Double-blind placebo-controlled trial evaluating metformin in adults with pre-diabetes to delay or prevent onset of Type 2 Diabetes.',
-            sites: ['Houston Methodist Hospital', 'UTHealth McGovern Medical School']
-        },
-        {
-            nctId: 'NCT00000007',
-            briefTitle: 'Cardiac Rehabilitation After Heart Failure',
-            conditions: ['Heart Failure', 'Heart Disease'],
-            enrollmentCount: 180,
-            location: 'Cleveland, USA',
-            startDate: '2023-07-01',
-            completionDate: '2026-01-01',
-            sponsor: 'CardioInst',
-            phase: 'Phase 2',
-            description: 'Structured exercise program for patients recovering from acute heart failure events, measuring 6-month readmission rates.',
-            sites: ['Cleveland Clinic', 'University Hospitals Cleveland Medical Center']
-        },
-        {
-            nctId: 'NCT00000008',
-            briefTitle: 'Novel Bronchodilator in Chronic Asthma',
-            conditions: ['Asthma', 'COPD'],
-            enrollmentCount: 600,
-            location: 'Toronto, Canada',
-            startDate: '2022-02-01',
-            completionDate: '2025-02-01',
-            sponsor: 'RespiPharma',
-            phase: 'Phase 3',
-            description: 'Multi-center trial of a long-acting bronchodilator in patients with moderate-to-severe persistent asthma inadequately controlled by inhaled corticosteroids.',
-            sites: ['Toronto General Hospital', 'Sunnybrook Health Sciences Centre', 'Mount Sinai Hospital Toronto']
-        },
-        {
-            nctId: 'NCT00000009',
-            briefTitle: 'Early Intervention in Mild Cognitive Impairment',
-            conditions: ['Alzheimer Disease', 'Mild Cognitive Impairment'],
-            enrollmentCount: 750,
-            location: 'Mayo Clinic, USA',
-            startDate: '2021-11-01',
-            completionDate: '2026-11-01',
-            sponsor: 'NeuroGen',
-            phase: 'Phase 2',
-            description: 'A multi-site randomized trial of a neuroprotective agent to slow progression from mild cognitive impairment to Alzheimer disease.',
-            sites: ['Mayo Clinic Rochester', 'Johns Hopkins Hospital', 'UCSF Memory and Aging Center']
-        },
-        {
-            nctId: 'NCT00000010',
-            briefTitle: 'Hypertension Control via Telemedicine',
-            conditions: ['Hypertension'],
-            enrollmentCount: 900,
-            location: 'Remote, USA',
-            startDate: '2023-03-15',
-            completionDate: '2025-03-15',
-            sponsor: 'TeleHealth Corp',
-            phase: 'N/A',
-            description: 'A pragmatic trial of a telemedicine-based hypertension management program versus usual care, measuring systolic BP reduction at 12 months.',
-            sites: ['Kaiser Permanente Northern California', 'Geisinger Health System']
-        },
-        {
-            nctId: 'NCT00000011',
-            briefTitle: 'GLP-1 Receptor Agonist in Type 2 Diabetes',
-            conditions: ['Type 2 Diabetes'],
-            enrollmentCount: 480,
-            location: 'Philadelphia, USA',
-            startDate: '2024-05-01',
-            completionDate: '2027-05-01',
-            sponsor: 'EndoPharm',
-            phase: 'Phase 3',
-            description: 'A head-to-head comparison of two GLP-1 receptor agonists in patients with Type 2 Diabetes and cardiovascular risk factors.',
-            sites: ['Penn Medicine', 'Temple University Hospital']
-        },
-        {
-            nctId: 'NCT00000012',
-            briefTitle: 'Pulmonary Rehabilitation in Post-COVID Asthma',
-            conditions: ['Asthma', 'Post-COVID Syndrome'],
-            enrollmentCount: 210,
-            location: 'Seattle, USA',
-            startDate: '2022-10-01',
-            completionDate: '2024-10-01',
-            sponsor: 'LungHealth Foundation',
-            phase: 'Phase 2',
-            description: 'Assessment of a structured pulmonary rehabilitation program in patients who developed asthma following COVID-19 infection.',
-            sites: ['UW Medical Center', 'Swedish Medical Center Seattle']
-        },
-        {
-            nctId: 'NCT00000013',
-            briefTitle: 'Blood Pressure Reduction with Low-Sodium Diet',
-            conditions: ['Hypertension', 'Cardiovascular Disease'],
-            enrollmentCount: 340,
-            location: 'Atlanta, USA',
-            startDate: '2020-01-15',
-            completionDate: '2022-01-15',
-            sponsor: 'NutritionFirst',
-            phase: 'N/A',
-            description: 'A dietary intervention trial examining the effect of a standardized low-sodium meal plan on blood pressure in hypertensive adults.',
-            sites: ['Emory University Hospital', 'Grady Memorial Hospital']
-        },
-        {
-            nctId: 'NCT00000014',
-            briefTitle: 'Immunotherapy for Early-Stage Alzheimer Disease',
-            conditions: ['Alzheimer Disease'],
-            enrollmentCount: 520,
-            location: 'San Diego, USA',
-            startDate: '2025-01-01',
-            completionDate: '2029-12-31',
-            sponsor: 'NeuralPath Therapeutics',
-            phase: 'Phase 2',
-            description: 'A phase 2 trial of a novel tau-targeting immunotherapy in patients with early-stage Alzheimer disease confirmed by PET imaging.',
-            sites: ['UC San Diego Health', 'Scripps Health', 'Sharp HealthCare']
-        },
-        {
-            nctId: 'NCT00000015',
-            briefTitle: 'Diabetes Prevention in High-Risk Communities',
-            conditions: ['Type 2 Diabetes', 'Obesity'],
-            enrollmentCount: 670,
-            location: 'Los Angeles, USA',
-            startDate: '2021-06-01',
-            completionDate: '2024-06-01',
-            sponsor: 'CommunityHealth Alliance',
-            phase: 'N/A',
-            description: 'A community-based randomized trial of culturally tailored lifestyle interventions in high-risk Hispanic adults to prevent Type 2 Diabetes.',
-            sites: ['Cedars-Sinai Medical Center', 'LAC+USC Medical Center', 'Kaiser Permanente Los Angeles']
-        },
-    ]);
+    DISPLAY_THRESHOLD = 1000;
 
-    filteredTrials = computed<MockTrial[]>(() => {
-        const keywords = this.filterWords();
-        const from = this.fromDate();
-        const to = this.toDate();
+    smartSuggestions = computed(() => {
+        const trials = this.filteredTrials();
+        const currentKeywords = this.workflowService.filterWords().map(kw => kw.toLowerCase());
 
-        return this.trials().filter(trial => {
+        
+        if (trials.length === 0) return [];
+
+        const wordCounts = new Map<string, number>();
+        const stopWords = new Set(['a', 'an', 'the', 'of', 'in', 'on', 'at', 'to', 'for', 'with', 'and', 'or', 'is', 'are', 'was', 'were', 'study', 'trial', 'evaluation', 'new', 'treatment', 'novel']);
+
+        trials.forEach(trial => {
+            // Extract from title and conditions
+            const text = (trial.briefTitle + ' ' + trial.conditions.join(' ')).toLowerCase();
+            const words = text.match(/\b\w{3,}\b/g) || [];
+            
+            // Unique words per trial to count frequency across trials
+            const uniqueWords = new Set(words);
+            uniqueWords.forEach(word => {
+                if (!stopWords.has(word) && !currentKeywords.includes(word)) {
+                    wordCounts.set(word, (wordCounts.get(word) || 0) + 1);
+                }
+            });
+        });
+
+        // Filter and sort: must appear in > 1 trial (unless only few trials total), and not lead to 0 results
+        // For simplicity, we just take top 5 most frequent that meet a minimum count.
+        return Array.from(wordCounts.entries())
+            .filter(([_, count]) => count > 1) // Only suggest if it helps group at least 2 trials
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5)
+            .map(([word]) => word);
+    });
+
+    filteredTrials = computed<StudyTrial[]>(() => {
+        const keywords = this.workflowService.filterWords();
+        const from = this.workflowService.fromDate();
+        const to = this.workflowService.toDate();
+        const trials = this.workflowService.foundTrials() as StudyTrial[];
+
+        return trials.filter(trial => {
             // Date range filter
             if (from && trial.startDate < from) return false;
             if (to && trial.startDate > to) return false;
@@ -252,22 +83,77 @@ export class Selection {
         });
     });
 
+    isAllSelected = computed(() => {
+        const filtered = this.filteredTrials();
+        const selected = this.selectedTrialIds();
+        if (filtered.length === 0) return false;
+        return filtered.every(trial => selected.includes(trial.nctId));
+    });
+
+    constructor() {
+        // Automatically select all if filtered count is below threshold
+        effect(() => {
+            const filtered = this.filteredTrials();
+            const currentSelected = this.selectedTrialIds();
+
+            if (filtered.length < this.DISPLAY_THRESHOLD) {
+                const filteredIds = filtered.map(t => t.nctId);
+                // If selection is empty, auto-select all
+                if (currentSelected.length === 0 && filteredIds.length > 0) {
+                     this.selectedTrialIds.set(filteredIds);
+                }
+            } else {
+                // If over threshold, clear selection as table is hidden and filtering is required
+                if (currentSelected.length > 0) {
+                    this.selectedTrialIds.set([]);
+                }
+            }
+        });
+    }
+
+    isTrialSelected(id: string): boolean {
+        return this.selectedTrialIds().includes(id);
+    }
+
+    toggleTrialSelection(id: string) {
+        this.selectedTrialIds.update(ids => {
+            if (ids.includes(id)) {
+                return ids.filter(i => i !== id);
+            } else {
+                return [...ids, id];
+            }
+        });
+    }
+
+    toggleAllSelection() {
+        if (this.isAllSelected()) {
+            const filteredIds = this.filteredTrials().map(t => t.nctId);
+            this.selectedTrialIds.update(ids => ids.filter(id => !filteredIds.includes(id)));
+        } else {
+            const filteredIds = this.filteredTrials().map(t => t.nctId);
+            this.selectedTrialIds.update(ids => {
+                const newIds = new Set([...ids, ...filteredIds]);
+                return Array.from(newIds);
+            });
+        }
+    }
+
     onAddKeyword(keyword: string) {
-        this.filterWords.update(keywords => [...keywords, keyword]);
+        this.workflowService.filterWords.update(keywords => [...keywords, keyword]);
     }
 
     onRemoveKeyword(keyword: string) {
-        this.filterWords.update(keywords => keywords.filter(k => k !== keyword));
+        this.workflowService.filterWords.update(keywords => keywords.filter(k => k !== keyword));
     }
 
     onFromDateChange(event: Event) {
         const input = event.target as HTMLInputElement;
-        this.fromDate.set(input.value);
+        this.workflowService.fromDate.set(input.value);
     }
 
     onToDateChange(event: Event) {
         const input = event.target as HTMLInputElement;
-        this.toDate.set(input.value);
+        this.workflowService.toDate.set(input.value);
     }
 
     toggleTrialExpansion(trialId: string) {
@@ -279,6 +165,7 @@ export class Selection {
     }
 
     onNext() {
+        this.workflowService.processResults();
         this.router.navigate(['/results']);
     }
 }
