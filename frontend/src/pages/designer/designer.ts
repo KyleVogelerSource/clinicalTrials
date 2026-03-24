@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from "@angular/core";
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { ProgressTrack } from "../../primitives/progress-track/progress-track";
 import { KeywordSelector } from "../../primitives/keyword-selector/keyword-selector";
 import { AutoCompleteInput } from "../../primitives/auto-complete-input/auto-complete-input";
 import { ClinicalStudyService } from "../../services/clinical-study.service";
-import { TrialResultsRequest } from "../../../../shared/src/dto/TrialResultsRequest";
 import { TrialWorkflowService } from "../../services/trial-workflow-service";
 
 @Component({
@@ -15,7 +14,7 @@ import { TrialWorkflowService } from "../../services/trial-workflow-service";
     imports: [ ReactiveFormsModule, ProgressTrack, KeywordSelector, AutoCompleteInput ],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class Designer {
+export class Designer implements OnInit {
     clinicalStudiesService = inject(ClinicalStudyService);
     workflowService = inject(TrialWorkflowService);
     router = inject(Router);
@@ -43,6 +42,15 @@ export class Designer {
         required: new FormControl<string[]>([]),
         ineligible: new FormControl<string[]>([]),
     });
+
+    ngOnInit() {
+        const savedParams = this.workflowService.inputParams();
+        if (savedParams) {
+            this.inputForm.patchValue(savedParams);
+            this.requiredConditions.set(savedParams.required || []);
+            this.ineligibleConditions.set(savedParams.ineligible || []);
+        }
+    }
 
     onConditionSearch(query: string) {
         if (query && query.trim().length > 0) {
