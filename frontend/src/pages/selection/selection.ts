@@ -29,6 +29,39 @@ export class Selection {
 
     DISPLAY_THRESHOLD = 1000;
 
+    smartSuggestions = computed(() => {
+        const trials = this.filteredTrials();
+        const currentKeywords = this.workflowService.filterWords().map(kw => kw.toLowerCase());
+
+        
+        if (trials.length === 0) return [];
+
+        const wordCounts = new Map<string, number>();
+        const stopWords = new Set(['a', 'an', 'the', 'of', 'in', 'on', 'at', 'to', 'for', 'with', 'and', 'or', 'is', 'are', 'was', 'were', 'study', 'trial', 'evaluation', 'new', 'treatment', 'novel']);
+
+        trials.forEach(trial => {
+            // Extract from title and conditions
+            const text = (trial.briefTitle + ' ' + trial.conditions.join(' ')).toLowerCase();
+            const words = text.match(/\b\w{3,}\b/g) || [];
+            
+            // Unique words per trial to count frequency across trials
+            const uniqueWords = new Set(words);
+            uniqueWords.forEach(word => {
+                if (!stopWords.has(word) && !currentKeywords.includes(word)) {
+                    wordCounts.set(word, (wordCounts.get(word) || 0) + 1);
+                }
+            });
+        });
+
+        // Filter and sort: must appear in > 1 trial (unless only few trials total), and not lead to 0 results
+        // For simplicity, we just take top 5 most frequent that meet a minimum count.
+        return Array.from(wordCounts.entries())
+            .filter(([_, count]) => count > 1) // Only suggest if it helps group at least 2 trials
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5)
+            .map(([word]) => word);
+    });
+
     filteredTrials = computed<StudyTrial[]>(() => {
         const keywords = this.workflowService.filterWords();
         const from = this.workflowService.fromDate();

@@ -12,6 +12,15 @@
                     (addKeyword)="onAddKeyword($event)"
                     (removeKeyword)="onRemoveKeyword($event)"
                 />
+                
+                @if (smartSuggestions().length > 0) {
+                    <div class="smart-suggestions">
+                        <span class="suggestion-label">Suggested:</span>
+                        @for (kw of smartSuggestions(); track kw) {
+                            <button class="suggestion-tag" (click)="onAddKeyword(kw)">+ {{ kw }}</button>
+                        }
+                    </div>
+                }
             </div>
 
             <div class="form-group">
