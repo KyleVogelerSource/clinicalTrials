@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { Designer, PhaseEnum, SexEnum, AllocationEnum } from './designer';
+import { Designer } from './designer';
 import { ClinicalStudyService } from '../../services/clinical-study.service';
 import { vi } from 'vitest';
 
@@ -14,7 +14,16 @@ describe('Designer', () => {
     beforeEach(async () => {
         mockClinicalStudyService = {
             getMatchingConditions: vi.fn().mockReturnValue(['test_test', 'test_one']),
-            getSuggestedKeywords: vi.fn().mockReturnValue([])
+            getSuggestedKeywords: vi.fn().mockReturnValue([]),
+            getPhases: vi.fn().mockReturnValue(['Phase 1', 'Phase 2', 'Phase 3']),
+            getAllocations: vi.fn().mockReturnValue(['N/A', 'Randomized', 'Non-Randomized']),
+            getInterventionModels: vi.fn().mockReturnValue(['Single Group Assignment', 'Parallel Assignment']),
+            getMaskingTypes: vi.fn().mockReturnValue(['None (Open Label)', 'Single', 'Double', 'Triple', 'Quadruple']),
+            getSexes: vi.fn().mockReturnValue(['All', 'Female', 'Male']),
+            getDefaultPhase: vi.fn().mockReturnValue('Phase 1'),
+            getDefaultAllocation: vi.fn().mockReturnValue('N/A'),
+            getDefaultMaskingType: vi.fn().mockReturnValue('None (Open Label)'),
+            getDefaultSex: vi.fn().mockReturnValue('All')
         };
 
         await TestBed.configureTestingModule({
@@ -34,13 +43,12 @@ describe('Designer', () => {
     });
 
     it('should initialize with default values', () => {
-        expect(component.inputForm.get('sex')?.value).toBe(SexEnum.Any);
-        expect(component.inputForm.get('allocationType')?.value).toBe(AllocationEnum.NA);
+        expect(component.inputForm.get('sex')?.value).toBe('All');
+        expect(component.inputForm.get('allocationType')?.value).toBe('N/A');
     });
 
-    it('should search matching conditions when input value changes', async () => {
-        component.inputForm.controls.condition.setValue('test');
-        await sleep(350); // debounceTime is 300
+    it('should search matching conditions when query changes', async () => {
+        component.onConditionSearch('test');
         expect(mockClinicalStudyService.getMatchingConditions).toHaveBeenCalledWith('test');
         expect(component.conditionMatches()).toEqual(['test_test', 'test_one']);
     });
@@ -79,6 +87,7 @@ describe('Designer', () => {
     });
 
     it('should enable next button when form is valid', () => {
+        component.inputForm.controls.condition.setValue('Diabetes');
         component.inputForm.controls.minAge.setValue(18);
         component.inputForm.controls.maxAge.setValue(65);
         fixture.detectChanges();

@@ -20,6 +20,7 @@ export class Designer implements OnInit {
     router = inject(Router);
 
     conditionMatches = signal<string[]>([]);
+    conditionValue = signal<string>('');
     requiredConditions = signal<string[]>([]);
     ineligibleConditions = signal<string[]>([]);
 
@@ -47,6 +48,7 @@ export class Designer implements OnInit {
         const savedParams = this.workflowService.inputParams();
         if (savedParams) {
             this.inputForm.patchValue(savedParams);
+            this.conditionValue.set(savedParams.condition || '');
             this.requiredConditions.set(savedParams.required || []);
             this.ineligibleConditions.set(savedParams.ineligible || []);
         }
@@ -63,6 +65,7 @@ export class Designer implements OnInit {
 
     onConditionSelected(condition: string) {
         this.inputForm.controls.condition.setValue(condition);
+        this.conditionValue.set(condition);
         this.conditionMatches.set([]);
     }
 

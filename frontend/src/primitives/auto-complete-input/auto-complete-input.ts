@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, ElementRef, inject, linkedSignal, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, ElementRef, inject, linkedSignal, signal, effect } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 
@@ -18,6 +18,7 @@ export class AutoCompleteInput {
     placeholderText = input<string>('');
     suggestions = input.required<string[]>();
     clearOnSelect = input<boolean>(true);
+    value = input<string>('');
 
     searchQueryChange = output<string>();
     itemSelected = output<string>();
@@ -25,6 +26,14 @@ export class AutoCompleteInput {
     elementRef = inject(ElementRef);
     queryControl = new FormControl('');
     isOpen = signal(false);
+
+    // Sync input value to control
+    private valueSync = effect(() => {
+        const val = this.value();
+        if (val !== this.queryControl.value) {
+            this.queryControl.setValue(val, { emitEvent: false });
+        }
+    });
 
     highlightedIndex = linkedSignal({
         source: this.suggestions,
