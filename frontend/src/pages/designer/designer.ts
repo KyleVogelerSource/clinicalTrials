@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from "@angular/core";
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { ProgressTrack } from "../../primitives/progress-track/progress-track";
 import { KeywordSelector } from "../../primitives/keyword-selector/keyword-selector";
 import { AutoCompleteInput } from "../../primitives/auto-complete-input/auto-complete-input";
 import { ClinicalStudyService } from "../../services/clinical-study.service";
-import { TrialResultsRequest } from "../../../../shared/src/dto/TrialResultsRequest";
 import { TrialWorkflowService } from "../../services/trial-workflow-service";
 
 @Component({
@@ -15,12 +14,13 @@ import { TrialWorkflowService } from "../../services/trial-workflow-service";
     imports: [ ReactiveFormsModule, ProgressTrack, KeywordSelector, AutoCompleteInput ],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class Designer {
+export class Designer implements OnInit {
     clinicalStudiesService = inject(ClinicalStudyService);
     workflowService = inject(TrialWorkflowService);
     router = inject(Router);
 
     conditionMatches = signal<string[]>([]);
+    conditionValue = signal<string>('');
     requiredConditions = signal<string[]>([]);
     ineligibleConditions = signal<string[]>([]);
 
@@ -44,6 +44,16 @@ export class Designer {
         ineligible: new FormControl<string[]>([]),
     });
 
+    ngOnInit() {
+        const savedParams = this.workflowService.inputParams();
+        if (savedParams) {
+            this.inputForm.patchValue(savedParams);
+            this.conditionValue.set(savedParams.condition || '');
+            this.requiredConditions.set(savedParams.required || []);
+            this.ineligibleConditions.set(savedParams.ineligible || []);
+        }
+    }
+
     onConditionSearch(query: string) {
         if (query && query.trim().length > 0) {
             const matches = this.clinicalStudiesService.getMatchingConditions(query.trim());
@@ -55,6 +65,7 @@ export class Designer {
 
     onConditionSelected(condition: string) {
         this.inputForm.controls.condition.setValue(condition);
+        this.conditionValue.set(condition);
         this.conditionMatches.set([]);
     }
 
@@ -97,6 +108,7 @@ export class Designer {
     onNext() {
         const v = this.inputForm.value;
         this.workflowService.setInputs(v);
+        this.workflowService.searchTrials();
         this.router.navigate(['/selection']);
     }
 }
