@@ -9,4 +9,5 @@ export interface TrialResultsRequest {
     sex: string | null;
     requiredConditions: string[];
     ineligibleConditions: string[];
+    selectedTrialIds: string[];
 }

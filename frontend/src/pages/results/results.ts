@@ -29,7 +29,7 @@ export class Results implements OnInit {
     private workflowService = inject(TrialWorkflowService);
 
     loadState = signal<LoadState>('loading');
-    data = signal<TrialResultsResponse | null>(null);
+    data = this.workflowService.results;
     errorMessage = signal<string>('');
 
     terminationChartData = computed<BarChartData | null>(() => {
@@ -86,23 +86,30 @@ export class Results implements OnInit {
     });
 
     ngOnInit(): void {
-        const request = this.workflowService.getForResults();
-
-        if (!request) {
+        if (!this.workflowService.inputParams()) {
             this.router.navigate(['/designer']);
             return;
         }
 
-        this.apiService.getResults(request).subscribe({
-            next: (response) => {
-                this.data.set(response);
-                this.loadState.set('loaded');
-            },
-            error: () => {
-                this.errorMessage.set('Failed to load results. Please try again.');
-                this.loadState.set('error');
-            },
-        });
+        if (this.data()) {
+            this.loadState.set('loaded');
+        } else {
+            const request = this.workflowService.getForResults();
+            if (request) {
+                this.workflowService.processResults();
+                this.loadState.set('loading');
+                // The signal 'data' is tied to workflowService.results, 
+                // so we can use an effect or just check if it updates.
+                // For simplicity in this mock-driven flow:
+                setTimeout(() => {
+                    if (this.data()) this.loadState.set('loaded');
+                    else {
+                        this.errorMessage.set('Failed to load results. Please try again.');
+                        this.loadState.set('error');
+                    }
+                }, 500);
+            }
+        }
     }
 
     onBack(): void {

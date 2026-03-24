@@ -105,6 +105,7 @@ export class Designer implements OnInit {
     onNext() {
         const v = this.inputForm.value;
         this.workflowService.setInputs(v);
+        this.workflowService.searchTrials();
         this.router.navigate(['/selection']);
     }
 }
