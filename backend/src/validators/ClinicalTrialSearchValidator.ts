@@ -10,7 +10,6 @@ export interface ValidationResult {
   errors: ValidationError[];
 }
 
-// Fields that count as "at least one search term provided"
 const QUERY_FIELDS: (keyof ClinicalTrialSearchRequest)[] = [
   "term",
   "condition",
@@ -28,7 +27,6 @@ export function validateSearchRequest(
 ): ValidationResult {
   const errors: ValidationError[] = [];
 
-  // ── Require at least one query term ────────────────────────────────────────
   const hasQuery = QUERY_FIELDS.some(
     (f) => req[f] !== undefined && String(req[f]).trim() !== ""
   );
@@ -40,7 +38,6 @@ export function validateSearchRequest(
     });
   }
 
-  // ── Pagination constraints ──────────────────────────────────────────────────
   if (req.pageSize !== undefined) {
     if (!Number.isInteger(req.pageSize) || req.pageSize < 1) {
       errors.push({ field: "pageSize", message: "pageSize must be a positive integer." });
@@ -52,7 +49,6 @@ export function validateSearchRequest(
     }
   }
 
-  // ── Age constraints ─────────────────────────────────────────────────────────
   if (req.minAge !== undefined) {
     if (!Number.isInteger(req.minAge) || req.minAge < 0) {
       errors.push({ field: "minAge", message: "minAge must be a non-negative integer." });
@@ -71,7 +67,6 @@ export function validateSearchRequest(
     errors.push({ field: "minAge / maxAge", message: "minAge cannot be greater than maxAge." });
   }
 
-  // ── Enrollment constraints ──────────────────────────────────────────────────
   if (req.minEnrollment !== undefined) {
     if (!Number.isInteger(req.minEnrollment) || req.minEnrollment < 0) {
       errors.push({
@@ -99,7 +94,6 @@ export function validateSearchRequest(
     });
   }
 
-  // ── Date format validation ──────────────────────────────────────────────────
   const dateFields: (keyof ClinicalTrialSearchRequest)[] = [
     "startDateFrom",
     "startDateTo",
@@ -116,7 +110,21 @@ export function validateSearchRequest(
     }
   }
 
-  // ── Date range ordering ─────────────────────────────────────────────────────
+  if (req.requiredConditions !== undefined) {
+    if (!Array.isArray(req.requiredConditions)) {
+      errors.push({ field: "requiredConditions", message: "requiredConditions must be an array of strings." });
+    } else if (req.requiredConditions.some((c) => typeof c !== "string" || c.trim() === "")) {
+      errors.push({ field: "requiredConditions", message: "Each entry in requiredConditions must be a non-empty string." });
+    }
+  }
+  if (req.ineligibleConditions !== undefined) {
+    if (!Array.isArray(req.ineligibleConditions)) {
+      errors.push({ field: "ineligibleConditions", message: "ineligibleConditions must be an array of strings." });
+    } else if (req.ineligibleConditions.some((c) => typeof c !== "string" || c.trim() === "")) {
+      errors.push({ field: "ineligibleConditions", message: "Each entry in ineligibleConditions must be a non-empty string." });
+    }
+  }
+
   if (req.startDateFrom && req.startDateTo && req.startDateFrom > req.startDateTo) {
     errors.push({
       field: "startDateFrom / startDateTo",

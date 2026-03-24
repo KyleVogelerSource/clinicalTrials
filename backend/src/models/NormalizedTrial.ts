@@ -40,7 +40,9 @@ export type FilterReason =
     | "phase_mismatch"
     | "study_type_mismatch"
     | "sex_incompatible"
-    | "no_condition_overlap";
+    | "no_condition_overlap"
+    | "required_condition_not_met"
+    | "ineligible_condition_present";
 
 export type ExclusionReason = "capped";
 
@@ -60,13 +62,6 @@ export interface ExcludedRecord {
     startDate: string | null;
 }
 
-export interface CandidatePool {
-    trials: NormalizedTrial[];
-    metadata: CandidatePoolMetadata;
-    filtered: FilteredRecord[];
-    excluded: ExcludedRecord[];
-}
-
 export interface CandidatePoolMetadata {
     totalFetchedFromApi: number;
     totalPagesfetched: number;
@@ -74,4 +69,14 @@ export interface CandidatePoolMetadata {
     totalExcluded: number;
     totalInPool: number;
     cappedAt: number;
+}
+
+export interface CandidatePool {
+    trials: NormalizedTrial[];
+    metadata: CandidatePoolMetadata;
+}
+
+export interface CandidatePoolInternal extends CandidatePool {
+    filtered: FilteredRecord[];
+    excluded: ExcludedRecord[];
 }
