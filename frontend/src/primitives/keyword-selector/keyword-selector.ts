@@ -24,7 +24,7 @@ export class KeywordSelector {
 
     onSearchQueryChange(query: string) {
         if (query && query.trim().length > 0) {
-            let keywords = this.clinicalStudyService.getSuggestedKeywords(query);
+            const keywords = this.clinicalStudyService.getSuggestedKeywords(query);
             this.suggestions.set(keywords);
         } else {
             this.suggestions.set([]);

@@ -153,11 +153,22 @@ export class ClinicalTrialsApiClient {
     return clauses.join(" AND ");
   }
 
-  private mapResponse(raw: any): ClinicalTrialStudiesResponse {
+  private mapResponse(raw: unknown): ClinicalTrialStudiesResponse {
+    if (!raw || typeof raw !== "object") {
+      return { totalCount: 0, studies: [] };
+    }
+
+    const payload = raw as Record<string, unknown>;
+
+    const totalCount = typeof payload.totalCount === "number" ? payload.totalCount : 0;
+    const nextPageToken =
+      typeof payload.nextPageToken === "string" ? payload.nextPageToken : undefined;
+    const studies = Array.isArray(payload.studies) ? payload.studies : [];
+
     return {
-      totalCount: raw.totalCount ?? 0,
-      nextPageToken: raw.nextPageToken,
-      studies: Array.isArray(raw.studies) ? raw.studies : [],
+      totalCount,
+      nextPageToken,
+      studies,
     };
   }
 }

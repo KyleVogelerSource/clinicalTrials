@@ -10,7 +10,6 @@ import { Router } from '@angular/router';
 import { ProgressTrack } from '../../primitives/progress-track/progress-track';
 import { BarChart, BarChartData } from '../../primitives/bar-chart/bar-chart';
 import { ResultsApiService } from '../../services/results-api.service';
-import { TrialResultsResponse } from '../../../../shared/src/dto/TrialResultsResponse';
 import { TrialWorkflowService } from '../../services/trial-workflow-service';
 
 type LoadState = 'loading' | 'loaded' | 'error';

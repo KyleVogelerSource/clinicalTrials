@@ -4,7 +4,8 @@
   "description": "npm install",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint .",
+    "test": "vitest run --passWithNoTests",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc --project tsconfig.json --outDir dist",
     "start": "node dist/src/server.js"
@@ -35,7 +36,12 @@
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^25.3.5",
     "@types/pg": "^8.15.6",
+    "@eslint/js": "^9.36.0",
+    "eslint": "^9.36.0",
+    "globals": "^16.4.0",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.44.1",
+    "vitest": "^4.1.0"
   }
 }
