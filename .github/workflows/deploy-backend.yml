@@ -11,9 +11,46 @@ permissions:
   id-token: write
   contents: read
 
+concurrency:
+  group: deploy-backend-main
+  cancel-in-progress: true
+
 jobs:
-  deploy-backend:
+  validate-backend:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ./backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+        # Adjust if your backend uses a different test command
+
+      - name: Build backend
+        run: npm run build
+
+  deploy-backend:
+    needs: validate-backend
+    runs-on: ubuntu-latest
+    environment: production
 
     steps:
       - name: Checkout
@@ -24,6 +61,14 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Login to ECR
         id: login-ecr
@@ -46,3 +91,35 @@ jobs:
         run: |
           aws apprunner start-deployment \
             --service-arn "${{ secrets.APP_RUNNER_SERVICE_ARN }}"
+
+      - name: Wait for backend readiness
+        env:
+          STATUS_URL: https://ppjtwpmmjp.us-east-1.awsapprunner.com/api/debug/status
+        run: |
+          echo "Checking backend readiness at $STATUS_URL"
+
+          for i in {1..30}; do
+            HTTP_CODE=$(curl -s -o /tmp/status.json -w "%{http_code}" "$STATUS_URL" || true)
+
+            if [ "$HTTP_CODE" = "200" ]; then
+              OK=$(jq -r '.ok // false' /tmp/status.json)
+              DB=$(jq -r '.databaseConnected // false' /tmp/status.json)
+
+              echo "Attempt $i: ok=$OK databaseConnected=$DB"
+
+              if [ "$OK" = "true" ] && [ "$DB" = "true" ]; then
+                echo "Backend and DB are ready"
+                cat /tmp/status.json
+                exit 0
+              fi
+            else
+              echo "Attempt $i: endpoint returned HTTP $HTTP_CODE"
+            fi
+
+            sleep 10
+          done
+
+          echo "Final status payload:"
+          cat /tmp/status.json || true
+          echo "::error title=Backend readiness failed::Backend did not become ready with DB connectivity."
+          exit 1
