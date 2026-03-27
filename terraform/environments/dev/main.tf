@@ -63,6 +63,8 @@ module "apprunner_backend" {
     DB_NAME     = var.db_name
     DB_USER     = var.db_username
     DB_PASSWORD = var.db_password
+    DB_SSL      = "true"
+    DB_SSL_REJECT_UNAUTHORIZED = "false"
     LOG_LEVEL   = "info"
   }
 

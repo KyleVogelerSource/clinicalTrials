@@ -11,9 +11,46 @@ permissions:
   id-token: write
   contents: read
 
+concurrency:
+  group: deploy-frontend-main
+  cancel-in-progress: true
+
 jobs:
-  deploy-frontend:
+  validate-frontend:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ./frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+        # Adjust if your frontend uses a different test runner/command
+
+      - name: Build frontend
+        run: npm run build -- --configuration production
+
+  deploy-frontend:
+    needs: validate-frontend
+    runs-on: ubuntu-latest
+    environment: production
 
     defaults:
       run:
