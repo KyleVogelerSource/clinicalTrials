@@ -1,15 +1,36 @@
 import { Pool } from "pg";
 import bcrypt from "bcryptjs";
 
+function parseBoolean(value: string | undefined, defaultValue: boolean): boolean {
+  if (value == null) {
+    return defaultValue;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  if (["1", "true", "yes", "on"].includes(normalized)) {
+    return true;
+  }
+  if (["0", "false", "no", "off"].includes(normalized)) {
+    return false;
+  }
+
+  return defaultValue;
+}
+
+const dbSslEnabled = parseBoolean(process.env.DB_SSL, false);
+const dbSslRejectUnauthorized = parseBoolean(process.env.DB_SSL_REJECT_UNAUTHORIZED, false);
+
 const pool = new Pool({
   host: process.env.DB_HOST ?? "postgres",
   port: Number(process.env.DB_PORT ?? 5432),
   database: process.env.DB_NAME ?? "clinicaltrials",
   user: process.env.DB_USER ?? "clinicaltrials",
   password: process.env.DB_PASSWORD ?? "clinicaltrials",
-  ssl: {
-    rejectUnauthorized: false
-  },
+  ssl: dbSslEnabled
+    ? {
+      rejectUnauthorized: dbSslRejectUnauthorized,
+    }
+    : false,
 });
 
 let connected = false;
@@ -37,7 +58,8 @@ interface DatabaseConnectionDiagnostics {
     database: string;
     user: string;
     ssl: {
-      rejectUnauthorized: boolean;
+      enabled: boolean;
+      rejectUnauthorized?: boolean;
     };
   };
   lastSuccessfulConnectionAt: string | null;
@@ -50,7 +72,8 @@ const dbConfiguration = {
   database: process.env.DB_NAME ?? "clinicaltrials",
   user: process.env.DB_USER ?? "clinicaltrials",
   ssl: {
-    rejectUnauthorized: false
+    enabled: dbSslEnabled,
+    rejectUnauthorized: dbSslEnabled ? dbSslRejectUnauthorized : undefined,
   },
 };
 
