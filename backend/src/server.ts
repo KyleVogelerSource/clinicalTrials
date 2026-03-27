@@ -5,7 +5,7 @@ import { ClinicalTrialSearchRequest } from "../shared/src/dto/ClinicalTrialSearc
 import { ReferenceTrial } from "../src/models/NormalizedTrial";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
-import { getDbPool, initializeDatabase, isDatabaseConnected, probeDatabaseConnection } from "./storage/PostgresClient";
+import { initializeDatabase, isDatabaseConnected, probeDatabaseConnection } from "./storage/PostgresClient";
 import { registerUser, loginUser } from "./auth/AuthService";
 import { authenticateToken, AuthenticatedRequest, requireAction, userHasAction } from "./auth/authMiddleware";
 import { assignRoleAction, createAdminUser, createRole, getAdminSnapshot } from "./services/AdminService";

@@ -4,8 +4,6 @@ import { Designer } from './designer';
 import { ClinicalStudyService } from '../../services/clinical-study.service';
 import { vi } from 'vitest';
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 describe('Designer', () => {
     let component: Designer;
     let fixture: ComponentFixture<Designer>;
