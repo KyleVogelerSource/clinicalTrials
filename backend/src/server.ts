@@ -2,7 +2,9 @@ import { searchClinicalTrials, createEmptyClinicalTrialStudiesResponse, searchAn
 import { ClinicalTrialsApiClientError, ClinicalTrialsApiTimeoutError } from "./client/ClinicalTrialsApiClient";
 import { validateSearchRequest } from "./validators/ClinicalTrialSearchValidator";
 import { ClinicalTrialSearchRequest } from "../shared/src/dto/ClinicalTrialSearchRequest";
-import { ReferenceTrial } from "../src/models/NormalizedTrial";
+import { NormalizedTrial, ReferenceTrial } from "../src/models/NormalizedTrial";
+import { TrialResultsRequest } from "../../shared/src/dto/TrialResultsRequest";
+import { generateAIResults } from "./services/AIResultsService";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import { initializeDatabase, isDatabaseConnected, probeDatabaseConnection } from "./storage/PostgresClient";
@@ -34,15 +36,15 @@ const allowedOrigins = ["http://localhost:4200", "https://d8rtqu8bq9oyq.cloudfro
 app.use((_req: Request, res: Response, next: NextFunction) => {
   const origin = _req.headers.origin;
   if (origin && allowedOrigins.includes(origin)) {
-      res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Origin", origin);
   }
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    if (_req.method === "OPTIONS") {
-        res.sendStatus(204);
-        return;
-    }
-    next();
+  if (_req.method === "OPTIONS") {
+    res.sendStatus(204);
+    return;
+  }
+  next();
 });
 
 app.get("/api/health", (_req: Request, res: Response) => {
@@ -160,9 +162,25 @@ app.get("/api/clinical-trials/empty-response", (_req: Request, res: Response) =>
   res.status(200).json(createEmptyClinicalTrialStudiesResponse());
 });
 
-// POST /api/clinical-trials/results — placeholder for real implementation
-app.post("/api/clinical-trials/results", (_req: Request, res: Response) => {
-    res.status(501).json({ message: "Not yet implemented" });
+// POST /api/clinical-trials/results — AI-powered analysis of selected trials
+app.post("/api/clinical-trials/results", async (req: Request, res: Response) => {
+  const { trials, ...request } = req.body as TrialResultsRequest & { trials?: NormalizedTrial[] };
+
+  if (!Array.isArray(trials) || trials.length === 0) {
+    res.status(400).json({
+      error: "Bad Request",
+      message: "A non-empty 'trials' array is required.",
+    });
+    return;
+  }
+
+  try {
+    const results = await generateAIResults(request, trials);
+    res.status(200).json(results);
+  } catch (err) {
+    console.error("Unexpected error in POST /api/clinical-trials/results:", err);
+    res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+  }
 });
 
 // POST /api/auth/register
