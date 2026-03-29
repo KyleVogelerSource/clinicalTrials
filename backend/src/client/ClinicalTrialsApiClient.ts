@@ -127,8 +127,8 @@ export class ClinicalTrialsApiClient {
     }
 
     if (request.minAge !== undefined || request.maxAge !== undefined) {
-      const lo = request.minAge ?? "MIN";
-      const hi = request.maxAge ?? "MAX";
+      const lo = request.minAge === undefined ? "MIN" : `${request.minAge}years`;
+      const hi = request.maxAge === undefined ? "MAX" : `${request.maxAge}years`;
       clauses.push(`AREA[MinimumAge]RANGE[${lo},${hi}]`);
     }
 
