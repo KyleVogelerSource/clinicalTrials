@@ -1,6 +1,6 @@
-import { ClinicalTrialSearchRequest } from "../../shared/src/dto/ClinicalTrialSearchRequest";
+import { ClinicalTrialSearchRequest } from "../../../shared/src/dto/ClinicalTrialSearchRequest";
 import { ClinicalTrialsApiClient } from "../client/ClinicalTrialsApiClient";
-import { ClinicalTrialStudiesResponse, ClinicalTrialStudy } from "../models/ClinicalTrialStudiesResponse";
+import { ClinicalTrialStudiesResponse, ClinicalTrialStudy } from "../../../shared/src/dto/ClinicalTrialStudiesResponse";
 import { buildCandidatePool, PoolBuilderConfig } from "./CandidatePoolBuilder";
 import { CandidatePool } from "../models/NormalizedTrial";
 
