@@ -2,7 +2,7 @@ import "dotenv/config";
 import { searchClinicalTrials, createEmptyClinicalTrialStudiesResponse, searchAndBuildCandidatePool } from "./services/ClinicalTrialsService";
 import { ClinicalTrialsApiClientError, ClinicalTrialsApiTimeoutError } from "./client/ClinicalTrialsApiClient";
 import { validateSearchRequest } from "./validators/ClinicalTrialSearchValidator";
-import { ClinicalTrialSearchRequest } from "../shared/src/dto/ClinicalTrialSearchRequest";
+import { ClinicalTrialSearchRequest } from "../../shared/src/dto/ClinicalTrialSearchRequest";
 import { NormalizedTrial, ReferenceTrial } from "../src/models/NormalizedTrial";
 import { TrialResultsRequest } from "../../shared/src/dto/TrialResultsRequest";
 import { generateAIResults } from "./services/AIResultsService";
