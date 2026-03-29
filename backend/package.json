@@ -25,18 +25,19 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.16.3"
   },
   "devDependencies": {
+    "@eslint/js": "^9.36.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^25.3.5",
     "@types/pg": "^8.15.6",
-    "@eslint/js": "^9.36.0",
     "eslint": "^9.36.0",
     "globals": "^16.4.0",
     "ts-node-dev": "^2.0.0",

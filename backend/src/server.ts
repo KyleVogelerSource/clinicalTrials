@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { searchClinicalTrials, createEmptyClinicalTrialStudiesResponse, searchAndBuildCandidatePool } from "./services/ClinicalTrialsService";
 import { ClinicalTrialsApiClientError, ClinicalTrialsApiTimeoutError } from "./client/ClinicalTrialsApiClient";
 import { validateSearchRequest } from "./validators/ClinicalTrialSearchValidator";
