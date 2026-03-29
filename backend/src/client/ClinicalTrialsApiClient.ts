@@ -115,8 +115,8 @@ export class ClinicalTrialsApiClient {
 
     if (request.phase) clauses.push(`AREA[Phase]${request.phase}`);
     if (request.studyType) clauses.push(`AREA[StudyType]${request.studyType}`);
-    if (request.interventionModel) clauses.push(`AREA[InterventionModel]${request.interventionModel}`);
-    if (request.primaryPurpose) clauses.push(`AREA[PrimaryPurpose]${request.primaryPurpose}`);
+    if (request.interventionModel) clauses.push(`AREA[DesignInterventionModel]${request.interventionModel}`);
+    if (request.primaryPurpose) clauses.push(`AREA[DesignPrimaryPurpose]${request.primaryPurpose}`);
     if (request.sex) clauses.push(`AREA[Sex]${request.sex}`);
 
     if (request.healthyVolunteers !== undefined) {

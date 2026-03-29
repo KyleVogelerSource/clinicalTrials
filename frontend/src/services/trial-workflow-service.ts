@@ -11,9 +11,9 @@ import { ClinicalTrialStudy } from "../../../shared/src/dto/ClinicalTrialStudies
 const PHASE_MAP: Record<string, string> = {
     'Early Phase 1': 'EARLY_PHASE1',
     'Phase 1': 'PHASE1',
-    'Phase 1/Phase 2': 'PHASE1 | PHASE2',
+    'Phase 1/Phase 2': 'PHASE1 OR PHASE2',
     'Phase 2': 'PHASE2',
-    'Phase 2/Phase 3': 'PHASE2 | PHASE3',
+    'Phase 2/Phase 3': 'PHASE2 OR PHASE3',
     'Phase 3': 'PHASE3',
     'Phase 4': 'PHASE4',
     'N/A': 'NA'
