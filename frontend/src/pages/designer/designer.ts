@@ -6,6 +6,7 @@ import { KeywordSelector } from "../../primitives/keyword-selector/keyword-selec
 import { AutoCompleteInput } from "../../primitives/auto-complete-input/auto-complete-input";
 import { ClinicalStudyService } from "../../services/clinical-study.service";
 import { TrialWorkflowService } from "../../services/trial-workflow-service";
+import { DesignModel } from "../../models/design-model";
 
 @Component({
     selector: "app-designer",
@@ -106,8 +107,8 @@ export class Designer implements OnInit {
     }
 
     onNext() {
-        const v = this.inputForm.value;
-        this.workflowService.setInputs(v);
+        const model = this.inputForm.value as DesignModel;
+        this.workflowService.setInputs(model);
         this.workflowService.searchTrials();
         this.router.navigate(['/selection']);
     }

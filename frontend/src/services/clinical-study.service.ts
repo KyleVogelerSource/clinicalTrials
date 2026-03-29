@@ -2,26 +2,18 @@ import { Injectable } from '@angular/core';
 import meshData from '../../../shared/src/static/combined-mesh-data.json';
 import conditionData from '../../../shared/src/static/common-disease-conditions.json';
 import trialDesignOptions from '../../../shared/src/static/trial-design-options.json';
+import { ClinicalTrialSearchRequest } from '../../../shared/src/dto/ClinicalTrialSearchRequest';
+import { ClinicalTrialStudiesResponse } from '../../../shared/src/dto/ClinicalTrialStudiesResponse';
 import Fuse from 'fuse.js'; // A fuzzy match library
+import { HttpClient } from '@angular/common/http';
+import { apiUrl } from '../app/config/api.config';
+import { Observable } from 'rxjs';
+import { StudyTrial } from '../models/study-trial';
 
 interface MeshEntry {
     id: string;
     name: string;
     synonyms: string[];
-}
-
-export interface StudyTrial {
-    nctId: string;
-    briefTitle: string;
-    conditions: string[];
-    enrollmentCount: number;
-    location: string;
-    startDate: string;
-    completionDate: string;
-    sponsor: string;
-    sites: string[];
-    phase: string;
-    description: string;
 }
 
 @Injectable({
@@ -31,7 +23,7 @@ export class ClinicalStudyService {
     private keywords: Fuse<MeshEntry>;
     private conditions: Fuse<MeshEntry>;
 
-    constructor() {
+    constructor(private http: HttpClient) {
         this.keywords = new Fuse(meshData as MeshEntry[], {
             keys: ['name', 'synonyms'],
             threshold: 0.3,
@@ -76,6 +68,15 @@ export class ClinicalStudyService {
     getDefaultPhase = () => trialDesignOptions.defaultPhase;
     getSexes = () => trialDesignOptions.sexes;
     getDefaultSex = () => trialDesignOptions.defaultSex;
+
+    getTrials() {
+        const url = apiUrl('/api/clinical-trails/search');
+    }
+
+    searchStudies(request: ClinicalTrialSearchRequest): Observable<ClinicalTrialStudiesResponse> {
+        const url = apiUrl('/api/clinical-trials/search');
+        return this.http.post<ClinicalTrialStudiesResponse>(url, request);
+    }
 
     getMockTrials(): StudyTrial[] {
         return [
