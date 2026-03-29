@@ -4,7 +4,8 @@ import { KeywordSelector } from '../../primitives/keyword-selector/keyword-selec
 import { Router } from '@angular/router';
 import { CommonModule, DecimalPipe, DatePipe } from '@angular/common';
 import { TrialWorkflowService } from '../../services/trial-workflow-service';
-import { ClinicalStudyService, StudyTrial } from '../../services/clinical-study.service';
+import { ClinicalStudyService } from '../../services/clinical-study.service';
+import { StudyTrial } from '../../models/study-trial';
 
 @Component({
     selector: 'app-selection',
