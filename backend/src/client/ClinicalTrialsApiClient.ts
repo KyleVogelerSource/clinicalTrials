@@ -1,5 +1,5 @@
-import { ClinicalTrialSearchRequest } from "../../shared/src/dto/ClinicalTrialSearchRequest";
-import { ClinicalTrialStudiesResponse } from "../models/ClinicalTrialStudiesResponse";
+import { ClinicalTrialSearchRequest } from "../../../shared/src/dto/ClinicalTrialSearchRequest";
+import { ClinicalTrialStudiesResponse } from "../../../shared/src/dto/ClinicalTrialStudiesResponse";
 
 const BASE_URL = "https://clinicaltrials.gov/api/v2/studies";
 const DEFAULT_PAGE_SIZE = 10;
@@ -115,8 +115,8 @@ export class ClinicalTrialsApiClient {
 
     if (request.phase) clauses.push(`AREA[Phase]${request.phase}`);
     if (request.studyType) clauses.push(`AREA[StudyType]${request.studyType}`);
-    if (request.interventionModel) clauses.push(`AREA[InterventionModel]${request.interventionModel}`);
-    if (request.primaryPurpose) clauses.push(`AREA[PrimaryPurpose]${request.primaryPurpose}`);
+    if (request.interventionModel) clauses.push(`AREA[DesignInterventionModel]${request.interventionModel}`);
+    if (request.primaryPurpose) clauses.push(`AREA[DesignPrimaryPurpose]${request.primaryPurpose}`);
     if (request.sex) clauses.push(`AREA[Sex]${request.sex}`);
 
     if (request.healthyVolunteers !== undefined) {
@@ -127,8 +127,8 @@ export class ClinicalTrialsApiClient {
     }
 
     if (request.minAge !== undefined || request.maxAge !== undefined) {
-      const lo = request.minAge ?? "MIN";
-      const hi = request.maxAge ?? "MAX";
+      const lo = request.minAge === undefined ? "MIN" : `${request.minAge}years`;
+      const hi = request.maxAge === undefined ? "MAX" : `${request.maxAge}years`;
       clauses.push(`AREA[MinimumAge]RANGE[${lo},${hi}]`);
     }
 
