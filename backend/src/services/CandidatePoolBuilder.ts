@@ -1,4 +1,4 @@
-import { ClinicalTrialStudy } from "../models/ClinicalTrialStudiesResponse";
+import { ClinicalTrialStudy } from "../../../shared/src/dto/ClinicalTrialStudiesResponse";
 import { CandidatePool, CandidatePoolInternal, CandidatePoolMetadata, ExcludedRecord, FilteredRecord, FilterReason, NormalizedTrial, ReferenceTrial } from "../models/NormalizedTrial";
 
 const DEFAULT_POOL_CAP = 15;

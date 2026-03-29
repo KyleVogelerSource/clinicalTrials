@@ -1,5 +1,5 @@
-import { ClinicalTrialSearchRequest } from "../../shared/src/dto/ClinicalTrialSearchRequest";
-import { ClinicalTrialStudiesResponse } from "../models/ClinicalTrialStudiesResponse";
+import { ClinicalTrialSearchRequest } from "../../../shared/src/dto/ClinicalTrialSearchRequest";
+import { ClinicalTrialStudiesResponse } from "../../../shared/src/dto/ClinicalTrialStudiesResponse";
 
 const BASE_URL = "https://clinicaltrials.gov/api/v2/studies";
 const DEFAULT_PAGE_SIZE = 10;
