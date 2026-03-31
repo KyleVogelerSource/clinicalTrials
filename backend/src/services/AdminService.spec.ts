@@ -18,7 +18,9 @@ describe("AdminService", () => {
     mockPool = {
       query: vi.fn(),
     };
-    vi.mocked(postgresClient.getDbPool).mockReturnValue(mockPool);
+    vi.mocked(postgresClient.getDbPool).mockReturnValue(
+      mockPool as unknown as ReturnType<typeof postgresClient.getDbPool>
+    );
     vi.clearAllMocks();
   });
 

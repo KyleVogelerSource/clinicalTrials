@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import jwt from "jsonwebtoken";
+import type { NextFunction, Response } from "express";
 import type { AuthTokenPayload } from "./AuthService";
 import {
   authenticateToken,
@@ -12,22 +13,29 @@ import * as postgresClient from "../storage/PostgresClient";
 vi.mock("jsonwebtoken");
 vi.mock("../storage/PostgresClient");
 
-interface MockResponse {
+type MockResponse = Response & {
   status: ReturnType<typeof vi.fn>;
   json: ReturnType<typeof vi.fn>;
-}
+};
 
 describe("authMiddleware", () => {
+  type VerifyFn = (token: string, secret: string) => AuthTokenPayload;
+
   let mockPool: { query: ReturnType<typeof vi.fn> };
   let mockReq: Partial<AuthenticatedRequest>;
   let mockRes: MockResponse;
-  let mockNext: ReturnType<typeof vi.fn>;
+  let mockNext: NextFunction & ReturnType<typeof vi.fn>;
+  let verifyMock: ReturnType<typeof vi.fn<VerifyFn>>;
 
   beforeEach(() => {
     mockPool = {
       query: vi.fn(),
     };
-    vi.mocked(postgresClient.getDbPool).mockReturnValue(mockPool);
+    verifyMock = jwt.verify as unknown as ReturnType<typeof vi.fn<VerifyFn>>;
+
+    vi.mocked(postgresClient.getDbPool).mockReturnValue(
+      mockPool as unknown as ReturnType<typeof postgresClient.getDbPool>
+    );
 
     mockReq = {
       headers: {},
@@ -36,9 +44,9 @@ describe("authMiddleware", () => {
     mockRes = {
       status: vi.fn().mockReturnThis(),
       json: vi.fn().mockReturnThis(),
-    };
+    } as unknown as MockResponse;
 
-    mockNext = vi.fn();
+    mockNext = vi.fn() as unknown as NextFunction & ReturnType<typeof vi.fn>;
 
     vi.clearAllMocks();
   });
@@ -52,10 +60,10 @@ describe("authMiddleware", () => {
       const token = "valid_token";
       mockReq.headers = { authorization: `Bearer ${token}` };
 
-      vi.mocked(jwt.verify).mockReturnValue({
+      verifyMock.mockReturnValue({
         userId: 1,
         username: "testuser",
-      } as unknown as AuthTokenPayload);
+      });
 
       authenticateToken(mockReq as AuthenticatedRequest, mockRes, mockNext);
 
@@ -68,7 +76,7 @@ describe("authMiddleware", () => {
       mockReq.headers = { authorization: `Bearer ${token}` };
 
       const payload: AuthTokenPayload = { userId: 42, username: "testuser" };
-      vi.mocked(jwt.verify).mockReturnValue(payload as unknown as AuthTokenPayload);
+      verifyMock.mockReturnValue(payload);
 
       authenticateToken(mockReq as AuthenticatedRequest, mockRes, mockNext);
 
@@ -109,7 +117,7 @@ describe("authMiddleware", () => {
     it("should return 401 when token verification fails", () => {
       mockReq.headers = { authorization: "Bearer invalid_token" };
 
-      vi.mocked(jwt.verify).mockImplementation(() => {
+      verifyMock.mockImplementation(() => {
         throw new Error("Invalid token");
       });
 
@@ -128,7 +136,7 @@ describe("authMiddleware", () => {
     it("should return 401 when token is expired", () => {
       mockReq.headers = { authorization: "Bearer expired_token" };
 
-      vi.mocked(jwt.verify).mockImplementation(() => {
+      verifyMock.mockImplementation(() => {
         throw new Error("TokenExpiredError");
       });
 
@@ -141,10 +149,10 @@ describe("authMiddleware", () => {
       const token = "actual_token_value";
       mockReq.headers = { authorization: `Bearer ${token}` };
 
-      vi.mocked(jwt.verify).mockReturnValue({
+      verifyMock.mockReturnValue({
         userId: 1,
         username: "user",
-      } as unknown as AuthTokenPayload);
+      });
 
       authenticateToken(mockReq as AuthenticatedRequest, mockRes, mockNext);
 
@@ -154,10 +162,10 @@ describe("authMiddleware", () => {
     it("should handle Bearer token with extra spaces", () => {
       mockReq.headers = { authorization: "Bearer    spaced_token" };
 
-      vi.mocked(jwt.verify).mockReturnValue({
+      verifyMock.mockReturnValue({
         userId: 1,
         username: "user",
-      } as unknown as AuthTokenPayload);
+      });
 
       authenticateToken(mockReq as AuthenticatedRequest, mockRes, mockNext);
 
@@ -371,7 +379,7 @@ describe("authMiddleware", () => {
       mockReq.user = { userId: 999, username: "admin" };
 
       const payload: AuthTokenPayload = { userId: 1, username: "realuser" };
-      vi.mocked(jwt.verify).mockReturnValue(payload as unknown as AuthTokenPayload);
+      verifyMock.mockReturnValue(payload);
 
       authenticateToken(mockReq as AuthenticatedRequest, mockRes, mockNext);
 
@@ -385,10 +393,10 @@ describe("authMiddleware", () => {
     it("should verify token with correct secret", () => {
       mockReq.headers = { authorization: "Bearer token" };
 
-      vi.mocked(jwt.verify).mockReturnValue({
+      verifyMock.mockReturnValue({
         userId: 1,
         username: "user",
-      } as unknown as AuthTokenPayload);
+      });
 
       authenticateToken(mockReq as AuthenticatedRequest, mockRes, mockNext);
 
@@ -411,7 +419,7 @@ describe("authMiddleware", () => {
       const longToken = "x".repeat(10000);
       mockReq.headers = { authorization: `Bearer ${longToken}` };
 
-      vi.mocked(jwt.verify).mockImplementation(() => {
+      verifyMock.mockImplementation(() => {
         throw new Error("Token too long");
       });
 

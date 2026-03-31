@@ -54,7 +54,7 @@ describe("CandidatePoolBuilder", () => {
     it("should filter studies with missing phase", () => {
       const validStudy = createMockStudy("NCT001");
       const invalidStudy = createMockStudy("NCT002");
-      invalidStudy.protocolSection.designModule.phases = [];
+      invalidStudy.protocolSection.designModule!.phases = [];
 
       const result = buildCandidatePool([validStudy, invalidStudy], 1);
 
@@ -65,7 +65,7 @@ describe("CandidatePoolBuilder", () => {
     it("should filter studies with missing enrollment", () => {
       const validStudy = createMockStudy("NCT001");
       const invalidStudy = createMockStudy("NCT002");
-      invalidStudy.protocolSection.designModule.enrollmentInfo = { count: undefined };
+      invalidStudy.protocolSection.designModule!.enrollmentInfo = { count: undefined };
 
       const result = buildCandidatePool([validStudy, invalidStudy], 1);
 
@@ -75,7 +75,7 @@ describe("CandidatePoolBuilder", () => {
     it("should filter studies with missing eligibility criteria", () => {
       const validStudy = createMockStudy("NCT001");
       const invalidStudy = createMockStudy("NCT002");
-      invalidStudy.protocolSection.eligibilityModule.eligibilityCriteria = "";
+      invalidStudy.protocolSection.eligibilityModule!.eligibilityCriteria = "";
 
       const result = buildCandidatePool([validStudy, invalidStudy], 1);
 
@@ -85,7 +85,7 @@ describe("CandidatePoolBuilder", () => {
     it("should filter studies with null enrollment", () => {
       const validStudy = createMockStudy("NCT001");
       const invalidStudy = createMockStudy("NCT002");
-      invalidStudy.protocolSection.designModule.enrollmentInfo = { count: null as unknown as number };
+      invalidStudy.protocolSection.designModule!.enrollmentInfo = { count: null as unknown as number };
 
       const result = buildCandidatePool([validStudy, invalidStudy], 1);
 
@@ -260,7 +260,7 @@ describe("CandidatePoolBuilder", () => {
 
     it("should accept ALL sex compatibility", () => {
       const allSex = createMockStudy("NCT001");
-      allSex.protocolSection.eligibilityModule.sex = "ALL";
+      allSex.protocolSection.eligibilityModule!.sex = "ALL";
 
       const ref: ReferenceTrial = { sex: "MALE" };
 
