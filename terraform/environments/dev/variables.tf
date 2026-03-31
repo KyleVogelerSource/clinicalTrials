@@ -36,6 +36,16 @@ variable "db_password" {
   sensitive = true
 }
 
+variable "db_ssl" {
+  type    = bool
+  default = true
+}
+
+variable "db_ssl_reject_unauthorized" {
+  type    = bool
+  default = false
+}
+
 variable "backend_port" {
   type    = number
   default = 3000
