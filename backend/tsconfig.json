@@ -9,9 +9,6 @@
     "verbatimModuleSyntax": false
   },
   "include": [
-    "src/**/*.ts",
-    "backend/src/**/*.ts",
-    "shared/src/**/*.ts", 
-    "../shared/src/dto/ClinicalTrialSearchRequest.ts"
+    "src/**/*.ts"
   ]
 }

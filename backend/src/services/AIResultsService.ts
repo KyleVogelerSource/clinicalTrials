@@ -1,6 +1,6 @@
 import { NormalizedTrial } from "../models/NormalizedTrial";
-import { TrialResultsRequest } from "../../../shared/src/dto/TrialResultsRequest";
-import { TrialResultsResponse } from "../../../shared/src/dto/TrialResultsResponse";
+import { TrialResultsRequest } from "../dto/TrialResultsRequest";
+import { TrialResultsResponse } from "../dto/TrialResultsResponse";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_MODEL = "claude-sonnet-4-20250514";
