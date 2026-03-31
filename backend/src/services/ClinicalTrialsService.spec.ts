@@ -6,18 +6,27 @@ import {
 } from "./ClinicalTrialsService";
 import { ClinicalTrialsApiClient } from "../client/ClinicalTrialsApiClient";
 import { ClinicalTrialSearchRequest } from "../dto/ClinicalTrialSearchRequest";
-import { ClinicalTrialStudy } from "../dto/ClinicalTrialStudiesResponse";
+import {
+  ClinicalTrialStudy,
+  ClinicalTrialStudiesResponse,
+} from "../dto/ClinicalTrialStudiesResponse";
 
 vi.mock("../client/ClinicalTrialsApiClient");
 
 describe("ClinicalTrialsService", () => {
-  let mockClient: { searchStudies: ReturnType<typeof vi.fn> };
+  type SearchStudiesFn = (
+    request: ClinicalTrialSearchRequest
+  ) => Promise<ClinicalTrialStudiesResponse>;
+
+  let mockClient: { searchStudies: ReturnType<typeof vi.fn<SearchStudiesFn>> };
+  let client: ClinicalTrialsApiClient;
 
   beforeEach(() => {
     mockClient = {
-      searchStudies: vi.fn(),
+      searchStudies: vi.fn<SearchStudiesFn>(),
     };
-    vi.mocked(ClinicalTrialsApiClient).mockImplementation(() => mockClient);
+    client = mockClient as unknown as ClinicalTrialsApiClient;
+    vi.mocked(ClinicalTrialsApiClient).mockImplementation(() => client);
     vi.clearAllMocks();
   });
 
@@ -51,7 +60,7 @@ describe("ClinicalTrialsService", () => {
         studies: [],
       });
 
-      await searchClinicalTrials(request, mockClient);
+      await searchClinicalTrials(request, client);
 
       expect(mockClient.searchStudies).toHaveBeenCalledWith(request);
     });
@@ -74,7 +83,7 @@ describe("ClinicalTrialsService", () => {
 
       mockClient.searchStudies.mockResolvedValue(expectedResponse);
 
-      const result = await searchClinicalTrials(request, mockClient);
+      const result = await searchClinicalTrials(request, client);
 
       expect(result).toEqual(expectedResponse);
     });
@@ -85,7 +94,7 @@ describe("ClinicalTrialsService", () => {
 
       mockClient.searchStudies.mockRejectedValue(error);
 
-      await expect(searchClinicalTrials(request, mockClient)).rejects.toThrow("API Error");
+      await expect(searchClinicalTrials(request, client)).rejects.toThrow("API Error");
     });
 
     it("should handle empty results", async () => {
@@ -96,7 +105,7 @@ describe("ClinicalTrialsService", () => {
         studies: [],
       });
 
-      const result = await searchClinicalTrials(request, mockClient);
+      const result = await searchClinicalTrials(request, client);
 
       expect(result.studies.length).toBe(0);
       expect(result.totalCount).toBe(0);
@@ -122,7 +131,7 @@ describe("ClinicalTrialsService", () => {
         studies: largeStudySet,
       });
 
-      const result = await searchClinicalTrials(request, mockClient);
+      const result = await searchClinicalTrials(request, client);
 
       expect(result.studies.length).toBe(100);
     });
@@ -157,7 +166,7 @@ describe("ClinicalTrialsService", () => {
         studies,
       });
 
-      const result = await searchAndBuildCandidatePool(request, {}, mockClient);
+      const result = await searchAndBuildCandidatePool(request, {}, client);
 
       expect(result).toHaveProperty("trials");
       expect(result).toHaveProperty("metadata");
@@ -185,7 +194,7 @@ describe("ClinicalTrialsService", () => {
           studies: studiesPage2,
         });
 
-      const result = await searchAndBuildCandidatePool(request, {}, mockClient);
+      const result = await searchAndBuildCandidatePool(request, {}, client);
 
       expect(mockClient.searchStudies).toHaveBeenCalledTimes(2);
       expect(result.metadata.totalFetchedFromApi).toBe(8);
@@ -203,7 +212,7 @@ describe("ClinicalTrialsService", () => {
       const result = await searchAndBuildCandidatePool(
         request,
         { cap: 10 },
-        mockClient
+        client
       );
 
       expect(result.trials.length).toBeLessThanOrEqual(10);
@@ -219,7 +228,7 @@ describe("ClinicalTrialsService", () => {
         studies,
       });
 
-      const result = await searchAndBuildCandidatePool(request, {}, mockClient);
+      const result = await searchAndBuildCandidatePool(request, {}, client);
 
       expect(result.trials.length).toBeLessThanOrEqual(15);
       expect(result.metadata.cappedAt).toBe(15);
@@ -241,7 +250,7 @@ describe("ClinicalTrialsService", () => {
         studies: [validStudy, invalidStudy],
       });
 
-      const result = await searchAndBuildCandidatePool(request, {}, mockClient);
+      const result = await searchAndBuildCandidatePool(request, {}, client);
 
       expect(result.metadata.totalFiltered).toBeGreaterThan(0);
     });
@@ -259,7 +268,7 @@ describe("ClinicalTrialsService", () => {
       const result = await searchAndBuildCandidatePool(
         request,
         { requiredConditions: ["diabetes"] },
-        mockClient
+        client
       );
 
       expect(result.metadata.totalFiltered).toBeGreaterThan(0);
@@ -278,7 +287,7 @@ describe("ClinicalTrialsService", () => {
       const result = await searchAndBuildCandidatePool(
         request,
         { ineligibleConditions: ["pregnancy"] },
-        mockClient
+        client
       );
 
       expect(result.metadata.totalFiltered).toBeGreaterThan(0);
@@ -296,7 +305,7 @@ describe("ClinicalTrialsService", () => {
       const result = await searchAndBuildCandidatePool(
         request,
         { cap: 10 },
-        mockClient
+        client
       );
 
       expect(result.metadata.totalFetchedFromApi).toBe(25);
@@ -311,7 +320,7 @@ describe("ClinicalTrialsService", () => {
       mockClient.searchStudies.mockRejectedValue(new Error("Network error"));
 
       await expect(
-        searchAndBuildCandidatePool(request, {}, mockClient)
+        searchAndBuildCandidatePool(request, {}, client)
       ).rejects.toThrow("Network error");
     });
 
@@ -329,7 +338,7 @@ describe("ClinicalTrialsService", () => {
         });
       }
 
-      const result = await searchAndBuildCandidatePool(request, {}, mockClient);
+      const result = await searchAndBuildCandidatePool(request, {}, client);
 
       expect(mockClient.searchStudies).toHaveBeenCalledTimes(10);
       expect(result.metadata.totalPagesfetched).toBeLessThanOrEqual(10);

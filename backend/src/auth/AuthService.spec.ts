@@ -11,13 +11,26 @@ vi.mock("../storage/PostgresClient", () => ({
 }));
 
 describe("AuthService", () => {
+  type HashFn = (value: string, salt: number) => Promise<string>;
+  type CompareFn = (value: string, hash: string) => Promise<boolean>;
+  type SignFn = (payload: unknown, secret: string, options?: unknown) => string;
+
   let mockPool: { query: ReturnType<typeof vi.fn> };
+  let hashMock: ReturnType<typeof vi.fn<HashFn>>;
+  let compareMock: ReturnType<typeof vi.fn<CompareFn>>;
+  let signMock: ReturnType<typeof vi.fn<SignFn>>;
 
   beforeEach(() => {
     mockPool = {
       query: vi.fn(),
     };
-    vi.mocked(postgresClient.getDbPool).mockReturnValue(mockPool);
+    hashMock = bcrypt.hash as unknown as ReturnType<typeof vi.fn<HashFn>>;
+    compareMock = bcrypt.compare as unknown as ReturnType<typeof vi.fn<CompareFn>>;
+    signMock = jwt.sign as unknown as ReturnType<typeof vi.fn<SignFn>>;
+
+    vi.mocked(postgresClient.getDbPool).mockReturnValue(
+      mockPool as unknown as ReturnType<typeof postgresClient.getDbPool>
+    );
     vi.clearAllMocks();
   });
 
@@ -48,7 +61,7 @@ describe("AuthService", () => {
           ],
         });
 
-      vi.mocked(bcrypt.hash).mockResolvedValue("hashed_password_123");
+      hashMock.mockResolvedValue("hashed_password_123");
 
       const result = await authService.createUserAccount(input);
 
@@ -99,7 +112,7 @@ describe("AuthService", () => {
           ],
         });
 
-      vi.mocked(bcrypt.hash).mockResolvedValue("hashed_value");
+      hashMock.mockResolvedValue("hashed_value");
 
       await authService.createUserAccount(input);
 
@@ -122,7 +135,7 @@ describe("AuthService", () => {
           ],
         });
 
-      vi.mocked(bcrypt.hash).mockResolvedValue("hashed");
+      hashMock.mockResolvedValue("hashed");
 
       await authService.createUserAccount(input);
 
@@ -154,8 +167,8 @@ describe("AuthService", () => {
           ],
         });
 
-      vi.mocked(bcrypt.hash).mockResolvedValue("hashed_password");
-      vi.mocked(jwt.sign).mockReturnValue("test_jwt_token" as unknown as string);
+      hashMock.mockResolvedValue("hashed_password");
+      signMock.mockReturnValue("test_jwt_token");
 
       const result = await authService.registerUser(input);
 
@@ -207,8 +220,8 @@ describe("AuthService", () => {
           ],
         });
 
-      vi.mocked(bcrypt.hash).mockResolvedValue("hashed");
-      vi.mocked(jwt.sign).mockReturnValue("token" as unknown as string);
+      hashMock.mockResolvedValue("hashed");
+      signMock.mockReturnValue("token");
 
       await authService.registerUser(input);
 
@@ -240,8 +253,8 @@ describe("AuthService", () => {
         ],
       });
 
-      vi.mocked(bcrypt.compare).mockResolvedValue(true);
-      vi.mocked(jwt.sign).mockReturnValue("login_token" as unknown as string);
+      compareMock.mockResolvedValue(true);
+      signMock.mockReturnValue("login_token");
 
       const result = await authService.loginUser(input);
 
@@ -285,7 +298,7 @@ describe("AuthService", () => {
         ],
       });
 
-      vi.mocked(bcrypt.compare).mockResolvedValue(false);
+      compareMock.mockResolvedValue(false);
 
       await expect(authService.loginUser(input)).rejects.toThrow("INVALID_CREDENTIALS");
     });
@@ -329,8 +342,8 @@ describe("AuthService", () => {
         ],
       });
 
-      vi.mocked(bcrypt.compare).mockResolvedValue(true);
-      vi.mocked(jwt.sign).mockReturnValue("token" as unknown as string);
+      compareMock.mockResolvedValue(true);
+      signMock.mockReturnValue("token");
 
       const result = await authService.loginUser(input);
 
@@ -358,8 +371,8 @@ describe("AuthService", () => {
         ],
       });
 
-      vi.mocked(bcrypt.compare).mockResolvedValue(true);
-      vi.mocked(jwt.sign).mockReturnValue("authtoken" as unknown as string);
+      compareMock.mockResolvedValue(true);
+      signMock.mockReturnValue("authtoken");
 
       await authService.loginUser(input);
 
@@ -393,7 +406,7 @@ describe("AuthService", () => {
           ],
         });
 
-      vi.mocked(bcrypt.hash).mockResolvedValue("hashed");
+      hashMock.mockResolvedValue("hashed");
 
       const result = await authService.createUserAccount(input);
 
@@ -424,7 +437,7 @@ describe("AuthService", () => {
           ],
         });
 
-      vi.mocked(bcrypt.hash).mockResolvedValue("hashed");
+      hashMock.mockResolvedValue("hashed");
 
       const result = await authService.createUserAccount(input);
 
@@ -453,7 +466,7 @@ describe("AuthService", () => {
           ],
         });
 
-      vi.mocked(bcrypt.hash).mockResolvedValue("hashed");
+      hashMock.mockResolvedValue("hashed");
 
       const result = await authService.createUserAccount(input);
 
