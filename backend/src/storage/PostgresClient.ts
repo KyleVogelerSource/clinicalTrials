@@ -17,7 +17,8 @@ function parseBoolean(value: string | undefined, defaultValue: boolean): boolean
   return defaultValue;
 }
 
-const dbSslEnabled = parseBoolean(process.env.DB_SSL, false);
+const defaultDbSslEnabled = process.env.NODE_ENV === "production";
+const dbSslEnabled = parseBoolean(process.env.DB_SSL, defaultDbSslEnabled);
 const dbSslRejectUnauthorized = parseBoolean(process.env.DB_SSL_REJECT_UNAUTHORIZED, false);
 
 const pool = new Pool({

@@ -1,0 +1,29 @@
+export interface ClinicalTrialSearchRequest {
+  term?: string;
+  condition?: string;
+  intervention?: string;
+  sponsor?: string;
+  investigator?: string;
+  location?: string;
+  overallStatus?: string;
+  studyType?: string;
+  phase?: string;
+  interventionModel?: string;
+  primaryPurpose?: string;
+  sex?: string;
+  minAge?: number;
+  maxAge?: number;
+  healthyVolunteers?: boolean;
+  startDateFrom?: string;
+  startDateTo?: string;
+  completionDateFrom?: string;
+  completionDateTo?: string;
+  minEnrollment?: number;
+  maxEnrollment?: number;
+  hasResults?: boolean;
+  pageSize?: number;
+  pageToken?: string;
+  countTotal?: boolean;
+  requiredConditions?: string[];
+  ineligibleConditions?: string[];
+}
