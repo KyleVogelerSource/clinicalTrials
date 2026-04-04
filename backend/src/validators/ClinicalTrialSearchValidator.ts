@@ -1,4 +1,4 @@
-import { ClinicalTrialSearchRequest } from "../../../shared/src/dto/ClinicalTrialSearchRequest";
+import { ClinicalTrialSearchRequest } from "../dto/ClinicalTrialSearchRequest";
 
 export interface ValidationError {
   field: string;
@@ -104,8 +104,8 @@ export function validateSearchRequest(
     const value = req[field];
     if (value !== undefined && typeof value === "string" && !DATE_PATTERN.test(value)) {
       errors.push({
-        field,
-        message: `${field} must match YYYY, YYYY-MM, or YYYY-MM-DD format.`,
+        field: String(field),
+        message: `${String(field)} must match YYYY, YYYY-MM, or YYYY-MM-DD format.`,
       });
     }
   }
@@ -113,14 +113,14 @@ export function validateSearchRequest(
   if (req.requiredConditions !== undefined) {
     if (!Array.isArray(req.requiredConditions)) {
       errors.push({ field: "requiredConditions", message: "requiredConditions must be an array of strings." });
-    } else if (req.requiredConditions.some((c) => typeof c !== "string" || c.trim() === "")) {
+    } else if (req.requiredConditions.some((c: string) => typeof c !== "string" || c.trim() === "")) {
       errors.push({ field: "requiredConditions", message: "Each entry in requiredConditions must be a non-empty string." });
     }
   }
   if (req.ineligibleConditions !== undefined) {
     if (!Array.isArray(req.ineligibleConditions)) {
       errors.push({ field: "ineligibleConditions", message: "ineligibleConditions must be an array of strings." });
-    } else if (req.ineligibleConditions.some((c) => typeof c !== "string" || c.trim() === "")) {
+    } else if (req.ineligibleConditions.some((c: string) => typeof c !== "string" || c.trim() === "")) {
       errors.push({ field: "ineligibleConditions", message: "Each entry in ineligibleConditions must be a non-empty string." });
     }
   }

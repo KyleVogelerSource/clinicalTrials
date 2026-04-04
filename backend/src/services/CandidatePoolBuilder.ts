@@ -1,4 +1,4 @@
-import { ClinicalTrialStudy } from "../../../shared/src/dto/ClinicalTrialStudiesResponse";
+import { ClinicalTrialStudy } from "../dto/ClinicalTrialStudiesResponse";
 import { CandidatePool, CandidatePoolInternal, CandidatePoolMetadata, ExcludedRecord, FilteredRecord, FilterReason, NormalizedTrial, ReferenceTrial } from "../models/NormalizedTrial";
 
 const DEFAULT_POOL_CAP = 15;
@@ -70,23 +70,23 @@ function getFilterReason(study: ClinicalTrialStudy, ref?: ReferenceTrial, config
     if (!criteria || criteria.trim() === "") return "missing_eligibility_criteria";
 
     if (config.requiredConditions && config.requiredConditions.length > 0) {
-        const studyConditions = (p.conditionsModule?.conditions ?? []).map((c) =>
+        const studyConditions = (p.conditionsModule?.conditions ?? []).map((c: string) =>
             c.toLowerCase()
         );
         const required = config.requiredConditions.map((c) => c.toLowerCase());
         const satisfied = required.some((rc) =>
-            studyConditions.some((sc) => sc.includes(rc))
+            studyConditions.some((sc: string) => sc.includes(rc))
         );
         if (!satisfied) return "required_condition_not_met";
     }
 
     if (config.ineligibleConditions && config.ineligibleConditions.length > 0) {
-        const studyConditions = (p.conditionsModule?.conditions ?? []).map((c) =>
+        const studyConditions = (p.conditionsModule?.conditions ?? []).map((c: string) =>
             c.toLowerCase()
         );
         const ineligible = config.ineligibleConditions.map((c) => c.toLowerCase());
         const hasIneligible = ineligible.some((ic) =>
-            studyConditions.some((sc) => sc.includes(ic))
+            studyConditions.some((sc: string) => sc.includes(ic))
         );
         if (hasIneligible) return "ineligible_condition_present";
     }
@@ -109,12 +109,12 @@ function getFilterReason(study: ClinicalTrialStudy, ref?: ReferenceTrial, config
     }
 
     if (ref.conditions && ref.conditions.length > 0) {
-        const studyConditions = (p.conditionsModule?.conditions ?? []).map((c) =>
+        const studyConditions = (p.conditionsModule?.conditions ?? []).map((c: string) =>
             c.toLowerCase()
         );
         const refConditions = ref.conditions.map((c) => c.toLowerCase());
         const hasOverlap = refConditions.some((rc) =>
-            studyConditions.some((sc) => sc.includes(rc) || rc.includes(sc))
+            studyConditions.some((sc: string) => sc.includes(rc) || rc.includes(sc))
         );
         if (!hasOverlap) return "no_condition_overlap";
     }
@@ -254,12 +254,12 @@ function normalizeString(value?: string, fallback = "UNKNOWN"): string {
 
 function extractInterventionNames(study: ClinicalTrialStudy): string[] {
     return (study.protocolSection.armsInterventionsModule?.interventions ?? [])
-        .map((i) => i.name)
-        .filter((n): n is string => !!n);
+        .map((i: { name?: string }) => i.name)
+        .filter((n: string | undefined): n is string => !!n);
 }
 
 function extractPrimaryOutcomes(study: ClinicalTrialStudy): string[] {
     return (study.protocolSection.outcomesModule?.primaryOutcomes ?? [])
-        .map((o) => o.measure)
-        .filter((m): m is string => !!m);
+        .map((o: { measure?: string }) => o.measure)
+        .filter((m: string | undefined): m is string => !!m);
 }
