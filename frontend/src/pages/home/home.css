@@ -80,13 +80,13 @@
 
 .steps-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
 }
 
 .step-card {
   background: #ffffff;
-  padding: 2.5rem 2rem;
+  padding: 2rem 1.5rem;
   border-radius: 12px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   transition: transform 0.2s ease;
@@ -125,6 +125,14 @@
 }
 
 /* Responsive adjustments */
+@media (max-width: 992px) {
+  .steps-container {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+}
+
 @media (max-width: 768px) {
   .hero-title {
     font-size: 2.25rem;
