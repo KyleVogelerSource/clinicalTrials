@@ -1,0 +1,154 @@
+/* home.css - Professional Medical Theme aligned with global styles */
+
+.home-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  color: var(--text-color);
+  background-color: #f8fafc; /* Keep subtle off-white for section contrast */
+}
+
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, var(--app-blue) 0%, var(--app-blue2) 100%);
+  color: #ffffff;
+  padding: 6rem 2rem;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-content {
+  max-width: 800px;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  font-weight: 300;
+  margin-bottom: 2.5rem;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+/* Reusing global .btn style foundations where possible */
+.cta-button {
+  display: inline-block;
+  background-color: var(--app-teal);
+  color: white;
+  font-size: 1.125rem;
+  font-weight: 600;
+  padding: 1rem 2.5rem;
+  border-radius: 4px; /* Matching .btn border-radius */
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: none;
+  cursor: pointer;
+}
+
+.cta-button:hover {
+  background-color: var(--app-teal2);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.cta-button:focus-visible {
+  outline: 3px solid var(--app-teal2);
+  outline-offset: 2px;
+}
+
+/* How It Works Section */
+.how-it-works-section {
+  padding: 5rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 2.25rem;
+  font-weight: 600;
+  margin-bottom: 3rem;
+  color: var(--app-blue);
+}
+
+.steps-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.step-card {
+  background: #ffffff;
+  padding: 2rem 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px var(--shadow-color); /* Reusing global shadow color */
+  transition: transform 0.2s ease;
+  border-top: 4px solid var(--app-blue);
+}
+
+.step-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px var(--shadow-color);
+}
+
+.step-icon {
+  width: 60px;
+  height: 60px;
+  background-color: #EEF1F8; /* Reusing global body bg color for icon contrast */
+  color: var(--app-blue);
+  font-size: 1.75rem;
+  font-weight: 700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem auto;
+}
+
+.step-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--app-blue2);
+}
+
+.step-description {
+  color: var(--app-gray);
+  line-height: 1.6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .steps-container {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.25rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.125rem;
+  }
+  
+  .hero-section {
+    padding: 4rem 1.5rem;
+  }
+  
+  .how-it-works-section {
+    padding: 4rem 1.5rem;
+  }
+}
