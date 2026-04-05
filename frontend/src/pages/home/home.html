@@ -1,2 +1,47 @@
-<h1>Welcome to Cardinal Trials!</h1>
-<a [routerLink]="['designer']"><button>Get Started</button></a>
+<div class="home-container">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1 class="hero-title">Informed Clinical Trial Design</h1>
+      <p class="hero-subtitle">
+        Cardinal Trials provides data-driven insights to your clinical workflow.
+      </p>
+      <a [routerLink]="['designer']" class="cta-button" aria-label="Start designing your trial">Get Started</a>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="how-it-works-section">
+    <h2 class="section-title">How It Works</h2>
+    <div class="steps-container">
+      
+      <!-- Step 1 -->
+      <div class="step-card">
+        <div class="step-icon">1</div>
+        <h3 class="step-title">Design Parameters</h3>
+        <p class="step-description">
+          Define your trial's conditions, phases, and requirements with our intuitive builder.
+        </p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card">
+        <div class="step-icon">2</div>
+        <h3 class="step-title">Select Candidates</h3>
+        <p class="step-description">
+          Utilize our advanced algorithms to match your criteria against diverse, optimal candidate pools.
+        </p>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-card">
+        <div class="step-icon">3</div>
+        <h3 class="step-title">Analyze Results</h3>
+        <p class="step-description">
+          Review intelligent trial outcomes and gain actionable insights for your research.
+        </p>
+      </div>
+
+    </div>
+  </section>
+</div>
