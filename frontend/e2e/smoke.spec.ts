@@ -7,7 +7,8 @@ test.describe("Frontend e2e smoke", () => {
     await expect(page.getByRole("heading", { name: "Informed Clinical Trial Design" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Designer" })).toBeVisible();
 
-    await page.getByRole("link", { name: "Get Started" }).click();
+    // Home CTA uses aria-label, so its accessible name differs from visible text.
+    await page.getByRole("link", { name: /Start designing your trial|Get Started/i }).click();
 
     await expect(page).toHaveURL(/\/designer$/);
     await expect(page.getByRole("heading", { name: "Study Design" })).toBeVisible();

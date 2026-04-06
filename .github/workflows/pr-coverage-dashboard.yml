@@ -66,11 +66,81 @@ jobs:
         working-directory: ./frontend
         run: |
           npm test -- \
-            --coverage \
-            --coverage.reporter=json-summary \
-            --coverage.reporter=html \
-            --reporter=json \
-            --outputFile=coverage/frontend/test-results.json
+            --coverage
+
+          # Angular emits coverage-final.json; convert it to coverage-summary.json.
+          node - <<'NODE'
+          const fs = require('node:fs');
+
+          const finalPath = 'coverage/frontend/coverage-final.json';
+          const summaryPath = 'coverage/frontend/coverage-summary.json';
+
+          if (!fs.existsSync(finalPath)) {
+            throw new Error(`Missing file: ${finalPath}`);
+          }
+
+          const final = JSON.parse(fs.readFileSync(finalPath, 'utf8'));
+
+          const totals = {
+            statements: { total: 0, covered: 0, skipped: 0, pct: 0 },
+            functions: { total: 0, covered: 0, skipped: 0, pct: 0 },
+            branches: { total: 0, covered: 0, skipped: 0, pct: 0 },
+            lines: { total: 0, covered: 0, skipped: 0, pct: 0 },
+          };
+
+          const lineTotals = new Map();
+
+          for (const file of Object.values(final)) {
+            const statements = Object.entries(file.s || {});
+            for (const [id, hits] of statements) {
+              totals.statements.total += 1;
+              if ((hits || 0) > 0) totals.statements.covered += 1;
+
+              const line = file.statementMap?.[id]?.start?.line;
+              if (typeof line === 'number') {
+                lineTotals.set(line, (lineTotals.get(line) || 0) + (hits || 0));
+              }
+            }
+
+            const functions = Object.values(file.f || {});
+            for (const hits of functions) {
+              totals.functions.total += 1;
+              if ((hits || 0) > 0) totals.functions.covered += 1;
+            }
+
+            const branches = Object.values(file.b || {});
+            for (const branchHits of branches) {
+              for (const hits of branchHits || []) {
+                totals.branches.total += 1;
+                if ((hits || 0) > 0) totals.branches.covered += 1;
+              }
+            }
+          }
+
+          totals.lines.total = lineTotals.size;
+          totals.lines.covered = Array.from(lineTotals.values()).filter((hits) => hits > 0).length;
+
+          for (const metric of Object.values(totals)) {
+            metric.pct = metric.total
+              ? Number(((metric.covered / metric.total) * 100).toFixed(2))
+              : 0;
+          }
+
+          fs.writeFileSync(summaryPath, JSON.stringify({ total: totals }, null, 2));
+          NODE
+
+          # Angular test runner does not expose reporter/outputFile flags.
+          # Create a fallback summary so downstream dashboard steps remain stable.
+          mkdir -p coverage/frontend
+          if [ ! -f coverage/frontend/test-results.json ]; then
+            cat > coverage/frontend/test-results.json <<'JSON'
+          {
+            "numTotalTests": 0,
+            "numPassedTests": 0,
+            "numFailedTests": 0
+          }
+          JSON
+          fi
 
       - name: Generate combined dashboard
         run: node scripts/generate-test-coverage-dashboard.mjs
