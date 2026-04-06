@@ -4,11 +4,6 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     branches: [main]
-    paths:
-      - 'backend/**'
-      - 'frontend/**'
-      - 'scripts/generate-test-coverage-dashboard.mjs'
-      - '.github/workflows/pr-coverage-dashboard.yml'
 
 permissions:
   contents: read
@@ -86,9 +81,20 @@ jobs:
           retention-days: 14
 
       - name: Build PR summary markdown
+        env:
+          RUN_ID: ${{ github.run_id }}
+          RUN_NUMBER: ${{ github.run_number }}
+          SHA: ${{ github.sha }}
+          SERVER_URL: ${{ github.server_url }}
+          REPOSITORY: ${{ github.repository }}
         run: |
           node - <<'NODE'
           const fs = require('node:fs');
+
+          const runId = process.env.RUN_ID;
+          const runNumber = process.env.RUN_NUMBER;
+          const sha = process.env.SHA;
+          const runUrl = `${process.env.SERVER_URL}/${process.env.REPOSITORY}/actions/runs/${runId}`;
 
           function readJson(filePath) {
             return JSON.parse(fs.readFileSync(filePath, 'utf8'));
@@ -127,6 +133,9 @@ jobs:
           const body = [
             '<!-- coverage-dashboard-comment -->',
             '## Coverage Visualization',
+            '',
+            `Run: [#${runNumber}](${runUrl})`,
+            `Commit: \`${sha}\``,
             '',
             '| Project | Tests (pass/total) | Failed | Pass rate | Lines | Statements | Functions | Branches |',
             '|---|---:|---:|---:|---:|---:|---:|---:|',
