@@ -1,0 +1,182 @@
+name: PR Coverage Dashboard
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'scripts/generate-test-coverage-dashboard.mjs'
+      - '.github/workflows/pr-coverage-dashboard.yml'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: pr-coverage-dashboard-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  coverage-dashboard:
+    name: coverage-dashboard
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run backend tests with coverage
+        working-directory: ./backend
+        run: |
+          set -e
+          TEST_FILES=$(find src -type f -name '*.spec.ts' -print)
+          if [ -z "$TEST_FILES" ]; then
+            echo 'No backend spec files found under backend/src.'
+            exit 1
+          fi
+
+          npx vitest run $TEST_FILES \
+            --coverage.enabled=true \
+            --coverage.reporter=json-summary \
+            --coverage.reporter=html \
+            --reporter=json \
+            --outputFile=coverage/test-results.json
+
+      - name: Run frontend tests with coverage
+        working-directory: ./frontend
+        run: |
+          npm test -- \
+            --coverage \
+            --coverage.reporter=json-summary \
+            --coverage.reporter=html \
+            --reporter=json \
+            --outputFile=coverage/frontend/test-results.json
+
+      - name: Generate combined dashboard
+        run: node scripts/generate-test-coverage-dashboard.mjs
+
+      - name: Upload coverage visualization artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-visualization-pr-${{ github.event.pull_request.number }}
+          path: |
+            reports/test-coverage-dashboard.html
+            backend/coverage/
+            frontend/coverage/frontend/
+          retention-days: 14
+
+      - name: Build PR summary markdown
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+
+          function readJson(filePath) {
+            return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+          }
+
+          function getMetrics(summaryPath, testsPath) {
+            const coverage = readJson(summaryPath).total;
+            const tests = readJson(testsPath);
+
+            const pct = (n) => `${Number(n ?? 0).toFixed(2)}%`;
+            const passRate = tests.numTotalTests
+              ? (tests.numPassedTests / tests.numTotalTests) * 100
+              : 0;
+
+            return {
+              total: tests.numTotalTests ?? 0,
+              passed: tests.numPassedTests ?? 0,
+              failed: tests.numFailedTests ?? 0,
+              passRate: pct(passRate),
+              lines: pct(coverage?.lines?.pct),
+              statements: pct(coverage?.statements?.pct),
+              functions: pct(coverage?.functions?.pct),
+              branches: pct(coverage?.branches?.pct),
+            };
+          }
+
+          const backend = getMetrics(
+            'backend/coverage/coverage-summary.json',
+            'backend/coverage/test-results.json'
+          );
+          const frontend = getMetrics(
+            'frontend/coverage/frontend/coverage-summary.json',
+            'frontend/coverage/frontend/test-results.json'
+          );
+
+          const body = [
+            '<!-- coverage-dashboard-comment -->',
+            '## Coverage Visualization',
+            '',
+            '| Project | Tests (pass/total) | Failed | Pass rate | Lines | Statements | Functions | Branches |',
+            '|---|---:|---:|---:|---:|---:|---:|---:|',
+            `| Backend | ${backend.passed}/${backend.total} | ${backend.failed} | ${backend.passRate} | ${backend.lines} | ${backend.statements} | ${backend.functions} | ${backend.branches} |`,
+            `| Frontend | ${frontend.passed}/${frontend.total} | ${frontend.failed} | ${frontend.passRate} | ${frontend.lines} | ${frontend.statements} | ${frontend.functions} | ${frontend.branches} |`,
+            '',
+            'Download the **coverage-visualization** artifact from this workflow run to open:',
+            '- `reports/test-coverage-dashboard.html`',
+            '- `backend/coverage/index.html`',
+            '- `frontend/coverage/frontend/index.html`',
+          ].join('\n');
+
+          fs.writeFileSync('pr-coverage-comment.md', body);
+          NODE
+
+      - name: Upsert PR comment
+        if: github.event.pull_request.head.repo.fork == false
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('node:fs');
+            const body = fs.readFileSync('pr-coverage-comment.md', 'utf8');
+            const marker = '<!-- coverage-dashboard-comment -->';
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            });
+
+            const existing = comments.find(
+              (c) => c.user?.type === 'Bot' && c.body?.includes(marker)
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body,
+              });
+            }

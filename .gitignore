@@ -3,6 +3,8 @@ dist
 .env
 .DS_Store
 npm-debug.log
+/backend/coverage
+/frontend/coverage
 resources/MeSH/desc2026.xml
 terraform/environments/dev/.terraform
 terraform/environments/dev/.terraform.lock.hcl
