@@ -139,22 +139,31 @@ jobs:
 
           const logPath = 'coverage/frontend/test-output.log';
           const resultsPath = 'coverage/frontend/test-results.json';
-          const log = fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf8') : '';
+          const rawLog = fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf8') : '';
+
+          function stripAnsi(input) {
+            return input
+              .replace(/\u001b\[[0-9;]*m/g, '')
+              .replace(/\u001b\][^\u0007]*\u0007/g, '')
+              .replace(/\u001b\[[0-9;]*[A-Za-z]/g, '');
+          }
+
+          const log = stripAnsi(rawLog);
 
           let numTotalTests = 0;
           let numPassedTests = 0;
           let numFailedTests = 0;
 
           // Typical vitest summary line: "Tests 31 passed (31)"
-          const summaryMatch = log.match(/Tests\s+(\d+)\s+passed\s+\((\d+)\)/m);
+          const summaryMatch = log.match(/\bTests\s+(\d+)\s+passed\s+\((\d+)\)/m);
           if (summaryMatch) {
             numPassedTests = Number(summaryMatch[1]);
             numTotalTests = Number(summaryMatch[2]);
             numFailedTests = Math.max(numTotalTests - numPassedTests, 0);
           } else {
             // Fallback parser for unexpected output formats.
-            const passedMatch = log.match(/\b(\d+)\s+passed\b/m);
-            const failedMatch = log.match(/\b(\d+)\s+failed\b/m);
+            const passedMatch = log.match(/\bTests\s+(\d+)\s+passed\b/m);
+            const failedMatch = log.match(/\bTests\s+(\d+)\s+failed\b/m);
 
             numPassedTests = passedMatch ? Number(passedMatch[1]) : 0;
             numFailedTests = failedMatch ? Number(failedMatch[1]) : 0;
