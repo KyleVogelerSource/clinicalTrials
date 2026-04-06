@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ClinicalTrials Test and Coverage Dashboard</title>
+    <style>
+      :root {
+        --bg: #f3efe7;
+        --ink: #1f2a44;
+        --card: #fffdf8;
+        --line: #d9d0c0;
+        --good: #1b8a5a;
+        --medium: #db7a22;
+        --low: #b7342b;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 20% 15%, #f8d9a030 0%, transparent 45%),
+          radial-gradient(circle at 80% 20%, #7aa5b530 0%, transparent 45%),
+          var(--bg);
+      }
+
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 32px 18px 48px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.5rem, 3vw, 2.4rem);
+        letter-spacing: 0.02em;
+      }
+
+      .subtitle {
+        margin: 8px 0 24px;
+        font-size: 0.95rem;
+        opacity: 0.8;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 18px;
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--card);
+        box-shadow: 0 10px 24px #00000014;
+        overflow: hidden;
+      }
+
+      .card-header {
+        padding: 16px 16px 10px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .card-header h2 {
+        margin: 0 0 8px;
+        font-size: 1.25rem;
+      }
+
+      .card-header a {
+        color: #0a4f8f;
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+
+      .card-header a:hover { text-decoration: underline; }
+
+      .test-strip {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        padding: 14px 16px;
+      }
+
+      .stat {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 8px;
+        background: #fff;
+      }
+
+      .stat .label {
+        display: block;
+        font-size: 0.72rem;
+        opacity: 0.8;
+        margin-bottom: 4px;
+      }
+
+      .stat .value {
+        font-size: 1.05rem;
+        font-weight: 700;
+      }
+
+      .stat .pass { color: var(--good); }
+      .stat .fail { color: var(--low); }
+
+      .metrics {
+        padding: 4px 16px 16px;
+      }
+
+      .metric-row {
+        margin: 10px 0 12px;
+      }
+
+      .metric-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 0.9rem;
+      }
+
+      .metric-name { font-weight: 700; }
+      .metric-values { opacity: 0.9; }
+
+      .bar-track {
+        margin-top: 6px;
+        height: 12px;
+        border-radius: 999px;
+        background: #e8e0d2;
+        overflow: hidden;
+      }
+
+      .bar-fill { height: 100%; }
+      .bar-fill.good { background: var(--good); }
+      .bar-fill.medium { background: var(--medium); }
+      .bar-fill.low { background: var(--low); }
+
+      .metric-foot {
+        margin-top: 4px;
+        font-size: 0.75rem;
+        opacity: 0.75;
+      }
+
+      @media (max-width: 700px) {
+        .test-strip {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <h1>Test and Coverage Dashboard</h1>
+      <p class="subtitle">Generated: 2026-04-05T23:55:03.563Z</p>
+      <div class="grid">
+        
+    <section class="card">
+      <header class="card-header">
+        <h2>Backend</h2>
+        <a href="../backend/coverage/index.html" target="_blank" rel="noopener noreferrer">Open HTML coverage report</a>
+      </header>
+
+      <div class="test-strip">
+        <div class="stat">
+          <span class="label">Total tests</span>
+          <span class="value">181</span>
+        </div>
+        <div class="stat">
+          <span class="label">Passed</span>
+          <span class="value pass">181</span>
+        </div>
+        <div class="stat">
+          <span class="label">Failed</span>
+          <span class="value fail">0</span>
+        </div>
+        <div class="stat">
+          <span class="label">Pass rate</span>
+          <span class="value">100.00%</span>
+        </div>
+      </div>
+
+      <div class="metrics">
+        
+        <div class="metric-row">
+          <div class="metric-head">
+            <span class="metric-name">Lines</span>
+            <span class="metric-values">244/393 (62.08%)</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill medium" style="width: 62.08%;"></div>
+          </div>
+          <div class="metric-foot">Uncovered: 149</div>
+        </div>
+      
+        <div class="metric-row">
+          <div class="metric-head">
+            <span class="metric-name">Statements</span>
+            <span class="metric-values">268/433 (61.89%)</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill medium" style="width: 61.89%;"></div>
+          </div>
+          <div class="metric-foot">Uncovered: 165</div>
+        </div>
+      
+        <div class="metric-row">
+          <div class="metric-head">
+            <span class="metric-name">Functions</span>
+            <span class="metric-values">52/75 (69.33%)</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill medium" style="width: 69.33%;"></div>
+          </div>
+          <div class="metric-foot">Uncovered: 23</div>
+        </div>
+      
+        <div class="metric-row">
+          <div class="metric-head">
+            <span class="metric-name">Branches</span>
+            <span class="metric-values">238/373 (63.80%)</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill medium" style="width: 63.8%;"></div>
+          </div>
+          <div class="metric-foot">Uncovered: 135</div>
+        </div>
+      
+      </div>
+    </section>
+  
+    <section class="card">
+      <header class="card-header">
+        <h2>Frontend</h2>
+        <a href="../frontend/coverage/frontend/index.html" target="_blank" rel="noopener noreferrer">Open HTML coverage report</a>
+      </header>
+
+      <div class="test-strip">
+        <div class="stat">
+          <span class="label">Total tests</span>
+          <span class="value">31</span>
+        </div>
+        <div class="stat">
+          <span class="label">Passed</span>
+          <span class="value pass">31</span>
+        </div>
+        <div class="stat">
+          <span class="label">Failed</span>
+          <span class="value fail">0</span>
+        </div>
+        <div class="stat">
+          <span class="label">Pass rate</span>
+          <span class="value">100.00%</span>
+        </div>
+      </div>
+
+      <div class="metrics">
+        
+        <div class="metric-row">
+          <div class="metric-head">
+            <span class="metric-name">Lines</span>
+            <span class="metric-values">359/603 (59.53%)</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill low" style="width: 59.53%;"></div>
+          </div>
+          <div class="metric-foot">Uncovered: 244</div>
+        </div>
+      
+        <div class="metric-row">
+          <div class="metric-head">
+            <span class="metric-name">Statements</span>
+            <span class="metric-values">522/910 (57.36%)</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill low" style="width: 57.36%;"></div>
+          </div>
+          <div class="metric-foot">Uncovered: 388</div>
+        </div>
+      
+        <div class="metric-row">
+          <div class="metric-head">
+            <span class="metric-name">Functions</span>
+            <span class="metric-values">47/164 (28.65%)</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill low" style="width: 28.65%;"></div>
+          </div>
+          <div class="metric-foot">Uncovered: 117</div>
+        </div>
+      
+        <div class="metric-row">
+          <div class="metric-head">
+            <span class="metric-name">Branches</span>
+            <span class="metric-values">198/363 (54.54%)</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill low" style="width: 54.54%;"></div>
+          </div>
+          <div class="metric-foot">Uncovered: 165</div>
+        </div>
+      
+      </div>
+    </section>
+  
+      </div>
+    </main>
+  </body>
+</html>

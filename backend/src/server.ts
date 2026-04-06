@@ -13,7 +13,7 @@ import { registerUser, loginUser } from "./auth/AuthService";
 import { authenticateToken, AuthenticatedRequest, requireAction, userHasAction } from "./auth/authMiddleware";
 import { assignRoleAction, createAdminUser, createRole, getAdminSnapshot } from "./services/AdminService";
 
-const app = express();
+export const app = express();
 const port = Number(process.env.PORT ?? 3000);
 
 function requireDatabaseConnection(_req: Request, res: Response, next: NextFunction) {
@@ -373,7 +373,7 @@ app.post(
   }
 );
 
-async function bootstrap() {
+export async function bootstrap() {
   try {
     await initializeDatabase();
   } catch (error) {
@@ -385,7 +385,9 @@ async function bootstrap() {
   });
 }
 
-bootstrap().catch((error) => {
-  console.error("Failed to start server:", error);
-  process.exit(1);
-});
+if (require.main === module) {
+  bootstrap().catch((error) => {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  });
+}
