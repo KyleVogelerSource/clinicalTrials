@@ -78,6 +78,7 @@ export class TrialWorkflowService {
             maxAge: input.maxAge ?? undefined,
             requiredConditions: input.required ?? [],
             ineligibleConditions: input.ineligible ?? [],
+            pageSize: 100
         };
 
         this.clinicalStudyService.searchStudies(request).subscribe({
