@@ -70,7 +70,7 @@ export class ClinicalStudyService {
     getDefaultSex = () => trialDesignOptions.defaultSex;
 
     getTrials() {
-        const url = apiUrl('/api/clinical-trails/search');
+        const url = apiUrl('/api/clinical-trials/search');
     }
 
     searchStudies(request: ClinicalTrialSearchRequest): Observable<ClinicalTrialStudiesResponse> {

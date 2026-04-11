@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, signal } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { Logo } from '../primitives/logo/logo';
 import { LoginModal } from '../primitives/login-modal/login-modal';
 import { DebugStatusResponse, DebugStatusService } from '../services/debug-status.service';
+import { DebugMessageService } from '../services/debug-message.service';
 import { AuthService } from '../services/auth.service';
 
 @Component({
@@ -14,7 +15,9 @@ import { AuthService } from '../services/auth.service';
 })
 export class App {
   private readonly debugStatusService = inject(DebugStatusService);
+  private readonly debugMessageService = inject(DebugMessageService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
   protected readonly authService = inject(AuthService);
 
   protected readonly debugEnabled = signal(false);
@@ -22,8 +25,17 @@ export class App {
   protected readonly debugError = signal<string | null>(null);
   protected readonly showLoginModal = signal(false);
   protected readonly canAccessAdmin = signal(false);
+  protected readonly flashMessage = signal<string | null>(null);
+  protected readonly runtimeDebugMessage = this.debugMessageService.message;
+
+  protected handleLogout(): void {
+    this.authService.logout();
+    this.router.navigate(['/']);
+  }
 
   constructor() {
+    const flash = this.authService.consumeFlash();
+    if (flash) this.flashMessage.set(flash);
     const debugFlag = new URLSearchParams(window.location.search).get('debug') === 'true';
     this.debugEnabled.set(debugFlag);
 
@@ -32,6 +44,8 @@ export class App {
         this.canAccessAdmin.set(false);
         return;
       }
+
+      this.flashMessage.set(null);
 
       this.authService.hasAction('user_roles').subscribe({
         next: (allowed) => this.canAccessAdmin.set(allowed),

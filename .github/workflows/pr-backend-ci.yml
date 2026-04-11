@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'backend/**'
+      - 'shared/**'
       - '.github/workflows/pr-backend-ci.yml'
 
 permissions:

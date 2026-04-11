@@ -11,7 +11,29 @@ import express, { NextFunction, Request, Response } from "express";
 import { initializeDatabase, isDatabaseConnected, probeDatabaseConnection } from "./storage/PostgresClient";
 import { registerUser, loginUser } from "./auth/AuthService";
 import { authenticateToken, AuthenticatedRequest, requireAction, userHasAction } from "./auth/authMiddleware";
-import { assignRoleAction, createAdminUser, createRole, getAdminSnapshot } from "./services/AdminService";
+import {
+  assignRoleAction,
+  assignUserRole,
+  createAdminUser,
+  createRole,
+  deleteRoleAction,
+  deleteUserRole,
+  getAdminSnapshot,
+} from "./services/AdminService";
+import { SavedSearchShareRequest, SavedSearchUpsertRequest } from "./dto/SavedSearchDto";
+import { TrialCompareRequest } from "./dto/TrialCompareDto";
+import {
+  createSavedSearch,
+  getAccessibleSavedSearch,
+  listOwnedSavedSearches,
+  listSharedSavedSearches,
+  runSavedSearch,
+  shareSavedSearch,
+  updateAccessibleSavedSearch,
+} from "./services/SavedSearchService";
+import { compareTrials } from "./services/TrialCompareService";
+import { validateSavedSearchShareRequest, validateSavedSearchUpsertRequest } from "./validators/SavedSearchValidator";
+import { validateTrialCompareRequest } from "./validators/TrialCompareValidator";
 
 export const app = express();
 const port = Number(process.env.PORT ?? 3000);
@@ -184,6 +206,37 @@ app.post("/api/clinical-trials/results", async (req: Request, res: Response) => 
   }
 });
 
+app.post(
+  "/api/clinical-trials/compare",
+  requireDatabaseConnection,
+  authenticateToken,
+  requireAction("trial_benchmarking"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    const requestBody = req.body as Partial<TrialCompareRequest>;
+    const validation = validateTrialCompareRequest(requestBody);
+    if (!validation.valid) {
+      res.status(400).json({
+        error: "Bad Request",
+        message: "One or more request body fields are invalid.",
+        details: validation.errors,
+      });
+      return;
+    }
+
+    try {
+      const comparison = await compareTrials(requestBody as TrialCompareRequest);
+      res.status(200).json(comparison);
+    } catch (err) {
+      if (err instanceof Error && err.message.startsWith("TRIAL_NOT_FOUND:")) {
+        res.status(404).json({ error: "Not Found", message: err.message.replace("TRIAL_NOT_FOUND:", "Trial not found: ") });
+        return;
+      }
+
+      handleApiError(err, res, "POST /api/clinical-trials/compare");
+    }
+  }
+);
+
 // POST /api/auth/register
 app.post("/api/auth/register", requireDatabaseConnection, async (req: Request, res: Response) => {
   const { username, password, firstName, lastName } = req.body as Record<string, string>;
@@ -256,6 +309,298 @@ app.get(
     } catch (err) {
       console.error("Unexpected error in GET /api/auth/has-action/:action:", err);
       res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+    }
+  }
+);
+
+app.post(
+  "/api/saved-searches",
+  requireDatabaseConnection,
+  authenticateToken,
+  async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.userId;
+    const username = req.user?.username ?? "";
+    if (!userId) {
+      res.status(401).json({ error: "Unauthorized", message: "No user in token payload." });
+      return;
+    }
+
+    const requestBody = req.body as Partial<SavedSearchUpsertRequest>;
+    const validation = validateSavedSearchUpsertRequest(requestBody);
+    if (!validation.valid) {
+      res.status(400).json({
+        error: "Bad Request",
+        message: "One or more request body fields are invalid.",
+        details: validation.errors,
+      });
+      return;
+    }
+
+    try {
+      const savedSearch = await createSavedSearch(
+        userId,
+        username,
+        requestBody as SavedSearchUpsertRequest
+      );
+      res.status(201).json(savedSearch);
+    } catch (err) {
+      if (err instanceof Error && err.message === "DUPLICATE_SAVED_SEARCH") {
+        res.status(409).json({ error: "Conflict", message: "An equivalent saved search already exists for this user." });
+        return;
+      }
+
+      console.error("Unexpected error in POST /api/saved-searches:", err);
+      res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+    }
+  }
+);
+
+app.get(
+  "/api/saved-searches",
+  requireDatabaseConnection,
+  authenticateToken,
+  async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: "Unauthorized", message: "No user in token payload." });
+      return;
+    }
+
+    try {
+      const savedSearches = await listOwnedSavedSearches(userId);
+      res.status(200).json(savedSearches);
+    } catch (err) {
+      console.error("Unexpected error in GET /api/saved-searches:", err);
+      res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+    }
+  }
+);
+
+app.get(
+  "/api/saved-searches/shared-with-me",
+  requireDatabaseConnection,
+  authenticateToken,
+  async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: "Unauthorized", message: "No user in token payload." });
+      return;
+    }
+
+    try {
+      const allowed = await userHasAction(userId, "saved_searches_view_shared");
+      if (!allowed) {
+        res.status(200).json([]);
+        return;
+      }
+
+      const savedSearches = await listSharedSavedSearches(userId);
+      res.status(200).json(savedSearches);
+    } catch (err) {
+      console.error("Unexpected error in GET /api/saved-searches/shared-with-me:", err);
+      res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+    }
+  }
+);
+
+app.get(
+  "/api/saved-searches/:id",
+  requireDatabaseConnection,
+  authenticateToken,
+  async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.userId;
+    const savedSearchId = Number(req.params.id);
+
+    if (!userId) {
+      res.status(401).json({ error: "Unauthorized", message: "No user in token payload." });
+      return;
+    }
+
+    if (!Number.isInteger(savedSearchId)) {
+      res.status(400).json({ error: "Bad Request", message: "Saved search id must be an integer." });
+      return;
+    }
+
+    try {
+      const allowSharedView = await userHasAction(userId, "saved_searches_view_shared");
+      const savedSearch = await getAccessibleSavedSearch(savedSearchId, userId, allowSharedView);
+      if (!savedSearch) {
+        res.status(404).json({ error: "Not Found", message: "Saved search not found." });
+        return;
+      }
+
+      res.status(200).json(savedSearch);
+    } catch (err) {
+      console.error("Unexpected error in GET /api/saved-searches/:id:", err);
+      res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+    }
+  }
+);
+
+app.put(
+  "/api/saved-searches/:id",
+  requireDatabaseConnection,
+  authenticateToken,
+  async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.userId;
+    const savedSearchId = Number(req.params.id);
+
+    if (!userId) {
+      res.status(401).json({ error: "Unauthorized", message: "No user in token payload." });
+      return;
+    }
+
+    if (!Number.isInteger(savedSearchId)) {
+      res.status(400).json({ error: "Bad Request", message: "Saved search id must be an integer." });
+      return;
+    }
+
+    const requestBody = req.body as Partial<SavedSearchUpsertRequest>;
+    const validation = validateSavedSearchUpsertRequest(requestBody);
+    if (!validation.valid) {
+      res.status(400).json({
+        error: "Bad Request",
+        message: "One or more request body fields are invalid.",
+        details: validation.errors,
+      });
+      return;
+    }
+
+    try {
+      const allowSharedView = await userHasAction(userId, "saved_searches_view_shared");
+      const savedSearch = await updateAccessibleSavedSearch(
+        savedSearchId,
+        userId,
+        requestBody as SavedSearchUpsertRequest,
+        false,
+        allowSharedView
+      );
+      res.status(200).json(savedSearch);
+    } catch (err) {
+      if (err instanceof Error && err.message === "SAVED_SEARCH_NOT_FOUND") {
+        res.status(404).json({ error: "Not Found", message: "Saved search not found." });
+        return;
+      }
+      if (err instanceof Error && err.message === "SAVED_SEARCH_FORBIDDEN") {
+        res.status(403).json({ error: "Forbidden", message: "You do not have permission to edit this saved search." });
+        return;
+      }
+      if (err instanceof Error && err.message === "DUPLICATE_SAVED_SEARCH") {
+        res.status(409).json({ error: "Conflict", message: "An equivalent saved search already exists for this user." });
+        return;
+      }
+
+      console.error("Unexpected error in PUT /api/saved-searches/:id:", err);
+      res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+    }
+  }
+);
+
+app.post(
+  "/api/saved-searches/:id/share",
+  requireDatabaseConnection,
+  authenticateToken,
+  async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.userId;
+    const savedSearchId = Number(req.params.id);
+
+    if (!userId) {
+      res.status(401).json({ error: "Unauthorized", message: "No user in token payload." });
+      return;
+    }
+
+    if (!Number.isInteger(savedSearchId)) {
+      res.status(400).json({ error: "Bad Request", message: "Saved search id must be an integer." });
+      return;
+    }
+
+    const requestBody = req.body as Partial<SavedSearchShareRequest>;
+    const validation = validateSavedSearchShareRequest(requestBody);
+    if (!validation.valid) {
+      res.status(400).json({
+        error: "Bad Request",
+        message: "One or more request body fields are invalid.",
+        details: validation.errors,
+      });
+      return;
+    }
+
+    try {
+      const sharedSearch = await shareSavedSearch(savedSearchId, userId, requestBody as SavedSearchShareRequest);
+      res.status(200).json(sharedSearch);
+    } catch (err) {
+      if (err instanceof Error && err.message === "SAVED_SEARCH_NOT_FOUND") {
+        res.status(404).json({ error: "Not Found", message: "Saved search not found." });
+        return;
+      }
+      if (err instanceof Error && err.message === "SAVED_SEARCH_FORBIDDEN") {
+        res.status(403).json({ error: "Forbidden", message: "Only the owner can manage sharing for this saved search." });
+        return;
+      }
+      if (err instanceof Error && err.message === "TARGET_USER_NOT_FOUND") {
+        res.status(404).json({ error: "Not Found", message: "Target user not found." });
+        return;
+      }
+      if (err instanceof Error && err.message === "TARGET_USER_INVALID") {
+        res.status(400).json({ error: "Bad Request", message: "Saved searches cannot be shared back to the owner." });
+        return;
+      }
+
+      console.error("Unexpected error in POST /api/saved-searches/:id/share:", err);
+      res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+    }
+  }
+);
+
+app.post(
+  "/api/saved-searches/:id/run",
+  requireDatabaseConnection,
+  authenticateToken,
+  async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.userId;
+    const savedSearchId = Number(req.params.id);
+
+    if (!userId) {
+      res.status(401).json({ error: "Unauthorized", message: "No user in token payload." });
+      return;
+    }
+
+    if (!Number.isInteger(savedSearchId)) {
+      res.status(400).json({ error: "Bad Request", message: "Saved search id must be an integer." });
+      return;
+    }
+
+    try {
+      const allowSharedView = await userHasAction(userId, "saved_searches_view_shared");
+      const result = await runSavedSearch(savedSearchId, userId, allowSharedView, false);
+      res.status(200).json(result);
+    } catch (err) {
+      if (err instanceof Error && err.message === "SAVED_SEARCH_NOT_FOUND") {
+        res.status(404).json({ error: "Not Found", message: "Saved search not found." });
+        return;
+      }
+      if (err instanceof Error && err.message === "SAVED_SEARCH_FORBIDDEN") {
+        res.status(403).json({ error: "Forbidden", message: "You do not have permission to run this saved search." });
+        return;
+      }
+      if (err instanceof Error && err.message.startsWith("SAVED_SEARCH_CRITERIA_INVALID:")) {
+        const rawDetails = err.message.replace("SAVED_SEARCH_CRITERIA_INVALID:", "");
+        let details: unknown = [];
+        try {
+          details = JSON.parse(rawDetails);
+        } catch {
+          details = [];
+        }
+
+        res.status(400).json({
+          error: "Bad Request",
+          message: "Saved search criteria are invalid. Please update the saved search and try again.",
+          details,
+        });
+        return;
+      }
+
+      handleApiError(err, res, "POST /api/saved-searches/:id/run");
     }
   }
 );
@@ -368,6 +713,97 @@ app.post(
         return;
       }
       console.error("Unexpected error in POST /api/admin/role-actions:", err);
+      res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+    }
+  }
+);
+
+app.post(
+  "/api/admin/user-roles",
+  requireDatabaseConnection,
+  authenticateToken,
+  requireAction("user_roles"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    const { userId, roleId } = req.body as { userId?: number; roleId?: number };
+
+    if (!Number.isInteger(userId) || !Number.isInteger(roleId)) {
+      res.status(400).json({ error: "Bad Request", message: "userId and roleId are required integers." });
+      return;
+    }
+
+    try {
+      const userRole = await assignUserRole(Number(userId), Number(roleId));
+      res.status(201).json(userRole);
+    } catch (err) {
+      if (err instanceof Error && err.message === "USER_NOT_FOUND") {
+        res.status(404).json({ error: "Not Found", message: "User not found." });
+        return;
+      }
+      if (err instanceof Error && err.message === "ROLE_NOT_FOUND") {
+        res.status(404).json({ error: "Not Found", message: "Role not found." });
+        return;
+      }
+      if (err instanceof Error && err.message === "USER_ROLE_EXISTS") {
+        res.status(409).json({ error: "Conflict", message: "User is already assigned to this role." });
+        return;
+      }
+      console.error("Unexpected error in POST /api/admin/user-roles:", err);
+      res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+    }
+  }
+);
+
+app.delete(
+  "/api/admin/role-actions/:roleId/:actionId",
+  requireDatabaseConnection,
+  authenticateToken,
+  requireAction("user_roles"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    const roleId = Number(req.params.roleId);
+    const actionId = Number(req.params.actionId);
+
+    if (!Number.isInteger(roleId) || !Number.isInteger(actionId)) {
+      res.status(400).json({ error: "Bad Request", message: "roleId and actionId must be integers." });
+      return;
+    }
+
+    try {
+      await deleteRoleAction(roleId, actionId);
+      res.status(204).send();
+    } catch (err) {
+      if (err instanceof Error && err.message === "ROLE_ACTION_NOT_FOUND") {
+        res.status(404).json({ error: "Not Found", message: "Role-action relation not found." });
+        return;
+      }
+      console.error("Unexpected error in DELETE /api/admin/role-actions/:roleId/:actionId:", err);
+      res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+    }
+  }
+);
+
+app.delete(
+  "/api/admin/user-roles/:userId/:roleId",
+  requireDatabaseConnection,
+  authenticateToken,
+  requireAction("user_roles"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    const userId = Number(req.params.userId);
+    const roleId = Number(req.params.roleId);
+
+    if (!Number.isInteger(userId) || !Number.isInteger(roleId)) {
+      res.status(400).json({ error: "Bad Request", message: "userId and roleId must be integers." });
+      return;
+    }
+
+    try {
+      await deleteUserRole(userId, roleId);
+      res.status(204).send();
+    } catch (err) {
+      if (err instanceof Error && err.message === "USER_ROLE_NOT_FOUND") {
+        res.status(404).json({ error: "Not Found", message: "User-role relation not found." });
+        return;
+      }
+      console.error("Unexpected error in DELETE /api/admin/user-roles/:userId/:roleId:", err);
       res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
     }
   }

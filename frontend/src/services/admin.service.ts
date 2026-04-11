@@ -33,11 +33,20 @@ export interface AdminRoleActionSummary {
   createdAt: string;
 }
 
+export interface AdminUserRoleSummary {
+  userId: number;
+  username: string;
+  roleId: number;
+  roleName: string;
+  createdAt: string;
+}
+
 export interface AdminSnapshot {
   users: AdminUserSummary[];
   roles: AdminRoleSummary[];
   actions: AdminActionSummary[];
   roleActions: AdminRoleActionSummary[];
+  userRoles: AdminUserRoleSummary[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -58,5 +67,17 @@ export class AdminService {
 
   assignRoleAction(payload: { roleId: number; actionId: number }) {
     return this.http.post(apiUrl('/api/admin/role-actions'), payload);
+  }
+
+  assignUserRole(payload: { userId: number; roleId: number }) {
+    return this.http.post(apiUrl('/api/admin/user-roles'), payload);
+  }
+
+  deleteRoleAction(roleId: number, actionId: number) {
+    return this.http.delete(apiUrl(`/api/admin/role-actions/${roleId}/${actionId}`));
+  }
+
+  deleteUserRole(userId: number, roleId: number) {
+    return this.http.delete(apiUrl(`/api/admin/user-roles/${userId}/${roleId}`));
   }
 }
