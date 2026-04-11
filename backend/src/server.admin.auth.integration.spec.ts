@@ -1,5 +1,7 @@
 import request from "supertest";
 import jwt from "jsonwebtoken";
+import type { NextFunction, Response } from "express";
+import type { AuthenticatedRequest } from "./auth/authMiddleware";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
@@ -20,7 +22,7 @@ vi.mock("./auth/authMiddleware", async () => {
   const actual = await vi.importActual<typeof import("./auth/authMiddleware")>("./auth/authMiddleware");
   return {
     ...actual,
-    requireAction: vi.fn(() => async (req, res, next) => {
+    requireAction: vi.fn(() => async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
       if (!req.user?.userId) {
         res.status(401).json({ error: "Unauthorized", message: "No user in token payload." });
         return;

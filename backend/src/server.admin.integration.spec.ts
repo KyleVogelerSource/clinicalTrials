@@ -1,4 +1,5 @@
 import request from "supertest";
+import type { NextFunction, Request, Response } from "express";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
@@ -11,8 +12,8 @@ const {
   assignUserRoleMock: vi.fn(),
   deleteRoleActionMock: vi.fn(),
   deleteUserRoleMock: vi.fn(),
-  authenticateTokenMock: vi.fn((_req, _res, next) => next()),
-  requireActionMock: vi.fn(() => (_req, _res, next) => next()),
+  authenticateTokenMock: vi.fn((_req: Request, _res: Response, next: NextFunction) => next()),
+  requireActionMock: vi.fn(() => (_req: Request, _res: Response, next: NextFunction) => next()),
 }));
 
 vi.mock("./services/AdminService", async () => {
