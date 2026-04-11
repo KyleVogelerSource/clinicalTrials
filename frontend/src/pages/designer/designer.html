@@ -42,7 +42,7 @@
 
                 <div class="form-group">
                     <label for="intervention">Intervention Model</label>
-                    <select id="intervention" type="text" formControlName="interventionModel">
+                    <select id="intervention" formControlName="interventionModel">
                         @for (option of interventionOptions; track option) {
                             <option [value]="option">{{ option }}</option>
                         }
@@ -51,7 +51,7 @@
 
                 <div class="form-group">
                     <label for="blinding">Blinding/Masking Type</label>
-                    <select id="blinding" type="text" formControlName="blindingType">
+                    <select id="blinding" formControlName="blindingType">
                         @for (option of blindingOptions; track option) {
                             <option [value]="option">{{ option }}</option>
                         }
