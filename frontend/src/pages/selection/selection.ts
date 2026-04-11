@@ -4,6 +4,7 @@ import { KeywordSelector } from '../../primitives/keyword-selector/keyword-selec
 import { Router } from '@angular/router';
 import { CommonModule, DecimalPipe, DatePipe } from '@angular/common';
 import { TrialWorkflowService } from '../../services/trial-workflow-service';
+import { AuthService } from '../../services/auth.service';
 import { StudyTrial } from '../../models/study-trial';
 
 @Component({
@@ -17,6 +18,10 @@ import { StudyTrial } from '../../models/study-trial';
 export class Selection {
     router = inject(Router);
     workflowService = inject(TrialWorkflowService);
+    authService = inject(AuthService);
+
+    private lastFoundTrialsKey = '';
+    private shouldAutoSelectForCurrentResults = true;
 
     // Proxy signals from the service
     foundTrials = this.workflowService.foundTrials;
@@ -26,6 +31,7 @@ export class Selection {
 
     expandedTrialId = signal<string | null>(null);
     selectedTrialIds = this.workflowService.selectedTrialIds;
+    canCompareTrials = signal(false);
 
     DISPLAY_THRESHOLD = 1000;
 
@@ -90,23 +96,44 @@ export class Selection {
         return filtered.every(trial => selected.includes(trial.nctId));
     });
 
+    compareDisabled = computed(() => {
+        const count = this.selectedTrialIds().length;
+        return count < 2 || count > 5;
+    });
+
     constructor() {
+        if (this.authService.isLoggedIn()) {
+            this.authService.hasAction('trial_benchmarking').subscribe({
+                next: (allowed) => this.canCompareTrials.set(allowed),
+                error: () => this.canCompareTrials.set(false),
+            });
+        }
+
         // Automatically select all if filtered count is below threshold
         effect(() => {
+            const foundTrialsKey = this.foundTrials().map(trial => trial.nctId).join('|');
+            if (foundTrialsKey !== this.lastFoundTrialsKey) {
+                this.lastFoundTrialsKey = foundTrialsKey;
+                this.shouldAutoSelectForCurrentResults = true;
+            }
+
             const filtered = this.filteredTrials();
             const currentSelected = this.selectedTrialIds();
 
             if (filtered.length < this.DISPLAY_THRESHOLD) {
                 const filteredIds = filtered.map(t => t.nctId);
-                // If selection is empty, auto-select all
-                if (currentSelected.length === 0 && filteredIds.length > 0) {
+                // Auto-select only once for a given result set.
+                if (this.shouldAutoSelectForCurrentResults && currentSelected.length === 0 && filteredIds.length > 0) {
                      this.selectedTrialIds.set(filteredIds);
+                     this.shouldAutoSelectForCurrentResults = false;
                 }
             } else {
                 // If over threshold, clear selection as table is hidden and filtering is required
                 if (currentSelected.length > 0) {
                     this.selectedTrialIds.set([]);
                 }
+
+                this.shouldAutoSelectForCurrentResults = true;
             }
         });
     }
@@ -167,5 +194,13 @@ export class Selection {
     onNext() {
         this.workflowService.processResults();
         this.router.navigate(['/results']);
+    }
+
+    onCompare() {
+        if (!this.canCompareTrials()) {
+            return;
+        }
+
+        this.router.navigate(['/compare']);
     }
 }

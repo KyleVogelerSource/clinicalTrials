@@ -31,17 +31,26 @@ export interface AdminRoleActionSummary {
   createdAt: string;
 }
 
+export interface AdminUserRoleSummary {
+  userId: number;
+  username: string;
+  roleId: number;
+  roleName: string;
+  createdAt: string;
+}
+
 export interface AdminSnapshot {
   users: AdminUserSummary[];
   roles: AdminRoleSummary[];
   actions: AdminActionSummary[];
   roleActions: AdminRoleActionSummary[];
+  userRoles: AdminUserRoleSummary[];
 }
 
 export async function getAdminSnapshot(): Promise<AdminSnapshot> {
   const pool = getDbPool();
 
-  const [usersResult, rolesResult, actionsResult, roleActionsResult] = await Promise.all([
+  const [usersResult, rolesResult, actionsResult, roleActionsResult, userRolesResult] = await Promise.all([
     pool.query(
       `SELECT u.id,
               u.username,
@@ -74,6 +83,13 @@ export async function getAdminSnapshot(): Promise<AdminSnapshot> {
        JOIN actions a ON a.id = ra.action_id
        ORDER BY r.name ASC, a.name ASC`
     ),
+    pool.query(
+      `SELECT ur.user_id, u.username, ur.role_id, r.name AS role_name, ur.created_at
+       FROM user_roles ur
+       JOIN users u ON u.id = ur.user_id
+       JOIN roles r ON r.id = ur.role_id
+       ORDER BY u.username ASC, r.name ASC`
+    ),
   ]);
 
   return {
@@ -101,6 +117,13 @@ export async function getAdminSnapshot(): Promise<AdminSnapshot> {
       roleName: row.role_name,
       actionId: row.action_id,
       actionName: row.action_name,
+      createdAt: row.created_at,
+    })),
+    userRoles: userRolesResult.rows.map((row) => ({
+      userId: row.user_id,
+      username: row.username,
+      roleId: row.role_id,
+      roleName: row.role_name,
       createdAt: row.created_at,
     })),
   };
@@ -165,4 +188,66 @@ export async function assignRoleAction(roleId: number, actionId: number) {
     actionName: actionCheck.rows[0].name,
     createdAt: result.rows[0].created_at,
   };
+}
+
+export async function assignUserRole(userId: number, roleId: number) {
+  const pool = getDbPool();
+
+  const userCheck = await pool.query(`SELECT id, username FROM users WHERE id = $1`, [userId]);
+  if ((userCheck.rowCount ?? 0) === 0) {
+    throw new Error("USER_NOT_FOUND");
+  }
+
+  const roleCheck = await pool.query(`SELECT id, name FROM roles WHERE id = $1`, [roleId]);
+  if ((roleCheck.rowCount ?? 0) === 0) {
+    throw new Error("ROLE_NOT_FOUND");
+  }
+
+  const result = await pool.query(
+    `INSERT INTO user_roles (user_id, role_id)
+     VALUES ($1, $2)
+     ON CONFLICT (user_id, role_id) DO NOTHING
+     RETURNING created_at`,
+    [userId, roleId]
+  );
+
+  if ((result.rowCount ?? 0) === 0) {
+    throw new Error("USER_ROLE_EXISTS");
+  }
+
+  return {
+    userId,
+    username: userCheck.rows[0].username,
+    roleId,
+    roleName: roleCheck.rows[0].name,
+    createdAt: result.rows[0].created_at,
+  };
+}
+
+export async function deleteRoleAction(roleId: number, actionId: number) {
+  const pool = getDbPool();
+
+  const result = await pool.query(
+    `DELETE FROM role_actions
+     WHERE role_id = $1 AND action_id = $2`,
+    [roleId, actionId]
+  );
+
+  if ((result.rowCount ?? 0) === 0) {
+    throw new Error("ROLE_ACTION_NOT_FOUND");
+  }
+}
+
+export async function deleteUserRole(userId: number, roleId: number) {
+  const pool = getDbPool();
+
+  const result = await pool.query(
+    `DELETE FROM user_roles
+     WHERE user_id = $1 AND role_id = $2`,
+    [userId, roleId]
+  );
+
+  if ((result.rowCount ?? 0) === 0) {
+    throw new Error("USER_ROLE_NOT_FOUND");
+  }
 }

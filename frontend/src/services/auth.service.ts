@@ -58,6 +58,22 @@ export class AuthService {
     this._user.set(null);
   }
 
+  logoutExpired(): void {
+    this.logout();
+    try { sessionStorage.setItem('auth_flash', 'Your session has expired. Please log in again.'); } catch { /* ignore */ }
+    window.location.href = '/';
+  }
+
+  consumeFlash(): string | null {
+    try {
+      const msg = sessionStorage.getItem('auth_flash');
+      if (msg) sessionStorage.removeItem('auth_flash');
+      return msg;
+    } catch {
+      return null;
+    }
+  }
+
   getToken(): string | null {
     return this._token();
   }

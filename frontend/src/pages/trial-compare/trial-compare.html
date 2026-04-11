@@ -1,0 +1,53 @@
+<div class="trial-compare-container">
+  <h2>Trial Comparison</h2>
+
+  @if (loading()) {
+    <p class="state-message">Comparing selected trials...</p>
+  } @else if (errorMessage()) {
+    <p class="error-message">{{ errorMessage() }}</p>
+    <button class="btn" (click)="backToSelection()">Back to Selection</button>
+  } @else if (compareData(); as data) {
+    <section class="scoreboard">
+      <h3>Benchmark Ranking</h3>
+      <div class="score-grid">
+        @for (score of data.benchmarkScores; track score.nctId) {
+          <article class="score-card">
+            <div class="rank">#{{ score.rank }}</div>
+            <div class="nct">{{ score.nctId }}</div>
+            <div class="pct">{{ toPercent(score.score) }}%</div>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="matrix-section">
+      <h3>Pairwise Comparison Matrix</h3>
+      @for (row of data.comparisonMatrix; track row.nctId) {
+        <article class="matrix-row">
+          <h4>{{ labelForNctId(row.nctId) }}</h4>
+          <div class="cell-list">
+            @for (cell of row.scores; track cell.againstNctId) {
+              <div class="matrix-cell">
+                <div class="cell-header">
+                  <span>Against {{ cell.againstNctId }}</span>
+                  <strong>{{ toPercent(cell.score) }}%</strong>
+                </div>
+                @if (cell.explanations.length > 0) {
+                  <ul>
+                    @for (item of cell.explanations.slice(0, 3); track item) {
+                      <li>{{ item }}</li>
+                    }
+                  </ul>
+                }
+              </div>
+            }
+          </div>
+        </article>
+      }
+    </section>
+
+    <div class="actions">
+      <button class="btn" (click)="backToSelection()">Back to Selection</button>
+    </div>
+  }
+</div>
