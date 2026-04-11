@@ -4,6 +4,9 @@ import {
   createAdminUser,
   createRole,
   assignRoleAction,
+  assignUserRole,
+  deleteRoleAction,
+  deleteUserRole,
 } from "./AdminService";
 import * as postgresClient from "../storage/PostgresClient";
 import * as authService from "../auth/AuthService";
@@ -39,15 +42,16 @@ describe("AdminService", () => {
         roles: [],
         actions: [],
         roleActions: [],
+        userRoles: [],
       });
     });
 
-    it("should make 4 database queries", async () => {
+    it("should make 5 database queries", async () => {
       mockPool.query.mockResolvedValue({ rows: [] });
 
       await getAdminSnapshot();
 
-      expect(mockPool.query).toHaveBeenCalledTimes(4);
+      expect(mockPool.query).toHaveBeenCalledTimes(5);
     });
 
     it("should query users with roles", async () => {
@@ -135,7 +139,8 @@ describe("AdminService", () => {
               created_at: "2024-01-01",
             },
           ],
-        });
+        })
+        .mockResolvedValueOnce({ rows: [] });
 
       const result = await getAdminSnapshot();
 
@@ -145,6 +150,35 @@ describe("AdminService", () => {
         roleName: "admin",
         actionId: 1,
         actionName: "create_users",
+      });
+    });
+
+    it("should query user-roles mappings", async () => {
+      mockPool.query
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({
+          rows: [
+            {
+              user_id: 7,
+              username: "jane",
+              role_id: 3,
+              role_name: "editor",
+              created_at: "2024-01-01",
+            },
+          ],
+        });
+
+      const result = await getAdminSnapshot();
+
+      expect(result.userRoles).toHaveLength(1);
+      expect(result.userRoles[0]).toMatchObject({
+        userId: 7,
+        username: "jane",
+        roleId: 3,
+        roleName: "editor",
       });
     });
 
@@ -577,6 +611,87 @@ describe("AdminService", () => {
       const result = await assignRoleAction(2147483647, 2147483647);
 
       expect(result.roleId).toBe(2147483647);
+    });
+  });
+
+  describe("assignUserRole", () => {
+    it("should assign role to user successfully", async () => {
+      mockPool.query
+        .mockResolvedValueOnce({
+          rowCount: 1,
+          rows: [{ id: 10, username: "alice" }],
+        })
+        .mockResolvedValueOnce({
+          rowCount: 1,
+          rows: [{ id: 2, name: "editor" }],
+        })
+        .mockResolvedValueOnce({
+          rowCount: 1,
+          rows: [{ created_at: "2024-01-01" }],
+        });
+
+      const result = await assignUserRole(10, 2);
+
+      expect(result).toMatchObject({
+        userId: 10,
+        username: "alice",
+        roleId: 2,
+        roleName: "editor",
+        createdAt: "2024-01-01",
+      });
+    });
+
+    it("should throw USER_NOT_FOUND when user doesn't exist", async () => {
+      mockPool.query.mockResolvedValueOnce({ rowCount: 0 });
+
+      await expect(assignUserRole(999, 2)).rejects.toThrow("USER_NOT_FOUND");
+    });
+
+    it("should throw ROLE_NOT_FOUND when role doesn't exist", async () => {
+      mockPool.query
+        .mockResolvedValueOnce({ rowCount: 1, rows: [{ id: 1, username: "alice" }] })
+        .mockResolvedValueOnce({ rowCount: 0 });
+
+      await expect(assignUserRole(1, 999)).rejects.toThrow("ROLE_NOT_FOUND");
+    });
+
+    it("should throw USER_ROLE_EXISTS when already assigned", async () => {
+      mockPool.query
+        .mockResolvedValueOnce({ rowCount: 1, rows: [{ id: 1, username: "alice" }] })
+        .mockResolvedValueOnce({ rowCount: 1, rows: [{ id: 2, name: "editor" }] })
+        .mockResolvedValueOnce({ rowCount: 0 });
+
+      await expect(assignUserRole(1, 2)).rejects.toThrow("USER_ROLE_EXISTS");
+    });
+  });
+
+  describe("deleteRoleAction", () => {
+    it("should delete an existing role-action relation", async () => {
+      mockPool.query.mockResolvedValueOnce({ rowCount: 1 });
+
+      await expect(deleteRoleAction(1, 2)).resolves.toBeUndefined();
+      expect(mockPool.query).toHaveBeenCalledWith(expect.stringContaining("DELETE FROM role_actions"), [1, 2]);
+    });
+
+    it("should throw ROLE_ACTION_NOT_FOUND when relation is missing", async () => {
+      mockPool.query.mockResolvedValueOnce({ rowCount: 0 });
+
+      await expect(deleteRoleAction(1, 2)).rejects.toThrow("ROLE_ACTION_NOT_FOUND");
+    });
+  });
+
+  describe("deleteUserRole", () => {
+    it("should delete an existing user-role relation", async () => {
+      mockPool.query.mockResolvedValueOnce({ rowCount: 1 });
+
+      await expect(deleteUserRole(4, 3)).resolves.toBeUndefined();
+      expect(mockPool.query).toHaveBeenCalledWith(expect.stringContaining("DELETE FROM user_roles"), [4, 3]);
+    });
+
+    it("should throw USER_ROLE_NOT_FOUND when relation is missing", async () => {
+      mockPool.query.mockResolvedValueOnce({ rowCount: 0 });
+
+      await expect(deleteUserRole(4, 3)).rejects.toThrow("USER_ROLE_NOT_FOUND");
     });
   });
 });
