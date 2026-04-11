@@ -53,7 +53,7 @@ function requireDatabaseConnection(_req: Request, res: Response, next: NextFunct
 app.use(express.json());
 app.use(cors());
 
-const allowedOrigins = ["http://localhost:4200", "https://d8rtqu8bq9oyq.cloudfront.net"];
+const allowedOrigins = ["http://localhost:4200", "https://d8rtqu8bq9oyq.cloudfront.net", "https://cardinaltrials.com"];
 
 // Allow requests from the Angular dev server and production CloudFront
 app.use((_req: Request, res: Response, next: NextFunction) => {
