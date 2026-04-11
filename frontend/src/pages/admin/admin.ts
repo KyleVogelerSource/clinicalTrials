@@ -6,6 +6,7 @@ import {
   AdminRoleActionSummary,
   AdminRoleSummary,
   AdminService,
+  AdminUserRoleSummary,
   AdminUserSummary,
 } from '../../services/admin.service';
 
@@ -28,6 +29,7 @@ export class Admin {
   protected readonly roles = signal<AdminRoleSummary[]>([]);
   protected readonly actions = signal<AdminActionSummary[]>([]);
   protected readonly roleActions = signal<AdminRoleActionSummary[]>([]);
+  protected readonly userRoles = signal<AdminUserRoleSummary[]>([]);
 
   protected userUsername = '';
   protected userPassword = '';
@@ -36,6 +38,8 @@ export class Admin {
   protected roleName = '';
   protected selectedRoleId: number | null = null;
   protected selectedActionId: number | null = null;
+  protected selectedUserId: number | null = null;
+  protected selectedUserRoleId: number | null = null;
 
   constructor() {
     if (!this.authService.isLoggedIn()) {
@@ -117,6 +121,50 @@ export class Admin {
     });
   }
 
+  protected assignRoleToUser(): void {
+    if (this.selectedUserId === null || this.selectedUserRoleId === null) {
+      this.errorMessage.set('Select both a user and a role.');
+      return;
+    }
+
+    this.clearMessages();
+    this.adminService.assignUserRole({ userId: this.selectedUserId, roleId: this.selectedUserRoleId }).subscribe({
+      next: () => {
+        this.successMessage.set('Role assigned to user.');
+        this.loadAdminData();
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.errorMessage.set(err.error?.message ?? 'Unable to assign role to user.');
+      },
+    });
+  }
+
+  protected removeRoleAction(assignment: AdminRoleActionSummary): void {
+    this.clearMessages();
+    this.adminService.deleteRoleAction(assignment.roleId, assignment.actionId).subscribe({
+      next: () => {
+        this.successMessage.set('Role-action relation deleted.');
+        this.loadAdminData();
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.errorMessage.set(err.error?.message ?? 'Unable to delete role-action relation.');
+      },
+    });
+  }
+
+  protected removeUserRole(assignment: AdminUserRoleSummary): void {
+    this.clearMessages();
+    this.adminService.deleteUserRole(assignment.userId, assignment.roleId).subscribe({
+      next: () => {
+        this.successMessage.set('User-role relation deleted.');
+        this.loadAdminData();
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.errorMessage.set(err.error?.message ?? 'Unable to delete user-role relation.');
+      },
+    });
+  }
+
   protected formatList(values: string[]): string {
     return values.length > 0 ? values.join(', ') : 'None';
   }
@@ -128,11 +176,18 @@ export class Admin {
         this.roles.set(snapshot.roles);
         this.actions.set(snapshot.actions);
         this.roleActions.set(snapshot.roleActions);
+        this.userRoles.set(snapshot.userRoles);
         if (this.selectedRoleId === null && snapshot.roles.length > 0) {
           this.selectedRoleId = snapshot.roles[0].id;
         }
         if (this.selectedActionId === null && snapshot.actions.length > 0) {
           this.selectedActionId = snapshot.actions[0].id;
+        }
+        if (this.selectedUserId === null && snapshot.users.length > 0) {
+          this.selectedUserId = snapshot.users[0].id;
+        }
+        if (this.selectedUserRoleId === null && snapshot.roles.length > 0) {
+          this.selectedUserRoleId = snapshot.roles[0].id;
         }
         this.loading.set(false);
       },

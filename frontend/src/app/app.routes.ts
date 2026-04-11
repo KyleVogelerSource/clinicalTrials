@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { Home } from '../pages/home/home';
 import { Designer } from '../pages/designer/designer';
 import { Selection } from '../pages/selection/selection';
+import { authGuard } from './auth.guard';
 
 export const routes: Routes = [
     {
@@ -22,6 +23,16 @@ export const routes: Routes = [
     },
     {
         path: 'admin',
-        loadComponent: () => import('../pages/admin/admin').then(m => m.Admin)
+        loadComponent: () => import('../pages/admin/admin').then(m => m.Admin),
+        canActivate: [authGuard]
+    },
+    {
+        path: 'saved-searches',
+        loadComponent: () => import('../pages/saved-searches/saved-searches').then(m => m.SavedSearches),
+        canActivate: [authGuard]
+    },
+    {
+        path: 'compare',
+        loadComponent: () => import('../pages/trial-compare/trial-compare').then(m => m.TrialCompare)
     }
 ];

@@ -1,0 +1,79 @@
+<div class="saved-searches-container">
+  <h2>Saved Searches</h2>
+
+  @if (!authorized()) {
+    <p class="state-message">Please log in to view saved searches.</p>
+  } @else if (loading()) {
+    <p class="state-message">Loading saved searches...</p>
+  } @else {
+    @if (errorMessage()) {
+      <p class="error-message">{{ errorMessage() }}</p>
+    }
+
+    <section class="search-section">
+      <h3>My Searches</h3>
+      @if (mine().length === 0) {
+        <p class="state-message">No saved searches yet.</p>
+      } @else {
+        <div class="search-list">
+          @for (record of mine(); track record.id) {
+            <article class="search-card">
+              <div class="search-card-header">
+                <h4>{{ record.name }} ({{ record.lastKnownCount ?? 0 }})</h4>
+                <div class="visibility-wrapper">
+                  <button
+                    class="visibility-pill"
+                    [class.is-shared]="record.visibility === 'shared'"
+                    [disabled]="visibilityUpdating() === record.id"
+                    (click)="toggleVisibilityMenu(record.id)"
+                    [attr.aria-expanded]="visibilityMenuId() === record.id"
+                    title="Click to change visibility"
+                  >
+                    {{ record.visibility }}
+                    @if (visibilityUpdating() === record.id) { … }
+                  </button>
+                  @if (visibilityMenuId() === record.id) {
+                    <div class="visibility-menu" role="menu">
+                      <button role="menuitem" [class.active]="record.visibility === 'private'" (click)="setVisibility(record, 'private')">🔒 Private</button>
+                      <button role="menuitem" [class.active]="record.visibility === 'shared'"  (click)="setVisibility(record, 'shared')">🌐 Shared</button>
+                    </div>
+                  }
+                </div>
+              </div>
+              @if (record.description) {
+                <p class="description">{{ record.description }}</p>
+              }
+              <div class="actions">
+                <button class="btn btn-secondary" (click)="openInDesigner(record)">Open in Designer</button>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="search-section">
+      <h3>Shared With Me</h3>
+      @if (sharedWithMe().length === 0) {
+        <p class="state-message">No shared searches available.</p>
+      } @else {
+        <div class="search-list">
+          @for (record of sharedWithMe(); track record.id) {
+            <article class="search-card">
+              <div class="search-card-header">
+                <h4>{{ record.name }} ({{ record.lastKnownCount ?? 0 }})</h4>
+                <span class="owner">Owner: {{ record.ownerUsername }}</span>
+              </div>
+              @if (record.description) {
+                <p class="description">{{ record.description }}</p>
+              }
+              <div class="actions">
+                <button class="btn btn-secondary" (click)="openInDesigner(record)">Open in Designer</button>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
+  }
+</div>

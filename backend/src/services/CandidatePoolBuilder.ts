@@ -1,5 +1,6 @@
 import { ClinicalTrialStudy } from "../dto/ClinicalTrialStudiesResponse";
 import { CandidatePool, CandidatePoolInternal, CandidatePoolMetadata, ExcludedRecord, FilteredRecord, FilterReason, NormalizedTrial, ReferenceTrial } from "../models/NormalizedTrial";
+import { normalizePhase, normalizeTrialStudy } from "./TrialNormalizer";
 
 const DEFAULT_POOL_CAP = 15;
 
@@ -27,7 +28,7 @@ export function buildCandidatePool(studies: ClinicalTrialStudy[], totalPagesFetc
         }
     }
 
-    const normalized = valid.map(normalize);
+    const normalized = valid.map(normalizeTrialStudy);
 
     const sorted = sortPool(normalized, ref?.enrollmentCount);
 
@@ -151,41 +152,6 @@ function buildFilteredRecord(study: ClinicalTrialStudy, reason: FilterReason, re
     };
 }
 
-function normalize(study: ClinicalTrialStudy): NormalizedTrial {
-    const p = study.protocolSection;
-    const id = p.identificationModule;
-    const status = p.statusModule;
-    const design = p.designModule;
-    const eligibility = p.eligibilityModule;
-
-    return {
-        nctId: id.nctId,
-        briefTitle: id.briefTitle,
-
-        phase: normalizePhase(design?.phases ?? []),
-        studyType: normalizeString(design?.studyType),
-        overallStatus: normalizeString(status?.overallStatus),
-
-        enrollmentCount: design?.enrollmentInfo?.count ?? 0,
-        enrollmentType: normalizeEnrollmentType(design?.enrollmentInfo?.type),
-
-        startDate: normalizeDate(status?.startDateStruct?.date),
-        completionDate: normalizeDate(status?.completionDateStruct?.date),
-
-        conditions: p.conditionsModule?.conditions ?? [],
-        interventions: extractInterventionNames(study),
-
-        eligibilityCriteria: eligibility?.eligibilityCriteria?.trim() ?? "",
-        sex: normalizeString(eligibility?.sex, "ALL"),
-        minimumAge: eligibility?.minimumAge ?? null,
-        maximumAge: eligibility?.maximumAge ?? null,
-
-        primaryOutcomes: extractPrimaryOutcomes(study),
-
-        sponsor: p.sponsorCollaboratorsModule?.leadSponsor?.name ?? null,
-    };
-}
-
 function sortPool(trials: NormalizedTrial[], referenceEnrollment?: number): NormalizedTrial[] {
     return [...trials].sort((a, b) => {
         const dateCompare = compareDates(b.startDate, a.startDate);
@@ -208,58 +174,3 @@ function compareDates(a: string | null, b: string | null): number {
     return a.localeCompare(b);
 }
 
-const PHASE_ORDER = ["PHASE4", "PHASE3", "PHASE2", "PHASE1", "EARLY_PHASE1", "NA"];
-
-function normalizePhase(phases: string[]): string {
-    const upper = phases.map((p) => p.toUpperCase().replace(/\s+/g, "_"));
-    for (const candidate of PHASE_ORDER) {
-        if (upper.includes(candidate)) return candidate;
-    }
-    return upper[0] ?? "NA";
-}
-
-function normalizeEnrollmentType(type?: string): "ACTUAL" | "ESTIMATED" {
-    return type?.toUpperCase() === "ACTUAL" ? "ACTUAL" : "ESTIMATED";
-}
-
-function normalizeDate(raw?: string): string | null {
-    if (!raw) return null;
-
-    const isoMatch = raw.match(/^(\d{4}-\d{2})/);
-    if (isoMatch) return isoMatch[1];
-
-    const monthYearMatch = raw.match(/^(\w+)\s+(\d{4})$/);
-    if (monthYearMatch) {
-        const month = parseMonthName(monthYearMatch[1]);
-        if (month) return `${monthYearMatch[2]}-${month}`;
-    }
-
-    return null;
-}
-
-const MONTH_MAP: Record<string, string> = {
-    january: "01", february: "02", march: "03", april: "04",
-    may: "05", june: "06", july: "07", august: "08",
-    september: "09", october: "10", november: "11", december: "12",
-};
-
-function parseMonthName(name: string): string | null {
-    return MONTH_MAP[name.toLowerCase()] ?? null;
-}
-
-function normalizeString(value?: string, fallback = "UNKNOWN"): string {
-    if (!value || value.trim() === "") return fallback;
-    return value.trim().toUpperCase();
-}
-
-function extractInterventionNames(study: ClinicalTrialStudy): string[] {
-    return (study.protocolSection.armsInterventionsModule?.interventions ?? [])
-        .map((i: { name?: string }) => i.name)
-        .filter((n: string | undefined): n is string => !!n);
-}
-
-function extractPrimaryOutcomes(study: ClinicalTrialStudy): string[] {
-    return (study.protocolSection.outcomesModule?.primaryOutcomes ?? [])
-        .map((o: { measure?: string }) => o.measure)
-        .filter((m: string | undefined): m is string => !!m);
-}
