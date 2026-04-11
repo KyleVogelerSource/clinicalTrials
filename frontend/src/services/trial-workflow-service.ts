@@ -96,18 +96,24 @@ export class TrialWorkflowService {
     }
 
     private toStudyTrial(study : ClinicalTrialStudy) : StudyTrial {
+        const locations = study.protocolSection.contactsLocationsModule?.locations || [];
+        const firstLocation = locations[0];
+        const locationStr = firstLocation 
+            ? `${firstLocation.city || ''}${firstLocation.city && firstLocation.country ? ', ' : ''}${firstLocation.country || ''}`
+            : 'Unknown';
+
         return {
             nctId: study.protocolSection.identificationModule.nctId,
             briefTitle: study.protocolSection.identificationModule.briefTitle,
             conditions: study.protocolSection.conditionsModule?.conditions || [],
             enrollmentCount: study.protocolSection.designModule?.enrollmentInfo?.count || 0,
-            location: '', // TODO
+            location: locationStr,
             startDate: study.protocolSection.statusModule?.startDateStruct?.date || '',
             completionDate: study.protocolSection.statusModule?.completionDateStruct?.date || '',
             sponsor: study.protocolSection.sponsorCollaboratorsModule?.leadSponsor?.name || 'Unknown',
             phase: study.protocolSection.designModule?.phases?.[0] || 'N/A',
             description: study.protocolSection.descriptionModule?.briefSummary || '',
-            sites: [] // TODO
+            sites: locations.map(loc => loc.facility).filter((f): f is string => !!f)
         }
     }
 
