@@ -9,6 +9,8 @@ type JsonValue =
   | JsonValue[]
   | { [key: string]: JsonValue };
 
+type JsonArrayItem = string | number | boolean;
+
 const LOWERCASE_FIELDS = new Set([
   "term",
   "condition",
@@ -69,7 +71,7 @@ function normalizeArray(key: string, value: unknown[]): JsonValue[] {
 
       return undefined;
     })
-    .filter((item): item is Exclude<JsonValue, null | { [key: string]: JsonValue }> => item !== undefined);
+    .filter((item): item is JsonArrayItem => item !== undefined);
 
   return [...normalized].sort((left, right) => JSON.stringify(left).localeCompare(JSON.stringify(right)));
 }
