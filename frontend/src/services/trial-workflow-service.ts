@@ -1,12 +1,12 @@
 import { Injectable, signal, inject } from "@angular/core";
-import { TrialResultsRequest } from "../../../shared/src/dto/TrialResultsRequest";
-import { ClinicalTrialSearchRequest } from "../../../shared/src/dto/ClinicalTrialSearchRequest";
+import { TrialResultsRequest } from "@shared/dto/TrialResultsRequest";
+import { ClinicalTrialSearchRequest } from "@shared/dto/ClinicalTrialSearchRequest";
 import { ClinicalStudyService } from "./clinical-study.service";
 import { ResultsApiService } from "./results-api.service";
-import { TrialResultsResponse } from "../../../shared/src/dto/TrialResultsResponse";
+import { TrialResultsResponse } from "@shared/dto/TrialResultsResponse";
 import { DesignModel } from "../models/design-model";
 import { StudyTrial } from "../models/study-trial";
-import { ClinicalTrialStudy } from "../../../shared/src/dto/ClinicalTrialStudiesResponse";
+import { ClinicalTrialStudy } from "@shared/dto/ClinicalTrialStudiesResponse";
 
 const PHASE_MAP: Record<string, string> = {
     'Early Phase 1': 'EARLY_PHASE1',
