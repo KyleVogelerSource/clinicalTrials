@@ -7,7 +7,7 @@ export default tseslint.config(
     ignores: [".angular/**", "dist/**", "node_modules/**"],
   },
   {
-    files: ["src/**/*.ts"],
+    files: ["src/**/*.ts", "../shared/src/**/*.ts"],
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     languageOptions: {
       globals: {

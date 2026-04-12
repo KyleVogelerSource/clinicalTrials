@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import meshData from '../../../shared/src/static/combined-mesh-data.json';
-import conditionData from '../../../shared/src/static/common-disease-conditions.json';
-import trialDesignOptions from '../../../shared/src/static/trial-design-options.json';
-import { ClinicalTrialSearchRequest } from '../../../shared/src/dto/ClinicalTrialSearchRequest';
-import { ClinicalTrialStudiesResponse } from '../../../shared/src/dto/ClinicalTrialStudiesResponse';
+import meshData from '@shared/static/combined-mesh-data.json';
+import conditionData from '@shared/static/common-disease-conditions.json';
+import trialDesignOptions from '@shared/static/trial-design-options.json';
+import { ClinicalTrialSearchRequest } from '@shared/dto/ClinicalTrialSearchRequest';
+import { ClinicalTrialStudiesResponse } from '@shared/dto/ClinicalTrialStudiesResponse';
 import Fuse from 'fuse.js'; // A fuzzy match library
 import { HttpClient } from '@angular/common/http';
 import { apiUrl } from '../app/config/api.config';
