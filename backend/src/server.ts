@@ -6,6 +6,7 @@ import { ClinicalTrialSearchRequest } from "./dto/ClinicalTrialSearchRequest";
 import { NormalizedTrial, ReferenceTrial } from "../src/models/NormalizedTrial";
 import { TrialResultsRequest } from "./dto/TrialResultsRequest";
 import { generateAIResults } from "./services/AIResultsService";
+import { runBenchmarkPipeline } from "./services/TrialBenchmarkPipeline";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import { initializeDatabase, isDatabaseConnected, probeDatabaseConnection } from "./storage/PostgresClient";
@@ -202,6 +203,49 @@ app.post("/api/clinical-trials/results", async (req: Request, res: Response) => 
     res.status(200).json(results);
   } catch (err) {
     console.error("Unexpected error in POST /api/clinical-trials/results:", err);
+    res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+  }
+});
+
+// POST /api/clinical-trials/benchmark
+// BE-7 + BE-8 + BE-9: synopsis → embed → similarity rank
+// Accepts the user's scenario request + a pre-built candidate pool.
+// Returns Top-K trials ranked by cosine similarity to the proposed design.
+app.post("/api/clinical-trials/benchmark", async (req: Request, res: Response) => {
+  const { trials, proposedTrial, topK, ...request } = req.body as TrialResultsRequest & {
+    trials?: NormalizedTrial[];
+    proposedTrial?: NormalizedTrial;
+    topK?: number;
+  };
+
+  if (!Array.isArray(trials) || trials.length === 0) {
+    res.status(400).json({
+      error: "Bad Request",
+      message: "A non-empty 'trials' array is required.",
+    });
+    return;
+  }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY ?? "";
+  if (!apiKey) {
+    res.status(500).json({
+      error: "Configuration Error",
+      message: "ANTHROPIC_API_KEY is not configured.",
+    });
+    return;
+  }
+
+  try {
+    const result = await runBenchmarkPipeline(
+      request,
+      trials,
+      proposedTrial ?? null,
+      topK ?? 15,
+      apiKey
+    );
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("Unexpected error in POST /api/clinical-trials/benchmark:", err);
     res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
   }
 });
