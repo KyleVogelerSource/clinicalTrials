@@ -1,0 +1,145 @@
+import { NormalizedTrial } from "../models/NormalizedTrial";
+import { generateSynopsis, generateSynopses } from "./TrialSynopsisGenerator";
+import { generateEmbeddings } from "./TrialEmbeddingService";
+import { rankBySimiliarity, SimilarityRankingResult } from "./TrialSimilarityService";
+import { detectOutliers, OutlierDetectionResult } from "./TrialOutlierDetector";
+import { generateExplanation, ExplanationResult } from "./TrialExplanationService";
+import { TrialResultsRequest } from "../dto/TrialResultsRequest";
+
+export interface BenchmarkPipelineResult extends SimilarityRankingResult {
+    outliers: OutlierDetectionResult;
+    explanation: ExplanationResult;
+    pipelineSteps: {
+        synopsesGenerated: number;
+        embeddingsGenerated: number;
+        totalInputTokens: number;
+    };
+}
+
+function buildProposedSynopsisFromRequest(request: TrialResultsRequest): string {
+    const parts: string[] = [];
+
+    if (request.condition) {
+        parts.push(`Condition(s): ${request.condition}`);
+    }
+
+    if (request.phase) {
+        parts.push(`Phase: ${request.phase}`);
+    }
+
+    if (request.interventionModel) {
+        parts.push(`Intervention Model: ${request.interventionModel}`);
+    }
+
+    if (request.allocationType) {
+        parts.push(`Allocation: ${request.allocationType}`);
+    }
+
+    if (request.sex) {
+        parts.push(`Sex: ${request.sex}`);
+    }
+
+    const ageRange = [
+        request.minAge != null ? `min ${request.minAge}` : null,
+        request.maxAge != null ? `max ${request.maxAge}` : null,
+    ]
+        .filter(Boolean)
+        .join(", ");
+
+    if (ageRange) {
+        parts.push(`Age Range: ${ageRange}`);
+    }
+
+    if (request.requiredConditions?.length) {
+        parts.push(`Required Conditions: ${request.requiredConditions.join(", ")}`);
+    }
+
+    return parts.join("\n");
+}
+
+export async function runBenchmarkPipeline(request: TrialResultsRequest, candidatePool: NormalizedTrial[], proposedTrial: NormalizedTrial | null = null, topK = 15, apiKey: string): Promise<BenchmarkPipelineResult> {
+    const emptyOutliers = detectOutliers([], {});
+
+    if (candidatePool.length === 0) {
+        return {
+            rankedTrials: [],
+            proposedNctId: proposedTrial?.nctId ?? null,
+            topK,
+            totalCandidates: 0,
+            outliers: emptyOutliers,
+            explanation: {
+                explanation: "No similar historical trials were found for the proposed design. Consider broadening the search parameters.",
+                generatedAt: new Date().toISOString(),
+            },
+            pipelineSteps: {
+                synopsesGenerated: 0,
+                embeddingsGenerated: 0,
+                totalInputTokens: 0,
+            },
+        };
+    }
+
+
+    const candidateSynopses = generateSynopses(candidatePool);
+
+    const proposedSynopsisText = proposedTrial
+        ? generateSynopsis(proposedTrial).synopsis
+        : buildProposedSynopsisFromRequest(request);
+
+    const proposedSynopsis = {
+        nctId: proposedTrial?.nctId ?? "__proposed__",
+        synopsis: proposedSynopsisText,
+    };
+
+    const allSynopses = [proposedSynopsis, ...candidateSynopses];
+    const { embeddings, totalInputTokens } = await generateEmbeddings(allSynopses, apiKey);
+
+    const proposedEmbeddingRecord = embeddings.find((e) => e.nctId === proposedSynopsis.nctId);
+    if (!proposedEmbeddingRecord) {
+        throw new Error("[TrialBenchmarkPipeline] Failed to generate embedding for proposed trial");
+    }
+
+    const candidateEmbeddingMap = new Map<string, number[]>(
+        embeddings
+            .filter((e) => e.nctId !== proposedSynopsis.nctId)
+            .map((e) => [e.nctId, e.embedding])
+    );
+
+    const rankingResult = rankBySimiliarity(
+        proposedEmbeddingRecord.embedding,
+        candidateEmbeddingMap,
+        candidatePool,
+        topK,
+        proposedTrial?.nctId ?? null
+    );
+
+    const outliers = detectOutliers(
+        rankingResult.rankedTrials.map((st) => st.trial),
+        {
+            enrollmentCount: proposedTrial?.enrollmentCount ?? null,
+            phase: request.phase ?? proposedTrial?.phase,
+            studyType: proposedTrial?.studyType,
+            sex: request.sex ?? proposedTrial?.sex,
+            startDate: proposedTrial?.startDate,
+            completionDate: proposedTrial?.completionDate,
+        }
+    );
+
+    const explanation = await generateExplanation(
+        request,
+        rankingResult.rankedTrials,
+        outliers,
+        apiKey
+    );
+
+    return {
+        ...rankingResult,
+        outliers,
+        explanation,
+        pipelineSteps: {
+            synopsesGenerated: candidateSynopses.length,
+            embeddingsGenerated: embeddings.length,
+            totalInputTokens,
+        },
+    };
+}
