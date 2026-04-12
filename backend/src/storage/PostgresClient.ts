@@ -190,6 +190,78 @@ export async function initializeDatabase() {
       )
     `);
 
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS saved_searches (
+        id SERIAL PRIMARY KEY,
+        owner_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        name VARCHAR(200) NOT NULL,
+        description TEXT,
+        criteria_json JSONB NOT NULL,
+        canonical_key VARCHAR(64) NOT NULL,
+        visibility VARCHAR(20) NOT NULL DEFAULT 'private',
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        CONSTRAINT saved_searches_visibility_check
+          CHECK (visibility IN ('private', 'shared')),
+        CONSTRAINT saved_searches_owner_canonical_key_unique
+          UNIQUE (owner_user_id, canonical_key)
+      )
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS saved_search_access (
+        saved_search_id INTEGER NOT NULL REFERENCES saved_searches(id) ON DELETE CASCADE,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        can_view BOOLEAN NOT NULL DEFAULT TRUE,
+        can_run BOOLEAN NOT NULL DEFAULT FALSE,
+        can_edit BOOLEAN NOT NULL DEFAULT FALSE,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        PRIMARY KEY (saved_search_id, user_id)
+      )
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS saved_search_runs (
+        id SERIAL PRIMARY KEY,
+        saved_search_id INTEGER NOT NULL REFERENCES saved_searches(id) ON DELETE CASCADE,
+        run_by_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        source VARCHAR(50) NOT NULL,
+        result_count INTEGER NOT NULL DEFAULT 0,
+        executed_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS saved_search_snapshots (
+        id SERIAL PRIMARY KEY,
+        run_id INTEGER NOT NULL REFERENCES saved_search_runs(id) ON DELETE CASCADE,
+        nct_id VARCHAR(20) NOT NULL,
+        rank_position INTEGER NOT NULL,
+        normalized_trial_json JSONB NOT NULL,
+        raw_trial_json JSONB NOT NULL
+      )
+    `);
+
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_saved_searches_owner_user_id
+        ON saved_searches(owner_user_id)
+    `);
+
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_saved_search_access_user_id
+        ON saved_search_access(user_id)
+    `);
+
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_saved_search_runs_saved_search_id
+        ON saved_search_runs(saved_search_id)
+    `);
+
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_saved_search_snapshots_run_id
+        ON saved_search_snapshots(run_id)
+    `);
+
     const adminPasswordHash = await bcrypt.hash("admin", 12);
 
     const superAdminRoleResult = await pool.query(
@@ -206,6 +278,16 @@ export async function initializeDatabase() {
        ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name
        RETURNING id`,
       ["user_roles"]
+    );
+
+    await pool.query(
+      `INSERT INTO actions (name)
+       VALUES ($1), ($2)
+       ON CONFLICT (name) DO NOTHING`,
+      [
+        "saved_searches_view_shared",
+        "trial_benchmarking",
+      ]
     );
 
     await pool.query(

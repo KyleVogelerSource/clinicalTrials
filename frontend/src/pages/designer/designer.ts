@@ -7,6 +7,9 @@ import { AutoCompleteInput } from "../../primitives/auto-complete-input/auto-com
 import { ClinicalStudyService } from "../../services/clinical-study.service";
 import { TrialWorkflowService } from "../../services/trial-workflow-service";
 import { DesignModel } from "../../models/design-model";
+import { AuthService } from "../../services/auth.service";
+import { SavedSearchService } from "../../services/saved-search.service";
+import { ClinicalTrialSearchRequest } from "../../../../shared/src/dto/ClinicalTrialSearchRequest";
 
 @Component({
     selector: "app-designer",
@@ -19,11 +22,22 @@ export class Designer implements OnInit {
     clinicalStudiesService = inject(ClinicalStudyService);
     workflowService = inject(TrialWorkflowService);
     router = inject(Router);
+    authService = inject(AuthService);
+    savedSearchService = inject(SavedSearchService);
 
     conditionMatches = signal<string[]>([]);
     conditionValue = signal<string>('');
     requiredConditions = signal<string[]>([]);
     ineligibleConditions = signal<string[]>([]);
+    showSavePanel = signal(false);
+    saveStatus = signal<'idle' | 'saving' | 'saved' | 'error'>('idle');
+    saveErrorMessage = signal('');
+
+    saveForm = new FormGroup({
+        name: new FormControl<string>('', [Validators.required, Validators.maxLength(200)]),
+        description: new FormControl<string | null>(null),
+        visibility: new FormControl<'private' | 'shared'>('private', [Validators.required]),
+    });
 
     phaseOptions = this.clinicalStudiesService.getPhases();
     allocationOptions = this.clinicalStudiesService.getAllocations();
@@ -111,5 +125,46 @@ export class Designer implements OnInit {
         this.workflowService.setInputs(model);
         this.workflowService.searchTrials();
         this.router.navigate(['/selection']);
+    }
+
+    onToggleSavePanel() {
+        this.showSavePanel.update(v => !v);
+        this.saveStatus.set('idle');
+    }
+
+    onSaveSearch() {
+        if (this.saveForm.invalid || !this.inputForm.valid) return;
+
+        const formValues = this.inputForm.value;
+        const criteria: ClinicalTrialSearchRequest = {
+            ...(formValues.condition ? { condition: formValues.condition } : {}),
+            ...(formValues.phase ? { phase: formValues.phase } : {}),
+            ...(formValues.interventionModel ? { interventionModel: formValues.interventionModel } : {}),
+            ...(formValues.minAge != null ? { minAge: formValues.minAge } : {}),
+            ...(formValues.maxAge != null ? { maxAge: formValues.maxAge } : {}),
+            ...(formValues.sex ? { sex: formValues.sex } : {}),
+            ...(formValues.required?.length ? { requiredConditions: formValues.required } : {}),
+            ...(formValues.ineligible?.length ? { ineligibleConditions: formValues.ineligible } : {}),
+        };
+
+        const name = this.saveForm.value.name!;
+        const description = this.saveForm.value.description ?? null;
+        const visibility = this.saveForm.value.visibility!;
+
+        this.saveStatus.set('saving');
+        this.savedSearchService.create({ name, description, criteriaJson: criteria, visibility }).subscribe({
+            next: () => {
+                this.saveStatus.set('saved');
+                this.saveForm.reset({ visibility: 'private' });
+            },
+            error: (err: { status?: number }) => {
+                this.saveStatus.set('error');
+                this.saveErrorMessage.set(
+                    err?.status === 409
+                        ? 'An equivalent search is already saved.'
+                        : 'Could not save search. Please try again.'
+                );
+            },
+        });
     }
 }

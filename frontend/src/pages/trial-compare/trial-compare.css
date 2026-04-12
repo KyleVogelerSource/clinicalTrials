@@ -1,0 +1,91 @@
+.trial-compare-container {
+  max-width: 1150px;
+  margin: 0 auto;
+}
+
+.scoreboard,
+.matrix-section {
+  margin-top: 1.5rem;
+}
+
+.score-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.score-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  padding: 1rem;
+}
+
+.rank {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.nct {
+  font-weight: 700;
+  margin-top: 0.35rem;
+}
+
+.pct {
+  margin-top: 0.25rem;
+  color: #0c5f31;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.matrix-row {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: #fff;
+}
+
+.matrix-row h4 {
+  margin-top: 0;
+}
+
+.cell-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.75rem;
+}
+
+.matrix-cell {
+  border: 1px solid #e7e7e7;
+  border-radius: 6px;
+  padding: 0.75rem;
+  background: #fcfcfc;
+}
+
+.cell-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+
+.cell-header strong {
+  color: #1b5f97;
+}
+
+.matrix-cell ul {
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.actions {
+  margin-top: 1rem;
+}
+
+.state-message {
+  color: #666;
+}
+
+.error-message {
+  color: var(--app-red);
+}

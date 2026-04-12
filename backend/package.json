@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint .",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run src/**/*.spec.ts src/*.spec.ts --passWithNoTests",
     "test:coverage": "bash -lc 'TEST_FILES=$(find src -type f -name \\*.spec.ts -print); vitest run $TEST_FILES --coverage.enabled=true --coverage.reporter=json-summary --coverage.reporter=html --reporter=json --outputFile=coverage/test-results.json'",
     "test:functional": "vitest run src/**/*.integration.spec.ts src/*.integration.spec.ts --passWithNoTests",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
