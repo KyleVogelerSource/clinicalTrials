@@ -120,6 +120,25 @@
     <!-- Bottom Bar -->
     <div class="actions">
         <button type="button" class="btn" (click)="onPrevious()">Previous</button>
-        <button type="button" class="btn btn-primary" (click)="onNext()" [disabled]="selectedTrialIds().length === 0">Process</button>
+        <div class="actions-right">
+            @if (canCompareTrials()) {
+                <div class="compare-wrapper" [class.is-disabled]="compareDisabled()" tabindex="0">
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        (click)="onCompare()"
+                        [disabled]="compareDisabled()"
+                    >
+                        Compare
+                    </button>
+                    @if (compareDisabled()) {
+                        <div class="compare-overlay" role="note">
+                            To compare trials, select between 2 and 5 trials.
+                        </div>
+                    }
+                </div>
+            }
+            <button type="button" class="btn btn-primary" (click)="onNext()" [disabled]="selectedTrialIds().length === 0">Process</button>
+        </div>
     </div>
 </div>

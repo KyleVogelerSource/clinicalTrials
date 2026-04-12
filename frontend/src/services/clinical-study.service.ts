@@ -69,6 +69,13 @@ export class ClinicalStudyService {
     getSexes = () => trialDesignOptions.sexes;
     getDefaultSex = () => trialDesignOptions.defaultSex;
 
+<<<<<<< HEAD
+=======
+    getTrials() {
+        const url = apiUrl('/api/clinical-trials/search');
+    }
+
+>>>>>>> origin/FE-Table-Comparison-View
     searchStudies(request: ClinicalTrialSearchRequest): Observable<ClinicalTrialStudiesResponse> {
         const url = apiUrl('/api/clinical-trials/search');
         return this.http.post<ClinicalTrialStudiesResponse>(url, request);

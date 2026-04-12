@@ -119,3 +119,132 @@ DescriptorRecordSet LanguageCode = "eng"
                     Term
                         String          <-- Synonyms -->
 ```
+
+## Trial Comparison (How It Works)
+
+The trial comparison feature ranks selected trials based on similarity across multiple dimensions.
+
+### Endpoint
+
+- `POST /api/clinical-trials/compare`
+
+### Access Requirements
+
+- User must be authenticated (JWT token).
+- User must have the `trial_benchmarking` action.
+
+### Input Rules
+
+- You must send between `2` and `5` trials.
+- Each trial must include a valid `nctId` string.
+- Optional `weights` object can override default scoring weights.
+- Weight values must be non-negative numbers.
+
+### Default Weights
+
+- `conditionOverlap`: `25`
+- `phaseMatch`: `20`
+- `studyType`: `10`
+- `eligibilityCompatibility`: `20`
+- `interventionOverlap`: `10`
+- `enrollmentSimilarity`: `10`
+- `statusRecency`: `5`
+
+The final pairwise score is the weighted sum of these dimensions and is normalized to a `0-100` scale.
+
+### What The Response Contains
+
+- `normalizedTrials`: normalized metadata for each trial.
+- `comparisonMatrix`: pairwise scores for each trial against all selected trials.
+- `benchmarkScores`: average pairwise score per trial, sorted by best score and assigned rank.
+
+### Example Request
+
+```json
+{
+    "trials": [
+        { "nctId": "NCT01234567" },
+        { "nctId": "NCT07654321" },
+        { "nctId": "NCT01112223" }
+    ]
+}
+```
+
+### Example Request With Custom Weights
+
+```json
+{
+    "trials": [
+        { "nctId": "NCT01234567" },
+        { "nctId": "NCT07654321" }
+    ],
+    "weights": {
+        "conditionOverlap": 35,
+        "phaseMatch": 25,
+        "studyType": 10,
+        "eligibilityCompatibility": 15,
+        "interventionOverlap": 5,
+        "enrollmentSimilarity": 5,
+        "statusRecency": 5
+    }
+}
+```
+
+### Example Response (Shape)
+
+```json
+{
+    "normalizedTrials": [
+        {
+            "nctId": "NCT01234567",
+            "briefTitle": "Trial A",
+            "phase": "PHASE2",
+            "studyType": "INTERVENTIONAL",
+            "overallStatus": "RECRUITING",
+            "enrollmentCount": 120,
+            "conditions": ["diabetes mellitus"],
+            "interventions": ["metformin"],
+            "sex": "ALL",
+            "minimumAge": "18 Years",
+            "maximumAge": "65 Years",
+            "sponsor": "Example Sponsor",
+            "startDate": "2024-01",
+            "completionDate": "2026-06"
+        }
+    ],
+    "comparisonMatrix": [
+        {
+            "nctId": "NCT01234567",
+            "scores": [
+                {
+                    "againstNctId": "NCT07654321",
+                    "score": 72.5,
+                    "weightedBreakdown": {
+                        "conditionOverlap": 20,
+                        "phaseMatch": 20,
+                        "studyType": 10,
+                        "eligibilityCompatibility": 15,
+                        "interventionOverlap": 5,
+                        "enrollmentSimilarity": 1.5,
+                        "statusRecency": 1
+                    },
+                    "explanations": [
+                        "Condition overlap is 80%.",
+                        "Both trials are in PHASE2."
+                    ]
+                }
+            ]
+        }
+    ],
+    "benchmarkScores": [
+        { "nctId": "NCT01234567", "score": 74.1, "rank": 1 },
+        { "nctId": "NCT07654321", "score": 71.8, "rank": 2 }
+    ]
+}
+```
+
+### Common Error Cases
+
+- `400 Bad Request`: fewer than 2 or more than 5 trials, missing `nctId`, or invalid weights.
+- `403 Forbidden`: user lacks `trial_benchmarking` permission.
+- `404 Not Found`: one of the NCT IDs could not be resolved.
