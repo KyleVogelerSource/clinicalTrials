@@ -74,6 +74,29 @@
           <button type="submit">Assign Action</button>
         </form>
       </section>
+
+      <section class="admin-card">
+        <h2>Assign Role To User</h2>
+        <form class="admin-form" (ngSubmit)="assignRoleToUser()">
+          <label>
+            <span>User</span>
+            <select [(ngModel)]="selectedUserId" name="selectedUserId" required>
+              @for (user of users(); track user.id) {
+                <option [ngValue]="user.id">{{ user.username }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            <span>Role</span>
+            <select [(ngModel)]="selectedUserRoleId" name="selectedUserRoleId" required>
+              @for (role of roles(); track role.id) {
+                <option [ngValue]="role.id">{{ role.name }}</option>
+              }
+            </select>
+          </label>
+          <button type="submit">Assign Role</button>
+        </form>
+      </section>
     </div>
 
     <section class="admin-card table-card">
@@ -143,6 +166,7 @@
           <tr>
             <th>Role</th>
             <th>Action</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -150,6 +174,33 @@
             <tr>
               <td>{{ assignment.roleName }}</td>
               <td>{{ assignment.actionName }}</td>
+              <td>
+                <button type="button" class="danger-button" (click)="removeRoleAction(assignment)">Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="admin-card table-card">
+      <h2>User Roles</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Role</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (assignment of userRoles(); track assignment.userId + '-' + assignment.roleId) {
+            <tr>
+              <td>{{ assignment.username }}</td>
+              <td>{{ assignment.roleName }}</td>
+              <td>
+                <button type="button" class="danger-button" (click)="removeUserRole(assignment)">Delete</button>
+              </td>
             </tr>
           }
         </tbody>

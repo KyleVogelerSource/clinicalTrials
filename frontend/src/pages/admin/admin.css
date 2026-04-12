@@ -70,6 +70,22 @@
   background: var(--app-teal);
 }
 
+.danger-button {
+  border: none;
+  border-radius: 8px;
+  padding: .45rem .75rem;
+  background: #b91c1c;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.danger-button:hover,
+.danger-button:focus-visible {
+  background: #991b1b;
+}
+
 .table-card table {
   width: 100%;
   border-collapse: collapse;
