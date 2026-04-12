@@ -4,6 +4,9 @@
     <ul>
       <li><a [routerLink]="['/']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a></li>
       <li><a [routerLink]="['designer']" routerLinkActive="active">Designer</a></li>
+      @if (authService.isLoggedIn()) {
+        <li><a [routerLink]="['/saved-searches']" routerLinkActive="active">Saved Searches</a></li>
+      }
       @if (canAccessAdmin()) {
         <li><a [routerLink]="['/admin']" routerLinkActive="active">Admin</a></li>
       }
@@ -12,12 +15,19 @@
   <div class="auth-slot">
     @if (authService.isLoggedIn()) {
       <span class="user-greeting">Hi, {{ authService.currentUser()?.firstName }}</span>
-      <button class="btn-logout" (click)="authService.logout()">Log Out</button>
+      <button class="btn-logout" (click)="handleLogout()">Log Out</button>
     } @else {
       <button class="btn-login" (click)="showLoginModal.set(true)">Log In</button>
     }
   </div>
 </div>
+
+@if (flashMessage()) {
+  <div class="flash-banner" role="alert">
+    {{ flashMessage() }}
+    <button class="flash-close" (click)="flashMessage.set(null)" aria-label="Dismiss">✕</button>
+  </div>
+}
 
 @if (showLoginModal()) {
   <app-login-modal (closed)="showLoginModal.set(false)" />
@@ -48,6 +58,10 @@
       <span class="debug-item">At: {{ status.timestamp }}</span>
     } @else {
       <span class="debug-item">Loading debug status...</span>
+    }
+
+    @if (runtimeDebugMessage()) {
+      <span class="debug-item debug-error">App: {{ runtimeDebugMessage() }}</span>
     }
   </div>
 }
