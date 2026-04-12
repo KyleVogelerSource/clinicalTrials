@@ -112,9 +112,74 @@
                     <p class="coming-soon">Coming soon</p>
                 </section>
 
-                <section id="comparison-table" class="results-section results-section--placeholder">
-                    <h2>Comparison Table</h2>
-                    <p class="coming-soon">Coming soon</p>
+                <section id="comparison-table" class="results-section">
+                    <div class="comparison-header">
+                        <h2>Comparison Table</h2>
+                        <div class="comparison-search">
+                            <span class="search-icon">&#128269;</span>
+                            <input
+                                type="text"
+                                placeholder="Search trials..."
+                                [value]="comparisonSearch()"
+                                (input)="onComparisonSearch($event)"
+                                aria-label="Search comparison trials"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="comparison-table-wrapper">
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th class="trial-col">Trial</th>
+                                    @for (metric of comparisonMetrics; track metric.key) {
+                                        <th
+                                            class="metric-col"
+                                            (click)="onComparisonSort(metric.key)"
+                                            [class.sorted]="comparisonSortKey() === metric.key"
+                                        >
+                                            {{ metric.label }}
+                                            <span class="sort-icon">
+                                                @if (comparisonSortKey() === metric.key) {
+                                                    {{ comparisonSortAsc() ? '&#9650;' : '&#9660;' }}
+                                                } @else {
+                                                    &#9661;
+                                                }
+                                            </span>
+                                        </th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (row of comparisonRows(); track row.trial.nctId) {
+                                    <tr>
+                                        <td class="trial-name-cell">
+                                            <a
+                                                [href]="'https://clinicaltrials.gov/study/' + row.trial.nctId"
+                                                target="_blank"
+                                                class="trial-link"
+                                            >{{ row.trial.briefTitle }}</a>
+                                        </td>
+                                        @for (metric of comparisonMetrics; track metric.key) {
+                                            <td class="metric-cell">
+                                                @if (row.metrics[metric.key]) {
+                                                    <span class="check">&#10003;</span>
+                                                } @else {
+                                                    <span class="cross">&#10007;</span>
+                                                }
+                                            </td>
+                                        }
+                                    </tr>
+                                } @empty {
+                                    <tr>
+                                        <td [attr.colspan]="comparisonMetrics.length + 1" class="no-results">
+                                            No trials match your search.
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </section>
 
             </main>
