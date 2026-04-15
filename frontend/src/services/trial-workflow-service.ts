@@ -1,12 +1,12 @@
 import { Injectable, signal, inject } from "@angular/core";
-import { TrialResultsRequest } from "../../../shared/src/dto/TrialResultsRequest";
-import { ClinicalTrialSearchRequest } from "../../../shared/src/dto/ClinicalTrialSearchRequest";
+import { TrialResultsRequest } from "@shared/dto/TrialResultsRequest";
+import { ClinicalTrialSearchRequest } from "@shared/dto/ClinicalTrialSearchRequest";
 import { ClinicalStudyService } from "./clinical-study.service";
 import { ResultsApiService } from "./results-api.service";
-import { TrialResultsResponse } from "../../../shared/src/dto/TrialResultsResponse";
+import { TrialResultsResponse } from "@shared/dto/TrialResultsResponse";
 import { DesignModel } from "../models/design-model";
 import { StudyTrial } from "../models/study-trial";
-import { ClinicalTrialStudy } from "../../../shared/src/dto/ClinicalTrialStudiesResponse";
+import { ClinicalTrialStudy } from "@shared/dto/ClinicalTrialStudiesResponse";
 
 const PHASE_MAP: Record<string, string> = {
     'Early Phase 1': 'EARLY_PHASE1',
@@ -78,6 +78,7 @@ export class TrialWorkflowService {
             maxAge: input.maxAge ?? undefined,
             requiredConditions: input.required ?? [],
             ineligibleConditions: input.ineligible ?? [],
+            pageSize: 100
         };
 
         this.clinicalStudyService.searchStudies(request).subscribe({
@@ -95,18 +96,24 @@ export class TrialWorkflowService {
     }
 
     private toStudyTrial(study : ClinicalTrialStudy) : StudyTrial {
+        const locations = study.protocolSection.contactsLocationsModule?.locations || [];
+        const firstLocation = locations[0];
+        const locationStr = firstLocation 
+            ? `${firstLocation.city || ''}${firstLocation.city && firstLocation.country ? ', ' : ''}${firstLocation.country || ''}`
+            : 'Unknown';
+
         return {
             nctId: study.protocolSection.identificationModule.nctId,
             briefTitle: study.protocolSection.identificationModule.briefTitle,
             conditions: study.protocolSection.conditionsModule?.conditions || [],
             enrollmentCount: study.protocolSection.designModule?.enrollmentInfo?.count || 0,
-            location: '', // TODO
+            location: locationStr,
             startDate: study.protocolSection.statusModule?.startDateStruct?.date || '',
             completionDate: study.protocolSection.statusModule?.completionDateStruct?.date || '',
             sponsor: study.protocolSection.sponsorCollaboratorsModule?.leadSponsor?.name || 'Unknown',
             phase: study.protocolSection.designModule?.phases?.[0] || 'N/A',
             description: study.protocolSection.descriptionModule?.briefSummary || '',
-            sites: [] // TODO
+            sites: locations.map(loc => loc.facility).filter((f): f is string => !!f)
         }
     }
 

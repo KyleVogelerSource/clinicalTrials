@@ -1,4 +1,4 @@
-import { TrialResultsResponse } from '../../../shared/src/dto/TrialResultsResponse';
+import { TrialResultsResponse } from '@shared/dto/TrialResultsResponse';
 
 export const mockTrialResultsResponse: TrialResultsResponse = {
     overallScore: 73,
