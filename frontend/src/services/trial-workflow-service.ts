@@ -126,11 +126,11 @@ export class TrialWorkflowService {
 
             // Plots
             terminationCause: trial?.protocolSection.statusModule?.whyStopped ?? null,
-            geoLocations: trial?.protocolSection.contactsLocationsModule?.locations?.map(loc => {
-                geoPoint: loc.geoPoint
-                city: loc.city
+            geoLocations: trial?.protocolSection.contactsLocationsModule?.locations?.map(loc => ({
+                geoPoint: loc.geoPoint,
+                city: loc.city,
                 country: loc.country
-            }) ?? [],
+            })) ?? [],
             startDate: trial?.protocolSection.statusModule?.startDateStruct,
             completionDate: trial?.protocolSection.statusModule?.completionDateStruct,
 
@@ -153,7 +153,7 @@ export class TrialWorkflowService {
             conditionCount: trial?.protocolSection.conditionsModule?.conditions?.length ?? 0
         }));
 
-        var terminations = new Map<string, number>([
+        const terminations = new Map<string, number>([
             ["Completed", 0]
         ]);
         plotData.forEach((trial) => {
@@ -171,7 +171,7 @@ export class TrialWorkflowService {
 
             current.terminationReasons = Array.from(terminations.entries()).map(([reason, count]) => ({ reason, count }));
             current.metricRows = plotData.map(trial => {
-                var row = new MetricRow();
+                const row = new MetricRow();
 
                 const completedDate = trial.completedDate ? Date.parse(trial.completedDate.date) : null;
                 const startDate = trial.startDate ? Date.parse(trial.startDate.date) : null;
