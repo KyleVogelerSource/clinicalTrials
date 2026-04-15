@@ -3,10 +3,10 @@ import { TrialResultsRequest } from "@shared/dto/TrialResultsRequest";
 import { ClinicalTrialSearchRequest } from "@shared/dto/ClinicalTrialSearchRequest";
 import { ClinicalStudyService } from "./clinical-study.service";
 import { ResultsApiService } from "./results-api.service";
-import { TrialResultsResponse } from "@shared/dto/TrialResultsResponse";
 import { DesignModel } from "../models/design-model";
 import { StudyTrial } from "../models/study-trial";
 import { ClinicalTrialStudy } from "@shared/dto/ClinicalTrialStudiesResponse";
+import { ResultsModel } from "../models/results-model";
 
 const PHASE_MAP: Record<string, string> = {
     'Early Phase 1': 'EARLY_PHASE1',
@@ -37,6 +37,7 @@ const INTERVENTION_MODEL_MAP: Record<string, string> = {
 export class TrialWorkflowService {
     private clinicalStudyService = inject(ClinicalStudyService);
     private apiService = inject(ResultsApiService);
+    private trialCache: Map<string, ClinicalTrialStudy> = new Map();
 
     // Designer state
     inputParams = signal<DesignModel | null>(null);
@@ -49,7 +50,7 @@ export class TrialWorkflowService {
 
     // Results state
     selectedTrialIds = signal<string[]>([]);
-    results = signal<TrialResultsResponse | null>(null);
+    results = signal<ResultsModel>(new ResultsModel());
 
     reset() {
         this.inputParams.set(null);
@@ -58,7 +59,7 @@ export class TrialWorkflowService {
         this.fromDate.set("");
         this.toDate.set("");
         this.selectedTrialIds.set([]);
-        this.results.set(null);
+        this.results.set(new ResultsModel());
     }
 
     setInputs(inputs : DesignModel) {
@@ -84,6 +85,7 @@ export class TrialWorkflowService {
         this.clinicalStudyService.searchStudies(request).subscribe({
             next: (response) => {
                 const mapped = response.studies.map(study => this.toStudyTrial(study));
+                response.studies.forEach(study => this.trialCache.set(study.protocolSection.identificationModule.nctId, study));
                 this.foundTrials.set(mapped);
             },
             error: (err) => {
@@ -118,17 +120,94 @@ export class TrialWorkflowService {
     }
 
     processResults() {
-        const request = this.getForResults();
+        const trials = this.selectedTrialIds().map(id => this.trialCache.get(id));
+        const plotData: any[] = trials.map(trial => ({
+            id: trial?.protocolSection.identificationModule.nctId,
+
+            // Plots
+            terminationCause: trial?.protocolSection.statusModule?.whyStopped ?? null,
+            geoLocations: trial?.protocolSection.contactsLocationsModule?.locations?.map(loc => {
+                geoPoint: loc.geoPoint
+                city: loc.city
+                country: loc.country
+            }) ?? [],
+            startDate: trial?.protocolSection.statusModule?.startDateStruct,
+            completionDate: trial?.protocolSection.statusModule?.completionDateStruct,
+
+            // Metrics - Get transformed into { x: number, y : number, label: string (optional) }
+            totalEnrollment: trial?.protocolSection.designModule?.enrollmentInfo?.count ?? 0,
+            siteCount: trial?.protocolSection.contactsLocationsModule?.locations?.length ?? 0,
+            /* Duration = completionDate - startDate */
+            /* Recruitment Velocity = total Enrollment / Duration */
+            inclusionStrictnes: trial?.protocolSection.eligibilityModule?.eligibilityCriteria?.split(' ').length ?? 0,
+            /* site efficiency = total enrollment / site count */
+            outcomeDensity: (trial?.protocolSection.outcomesModule?.primaryOutcomes?.length ?? 0) + (trial?.protocolSection.outcomesModule?.secondaryOutcomes?.length ?? 0),
+            minAge: trial?.protocolSection.eligibilityModule?.minimumAge,
+            maxAge: trial?.protocolSection.eligibilityModule?.maximumAge,
+            /* Age Span = maxAge - minAge */
+            interventionCount: trial?.protocolSection.armsInterventionsModule?.interventions?.length ?? 0,
+            collaboratorCount: trial?.protocolSection.sponsorCollaboratorsModule?.collaborators?.length ?? 0,
+            completedDate: trial?.protocolSection.statusModule?.primaryCompletionDateStruct,
+            /* Timeline Slippage */
+            conditionCount: trial?.protocolSection.conditionsModule?.conditions?.length ?? 0
+        }));
+
+        var terminations = new Map<string, number>([
+            ["Completed", 0]
+        ]);
+        plotData.forEach((trial: any) => {
+            if (trial.terminationCause as string) {
+                terminations.set(trial.terminationCause, (terminations.get(trial.terminationCause) || 0) + 1);
+            } else {
+                terminations.set("Completed", (terminations.get("Completed") || 0) + 1);
+            }
+        });
+
+        this.results.update(current => {
+            if (current == null) {
+                current = new ResultsModel();
+            }
+
+            current.terminationReasons = Array.from(terminations.entries()).map(([reason, count]) => ({ reason, count }));
+            // current.metricRows = plotData.map(trial =>{
+            //     return ({
+            //         id: trial.id,
+            //         totalEnrollment: trial.totalEnrollment,
+            //         siteCount: trial.siteCount,
+            //         recruitmentVelocity: trial.totalEnrollment / (trial.completedDate - trial.startDate), // todo: zero
+            //         inclusionStrictnes: trial.inclusionStrictnes,
+            //         siteEfficiency: trial.siteCount == 0 ? 0 : (trial.totalEnrollment / trial.siteCount),
+            //         outcomeDensity: trial.outcomeDensity,
+            //         ageSpan: trial.maxAge - trial.minAge,
+            //         minAge: trial.minAge,
+            //         maxAge: trial.maxAge,
+            //         interventionCount: trial.interventionCount,
+            //         collaboratorCount: trial.collaboratorCount,
+            //         timelineSlippage: trial.completedDate - trial.startDate, // todo: not yet a number need to convert strings
+            //         maskingIntensity: trial.maskingIntensity,
+            //         geographicSpread: trial.geographicSpread,
+            //         conditionCount: trial.conditionCount
+            //     });
+            // });
+
+            return current;
+        })
+
+        const request = this.createResultsRequest();
         if (!request) return;
 
-        // In a real app, this would be an observable we subscribe to
-        // For now, we just call the mock API
         this.apiService.getResults(request).subscribe(response => {
-            this.results.set(response);
+            this.results.update(current => {
+                if (current == null) {
+                    current = new ResultsModel();
+                }
+                current.trialResults = response;
+                return current;
+            })
         });
     }
 
-    getForResults() : TrialResultsRequest | undefined {
+    createResultsRequest() : TrialResultsRequest | undefined {
         const input = this.inputParams();
         if (!input) 
             return undefined;
