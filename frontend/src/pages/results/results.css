@@ -150,6 +150,135 @@ app-progress-track {
     to { transform: rotate(360deg); }
 }
 
+/* Comparison Table */
+.comparison-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.comparison-header h2 {
+    margin: 0;
+}
+
+.comparison-search {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    padding: 0.3rem 0.6rem;
+    background: white;
+}
+
+.comparison-search .search-icon {
+    font-size: 0.9rem;
+    color: var(--app-gray);
+}
+
+.comparison-search input {
+    border: none;
+    outline: none;
+    font-size: 0.85rem;
+    width: 180px;
+}
+
+.comparison-table-wrapper {
+    overflow-x: auto;
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.comparison-table thead tr {
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.comparison-table th {
+    padding: 0.6rem 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: #444;
+    white-space: nowrap;
+}
+
+.comparison-table th.metric-col {
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.comparison-table th.metric-col:hover {
+    color: var(--app-teal);
+}
+
+.comparison-table th.sorted {
+    color: var(--app-blue);
+}
+
+.sort-icon {
+    margin-left: 0.25rem;
+    font-size: 0.7rem;
+    color: var(--app-gray);
+}
+
+.comparison-table tbody tr {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.comparison-table tbody tr:hover {
+    background: #f8f9fc;
+}
+
+.trial-name-cell {
+    padding: 0.55rem 0.75rem;
+    max-width: 280px;
+}
+
+.trial-name-cell .trial-link {
+    color: var(--app-blue);
+    text-decoration: none;
+    font-size: 0.82rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.trial-name-cell .trial-link:hover {
+    text-decoration: underline;
+}
+
+.metric-cell {
+    padding: 0.55rem 0.75rem;
+    text-align: center;
+}
+
+.check {
+    color: #2e9e5a;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.cross {
+    color: #dc344d;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.no-results {
+    padding: 2rem;
+    text-align: center;
+    color: var(--app-gray);
+    font-style: italic;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
     .results-layout {
