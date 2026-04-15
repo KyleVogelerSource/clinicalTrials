@@ -6,7 +6,7 @@ import { ResultsApiService } from "./results-api.service";
 import { DesignModel } from "../models/design-model";
 import { StudyTrial } from "../models/study-trial";
 import { ClinicalTrialStudy } from "@shared/dto/ClinicalTrialStudiesResponse";
-import { ResultsModel } from "../models/results-model";
+import { MetricRow, ResultsModel } from "../models/results-model";
 
 const PHASE_MAP: Record<string, string> = {
     'Early Phase 1': 'EARLY_PHASE1',
@@ -121,7 +121,7 @@ export class TrialWorkflowService {
 
     processResults() {
         const trials = this.selectedTrialIds().map(id => this.trialCache.get(id));
-        const plotData: any[] = trials.map(trial => ({
+        const plotData = trials.map(trial => ({
             id: trial?.protocolSection.identificationModule.nctId,
 
             // Plots
@@ -139,7 +139,7 @@ export class TrialWorkflowService {
             siteCount: trial?.protocolSection.contactsLocationsModule?.locations?.length ?? 0,
             /* Duration = completionDate - startDate */
             /* Recruitment Velocity = total Enrollment / Duration */
-            inclusionStrictnes: trial?.protocolSection.eligibilityModule?.eligibilityCriteria?.split(' ').length ?? 0,
+            inclusionStrictness: trial?.protocolSection.eligibilityModule?.eligibilityCriteria?.split(' ').length ?? 0,
             /* site efficiency = total enrollment / site count */
             outcomeDensity: (trial?.protocolSection.outcomesModule?.primaryOutcomes?.length ?? 0) + (trial?.protocolSection.outcomesModule?.secondaryOutcomes?.length ?? 0),
             minAge: trial?.protocolSection.eligibilityModule?.minimumAge,
@@ -149,14 +149,15 @@ export class TrialWorkflowService {
             collaboratorCount: trial?.protocolSection.sponsorCollaboratorsModule?.collaborators?.length ?? 0,
             completedDate: trial?.protocolSection.statusModule?.primaryCompletionDateStruct,
             /* Timeline Slippage */
+            maskingInfo: trial?.protocolSection.designModule?.designInfo?.maskingInfo?.whoMasked ?? [],
             conditionCount: trial?.protocolSection.conditionsModule?.conditions?.length ?? 0
         }));
 
         var terminations = new Map<string, number>([
             ["Completed", 0]
         ]);
-        plotData.forEach((trial: any) => {
-            if (trial.terminationCause as string) {
+        plotData.forEach((trial) => {
+            if (trial.terminationCause) {
                 terminations.set(trial.terminationCause, (terminations.get(trial.terminationCause) || 0) + 1);
             } else {
                 terminations.set("Completed", (terminations.get("Completed") || 0) + 1);
@@ -169,26 +170,42 @@ export class TrialWorkflowService {
             }
 
             current.terminationReasons = Array.from(terminations.entries()).map(([reason, count]) => ({ reason, count }));
-            // current.metricRows = plotData.map(trial =>{
-            //     return ({
-            //         id: trial.id,
-            //         totalEnrollment: trial.totalEnrollment,
-            //         siteCount: trial.siteCount,
-            //         recruitmentVelocity: trial.totalEnrollment / (trial.completedDate - trial.startDate), // todo: zero
-            //         inclusionStrictnes: trial.inclusionStrictnes,
-            //         siteEfficiency: trial.siteCount == 0 ? 0 : (trial.totalEnrollment / trial.siteCount),
-            //         outcomeDensity: trial.outcomeDensity,
-            //         ageSpan: trial.maxAge - trial.minAge,
-            //         minAge: trial.minAge,
-            //         maxAge: trial.maxAge,
-            //         interventionCount: trial.interventionCount,
-            //         collaboratorCount: trial.collaboratorCount,
-            //         timelineSlippage: trial.completedDate - trial.startDate, // todo: not yet a number need to convert strings
-            //         maskingIntensity: trial.maskingIntensity,
-            //         geographicSpread: trial.geographicSpread,
-            //         conditionCount: trial.conditionCount
-            //     });
-            // });
+            current.metricRows = plotData.map(trial => {
+                var row = new MetricRow();
+
+                const completedDate = trial.completedDate ? Date.parse(trial.completedDate.date) : null;
+                const startDate = trial.startDate ? Date.parse(trial.startDate.date) : null;
+                if (completedDate && startDate) {
+                    const diff = (completedDate - startDate) / (1000 * 60 * 60 * 24);
+                    row.timelineSlippage = diff;
+                    if (diff > 0) {
+                        row.recruitmentVelocity = trial.totalEnrollment / diff;
+                    }
+                }
+
+                if (trial.maxAge) {
+                    row.maxAge = parseInt(trial.maxAge);
+                }
+                if (trial.minAge) {
+                    row.minAge = parseInt(trial.minAge);
+                }
+                if (trial.minAge && trial.maxAge) {
+                    row.ageSpan = row.maxAge - row.minAge;
+                }
+                
+                row.id = trial.id ?? 'Unknown';
+                row.totalEnrollment = trial.totalEnrollment;
+                row.siteCount = trial.siteCount;
+                row.inclusionStrictness = trial.inclusionStrictness;
+                row.siteEfficiency = trial.siteCount == 0 ? 0 : (trial.totalEnrollment / trial.siteCount);
+                row.outcomeDensity = trial.outcomeDensity;
+                row.interventionCount = trial.interventionCount;
+                row.collaboratorCount = trial.collaboratorCount;
+                row.maskingIntensity = trial.maskingInfo.length;
+                row.geographicSpread = trial.geoLocations.length;
+                row.conditionCount = trial.conditionCount;
+                return row;
+            });
 
             return current;
         })
