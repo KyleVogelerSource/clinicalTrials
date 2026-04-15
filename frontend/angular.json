@@ -64,6 +64,7 @@
           "options": {
             "host": "0.0.0.0",
             "port": 4200,
+            "proxyConfig": "proxy.conf.json",
             "allowedHosts": [
               "localhost",
               "127.0.0.1",

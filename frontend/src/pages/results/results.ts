@@ -11,8 +11,52 @@ import { ProgressTrack } from '../../primitives/progress-track/progress-track';
 import { BarChart, BarChartData } from '../../primitives/bar-chart/bar-chart';
 import { ResultsApiService } from '../../services/results-api.service';
 import { TrialWorkflowService } from '../../services/trial-workflow-service';
+import { StudyTrial } from '../../models/study-trial';
+
+interface ComparisonMetric {
+    key: string;
+    label: string;
+    fn: (trial: StudyTrial, phase: string) => boolean;
+}
+
+interface ComparisonRow {
+    trial: StudyTrial;
+    metrics: Record<string, boolean>;
+}
 
 type LoadState = 'loading' | 'loaded' | 'error';
+
+const COMPARISON_METRICS: ComparisonMetric[] = [
+    {
+        key: 'phaseMatch',
+        label: 'Phase Match',
+        fn: (t, phase) => {
+            if (!phase) return false;
+            const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+            return normalize(t.phase) === normalize(phase);
+        }
+    },
+    {
+        key: 'highEnrollment',
+        label: 'High Enrollment',
+        fn: (t) => t.enrollmentCount >= 200,
+    },
+    {
+        key: 'hasStartDate',
+        label: 'Has Start Date',
+        fn: (t) => !!t.startDate,
+    },
+    {
+        key: 'hasEndDate',
+        label: 'Completion Date',
+        fn: (t) => !!t.completionDate,
+    },
+    {
+        key: 'hasDescription',
+        label: 'Has Description',
+        fn: (t) => t.description.trim().length > 0,
+    },
+];
 
 @Component({
     selector: 'app-results',
@@ -30,6 +74,59 @@ export class Results implements OnInit {
     loadState = signal<LoadState>('loading');
     data = this.workflowService.results;
     errorMessage = signal<string>('');
+
+    // Comparison table
+    readonly comparisonMetrics = COMPARISON_METRICS;
+    comparisonSearch = signal('');
+    comparisonSortKey = signal('');
+    comparisonSortAsc = signal(true);
+
+    private selectedTrials = computed(() => {
+        const ids = new Set(this.workflowService.selectedTrialIds());
+        const all = this.workflowService.foundTrials();
+        return ids.size > 0 ? all.filter(t => ids.has(t.nctId)) : all;
+    });
+
+    comparisonRows = computed<ComparisonRow[]>(() => {
+        const search = this.comparisonSearch().toLowerCase();
+        const phase = this.workflowService.inputParams()?.phase ?? '';
+        const sortKey = this.comparisonSortKey();
+        const sortAsc = this.comparisonSortAsc();
+
+        let rows: ComparisonRow[] = this.selectedTrials().map(trial => ({
+            trial,
+            metrics: Object.fromEntries(
+                COMPARISON_METRICS.map(m => [m.key, m.fn(trial, phase)])
+            ),
+        }));
+
+        if (search) {
+            rows = rows.filter(r => r.trial.briefTitle.toLowerCase().includes(search));
+        }
+
+        if (sortKey) {
+            rows = [...rows].sort((a, b) => {
+                const av = a.metrics[sortKey] ? 1 : 0;
+                const bv = b.metrics[sortKey] ? 1 : 0;
+                return sortAsc ? bv - av : av - bv;
+            });
+        }
+
+        return rows;
+    });
+
+    onComparisonSearch(event: Event) {
+        this.comparisonSearch.set((event.target as HTMLInputElement).value);
+    }
+
+    onComparisonSort(key: string) {
+        if (this.comparisonSortKey() === key) {
+            this.comparisonSortAsc.update(v => !v);
+        } else {
+            this.comparisonSortKey.set(key);
+            this.comparisonSortAsc.set(true);
+        }
+    }
 
     terminationChartData = computed<BarChartData | null>(() => {
         const d = this.data();
