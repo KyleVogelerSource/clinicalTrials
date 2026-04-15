@@ -72,7 +72,8 @@ export class Results implements OnInit {
     private workflowService = inject(TrialWorkflowService);
 
     loadState = signal<LoadState>('loading');
-    data = this.workflowService.results;
+    model = this.workflowService.results;
+    data = computed(() => this.workflowService.results().trialResults);
     errorMessage = signal<string>('');
 
     // Comparison table
@@ -190,21 +191,18 @@ export class Results implements OnInit {
         if (this.data()) {
             this.loadState.set('loaded');
         } else {
-            const request = this.workflowService.getForResults();
-            if (request) {
-                this.workflowService.processResults();
-                this.loadState.set('loading');
-                // The signal 'data' is tied to workflowService.results, 
-                // so we can use an effect or just check if it updates.
-                // For simplicity in this mock-driven flow:
-                setTimeout(() => {
-                    if (this.data()) this.loadState.set('loaded');
-                    else {
-                        this.errorMessage.set('Failed to load results. Please try again.');
-                        this.loadState.set('error');
-                    }
-                }, 500);
-            }
+            this.workflowService.processResults();
+            this.loadState.set('loading');
+            // The signal 'data' is tied to workflowService.results, 
+            // so we can use an effect or just check if it updates.
+            // For simplicity in this mock-driven flow:
+            setTimeout(() => {
+                if (this.data()) this.loadState.set('loaded');
+                else {
+                    this.errorMessage.set('Failed to load results. Please try again.');
+                    this.loadState.set('error');
+                }
+            }, 500);
         }
     }
 
