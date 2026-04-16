@@ -1,9 +1,12 @@
 import { TrialResultsResponse } from '@shared/dto/TrialResultsResponse';
 
 export const mockTrialResultsResponse: TrialResultsResponse = {
+    timestamp: new Date(),
+    generatedAt: new Date().toISOString(),
     overallScore: 73,
     totalTrialsFound: 511,
     queryCondition: "Type 2 Diabetes",
+    overallSummary: "Based on 511 previous trials ffor disease/condition, the parameters you suppied for you clinical trial has a fair chance of completion.",
     terminationReasons: [
         { reason: "Slow Recruitment", count: 42 },
         { reason: "Sponsor Decision", count: 38 },
@@ -27,6 +30,5 @@ export const mockTrialResultsResponse: TrialResultsResponse = {
         { patientBucket: "101–250", estimatedDays: 365, actualDays: 420 },
         { patientBucket: "251–500", estimatedDays: 480, actualDays: 0   },
         { patientBucket: "500+",    estimatedDays: 720, actualDays: 0   },
-    ],
-    generatedAt: new Date().toISOString(),
+    ]
 };

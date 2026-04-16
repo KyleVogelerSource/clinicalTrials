@@ -3,10 +3,10 @@ import { TrialResultsRequest } from "@shared/dto/TrialResultsRequest";
 import { ClinicalTrialSearchRequest } from "@shared/dto/ClinicalTrialSearchRequest";
 import { ClinicalStudyService } from "./clinical-study.service";
 import { ResultsApiService } from "./results-api.service";
-import { TrialResultsResponse } from "@shared/dto/TrialResultsResponse";
 import { DesignModel } from "../models/design-model";
 import { StudyTrial } from "../models/study-trial";
 import { ClinicalTrialStudy } from "@shared/dto/ClinicalTrialStudiesResponse";
+import { MetricRow, ResultsModel } from "../models/results-model";
 
 const PHASE_MAP: Record<string, string> = {
     'Early Phase 1': 'EARLY_PHASE1',
@@ -37,6 +37,7 @@ const INTERVENTION_MODEL_MAP: Record<string, string> = {
 export class TrialWorkflowService {
     private clinicalStudyService = inject(ClinicalStudyService);
     private apiService = inject(ResultsApiService);
+    private trialCache: Map<string, ClinicalTrialStudy> = new Map();
 
     // Designer state
     inputParams = signal<DesignModel | null>(null);
@@ -49,7 +50,7 @@ export class TrialWorkflowService {
 
     // Results state
     selectedTrialIds = signal<string[]>([]);
-    results = signal<TrialResultsResponse | null>(null);
+    results = signal<ResultsModel>(new ResultsModel());
 
     reset() {
         this.inputParams.set(null);
@@ -58,7 +59,7 @@ export class TrialWorkflowService {
         this.fromDate.set("");
         this.toDate.set("");
         this.selectedTrialIds.set([]);
-        this.results.set(null);
+        this.results.set(new ResultsModel());
     }
 
     setInputs(inputs : DesignModel) {
@@ -84,6 +85,7 @@ export class TrialWorkflowService {
         this.clinicalStudyService.searchStudies(request).subscribe({
             next: (response) => {
                 const mapped = response.studies.map(study => this.toStudyTrial(study));
+                response.studies.forEach(study => this.trialCache.set(study.protocolSection.identificationModule.nctId, study));
                 this.foundTrials.set(mapped);
             },
             error: (err) => {
@@ -118,17 +120,111 @@ export class TrialWorkflowService {
     }
 
     processResults() {
-        const request = this.getForResults();
+        const trials = this.selectedTrialIds().map(id => this.trialCache.get(id));
+        const plotData = trials.map(trial => ({
+            id: trial?.protocolSection.identificationModule.nctId,
+
+            // Plots
+            terminationCause: trial?.protocolSection.statusModule?.whyStopped ?? null,
+            geoLocations: trial?.protocolSection.contactsLocationsModule?.locations?.map(loc => ({
+                geoPoint: loc.geoPoint,
+                city: loc.city,
+                country: loc.country
+            })) ?? [],
+            startDate: trial?.protocolSection.statusModule?.startDateStruct,
+            completionDate: trial?.protocolSection.statusModule?.completionDateStruct,
+
+            // Metrics - Get transformed into { x: number, y : number, label: string (optional) }
+            totalEnrollment: trial?.protocolSection.designModule?.enrollmentInfo?.count ?? 0,
+            siteCount: trial?.protocolSection.contactsLocationsModule?.locations?.length ?? 0,
+            /* Duration = completionDate - startDate */
+            /* Recruitment Velocity = total Enrollment / Duration */
+            inclusionStrictness: trial?.protocolSection.eligibilityModule?.eligibilityCriteria?.split(' ').length ?? 0,
+            /* site efficiency = total enrollment / site count */
+            outcomeDensity: (trial?.protocolSection.outcomesModule?.primaryOutcomes?.length ?? 0) + (trial?.protocolSection.outcomesModule?.secondaryOutcomes?.length ?? 0),
+            minAge: trial?.protocolSection.eligibilityModule?.minimumAge,
+            maxAge: trial?.protocolSection.eligibilityModule?.maximumAge,
+            /* Age Span = maxAge - minAge */
+            interventionCount: trial?.protocolSection.armsInterventionsModule?.interventions?.length ?? 0,
+            collaboratorCount: trial?.protocolSection.sponsorCollaboratorsModule?.collaborators?.length ?? 0,
+            completedDate: trial?.protocolSection.statusModule?.primaryCompletionDateStruct,
+            /* Timeline Slippage */
+            maskingInfo: trial?.protocolSection.designModule?.designInfo?.maskingInfo?.whoMasked ?? [],
+            conditionCount: trial?.protocolSection.conditionsModule?.conditions?.length ?? 0
+        }));
+
+        const terminations = new Map<string, number>([
+            ["Completed", 0]
+        ]);
+        plotData.forEach((trial) => {
+            if (trial.terminationCause) {
+                terminations.set(trial.terminationCause, (terminations.get(trial.terminationCause) || 0) + 1);
+            } else {
+                terminations.set("Completed", (terminations.get("Completed") || 0) + 1);
+            }
+        });
+
+        this.results.update(current => {
+            if (current == null) {
+                current = new ResultsModel();
+            }
+
+            current.terminationReasons = Array.from(terminations.entries()).map(([reason, count]) => ({ reason, count }));
+            current.metricRows = plotData.map(trial => {
+                const row = new MetricRow();
+
+                const completedDate = trial.completedDate ? Date.parse(trial.completedDate.date) : null;
+                const startDate = trial.startDate ? Date.parse(trial.startDate.date) : null;
+                if (completedDate && startDate) {
+                    const diff = (completedDate - startDate) / (1000 * 60 * 60 * 24);
+                    row.timelineSlippage = diff;
+                    if (diff > 0) {
+                        row.recruitmentVelocity = trial.totalEnrollment / diff;
+                    }
+                }
+
+                if (trial.maxAge) {
+                    row.maxAge = parseInt(trial.maxAge);
+                }
+                if (trial.minAge) {
+                    row.minAge = parseInt(trial.minAge);
+                }
+                if (trial.minAge && trial.maxAge) {
+                    row.ageSpan = row.maxAge - row.minAge;
+                }
+                
+                row.id = trial.id ?? 'Unknown';
+                row.totalEnrollment = trial.totalEnrollment;
+                row.siteCount = trial.siteCount;
+                row.inclusionStrictness = trial.inclusionStrictness;
+                row.siteEfficiency = trial.siteCount == 0 ? 0 : (trial.totalEnrollment / trial.siteCount);
+                row.outcomeDensity = trial.outcomeDensity;
+                row.interventionCount = trial.interventionCount;
+                row.collaboratorCount = trial.collaboratorCount;
+                row.maskingIntensity = trial.maskingInfo.length;
+                row.geographicSpread = trial.geoLocations.length;
+                row.conditionCount = trial.conditionCount;
+                return row;
+            });
+
+            return current;
+        })
+
+        const request = this.createResultsRequest();
         if (!request) return;
 
-        // In a real app, this would be an observable we subscribe to
-        // For now, we just call the mock API
         this.apiService.getResults(request).subscribe(response => {
-            this.results.set(response);
+            this.results.update(current => {
+                if (current == null) {
+                    current = new ResultsModel();
+                }
+                current.trialResults = response;
+                return current;
+            })
         });
     }
 
-    getForResults() : TrialResultsRequest | undefined {
+    createResultsRequest() : TrialResultsRequest | undefined {
         const input = this.inputParams();
         if (!input) 
             return undefined;
