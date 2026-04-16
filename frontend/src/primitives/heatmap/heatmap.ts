@@ -12,8 +12,8 @@ declare module 'leaflet' {
 }
 
 export interface HeatPoint {
-    lat: number;
-    lng: number;
+    latitude: number;
+    longitude: number;
     intensity?: number;
 }
 
@@ -71,8 +71,8 @@ export class Heatmap implements OnDestroy {
         }
 
         const heatData: [number, number, number][] = points.map(p => [
-            p.lat, 
-            p.lng, 
+            p.latitude, 
+            p.longitude, 
             p.intensity ?? 1
         ]);
 
@@ -84,7 +84,7 @@ export class Heatmap implements OnDestroy {
 
         // Optionally fit bounds if there are points
         if (points.length > 0) {
-            const bounds = L.latLngBounds(points.map(p => [p.lat, p.lng]));
+            const bounds = L.latLngBounds(points.map(p => [p.latitude, p.longitude]));
             this.map.fitBounds(bounds, { padding: [20, 20] });
         }
     }

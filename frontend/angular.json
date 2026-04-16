@@ -33,6 +33,10 @@
             "styles": [
               "node_modules/leaflet/dist/leaflet.css",
               "src/styles.css"
+            ],
+            "allowedCommonJsDependencies": [
+              "leaflet",
+              "leaflet.heat"
             ]
           },
           "configurations": {
