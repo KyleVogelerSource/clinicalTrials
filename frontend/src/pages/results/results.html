@@ -102,7 +102,12 @@
                 <!-- TODO -->
                 <section id="heatmap" class="results-section results-section--placeholder">
                     <h2>Heatmap</h2>
-                    <p class="coming-soon">Coming soon</p>
+                    @if (heatmapData(); as heatmapData) {
+                        <app-map-heatmap [points]="heatmapData"/>
+                    }
+                    @else {
+                        <p class="coming-soon">No Data Available</p>
+                    }
                 </section>
 
                 <section id="data-plot" class="results-section">
