@@ -5,7 +5,7 @@ import { buildCandidatePool, PoolBuilderConfig } from "./CandidatePoolBuilder";
 import { CandidatePool } from "../models/NormalizedTrial";
 
 const defaultClient = new ClinicalTrialsApiClient();
-const MAX_PAGES = 10;
+const MAX_PAGES = 100;
 
 export async function searchClinicalTrials(request: ClinicalTrialSearchRequest, client: ClinicalTrialsApiClient = defaultClient): Promise<ClinicalTrialStudiesResponse> {
   return client.searchStudies(request);
