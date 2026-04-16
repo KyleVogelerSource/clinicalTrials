@@ -1,5 +1,5 @@
 import { TrialResultsResponse } from "@shared/dto/TrialResultsResponse";
-import { HeatPoint } from "../primitives/map-heatmap/map-heatmap";
+import { HeatPoint } from "../primitives/heatmap/heatmap";
 
 export interface LabelBar {
     reason: string;
