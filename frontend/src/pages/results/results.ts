@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { ProgressTrack } from '../../primitives/progress-track/progress-track';
 import { BarChart, BarChartData } from '../../primitives/bar-chart/bar-chart';
 import { ScatterChart } from '../../primitives/scatter-chart/scatter-chart';
+import { MapHeatmap, HeatPoint } from '../../primitives/map-heatmap/map-heatmap';
 import { ResultsApiService } from '../../services/results-api.service';
 import { TrialWorkflowService } from '../../services/trial-workflow-service';
 import { StudyTrial } from '../../models/study-trial';
@@ -63,7 +64,7 @@ const COMPARISON_METRICS: ComparisonMetric[] = [
 @Component({
     selector: 'app-results',
     standalone: true,
-    imports: [ProgressTrack, BarChart, ScatterChart],
+    imports: [ProgressTrack, BarChart, ScatterChart, MapHeatmap],
     templateUrl: './results.html',
     styleUrl: './results.css',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -77,6 +78,13 @@ export class Results implements OnInit {
     model = this.workflowService.results;
     data = computed(() => this.workflowService.results().trialResults);
     errorMessage = signal<string>('');
+
+    // heatmap
+    heatmapData = computed(() => {
+        const locations = this.model().siteLocations;
+        if (!locations) return null;
+        return locations;
+    });
 
     // DataPlot
     dataPlotX = signal<string>(metricNames[0]);
@@ -158,7 +166,7 @@ export class Results implements OnInit {
     }
 
     terminationChartData = computed<BarChartData | null>(() => {
-        const d = this.data();
+        const d = this.model();
         if (!d) return null;
         return {
             labels: d.terminationReasons.map(r => r.reason),
