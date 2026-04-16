@@ -170,6 +170,16 @@ export class TrialWorkflowService {
             }
 
             current.terminationReasons = Array.from(terminations.entries()).map(([reason, count]) => ({ reason, count }));
+            current.siteLocations = plotData.flatMap(trial => 
+                trial.geoLocations.map(loc =>{
+                    if (!loc.geoPoint || !loc.geoPoint.lat || !loc.geoPoint.lon) return null;
+                    return ({
+                        longitude: loc.geoPoint.lon,
+                        latitude: loc.geoPoint.lat
+                    })
+                }).filter(loc => loc !== null)
+            );
+
             current.metricRows = plotData.map(trial => {
                 const row = new MetricRow();
 

@@ -1,4 +1,5 @@
 import { TrialResultsResponse } from "@shared/dto/TrialResultsResponse";
+import { HeatPoint } from "../primitives/heatmap/heatmap";
 
 export interface LabelBar {
     reason: string;
@@ -71,6 +72,7 @@ export interface BenchmarkInfo {
 export class ResultsModel {
     trialResults?: TrialResultsResponse;
     terminationReasons: LabelBar[] = [];
+    siteLocations: HeatPoint[] = [];
     metricNames: string[] = metricNames;
     metricRows: MetricRow[] = [];
     complitionBenchmarks: BenchmarkInfo[] = [];
