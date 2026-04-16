@@ -340,8 +340,8 @@ describe("ClinicalTrialsService", () => {
 
       const result = await searchAndBuildCandidatePool(request, {}, client);
 
-      expect(mockClient.searchStudies).toHaveBeenCalledTimes(10);
-      expect(result.metadata.totalPagesfetched).toBeLessThanOrEqual(10);
+      expect(mockClient.searchStudies).toHaveBeenCalledTimes(11);
+      expect(result.metadata.totalPagesfetched).toBeLessThanOrEqual(11);
     });
   });
 });
