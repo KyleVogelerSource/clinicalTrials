@@ -1,8 +1,3 @@
-export interface TerminationReasonBar {
-    reason: string;
-    count: number;
-}
-
 export interface RecruitmentImpactBar {
     label: string;
     avgDays: number;
@@ -16,13 +11,23 @@ export interface TimelineBar {
 }
 
 export interface TrialResultsResponse {
+    timestamp: Date;
     overallScore: number;
+    overallSummary: string | null;
     totalTrialsFound: number;
     queryCondition: string | null;
-    terminationReasons: TerminationReasonBar[];
     avgRecruitmentDays: number;
     participantTarget: number;
     recruitmentByImpact: RecruitmentImpactBar[];
     timelineBuckets: TimelineBar[];
+
+    // OBSELETE
+    terminationReasons: TerminationReasonBar[];
     generatedAt: string;
+}
+
+// OBSELETE
+export interface TerminationReasonBar {
+    reason: string;
+    count: number;
 }

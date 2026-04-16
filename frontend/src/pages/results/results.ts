@@ -9,9 +9,11 @@ import {
 import { Router } from '@angular/router';
 import { ProgressTrack } from '../../primitives/progress-track/progress-track';
 import { BarChart, BarChartData } from '../../primitives/bar-chart/bar-chart';
+import { ScatterChart } from '../../primitives/scatter-chart/scatter-chart';
 import { ResultsApiService } from '../../services/results-api.service';
 import { TrialWorkflowService } from '../../services/trial-workflow-service';
 import { StudyTrial } from '../../models/study-trial';
+import { metricNames, MetricRow } from '../../models/results-model';
 
 interface ComparisonMetric {
     key: string;
@@ -61,7 +63,7 @@ const COMPARISON_METRICS: ComparisonMetric[] = [
 @Component({
     selector: 'app-results',
     standalone: true,
-    imports: [ProgressTrack, BarChart],
+    imports: [ProgressTrack, BarChart, ScatterChart],
     templateUrl: './results.html',
     styleUrl: './results.css',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -72,8 +74,35 @@ export class Results implements OnInit {
     private workflowService = inject(TrialWorkflowService);
 
     loadState = signal<LoadState>('loading');
-    data = this.workflowService.results;
+    model = this.workflowService.results;
+    data = computed(() => this.workflowService.results().trialResults);
     errorMessage = signal<string>('');
+
+    // DataPlot
+    dataPlotX = signal<string>(metricNames[0]);
+    dataPlotY = signal<string>(metricNames[1]);
+    dataPlotData = computed(() => {
+        const metrics = this.model().metricRows;
+        if (!metrics) return null;
+        
+        const getX = MetricRow.metricExtractors[this.dataPlotX()];
+        const getY = MetricRow.metricExtractors[this.dataPlotY()];
+        if (!getX || !getY) return null;
+
+        const dataSet = metrics.map(row => {
+            const x = getX(row);
+            const y = getY(row);
+            if (x == null || y == null) return null;
+            return { x, y };
+        }).filter(point => point !== null);
+
+        return {
+            datasets: [{
+                label: this.dataPlotX() + ' vs ' + this.dataPlotY(),
+                data: dataSet
+            }]
+        };
+    });
 
     // Comparison table
     readonly comparisonMetrics = COMPARISON_METRICS;
@@ -190,21 +219,18 @@ export class Results implements OnInit {
         if (this.data()) {
             this.loadState.set('loaded');
         } else {
-            const request = this.workflowService.getForResults();
-            if (request) {
-                this.workflowService.processResults();
-                this.loadState.set('loading');
-                // The signal 'data' is tied to workflowService.results, 
-                // so we can use an effect or just check if it updates.
-                // For simplicity in this mock-driven flow:
-                setTimeout(() => {
-                    if (this.data()) this.loadState.set('loaded');
-                    else {
-                        this.errorMessage.set('Failed to load results. Please try again.');
-                        this.loadState.set('error');
-                    }
-                }, 500);
-            }
+            this.workflowService.processResults();
+            this.loadState.set('loading');
+            // The signal 'data' is tied to workflowService.results, 
+            // so we can use an effect or just check if it updates.
+            // For simplicity in this mock-driven flow:
+            setTimeout(() => {
+                if (this.data()) this.loadState.set('loaded');
+                else {
+                    this.errorMessage.set('Failed to load results. Please try again.');
+                    this.loadState.set('error');
+                }
+            }, 500);
         }
     }
 

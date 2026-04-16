@@ -85,28 +85,53 @@
                 <!-- Expected Timeline -->
                 <section id="expected-timeline" class="results-section">
                     <h2>Expected Timeline</h2>
-
+                    
                     @if (timelineChartData(); as chartData) {
-                        <app-bar-chart
+                    <app-bar-chart
                             [chartData]="chartData"
                             [grouped]="true"
                             xAxisLabel="# of Patients"
                             yAxisLabel="Days"
                         />
                     }
+                    @else {
+                        <p class="coming-soon">No Data Available</p>
+                    }
                 </section>
 
-                <!-- Placeholder sections -->
+                <!-- TODO -->
                 <section id="heatmap" class="results-section results-section--placeholder">
                     <h2>Heatmap</h2>
                     <p class="coming-soon">Coming soon</p>
                 </section>
 
-                <section id="data-plot" class="results-section results-section--placeholder">
+                <section id="data-plot" class="results-section">
                     <h2>Data Plot</h2>
-                    <p class="coming-soon">Coming soon</p>
+                    
+                    <select [value]="dataPlotX()" (change)="dataPlotX.set($any($event.target).value)">
+                        @for (name of model().metricNames; track name) {
+                            <option value="{{ name }}">{{ name }}</option>
+                        }
+                    </select>
+                    
+                    <select [value]="dataPlotY()" (change)="dataPlotY.set($any($event.target).value)">
+                        @for (name of model().metricNames; track name) {
+                            <option value="{{ name }}">{{ name }}</option>
+                        }
+                    </select>
+
+                    @if (dataPlotData(); as plotData) {
+                        <app-scatter-chart 
+                            [chartData]="plotData" 
+                            xAxisLabel="{{ dataPlotX() }}" 
+                            yAxisLabel="{{ dataPlotY() }}" />
+                    }
+                    @else {
+                        <p class="coming-soon">No Data Available</p>
+                    }
                 </section>
 
+                <!-- TODO -->
                 <section id="benchmarks" class="results-section results-section--placeholder">
                     <h2>Benchmarks</h2>
                     <p class="coming-soon">Coming soon</p>
