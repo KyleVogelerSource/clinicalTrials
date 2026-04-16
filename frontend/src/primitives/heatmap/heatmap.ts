@@ -12,19 +12,19 @@ declare module 'leaflet' {
 }
 
 export interface HeatPoint {
-    latitude: number;
-    longitude: number;
+    lat: number;
+    lng: number;
     intensity?: number;
 }
 
 @Component({
-    selector: 'app-map-heatmap',
+    selector: 'app-heatmap',
     standalone: true,
-    templateUrl: './map-heatmap.html',
-    styleUrl: './map-heatmap.css',
+    templateUrl: './heatmap.html',
+    styleUrl: './heatmap.css',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MapHeatmap implements OnDestroy {
+export class Heatmap implements OnDestroy {
     points = input.required<HeatPoint[]>();
     zoom = input<number>(2);
     center = input<[number, number]>([20, 0]); // Default to a global view
@@ -71,8 +71,8 @@ export class MapHeatmap implements OnDestroy {
         }
 
         const heatData: [number, number, number][] = points.map(p => [
-            p.latitude, 
-            p.longitude, 
+            p.lat, 
+            p.lng, 
             p.intensity ?? 1
         ]);
 
@@ -84,7 +84,7 @@ export class MapHeatmap implements OnDestroy {
 
         // Optionally fit bounds if there are points
         if (points.length > 0) {
-            const bounds = L.latLngBounds(points.map(p => [p.latitude, p.longitude]));
+            const bounds = L.latLngBounds(points.map(p => [p.lat, p.lng]));
             this.map.fitBounds(bounds, { padding: [20, 20] });
         }
     }
