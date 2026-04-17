@@ -7,7 +7,42 @@
         <!-- Left Column -->
         <div class="form-left-col">
             <div class="form-section">
-                <h3>Study Design</h3>
+                <div class="section-header">
+                    <h3>Study Design</h3>
+                    @if (canImportCriteria()) {
+                    <div class="section-actions">
+                        <label
+                            class="btn btn-compact import-button btn-import"
+                            for="criteriaImport"
+                            title="Import a previously exported criteria JSON file to repopulate the form."
+                        >
+                            Import
+                        </label>
+                        <input
+                            id="criteriaImport"
+                            class="visually-hidden"
+                            type="file"
+                            accept=".json,application/json"
+                            (change)="onImportFile($event)"
+                        />
+                    </div>
+                    }
+                </div>
+                @if (importStatus() !== 'idle') {
+                    <p class="import-message" [class.is-error]="importStatus() === 'error'">{{ importMessage() }}</p>
+                }
+                @if (canImportCriteria() && showImportHelp()) {
+                    <div class="criteria-help" role="note">
+                        <div class="criteria-help-header">
+                            <strong>First time using import/export?</strong>
+                            <button type="button" class="help-dismiss" aria-label="Dismiss import help" (click)="onDismissImportHelp()">Dismiss</button>
+                        </div>
+                        <p class="criteria-help-copy">
+                            `Import` reloads a previously exported criteria JSON file back into the input step.
+                            Use `Export` from the Results step when you want to download the current criteria.
+                        </p>
+                    </div>
+                }
 
                 <div class="form-group">
                     <label for="condition">Disease/Condition</label>

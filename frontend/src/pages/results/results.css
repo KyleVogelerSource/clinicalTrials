@@ -4,6 +4,17 @@ app-progress-track {
     margin-bottom: 2rem;
 }
 
+.results-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 0 1.5rem 0;
+}
+
+.btn-compact {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.85rem;
+}
+
 /* Two-column layout: sidebar + content */
 .results-layout {
     display: grid;
