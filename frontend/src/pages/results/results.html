@@ -99,12 +99,18 @@
                     }
                 </section>
 
-                <!-- TODO -->
-                <section id="heatmap" class="results-section results-section--placeholder">
+                <!-- HeatMap -->
+                <section id="heatmap" class="results-section">
                     <h2>Heatmap</h2>
-                    <p class="coming-soon">Coming soon</p>
+                    @if (heatmapData(); as heatmapData) {
+                        <app-heatmap [points]="heatmapData"/>
+                    }
+                    @else {
+                        <p class="coming-soon">No Data Available</p>
+                    }
                 </section>
 
+                <!-- Metric Comparison Plot -->
                 <section id="data-plot" class="results-section">
                     <h2>Data Plot</h2>
                     
