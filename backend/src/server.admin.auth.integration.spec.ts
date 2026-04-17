@@ -1,8 +1,9 @@
-import request from "supertest";
 import jwt from "jsonwebtoken";
 import type { NextFunction, Response } from "express";
 import type { AuthenticatedRequest } from "./auth/authMiddleware";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { Express } from "express";
+import { invokeExpressApp } from "./test/expressHarness";
 
 const {
   assignUserRoleMock,
@@ -72,27 +73,33 @@ vi.mock("./storage/PostgresClient", () => ({
   }),
 }));
 
-import { app } from "./server";
-
 describe("Server admin auth flow integration tests", () => {
-  beforeEach(() => {
+  let app: Express;
+
+  beforeEach(async () => {
     vi.clearAllMocks();
     allowAction = true;
+    vi.resetModules();
+    ({ app } = await import("./server"));
   });
 
   it("returns 401 when missing bearer token", async () => {
-    const res = await request(app)
-      .post("/api/admin/user-roles")
-      .send({ userId: 1, roleId: 2 });
+    const res = await invokeExpressApp(app, {
+      method: "POST",
+      url: "/api/admin/user-roles",
+      body: { userId: 1, roleId: 2 },
+    });
 
     expect(res.status).toBe(401);
   });
 
   it("returns 401 for invalid bearer token", async () => {
-    const res = await request(app)
-      .post("/api/admin/user-roles")
-      .set("Authorization", "Bearer not-a-valid-token")
-      .send({ userId: 1, roleId: 2 });
+    const res = await invokeExpressApp(app, {
+      method: "POST",
+      url: "/api/admin/user-roles",
+      headers: { authorization: "Bearer not-a-valid-token" },
+      body: { userId: 1, roleId: 2 },
+    });
 
     expect(res.status).toBe(401);
   });
@@ -117,14 +124,18 @@ describe("Server admin auth flow integration tests", () => {
       createdAt: "2026-04-10T00:00:00.000Z",
     });
 
-    const login = await request(app)
-      .post("/api/auth/login")
-      .send({ username: "admin", password: "admin" });
+    const login = await invokeExpressApp(app, {
+      method: "POST",
+      url: "/api/auth/login",
+      body: { username: "admin", password: "admin" },
+    });
 
-    const res = await request(app)
-      .post("/api/admin/user-roles")
-      .set("Authorization", `Bearer ${login.body.token}`)
-      .send({ userId: 1, roleId: 2 });
+    const res = await invokeExpressApp(app, {
+      method: "POST",
+      url: "/api/admin/user-roles",
+      headers: { authorization: `Bearer ${(login.body as Record<string, string>).token}` },
+      body: { userId: 1, roleId: 2 },
+    });
 
     expect(login.status).toBe(200);
     expect(res.status).toBe(201);
@@ -138,9 +149,11 @@ describe("Server admin auth flow integration tests", () => {
 
     allowAction = false;
 
-    const res = await request(app)
-      .delete("/api/admin/user-roles/1/2")
-      .set("Authorization", `Bearer ${token}`);
+    const res = await invokeExpressApp(app, {
+      method: "DELETE",
+      url: "/api/admin/user-roles/1/2",
+      headers: { authorization: `Bearer ${token}` },
+    });
 
     expect(res.status).toBe(403);
     expect(deleteUserRoleMock).not.toHaveBeenCalled();
@@ -154,13 +167,17 @@ describe("Server admin auth flow integration tests", () => {
     deleteRoleActionMock.mockResolvedValueOnce(undefined);
     deleteUserRoleMock.mockResolvedValueOnce(undefined);
 
-    const roleActionDelete = await request(app)
-      .delete("/api/admin/role-actions/2/8")
-      .set("Authorization", `Bearer ${token}`);
+    const roleActionDelete = await invokeExpressApp(app, {
+      method: "DELETE",
+      url: "/api/admin/role-actions/2/8",
+      headers: { authorization: `Bearer ${token}` },
+    });
 
-    const userRoleDelete = await request(app)
-      .delete("/api/admin/user-roles/3/2")
-      .set("Authorization", `Bearer ${token}`);
+    const userRoleDelete = await invokeExpressApp(app, {
+      method: "DELETE",
+      url: "/api/admin/user-roles/3/2",
+      headers: { authorization: `Bearer ${token}` },
+    });
 
     expect(roleActionDelete.status).toBe(204);
     expect(userRoleDelete.status).toBe(204);
