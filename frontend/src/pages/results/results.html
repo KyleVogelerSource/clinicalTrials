@@ -114,15 +114,15 @@
                 <section id="data-plot" class="results-section">
                     <h2>Data Plot</h2>
                     
-                    <select [value]="dataPlotX()" (change)="dataPlotX.set($any($event.target).value)">
+                    <select (change)="dataPlotX.set($any($event.target).value)">
                         @for (name of model().metricNames; track name) {
-                            <option value="{{ name }}">{{ name }}</option>
+                            <option [value]="name" [selected]="name === dataPlotX()">{{ name }}</option>
                         }
                     </select>
                     
-                    <select [value]="dataPlotY()" (change)="dataPlotY.set($any($event.target).value)">
+                    <select (change)="dataPlotY.set($any($event.target).value)">
                         @for (name of model().metricNames; track name) {
-                            <option value="{{ name }}">{{ name }}</option>
+                            <option [value]="name" [selected]="name === dataPlotY()">{{ name }}</option>
                         }
                     </select>
 
