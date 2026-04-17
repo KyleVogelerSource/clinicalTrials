@@ -29,7 +29,6 @@ vi.mock('chart.js', () => {
 
 describe('BarChart', () => {
   let fixture: ComponentFixture<BarChart>;
-  let component: BarChart;
 
   beforeEach(async () => {
     chartDestroyMock.mockClear();
@@ -40,7 +39,6 @@ describe('BarChart', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(BarChart);
-    component = fixture.componentInstance;
   });
 
   it('renders a bar chart with axis labels and grouped legend support', () => {
