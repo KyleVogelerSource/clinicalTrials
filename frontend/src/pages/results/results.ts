@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 import { ProgressTrack } from '../../primitives/progress-track/progress-track';
 import { BarChart, BarChartData } from '../../primitives/bar-chart/bar-chart';
 import { ScatterChart } from '../../primitives/scatter-chart/scatter-chart';
-import { Heatmap, HeatPoint } from '../../primitives/heatmap/heatmap';
+import { Heatmap } from '../../primitives/heatmap/heatmap';
 import { ResultsApiService } from '../../services/results-api.service';
 import { TrialWorkflowService } from '../../services/trial-workflow-service';
 import { StudyTrial } from '../../models/study-trial';
