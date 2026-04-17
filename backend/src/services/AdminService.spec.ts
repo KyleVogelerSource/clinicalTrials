@@ -10,6 +10,7 @@ import {
 } from "./AdminService";
 import * as postgresClient from "../storage/PostgresClient";
 import * as authService from "../auth/AuthService";
+import { ACTION_NAMES } from "../../../shared/src/auth/action-names";
 
 vi.mock("../storage/PostgresClient");
 vi.mock("../auth/AuthService");
@@ -252,6 +253,93 @@ describe("AdminService", () => {
       const result = await getAdminSnapshot();
 
       expect(result.roles[0].actions).toEqual([]);
+    });
+
+    it("includes search criteria import/export actions in the admin snapshot", async () => {
+      mockPool.query
+        .mockResolvedValueOnce({
+          rows: [
+            {
+              id: 1,
+              username: "admin",
+              first_name: "Super",
+              last_name: "Admin",
+              created_at: "2024-01-01",
+              roles: ["super-admin"],
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          rows: [
+            {
+              id: 1,
+              name: "super-admin",
+              created_at: "2024-01-01",
+              actions: [
+                ACTION_NAMES.userRoles,
+                ACTION_NAMES.searchCriteriaImport,
+                ACTION_NAMES.searchCriteriaExport,
+              ],
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          rows: [
+            { id: 1, name: ACTION_NAMES.userRoles, created_at: "2024-01-01" },
+            { id: 2, name: ACTION_NAMES.searchCriteriaImport, created_at: "2024-01-01" },
+            { id: 3, name: ACTION_NAMES.searchCriteriaExport, created_at: "2024-01-01" },
+          ],
+        })
+        .mockResolvedValueOnce({
+          rows: [
+            {
+              role_id: 1,
+              role_name: "super-admin",
+              action_id: 2,
+              action_name: ACTION_NAMES.searchCriteriaImport,
+              created_at: "2024-01-01",
+            },
+            {
+              role_id: 1,
+              role_name: "super-admin",
+              action_id: 3,
+              action_name: ACTION_NAMES.searchCriteriaExport,
+              created_at: "2024-01-01",
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          rows: [
+            {
+              user_id: 1,
+              username: "admin",
+              role_id: 1,
+              role_name: "super-admin",
+              created_at: "2024-01-01",
+            },
+          ],
+        });
+
+      const result = await getAdminSnapshot();
+
+      expect(result.actions.map((action) => action.name)).toEqual(
+        expect.arrayContaining([
+          ACTION_NAMES.searchCriteriaImport,
+          ACTION_NAMES.searchCriteriaExport,
+        ])
+      );
+      expect(result.roles[0].actions).toEqual(
+        expect.arrayContaining([
+          ACTION_NAMES.searchCriteriaImport,
+          ACTION_NAMES.searchCriteriaExport,
+        ])
+      );
+      expect(result.roleActions.map((assignment) => assignment.actionName)).toEqual(
+        expect.arrayContaining([
+          ACTION_NAMES.searchCriteriaImport,
+          ACTION_NAMES.searchCriteriaExport,
+        ])
+      );
     });
   });
 

@@ -1,5 +1,6 @@
 import { Pool } from "pg";
 import bcrypt from "bcryptjs";
+import { ACTION_NAMES } from "../../../shared/src/auth/action-names";
 
 function parseBoolean(value: string | undefined, defaultValue: boolean): boolean {
   if (value == null) {
@@ -272,29 +273,53 @@ export async function initializeDatabase() {
       ["super-admin"]
     );
 
-    const userRolesActionResult = await pool.query(
-      `INSERT INTO actions (name)
-       VALUES ($1)
-       ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name
-       RETURNING id`,
-      ["user_roles"]
-    );
-
-    await pool.query(
-      `INSERT INTO actions (name)
-       VALUES ($1), ($2)
-       ON CONFLICT (name) DO NOTHING`,
-      [
-        "saved_searches_view_shared",
-        "trial_benchmarking",
-      ]
-    );
+    const actionResults = await Promise.all([
+      pool.query(
+        `INSERT INTO actions (name)
+         VALUES ($1)
+         ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name
+         RETURNING id`,
+        [ACTION_NAMES.userRoles]
+      ),
+      pool.query(
+        `INSERT INTO actions (name)
+         VALUES ($1)
+         ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name
+         RETURNING id`,
+        [ACTION_NAMES.savedSearchesViewShared]
+      ),
+      pool.query(
+        `INSERT INTO actions (name)
+         VALUES ($1)
+         ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name
+         RETURNING id`,
+        [ACTION_NAMES.trialBenchmarking]
+      ),
+      pool.query(
+        `INSERT INTO actions (name)
+         VALUES ($1)
+         ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name
+         RETURNING id`,
+        [ACTION_NAMES.searchCriteriaImport]
+      ),
+      pool.query(
+        `INSERT INTO actions (name)
+         VALUES ($1)
+         ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name
+         RETURNING id`,
+        [ACTION_NAMES.searchCriteriaExport]
+      ),
+    ]);
 
     await pool.query(
       `INSERT INTO role_actions (role_id, action_id)
-       VALUES ($1, $2)
+       SELECT $1, action_id
+       FROM unnest($2::INTEGER[]) AS seeded(action_id)
        ON CONFLICT (role_id, action_id) DO NOTHING`,
-      [superAdminRoleResult.rows[0].id, userRolesActionResult.rows[0].id]
+      [
+        superAdminRoleResult.rows[0].id,
+        actionResults.map((result) => result.rows[0].id),
+      ]
     );
 
     const adminUserResult = await pool.query(

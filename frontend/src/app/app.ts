@@ -5,6 +5,8 @@ import { LoginModal } from '../primitives/login-modal/login-modal';
 import { DebugStatusResponse, DebugStatusService } from '../services/debug-status.service';
 import { DebugMessageService } from '../services/debug-message.service';
 import { AuthService } from '../services/auth.service';
+import { PermissionService } from '../services/permission.service';
+import { ACTION_NAMES } from '@shared/auth/action-names';
 
 @Component({
   selector: 'app-root',
@@ -19,12 +21,13 @@ export class App {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   protected readonly authService = inject(AuthService);
+  private readonly permissionService = inject(PermissionService);
 
   protected readonly debugEnabled = signal(false);
   protected readonly debugStatus = signal<DebugStatusResponse | null>(null);
   protected readonly debugError = signal<string | null>(null);
   protected readonly showLoginModal = signal(false);
-  protected readonly canAccessAdmin = signal(false);
+  protected readonly canAccessAdmin = this.permissionService.watch(ACTION_NAMES.userRoles);
   protected readonly flashMessage = signal<string | null>(null);
   protected readonly runtimeDebugMessage = this.debugMessageService.message;
 
@@ -41,16 +44,10 @@ export class App {
 
     effect(() => {
       if (!this.authService.isLoggedIn()) {
-        this.canAccessAdmin.set(false);
         return;
       }
 
       this.flashMessage.set(null);
-
-      this.authService.hasAction('user_roles').subscribe({
-        next: (allowed) => this.canAccessAdmin.set(allowed),
-        error: () => this.canAccessAdmin.set(false),
-      });
     });
 
     if (!debugFlag) {

@@ -9,7 +9,14 @@ import { TrialWorkflowService } from "../../services/trial-workflow-service";
 import { DesignModel } from "../../models/design-model";
 import { AuthService } from "../../services/auth.service";
 import { SavedSearchService } from "../../services/saved-search.service";
-import { ClinicalTrialSearchRequest } from "../../../../shared/src/dto/ClinicalTrialSearchRequest";
+import { PermissionService } from "../../services/permission.service";
+import { mapDesignModelToSavedSearchCriteria } from "../../services/saved-search-criteria-mapper";
+import {
+    parseDesignerCriteriaFile,
+} from "../../services/designer-criteria-file.service";
+import { ACTION_NAMES } from "@shared/auth/action-names";
+
+const DESIGNER_IMPORT_HELP_DISMISSED_KEY = 'designer_import_help_dismissed';
 
 @Component({
     selector: "app-designer",
@@ -24,6 +31,7 @@ export class Designer implements OnInit {
     router = inject(Router);
     authService = inject(AuthService);
     savedSearchService = inject(SavedSearchService);
+    permissionService = inject(PermissionService);
 
     conditionMatches = signal<string[]>([]);
     conditionValue = signal<string>('');
@@ -32,6 +40,10 @@ export class Designer implements OnInit {
     showSavePanel = signal(false);
     saveStatus = signal<'idle' | 'saving' | 'saved' | 'error'>('idle');
     saveErrorMessage = signal('');
+    importStatus = signal<'idle' | 'success' | 'error'>('idle');
+    importMessage = signal('');
+    showImportHelp = signal(true);
+    canImportCriteria = this.permissionService.watch(ACTION_NAMES.searchCriteriaImport);
 
     saveForm = new FormGroup({
         name: new FormControl<string>('', [Validators.required, Validators.maxLength(200)]),
@@ -60,6 +72,7 @@ export class Designer implements OnInit {
     });
 
     ngOnInit() {
+        this.showImportHelp.set(!this.getStoredImportHelpDismissed());
         const savedParams = this.workflowService.inputParams();
         if (savedParams) {
             this.inputForm.patchValue(savedParams);
@@ -135,17 +148,8 @@ export class Designer implements OnInit {
     onSaveSearch() {
         if (this.saveForm.invalid || !this.inputForm.valid) return;
 
-        const formValues = this.inputForm.value;
-        const criteria: ClinicalTrialSearchRequest = {
-            ...(formValues.condition ? { condition: formValues.condition } : {}),
-            ...(formValues.phase ? { phase: formValues.phase } : {}),
-            ...(formValues.interventionModel ? { interventionModel: formValues.interventionModel } : {}),
-            ...(formValues.minAge != null ? { minAge: formValues.minAge } : {}),
-            ...(formValues.maxAge != null ? { maxAge: formValues.maxAge } : {}),
-            ...(formValues.sex ? { sex: formValues.sex } : {}),
-            ...(formValues.required?.length ? { requiredConditions: formValues.required } : {}),
-            ...(formValues.ineligible?.length ? { ineligibleConditions: formValues.ineligible } : {}),
-        };
+        const formValues = this.inputForm.getRawValue();
+        const criteria = mapDesignModelToSavedSearchCriteria(formValues);
 
         const name = this.saveForm.value.name!;
         const description = this.saveForm.value.description ?? null;
@@ -166,5 +170,69 @@ export class Designer implements OnInit {
                 );
             },
         });
+    }
+
+    onDismissImportHelp() {
+        this.showImportHelp.set(false);
+        this.setStoredImportHelpDismissed(true);
+    }
+
+    async onImportFile(event: Event) {
+        if (!this.canImportCriteria()) {
+            return;
+        }
+
+        const input = event.target as HTMLInputElement | null;
+        const file = input?.files?.[0];
+        if (!file) return;
+
+        try {
+            const content = await file.text();
+            const criteria = parseDesignerCriteriaFile(content, file.name, {
+                phase: this.clinicalStudiesService.getDefaultPhase(),
+                phases: this.phaseOptions,
+                allocationType: this.clinicalStudiesService.getDefaultAllocation(),
+                allocations: this.allocationOptions,
+                interventionModels: this.interventionOptions,
+                blindingType: this.clinicalStudiesService.getDefaultMaskingType(),
+                blindingTypes: this.blindingOptions,
+                sex: this.clinicalStudiesService.getDefaultSex(),
+                sexes: this.sexOptions,
+            });
+
+            this.inputForm.patchValue(criteria);
+            this.conditionValue.set(criteria.condition);
+            this.requiredConditions.set(criteria.required);
+            this.ineligibleConditions.set(criteria.ineligible);
+            this.workflowService.setInputs(criteria);
+            this.workflowService.setImportNotice(`Imported criteria from ${file.name}.`);
+            this.workflowService.searchTrials();
+            this.importStatus.set('success');
+            this.importMessage.set(`Imported criteria from ${file.name}.`);
+            this.router.navigate(['/selection']);
+        } catch {
+            this.importStatus.set('error');
+            this.importMessage.set('Could not import criteria file. Use a valid JSON export.');
+        } finally {
+            if (input) {
+                input.value = '';
+            }
+        }
+    }
+
+    private getStoredImportHelpDismissed(): boolean {
+        try {
+            return globalThis.localStorage?.getItem(DESIGNER_IMPORT_HELP_DISMISSED_KEY) === 'true';
+        } catch {
+            return false;
+        }
+    }
+
+    private setStoredImportHelpDismissed(dismissed: boolean) {
+        try {
+            globalThis.localStorage?.setItem(DESIGNER_IMPORT_HELP_DISMISSED_KEY, dismissed ? 'true' : 'false');
+        } catch {
+            // ignore localStorage access failures
+        }
     }
 }

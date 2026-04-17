@@ -25,6 +25,7 @@ import { SavedSearchShareRequest, SavedSearchUpsertRequest } from "./dto/SavedSe
 import { TrialCompareRequest } from "./dto/TrialCompareDto";
 import {
   createSavedSearch,
+  deleteOwnedSavedSearch,
   getAccessibleSavedSearch,
   listOwnedSavedSearches,
   listSharedSavedSearches,
@@ -535,6 +536,43 @@ app.put(
       }
 
       console.error("Unexpected error in PUT /api/saved-searches/:id:", err);
+      res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
+    }
+  }
+);
+
+app.delete(
+  "/api/saved-searches/:id",
+  requireDatabaseConnection,
+  authenticateToken,
+  async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.userId;
+    const savedSearchId = Number(req.params.id);
+
+    if (!userId) {
+      res.status(401).json({ error: "Unauthorized", message: "No user in token payload." });
+      return;
+    }
+
+    if (!Number.isInteger(savedSearchId)) {
+      res.status(400).json({ error: "Bad Request", message: "Saved search id must be an integer." });
+      return;
+    }
+
+    try {
+      await deleteOwnedSavedSearch(savedSearchId, userId);
+      res.status(204).send();
+    } catch (err) {
+      if (err instanceof Error && err.message === "SAVED_SEARCH_NOT_FOUND") {
+        res.status(404).json({ error: "Not Found", message: "Saved search not found." });
+        return;
+      }
+      if (err instanceof Error && err.message === "SAVED_SEARCH_FORBIDDEN") {
+        res.status(403).json({ error: "Forbidden", message: "Only the owner can delete this saved search." });
+        return;
+      }
+
+      console.error("Unexpected error in DELETE /api/saved-searches/:id:", err);
       res.status(500).json({ error: "Internal Server Error", message: "An unexpected error occurred." });
     }
   }
