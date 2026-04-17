@@ -75,20 +75,19 @@ describe('ClinicalStudyService', () => {
   });
 
   it('should stop fetching after MAX_SEARCH_PAGES', async () => {
-    // MAX_SEARCH_PAGES is 5
+    const maxPages = ClinicalStudyService.MAX_SEARCH_PAGES;
     const mockResponse = (id: number) => ({
       studies: [{ protocolSection: { identificationModule: { nctId: `NCT${id}`, briefTitle: `Trial ${id}` } } }],
       nextPageToken: `token${id}`,
-      totalCount: 10,
+      totalCount: 100,
     });
 
-    for (let i = 1; i <= 6; i++) {
-      mockHttpClient.post.mockReturnValueOnce(of(mockResponse(i)));
-    }
+    // Mock it to return a response for any call
+    mockHttpClient.post.mockReturnValue(of(mockResponse(0)));
 
     const result = await firstValueFrom(service.searchStudies({}));
 
-    expect(result.studies.length).toBe(5);
-    expect(mockHttpClient.post).toHaveBeenCalledTimes(5);
+    expect(result.studies.length).toBe(maxPages);
+    expect(mockHttpClient.post).toHaveBeenCalledTimes(maxPages);
   });
 });
