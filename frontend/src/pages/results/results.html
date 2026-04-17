@@ -114,17 +114,25 @@
                 <section id="data-plot" class="results-section">
                     <h2>Data Plot</h2>
                     
-                    <select (change)="dataPlotX.set($any($event.target).value)">
-                        @for (name of model().metricNames; track name) {
-                            <option [value]="name" [selected]="name === dataPlotX()">{{ name }}</option>
-                        }
-                    </select>
-                    
-                    <select (change)="dataPlotY.set($any($event.target).value)">
-                        @for (name of model().metricNames; track name) {
-                            <option [value]="name" [selected]="name === dataPlotY()">{{ name }}</option>
-                        }
-                    </select>
+                    <div class="plot-controls form-row">
+                        <div class="form-group">
+                            <label for="x-axis-select">X-Axis Metric</label>
+                            <select id="x-axis-select" (change)="dataPlotX.set($any($event.target).value)">
+                                @for (name of model().metricNames; track name) {
+                                    <option [value]="name" [selected]="name === dataPlotX()">{{ name }}</option>
+                                }
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="y-axis-select">Y-Axis Metric</label>
+                            <select id="y-axis-select" (change)="dataPlotY.set($any($event.target).value)">
+                                @for (name of model().metricNames; track name) {
+                                    <option [value]="name" [selected]="name === dataPlotY()">{{ name }}</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
 
                     @if (dataPlotData(); as plotData) {
                         <app-scatter-chart 
