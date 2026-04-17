@@ -9,7 +9,6 @@ import { vi } from 'vitest';
 
 describe('Admin', () => {
   let fixture: ComponentFixture<Admin>;
-  let component: Admin;
   let loggedIn: WritableSignal<boolean>;
   let userRolesPermission: WritableSignal<boolean>;
   let mockAuthService: any;
@@ -58,7 +57,6 @@ describe('Admin', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(Admin);
-    component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
@@ -74,7 +72,6 @@ describe('Admin', () => {
     mockAdminService.getSummary.mockClear();
 
     fixture = TestBed.createComponent(Admin);
-    component = fixture.componentInstance;
     fixture.detectChanges();
 
     expect(mockAdminService.getSummary).not.toHaveBeenCalled();
@@ -86,7 +83,6 @@ describe('Admin', () => {
     mockAdminService.getSummary.mockClear();
 
     fixture = TestBed.createComponent(Admin);
-    component = fixture.componentInstance;
     fixture.detectChanges();
 
     expect(mockAdminService.getSummary).not.toHaveBeenCalled();
@@ -99,7 +95,6 @@ describe('Admin', () => {
     })));
 
     fixture = TestBed.createComponent(Admin);
-    component = fixture.componentInstance;
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Unable to load admin data.');

@@ -1,10 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { generateAIResults } from "./AIResultsService";
+import { TrialResultsRequest } from "../dto/TrialResultsRequest";
+import { NormalizedTrial } from "../models/NormalizedTrial";
 
 describe("generateAIResults", () => {
   const fetchMock = vi.fn();
 
-  const request = {
+  const request: TrialResultsRequest = {
     condition: "Type 2 Diabetes",
     phase: "Phase 2",
     allocationType: "Randomized",
@@ -14,7 +16,7 @@ describe("generateAIResults", () => {
     sex: "All",
   };
 
-  const trials = [
+  const trials: NormalizedTrial[] = [
     {
       nctId: "NCT0001",
       briefTitle: "Study 1",
@@ -32,7 +34,7 @@ describe("generateAIResults", () => {
       maximumAge: "65 Years",
       sponsor: "NIH",
     },
-  ] as any;
+  ];
 
   afterEach(() => {
     vi.unstubAllGlobals();
@@ -53,7 +55,7 @@ describe("generateAIResults", () => {
       }),
     });
 
-    const result = await generateAIResults(request as any, trials);
+    const result = await generateAIResults(request, trials);
 
     expect(result.overallScore).toBe(88);
     expect(result.totalTrialsFound).toBe(1);
@@ -77,7 +79,7 @@ describe("generateAIResults", () => {
       text: vi.fn().mockResolvedValue("backend exploded"),
     });
 
-    await expect(generateAIResults(request as any, trials)).rejects.toThrow(
+    await expect(generateAIResults(request, trials)).rejects.toThrow(
       "Anthropic API error 500: backend exploded"
     );
   });
@@ -91,7 +93,7 @@ describe("generateAIResults", () => {
       }),
     });
 
-    await expect(generateAIResults(request as any, trials)).rejects.toThrow(
+    await expect(generateAIResults(request, trials)).rejects.toThrow(
       "Failed to parse AI response as JSON:"
     );
   });
