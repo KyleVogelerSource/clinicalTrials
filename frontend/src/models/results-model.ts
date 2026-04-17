@@ -10,7 +10,7 @@ export const metricNames: string[] = [
     "Total Enrollment",
     "Site Count",
     "Recruitment Velocity",
-    "Inclusion Strictnes",
+    "Inclusion Strictness",
     "Site Efficiency",
     "Outcome Density",
     "Age Span",
