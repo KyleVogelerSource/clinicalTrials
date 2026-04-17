@@ -1,4 +1,3 @@
-import type { Express } from "express";
 import { Readable, Writable } from "node:stream";
 
 type HeaderValue = string | string[] | number | undefined;
@@ -17,10 +16,19 @@ export interface HarnessResponse {
   body: unknown;
 }
 
+interface ExpressLikeApp {
+  handle: (req: unknown, res: unknown, next: (error?: unknown) => void) => void;
+}
+
 class MockResponse extends Writable {
   statusCode = 200;
   headersSent = false;
   locals: Record<string, unknown> = {};
+  setHeader!: (name: string, value: HeaderValue) => this;
+  getHeader!: (name: string) => HeaderValue;
+  removeHeader!: (name: string) => void;
+  writeHead!: (statusCode: number, headers?: Record<string, HeaderValue>) => this;
+  onceFinished!: () => Promise<HarnessResponse>;
 
   private readonly headers = new Map<string, HeaderValue>();
   private readonly chunks: Buffer[] = [];
@@ -103,7 +111,7 @@ class MockResponse extends Writable {
       return this;
     }) as typeof this.writeHead;
 
-    (this as MockResponse & { onceFinished: () => Promise<HarnessResponse> }).onceFinished = () => this.done;
+    this.onceFinished = () => this.done;
   }
 
   _write(chunk: Buffer | string, _encoding: BufferEncoding, callback: (error?: Error | null) => void): void {
@@ -112,7 +120,8 @@ class MockResponse extends Writable {
   }
 }
 
-export async function invokeExpressApp(app: Express, request: HarnessRequest): Promise<HarnessResponse> {
+export async function invokeExpressApp(app: unknown, request: HarnessRequest): Promise<HarnessResponse> {
+  const expressApp = app as ExpressLikeApp;
   const serializedBody = request.body === undefined ? "" : JSON.stringify(request.body);
   const req = Readable.from(serializedBody ? [serializedBody] : []) as Readable & Record<string, unknown>;
   const res = new MockResponse() as MockResponse & Record<string, unknown> & { onceFinished: () => Promise<HarnessResponse> };
@@ -133,7 +142,7 @@ export async function invokeExpressApp(app: Express, request: HarnessRequest): P
   res.req = req;
   req.res = res;
 
-  app.handle(req as never, res as never, (error?: unknown) => {
+  expressApp.handle(req as never, res as never, (error?: unknown) => {
     if (error) {
       throw error;
     }

@@ -11,9 +11,13 @@ describe("generateAIResults", () => {
     phase: "Phase 2",
     allocationType: "Randomized",
     interventionModel: "Parallel Assignment",
+    blindingType: "Double",
     minAge: 18,
     maxAge: 65,
     sex: "All",
+    requiredConditions: [],
+    ineligibleConditions: [],
+    selectedTrialIds: ["NCT0001"],
   };
 
   const trials: NormalizedTrial[] = [
@@ -24,14 +28,16 @@ describe("generateAIResults", () => {
       studyType: "Interventional",
       overallStatus: "Completed",
       enrollmentCount: 120,
-      enrollmentType: "Actual",
+      enrollmentType: "ACTUAL",
       startDate: "2024-01-01",
       completionDate: "2024-12-31",
       conditions: ["Type 2 Diabetes"],
-      interventions: [{ name: "Drug A" }],
+      interventions: ["Drug A"],
+      eligibilityCriteria: "Adults with Type 2 Diabetes",
       sex: "All",
       minimumAge: "18 Years",
       maximumAge: "65 Years",
+      primaryOutcomes: ["A1C change"],
       sponsor: "NIH",
     },
   ];
