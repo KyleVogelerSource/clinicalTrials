@@ -3,25 +3,7 @@
     <!-- Top bar -->
     <app-progress-track [activeStep]="3" />
 
-    <!-- Loading state -->
-    @if (loadState() === 'loading') {
-        <div class="loading-state">
-            <div class="spinner"></div>
-            <p>Analyzing clinical trials data...</p>
-        </div>
-    }
-
-    <!-- Error state -->
-    @else if (loadState() === 'error') {
-        <div class="error-state">
-            <p>{{ errorMessage() }}</p>
-            <button class="btn btn-primary" (click)="onBack()">Back to Designer</button>
-        </div>
-    }
-
-    <!-- Loaded state -->
-    @else {
-        <div class="results-layout">
+    <div class="results-layout">
 
             <!-- Sticky sidebar nav -->
             <nav class="sidebar-nav">
@@ -223,6 +205,5 @@
 
             </main>
         </div>
-    }
 
 </div>
