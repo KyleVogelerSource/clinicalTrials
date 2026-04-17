@@ -7,7 +7,7 @@ import { ClinicalTrialStudiesResponse } from '@shared/dto/ClinicalTrialStudiesRe
 import Fuse from 'fuse.js'; // A fuzzy match library
 import { HttpClient } from '@angular/common/http';
 import { apiUrl } from '../app/config/api.config';
-import { Observable } from 'rxjs';
+import { EMPTY, Observable, expand, reduce } from 'rxjs';
 import { StudyTrial } from '../models/study-trial';
 
 interface MeshEntry {
@@ -20,6 +20,7 @@ interface MeshEntry {
     providedIn: 'root',
 })
 export class ClinicalStudyService {
+    public static readonly MAX_SEARCH_PAGES = 10;
     private keywords: Fuse<MeshEntry>;
     private conditions: Fuse<MeshEntry>;
 
@@ -71,7 +72,21 @@ export class ClinicalStudyService {
 
     searchStudies(request: ClinicalTrialSearchRequest): Observable<ClinicalTrialStudiesResponse> {
         const url = apiUrl('/api/clinical-trials/search');
-        return this.http.post<ClinicalTrialStudiesResponse>(url, request);
+        return this.http.post<ClinicalTrialStudiesResponse>(url, request).pipe(
+            expand((response, index) => {
+                if (response.nextPageToken && index < ClinicalStudyService.MAX_SEARCH_PAGES - 1) {
+                    return this.http.post<ClinicalTrialStudiesResponse>(url, {
+                        ...request,
+                        pageToken: response.nextPageToken,
+                    });
+                }
+                return EMPTY;
+            }),
+            reduce((acc, response) => ({
+                ...response,
+                studies: [...acc.studies, ...response.studies],
+            }), { studies: [], totalCount: 0 } as ClinicalTrialStudiesResponse)
+        );
     }
 
     getMockTrials(): StudyTrial[] {
