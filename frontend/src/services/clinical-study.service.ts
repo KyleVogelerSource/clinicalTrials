@@ -10,8 +10,6 @@ import { apiUrl } from '../app/config/api.config';
 import { EMPTY, Observable, expand, reduce } from 'rxjs';
 import { StudyTrial } from '../models/study-trial';
 
-const MAX_SEARCH_PAGES = 10;
-
 interface MeshEntry {
     id: string;
     name: string;
@@ -22,6 +20,7 @@ interface MeshEntry {
     providedIn: 'root',
 })
 export class ClinicalStudyService {
+    public static readonly MAX_SEARCH_PAGES = 10;
     private keywords: Fuse<MeshEntry>;
     private conditions: Fuse<MeshEntry>;
 
@@ -75,7 +74,7 @@ export class ClinicalStudyService {
         const url = apiUrl('/api/clinical-trials/search');
         return this.http.post<ClinicalTrialStudiesResponse>(url, request).pipe(
             expand((response, index) => {
-                if (response.nextPageToken && index < MAX_SEARCH_PAGES - 1) {
+                if (response.nextPageToken && index < ClinicalStudyService.MAX_SEARCH_PAGES - 1) {
                     return this.http.post<ClinicalTrialStudiesResponse>(url, {
                         ...request,
                         pageToken: response.nextPageToken,
