@@ -27,8 +27,6 @@ interface ComparisonRow {
     metrics: Record<string, boolean>;
 }
 
-type LoadState = 'loading' | 'loaded' | 'error';
-
 const COMPARISON_METRICS: ComparisonMetric[] = [
     {
         key: 'phaseMatch',
@@ -74,10 +72,8 @@ export class Results implements OnInit {
     private apiService = inject(ResultsApiService);
     private workflowService = inject(TrialWorkflowService);
 
-    loadState = signal<LoadState>('loading');
     model = this.workflowService.results;
     data = computed(() => this.workflowService.results().trialResults);
-    errorMessage = signal<string>('');
 
     // heatmap
     heatmapData = computed(() => {
@@ -224,21 +220,8 @@ export class Results implements OnInit {
             return;
         }
 
-        if (this.data()) {
-            this.loadState.set('loaded');
-        } else {
+        if (!this.data()) {
             this.workflowService.processResults();
-            this.loadState.set('loading');
-            // The signal 'data' is tied to workflowService.results, 
-            // so we can use an effect or just check if it updates.
-            // For simplicity in this mock-driven flow:
-            setTimeout(() => {
-                if (this.data()) this.loadState.set('loaded');
-                else {
-                    this.errorMessage.set('Failed to load results. Please try again.');
-                    this.loadState.set('error');
-                }
-            }, 500);
         }
     }
 

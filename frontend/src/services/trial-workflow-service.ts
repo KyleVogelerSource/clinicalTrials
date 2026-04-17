@@ -3,6 +3,7 @@ import { TrialResultsRequest } from "@shared/dto/TrialResultsRequest";
 import { ClinicalTrialSearchRequest } from "@shared/dto/ClinicalTrialSearchRequest";
 import { ClinicalStudyService } from "./clinical-study.service";
 import { ResultsApiService } from "./results-api.service";
+import { LoadingService } from "./loading.service";
 import { DesignModel } from "../models/design-model";
 import { StudyTrial } from "../models/study-trial";
 import { ClinicalTrialStudy } from "@shared/dto/ClinicalTrialStudiesResponse";
@@ -37,6 +38,7 @@ const INTERVENTION_MODEL_MAP: Record<string, string> = {
 export class TrialWorkflowService {
     private clinicalStudyService = inject(ClinicalStudyService);
     private apiService = inject(ResultsApiService);
+    private loadingService = inject(LoadingService);
     private trialCache: Map<string, ClinicalTrialStudy> = new Map();
 
     // Designer state
@@ -82,14 +84,17 @@ export class TrialWorkflowService {
             pageSize: 100
         };
 
+        this.loadingService.show('Searching for matching trials...');
         this.clinicalStudyService.searchStudies(request).subscribe({
             next: (response) => {
                 const mapped = response.studies.map(study => this.toStudyTrial(study));
                 response.studies.forEach(study => this.trialCache.set(study.protocolSection.identificationModule.nctId, study));
                 this.foundTrials.set(mapped);
+                this.loadingService.hide();
             },
             error: (err) => {
                 console.error("Failed to search trials:", err);
+                this.loadingService.hide();
             }
         });
 
@@ -120,6 +125,7 @@ export class TrialWorkflowService {
     }
 
     processResults() {
+        this.loadingService.show('Analyzing clinical trials data...');
         const trials = this.selectedTrialIds().map(id => this.trialCache.get(id));
         const plotData = trials.map(trial => ({
             id: trial?.protocolSection.identificationModule.nctId,
@@ -342,10 +348,9 @@ export class TrialWorkflowService {
             };
 
             return current;
-        })
+        });
 
-        // We still call API but local calculation will override part of it or be overridden
-        // To keep it "real", we let the local calculation take precedence for the charts
+        this.loadingService.hide();
     }
 
     createResultsRequest() : TrialResultsRequest | undefined {
