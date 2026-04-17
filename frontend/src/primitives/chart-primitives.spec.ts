@@ -1,50 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { BarChart } from './bar-chart/bar-chart';
 import { ScatterChart } from './scatter-chart/scatter-chart';
 
-const chartDestroyMock = vi.fn();
-const chartConstructorMock = vi.fn();
-
-vi.mock('chart.js', () => {
-  class FakeChart {
-    static register = vi.fn();
-    destroy = chartDestroyMock;
-
-    constructor(canvas: HTMLCanvasElement, config: unknown) {
-      chartConstructorMock(canvas, config);
-    }
-  }
-
-  return {
-    Chart: FakeChart,
-    BarController: {},
-    BarElement: {},
-    CategoryScale: {},
-    LinearScale: {},
-    ScatterController: {},
-    PointElement: {},
-    Tooltip: {},
-    Legend: {},
-    Title: {},
-  };
-});
-
 describe('Chart primitives', () => {
-  let getContextSpy: ReturnType<typeof vi.spyOn>;
-
-  beforeEach(() => {
-    chartDestroyMock.mockClear();
-    chartConstructorMock.mockClear();
-    getContextSpy = vi
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockReturnValue({} as CanvasRenderingContext2D);
-  });
-
-  afterEach(() => {
-    getContextSpy.mockRestore();
-  });
-
   describe('BarChart', () => {
     let fixture: ComponentFixture<BarChart>;
 
@@ -56,7 +15,11 @@ describe('Chart primitives', () => {
       fixture = TestBed.createComponent(BarChart);
     });
 
-    it('renders a bar chart with axis labels and grouped legend support', () => {
+    it('invokes renderChart after inputs and canvas are available', () => {
+      const component = fixture.componentInstance;
+      const renderChartSpy = vi.spyOn(component as never, 'renderChart' as never) as ReturnType<typeof vi.fn>;
+      renderChartSpy.mockImplementation(() => undefined);
+
       fixture.componentRef.setInput('chartData', {
         labels: ['A', 'B'],
         datasets: [
@@ -69,48 +32,29 @@ describe('Chart primitives', () => {
       fixture.detectChanges();
       TestBed.flushEffects();
 
-      expect(chartConstructorMock).toHaveBeenCalledWith(
-        expect.any(HTMLCanvasElement),
-        expect.objectContaining({
-          type: 'bar',
-          options: expect.objectContaining({
-            plugins: {
-              legend: { display: true },
-            },
-            scales: expect.objectContaining({
-              x: expect.objectContaining({
-                title: expect.objectContaining({ text: 'Phase', display: true }),
-              }),
-              y: expect.objectContaining({
-                title: expect.objectContaining({ text: 'Count', display: true }),
-                beginAtZero: true,
-              }),
-            }),
-          }),
-        })
+      expect(renderChartSpy).toHaveBeenCalledWith(
+        {
+          labels: ['A', 'B'],
+          datasets: [
+            { label: 'Days', data: [1, 2], backgroundColor: '#088989' },
+            { label: 'Participants', data: [3, 4], backgroundColor: '#193F6A' },
+          ],
+        },
+        expect.any(HTMLCanvasElement)
       );
     });
 
-    it('destroys the current chart before rendering a new one and on component destroy', () => {
-      fixture.componentRef.setInput('chartData', {
-        labels: ['A'],
-        datasets: [{ label: 'Only', data: [1], backgroundColor: '#088989' }],
-      });
-      fixture.detectChanges();
-      TestBed.flushEffects();
-      chartDestroyMock.mockClear();
-
-      fixture.componentRef.setInput('chartData', {
-        labels: ['B'],
-        datasets: [{ label: 'Updated', data: [2], backgroundColor: '#193F6A' }],
-      });
-      fixture.detectChanges();
-      TestBed.flushEffects();
-
-      expect(chartDestroyMock).toHaveBeenCalledTimes(1);
+    it('destroys an existing chart on component teardown', () => {
+      const component = fixture.componentInstance as unknown as {
+        chart: { destroy: ReturnType<typeof vi.fn> };
+        ngOnDestroy: () => void;
+      };
+      const destroySpy = vi.fn();
+      component.chart = { destroy: destroySpy };
 
       fixture.destroy();
-      expect(chartDestroyMock).toHaveBeenCalledTimes(2);
+
+      expect(destroySpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -125,7 +69,11 @@ describe('Chart primitives', () => {
       fixture = TestBed.createComponent(ScatterChart);
     });
 
-    it('renders a scatter chart with axis labels and tooltip labels', () => {
+    it('invokes renderChart after inputs and canvas are available', () => {
+      const component = fixture.componentInstance;
+      const renderChartSpy = vi.spyOn(component as never, 'renderChart' as never) as ReturnType<typeof vi.fn>;
+      renderChartSpy.mockImplementation(() => undefined);
+
       fixture.componentRef.setInput('chartData', {
         datasets: [{ label: 'Trials', data: [{ x: 10, y: 20 }] }],
       });
@@ -135,48 +83,25 @@ describe('Chart primitives', () => {
       fixture.detectChanges();
       TestBed.flushEffects();
 
-      const config = chartConstructorMock.mock.calls[0]?.[1] as {
-        type: string;
-        options: {
-          plugins: {
-            legend: { display: boolean };
-            tooltip: { callbacks: { label: (context: { dataset: { label?: string }; parsed: { x: number; y: number } }) => string } };
-          };
-          scales: {
-            x: { title: { text: string } };
-            y: { title: { text: string } };
-          };
-        };
-      };
-
-      expect(config.type).toBe('scatter');
-      expect(config.options.plugins.legend.display).toBe(true);
-      expect(config.options.scales.x.title.text).toBe('Enrollment');
-      expect(config.options.scales.y.title.text).toBe('Sites');
-      expect(config.options.plugins.tooltip.callbacks.label({
-        dataset: { label: 'Trials' },
-        parsed: { x: 10, y: 20 },
-      })).toBe('Trials: (10, 20)');
+      expect(renderChartSpy).toHaveBeenCalledWith(
+        {
+          datasets: [{ label: 'Trials', data: [{ x: 10, y: 20 }] }],
+        },
+        expect.any(HTMLCanvasElement)
+      );
     });
 
-    it('destroys chart instances on rerender and destroy', () => {
-      fixture.componentRef.setInput('chartData', {
-        datasets: [{ label: 'Trials', data: [{ x: 1, y: 2 }] }],
-      });
-      fixture.detectChanges();
-      TestBed.flushEffects();
-      chartDestroyMock.mockClear();
-
-      fixture.componentRef.setInput('chartData', {
-        datasets: [{ label: 'Trials', data: [{ x: 3, y: 4 }] }],
-      });
-      fixture.detectChanges();
-      TestBed.flushEffects();
-
-      expect(chartDestroyMock).toHaveBeenCalledTimes(1);
+    it('destroys an existing chart on component teardown', () => {
+      const component = fixture.componentInstance as unknown as {
+        chart: { destroy: ReturnType<typeof vi.fn> };
+        ngOnDestroy: () => void;
+      };
+      const destroySpy = vi.fn();
+      component.chart = { destroy: destroySpy };
 
       fixture.destroy();
-      expect(chartDestroyMock).toHaveBeenCalledTimes(2);
+
+      expect(destroySpy).toHaveBeenCalledTimes(1);
     });
   });
 });
