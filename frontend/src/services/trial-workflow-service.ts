@@ -259,10 +259,6 @@ export class TrialWorkflowService {
 
             const recruitmentByImpact = topDrivers.map((driver) => {
                 const absCorr = Math.abs(driver.correlation);
-                let tier = 'Minor Influence';
-                if (absCorr >= 0.6) tier = 'Strong Influence';
-                else if (absCorr >= 0.3) tier = 'Moderate Influence';
-
                 const label = `${driver.name} r = ${absCorr.toFixed(2)}`;
                 
                 // Filter trials that perform "well" on this driver
@@ -284,24 +280,45 @@ export class TrialWorkflowService {
                 return { label, avgDays, participantCount };
             });
 
-            // Expected Timeline by Enrollment
-            const timelineBuckets = [
-                { label: '0-50', min: 0, max: 50 },
-                { label: '51-100', min: 51, max: 100 },
-                { label: '101-250', min: 101, max: 250 },
-                { label: '251-500', min: 251, max: 500 },
-                { label: '500+', min: 501, max: Infinity }
-            ];
+            // Expected Timeline by Enrollment - Dynamic Adaptive Binning
+            const enrollments = validTrials
+                .map(r => r.totalEnrollment)
+                .sort((a, b) => a - b);
 
-            const timelineData = timelineBuckets.map(bucket => {
-                const trials = validTrials.filter(r => r.totalEnrollment >= bucket.min && r.totalEnrollment <= bucket.max);
-                const actualDays = trials.length > 0
-                    ? Math.round(trials.reduce((acc, r) => acc + r.timelineSlippage, 0) / trials.length)
-                    : 0;
-                // Simulate estimated days as 80-95% of actual
-                const estimatedDays = actualDays > 0 ? Math.round(actualDays * (0.8 + Math.random() * 0.15)) : 0;
-                return { patientBucket: bucket.label, estimatedDays, actualDays };
-            });
+            let timelineData: any[] = [];
+
+            if (enrollments.length > 0) {
+                const maxBuckets = Math.min(10, Math.ceil(enrollments.length / 2)); // At least 2 trials per bucket
+                const bucketSize = Math.max(1, Math.floor(enrollments.length / maxBuckets));
+                
+                const boundaries: number[] = [0];
+                for (let i = 1; i < maxBuckets; i++) {
+                    const rawVal = enrollments[i * bucketSize];
+                    // Round to nearest 50, but ensure it's increasing
+                    const rounded = Math.max(boundaries[boundaries.length - 1] + 50, Math.round(rawVal / 50) * 50);
+                    if (rounded < enrollments[enrollments.length - 1]) {
+                        boundaries.push(rounded);
+                    }
+                }
+                boundaries.push(Infinity);
+
+                timelineData = [];
+                for (let i = 0; i < boundaries.length - 1; i++) {
+                    const min = boundaries[i];
+                    const max = boundaries[i + 1];
+                    const label = max === Infinity ? `${min}+` : `${min}-${max}`;
+                    
+                    const trialsInBucket = validTrials.filter(r => 
+                        r.totalEnrollment >= min && (max === Infinity ? true : r.totalEnrollment < max)
+                    );
+
+                    if (trialsInBucket.length > 0) {
+                        const actualDays = Math.round(trialsInBucket.reduce((acc, r) => acc + r.timelineSlippage, 0) / trialsInBucket.length);
+                        const estimatedDays = actualDays > 0 ? Math.round(actualDays * (0.8 + Math.random() * 0.15)) : 0;
+                        timelineData.push({ patientBucket: label, estimatedDays, actualDays });
+                    }
+                }
+            }
 
             const avgRecruitmentDays = validTrials.length > 0
                 ? Math.round(validTrials.reduce((acc, r) => acc + r.timelineSlippage, 0) / validTrials.length)
