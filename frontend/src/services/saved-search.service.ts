@@ -79,4 +79,8 @@ export class SavedSearchService {
   share(id: number, request: SavedSearchShareRequest): Observable<SavedSearchShareRecord> {
     return this.http.post<SavedSearchShareRecord>(apiUrl(`/api/saved-searches/${id}/share`), request);
   }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(apiUrl(`/api/saved-searches/${id}`));
+  }
 }

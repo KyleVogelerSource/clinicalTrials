@@ -3,6 +3,19 @@
     <!-- Top bar -->
     <app-progress-track [activeStep]="3" />
 
+    @if (canExportCriteria() && hasCriteriaToExport()) {
+        <div class="results-toolbar">
+            <button
+                type="button"
+                class="btn btn-secondary btn-compact"
+                title="Download the current designer criteria as a structured JSON file."
+                (click)="onExportCriteria()"
+            >
+                Export
+            </button>
+        </div>
+    }
+
     <!-- Loading state -->
     @if (loadState() === 'loading') {
         <div class="loading-state">
