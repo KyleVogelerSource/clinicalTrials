@@ -221,22 +221,67 @@ export class TrialWorkflowService {
             // Calculate derived results for charts
             const validTrials = current.metricRows.filter(r => r.timelineSlippage > 0);
             
-            // Recruitment by Impact (Site Count)
-            const impactLevels = [
-                { label: 'High Impact', min: 21, max: Infinity },
-                { label: 'Medium Impact', min: 6, max: 20 },
-                { label: 'Low Impact', min: 1, max: 5 }
+            // Driver Analysis for Recruitment Velocity
+            const metricsToTest = [
+                { name: 'Site Count', key: 'siteCount', invert: false },
+                { name: 'Inclusion Strictness', key: 'inclusionStrictness', invert: true }, // Less strict = faster
+                { name: 'Age Span', key: 'ageSpan', invert: false },
+                { name: 'Intervention Count', key: 'interventionCount', invert: true }, // Fewer = faster
+                { name: 'Collaborator Count', key: 'collaboratorCount', invert: false },
+                { name: 'Outcome Density', key: 'outcomeDensity', invert: true } // Fewer = faster
             ];
 
-            const recruitmentByImpact = impactLevels.map(level => {
-                const trials = validTrials.filter(r => r.siteCount >= level.min && r.siteCount <= level.max);
-                const avgDays = trials.length > 0 
-                    ? Math.round(trials.reduce((acc, r) => acc + r.timelineSlippage, 0) / trials.length)
+            const drivers = metricsToTest.map(m => {
+                const values = validTrials.map(r => (r as any)[m.key] as number);
+                const velocities = validTrials.map(r => r.recruitmentVelocity);
+                
+                // Simple Pearson Correlation
+                const n = values.length;
+                if (n < 2) return { name: m.name, correlation: 0, key: m.key, invert: m.invert };
+                
+                const sumX = values.reduce((a, b) => a + b, 0);
+                const sumY = velocities.reduce((a, b) => a + b, 0);
+                const sumXY = values.reduce((acc, x, i) => acc + x * velocities[i], 0);
+                const sumX2 = values.reduce((a, b) => a + b * b, 0);
+                const sumY2 = velocities.reduce((a, b) => a + b * b, 0);
+                
+                const numerator = (n * sumXY) - (sumX * sumY);
+                const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+                
+                const correlation = denominator === 0 ? 0 : numerator / denominator;
+                return { name: m.name, correlation: m.invert ? -correlation : correlation, key: m.key, invert: m.invert };
+            });
+
+            // Pick top 3 drivers by absolute correlation
+            const topDrivers = drivers
+                .sort((a, b) => Math.abs(b.correlation) - Math.abs(a.correlation))
+                .slice(0, 3);
+
+            const recruitmentByImpact = topDrivers.map((driver) => {
+                const absCorr = Math.abs(driver.correlation);
+                let tier = 'Minor Influence';
+                if (absCorr >= 0.6) tier = 'Strong Influence';
+                else if (absCorr >= 0.3) tier = 'Moderate Influence';
+
+                const label = `${driver.name} r = ${absCorr.toFixed(2)}`;
+                
+                // Filter trials that perform "well" on this driver
+                const values = validTrials.map(r => (r as any)[driver.key] as number);
+                const median = values.sort((a, b) => a - b)[Math.floor(values.length / 2)];
+                
+                const favoredTrials = validTrials.filter(r => {
+                    const val = (r as any)[driver.key];
+                    return driver.invert ? val <= median : val >= median;
+                });
+
+                const avgDays = favoredTrials.length > 0 
+                    ? Math.round(favoredTrials.reduce((acc, r) => acc + r.timelineSlippage, 0) / favoredTrials.length)
                     : 0;
-                const participantCount = trials.length > 0
-                    ? Math.round(trials.reduce((acc, r) => acc + r.totalEnrollment, 0) / trials.length)
+                const participantCount = favoredTrials.length > 0
+                    ? Math.round(favoredTrials.reduce((acc, r) => acc + r.totalEnrollment, 0) / favoredTrials.length)
                     : 0;
-                return { label: level.label, avgDays, participantCount };
+
+                return { label, avgDays, participantCount };
             });
 
             // Expected Timeline by Enrollment
