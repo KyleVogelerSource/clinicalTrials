@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import bcrypt from "bcryptjs";
-import { ACTION_NAMES } from "../../../shared/src/auth/action-names";
+import { ACTION_NAMES } from "../auth/action-names";
 
 function parseBoolean(value: string | undefined, defaultValue: boolean): boolean {
   if (value == null) {
