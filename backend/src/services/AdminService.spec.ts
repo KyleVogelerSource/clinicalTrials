@@ -10,7 +10,7 @@ import {
 } from "./AdminService";
 import * as postgresClient from "../storage/PostgresClient";
 import * as authService from "../auth/AuthService";
-import { ACTION_NAMES } from "../../../shared/src/auth/action-names";
+import { ACTION_NAMES } from "../auth/action-names";
 
 vi.mock("../storage/PostgresClient");
 vi.mock("../auth/AuthService");
