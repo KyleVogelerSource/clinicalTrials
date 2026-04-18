@@ -1,11 +1,28 @@
 <div class="saved-searches-container">
-  <h2>Saved Searches</h2>
+  <div class="saved-searches-header">
+    <h2>Saved Searches</h2>
+    @if (authorized() && canImportCriteria()) {
+      <div class="saved-searches-actions">
+        <label class="btn btn-import" for="savedSearchImport">Import</label>
+        <input
+          id="savedSearchImport"
+          class="visually-hidden"
+          type="file"
+          accept=".json,application/json"
+          (change)="importSavedSearches($event)"
+        />
+      </div>
+    }
+  </div>
 
   @if (!authorized()) {
     <p class="state-message">Please log in to view saved searches.</p>
   } @else if (loading()) {
     <p class="state-message">Loading saved searches...</p>
   } @else {
+    @if (importStatus() !== 'idle') {
+      <p class="state-message" [class.error-message]="importStatus() === 'error'">{{ importMessage() }}</p>
+    }
     @if (errorMessage()) {
       <p class="error-message">{{ errorMessage() }}</p>
     }
@@ -43,8 +60,16 @@
               @if (record.description) {
                 <p class="description">{{ record.description }}</p>
               }
-              <div class="actions">
-                <button class="btn btn-secondary" (click)="openInDesigner(record)">Open in Designer</button>
+              <div class="card-actions">
+                <div class="card-actions-main">
+                  <button class="btn btn-secondary action-button" (click)="openInDesigner(record)">Open in Designer</button>
+                  @if (canExportCriteria()) {
+                  <button class="btn btn-secondary action-button" (click)="exportSearch(record)">Export</button>
+                  }
+                </div>
+                <button class="btn btn-danger" [disabled]="deletePendingId() === record.id" (click)="deleteSearch(record)">
+                  {{ deletePendingId() === record.id ? 'Deleting...' : 'Delete' }}
+                </button>
               </div>
             </article>
           }
@@ -67,8 +92,10 @@
               @if (record.description) {
                 <p class="description">{{ record.description }}</p>
               }
-              <div class="actions">
-                <button class="btn btn-secondary" (click)="openInDesigner(record)">Open in Designer</button>
+              <div class="card-actions">
+                <div class="card-actions-main">
+                  <button class="btn btn-secondary action-button" (click)="openInDesigner(record)">Open in Designer</button>
+                </div>
               </div>
             </article>
           }

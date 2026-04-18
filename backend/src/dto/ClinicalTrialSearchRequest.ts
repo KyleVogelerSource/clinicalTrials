@@ -8,7 +8,9 @@ export interface ClinicalTrialSearchRequest {
   overallStatus?: string;
   studyType?: string;
   phase?: string;
+  allocationType?: string;
   interventionModel?: string;
+  blindingType?: string;
   primaryPurpose?: string;
   sex?: string;
   minAge?: number;

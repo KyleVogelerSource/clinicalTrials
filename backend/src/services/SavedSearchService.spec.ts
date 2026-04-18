@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as postgresClient from "../storage/PostgresClient";
 import {
   createSavedSearch,
+  deleteOwnedSavedSearch,
   getAccessibleSavedSearch,
   listOwnedSavedSearches,
   listSharedSavedSearches,
@@ -217,5 +218,38 @@ describe("SavedSearchService", () => {
         visibility: "private",
       })
     ).rejects.toThrow("DUPLICATE_SAVED_SEARCH");
+  });
+
+  it("deletes an owned saved search", async () => {
+    mockPool.query.mockResolvedValueOnce({ rowCount: 1 });
+
+    await deleteOwnedSavedSearch(12, 7);
+
+    expect(mockPool.query).toHaveBeenCalledWith(
+      expect.stringContaining("DELETE FROM saved_searches"),
+      [12, 7]
+    );
+  });
+
+  it("rejects deleting another user's saved search", async () => {
+    mockPool.query
+      .mockResolvedValueOnce({ rowCount: 0 })
+      .mockResolvedValueOnce({
+        rowCount: 1,
+        rows: [{ owner_user_id: 9 }],
+      });
+
+    await expect(deleteOwnedSavedSearch(12, 7)).rejects.toThrow("SAVED_SEARCH_FORBIDDEN");
+  });
+
+  it("returns not found when deleting a missing saved search", async () => {
+    mockPool.query
+      .mockResolvedValueOnce({ rowCount: 0 })
+      .mockResolvedValueOnce({
+        rowCount: 0,
+        rows: [],
+      });
+
+    await expect(deleteOwnedSavedSearch(12, 7)).rejects.toThrow("SAVED_SEARCH_NOT_FOUND");
   });
 });
