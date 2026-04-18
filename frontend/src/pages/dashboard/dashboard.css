@@ -245,13 +245,14 @@
 .sort-indicator {
     font-size: 0.7rem;
     color: #ccc;
-    display: inline-block;
+    display: none;
     width: 10px;
 }
 
 .sort-indicator.active {
     color: var(--app-teal);
     font-weight: bold;
+    display: inline-block;
 }
 
 .filter-trigger {
