@@ -158,6 +158,13 @@
     font-weight: 600;
 }
 
+.clear-filters-btn {
+    font-size: 0.7rem;
+    margin-left: 1rem;
+    color: #6a737d;
+    padding: 0.2rem 0.5rem;
+}
+
 .results-meta {
     font-size: 0.75rem;
     color: #6a737d;
@@ -173,37 +180,24 @@
 .date-range-filter {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.3rem;
     margin-right: 0.75rem;
     padding-right: 0.75rem;
     border-right: 1px solid #e1e4e8;
 }
 
 .date-range-filter label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: #586069;
 }
 
 .date-range-filter input[type="date"] {
     padding: 0.15rem 0.3rem;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     border-radius: 2px;
     border: 1px solid #d1d5da;
     background-color: #fff;
     color: #24292e;
-}
-
-.table-controls label {
-    font-size: 0.75rem;
-    color: #586069;
-}
-
-.table-controls select {
-    padding: 0.2rem 0.4rem;
-    font-size: 0.75rem;
-    border-radius: 2px;
-    border: 1px solid #d1d5da;
-    background-color: #fff;
 }
 
 .table-content {
@@ -228,6 +222,88 @@
     top: 0;
     z-index: 10;
     border-bottom: 1px solid #e1e4e8;
+}
+
+.sortable-header {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    white-space: nowrap;
+}
+
+.sortable-header:hover {
+    background-color: #f1f3f5 !important;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    position: relative;
+}
+
+.sort-indicator {
+    font-size: 0.7rem;
+    color: #ccc;
+    display: inline-block;
+    width: 10px;
+}
+
+.sort-indicator.active {
+    color: var(--app-teal);
+    font-weight: bold;
+}
+
+.filter-trigger {
+    background: none;
+    border: none;
+    padding: 0 0.2rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: #888;
+    opacity: 0.5;
+    transition: all 0.15s;
+    margin-left: auto;
+}
+
+.filter-trigger:hover,
+.filter-trigger.filter-active {
+    opacity: 1;
+    color: var(--app-blue);
+}
+
+.filter-popover {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #d1d5da;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 0.5rem;
+    z-index: 1000;
+    min-width: 180px;
+    margin-top: 4px;
+    font-weight: normal;
+}
+
+.filter-popover label {
+    display: block;
+    font-size: 0.7rem;
+    margin-bottom: 0.2rem;
+    text-transform: none;
+    color: #555;
+}
+
+.filter-popover input,
+.filter-popover select {
+    width: 100%;
+    padding: 0.3rem;
+    font-size: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    background-color: #fff;
+    box-sizing: border-box;
 }
 
 .trials-table td {
