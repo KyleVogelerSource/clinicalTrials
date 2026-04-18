@@ -10,6 +10,7 @@ import { AuthService } from "../../services/auth.service";
 import { SavedSearchService } from "../../services/saved-search.service";
 import { LoadingIndicator } from "../../primitives/loading-indicator/loading-indicator";
 import { AutoCompleteInput } from "../../primitives/auto-complete-input/auto-complete-input";
+import { KeywordSelector } from "../../primitives/keyword-selector/keyword-selector";
 import { StudyTrial } from "../../models/study-trial";
 import { ClinicalTrialSearchRequest } from "@shared/dto/ClinicalTrialSearchRequest";
 
@@ -23,6 +24,7 @@ import { ClinicalTrialSearchRequest } from "@shared/dto/ClinicalTrialSearchReque
         ReactiveFormsModule,
         LoadingIndicator,
         AutoCompleteInput,
+        KeywordSelector,
         DecimalPipe,
         DatePipe
     ],
@@ -58,6 +60,7 @@ export class Dashboard implements OnInit {
     nameFilter = signal<string>('');
     statusFilter = signal<string>('');
     participantsFilter = signal<number | null>(null);
+    keywordFilter = signal<string[]>([]);
     activeFilter = signal<string | null>(null);
 
     // Service State Proxies
@@ -104,6 +107,15 @@ export class Dashboard implements OnInit {
 
         const partF = this.participantsFilter();
         if (partF !== null) trials = trials.filter(t => t.enrollmentCount >= partF);
+
+        // Apply Keyword Filter
+        const keywords = this.keywordFilter();
+        if (keywords.length > 0) {
+            trials = trials.filter(t => {
+                const combinedText = `${t.briefTitle} ${t.description} ${t.sponsor} ${t.sites.join(' ')}`.toLowerCase();
+                return keywords.every(k => combinedText.includes(k.toLowerCase()));
+            });
+        }
 
         const order = this.sortOrder();
 
@@ -161,10 +173,19 @@ export class Dashboard implements OnInit {
         }
     }
 
+    onAddKeyword(keyword: string) {
+        this.keywordFilter.update(k => [...new Set([...k, keyword])]);
+    }
+
+    onRemoveKeyword(keyword: string) {
+        this.keywordFilter.update(k => k.filter(v => v !== keyword));
+    }
+
     clearFilters() {
         this.nameFilter.set('');
         this.statusFilter.set('');
         this.participantsFilter.set(null);
+        this.keywordFilter.set([]);
         this.startDateFilter.set('');
         this.endDateFilter.set('');
     }
@@ -208,6 +229,7 @@ export class Dashboard implements OnInit {
 
                 this.isLoading.set(true);
                 this.clearFilters();
+                this.selectedTrialIds.set([]);
                 const request: ClinicalTrialSearchRequest = {
                     condition: values.condition,
                     phase: this.mapPhase(values.phase!),
