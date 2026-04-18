@@ -1,0 +1,154 @@
+<div class="container">
+
+    <!-- Top Info Bar -->
+    <div class="section">
+        <div class="info-bar-layout"> <!-- layout note - left side text, right buttons -->
+            <div class="info-bar-text">
+                <h2>Design & Match</h2>
+                <p>Welcome to Cardinal Trials. To begin, input your trial parameters in the form below. Then select
+                    from among the candidate trials to compare against from the table on the right. Once ready, click
+                    'Process' to create your feasibility report. Or import your data from a previous</p>
+            </div>
+            <div class="info-bar-buttons">
+                <button class="btn btn-primary">Process</button> <!-- layout note - should only be enabled if >0 trials are selected. -->
+                <button class="btn">Import</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container for Metadata and Search Table -->
+    <div class="workbench-layout">
+        
+        <!-- User's Input Form -->
+        <div class="section metadata-layout">
+            <!-- layout note - a <form> probably isn't appropriate here any longer since it isn't being "submitted" I think, but not sure. 
+                               We want changes to happenen every time the user makes a selection change. 
+                               
+                               Fields we expect for searching: 
+                               Disease / Condition
+                               Phase
+                               Patient Alloction Type
+                               Intervention Model
+                               Blinding / Masking Type
+
+                               For the User's Trial specifically (does not feed into search table):
+                               Number of patients
+                               Number of inclusions
+                               number of exclusions
+                               number of outcomes
+                               number of sites
+                               number of... there's one more thing but I didn't catch it
+            -->
+        </div>
+
+        <!-- Matching Trials Display -->
+        <div class="section table-layout">
+            <app-loading-indicator /> <!-- layout note - loading indicator only blocks the table view -->
+            
+            <!-- Table Info -->
+            <div class="table-header">
+                <h3>Matching Trials</h3>
+                <span>Showing {{ displayedTrials().length }} of {{ foundTrials().length }} Matches</span>
+                <div class="filter-icon"></div> <!-- layout note - something the user can click to show an "Order By" selection -->
+            </div>
+
+            @if (displayedTrials().length === 0) {
+                <div class="alert-container">
+                    <div class="alert-box no-results">
+                        <span class="alert-icon">ℹ️</span>
+                        <div class="alert-text">
+                            <h3>No Results</h3>
+                            <p></p>
+                        </div>
+                    </div>
+                </div>
+            }
+            @elseif (displayedTrials().length > DISPLAY_THRESHOLD) {
+                <div class="alert-container">
+                    <div class="alert-box no-results">
+                        <span class="alert-icon">⚠️</span>
+                        <div class="alert-text">
+                            <h3>Too many results to display</h3>
+                            <p>Please apply more specific keywords or a narrower date range to reduce the results below {{ DISPLAY_THRESHOLD | number }} to select individual trials.</p>
+                        </div>
+                    </div>
+                </div>
+            }
+            @else {
+                <!-- Table of Trials-->
+                <div class="table-content">
+                    <table class="trials-table">
+                        <thead>
+                            <th class="selection-cell">
+                                <input type="checkbox" [checked]="isAllSelected()" (change)="toggleAllSelection()" aria-label="Select all trials">
+                            </th>
+                            <th>Trial ID</th>
+                            <th>Name</th>
+                            <th>Participants</th>
+                            <th>Status</th>
+                            <th></th> <!-- layout note - left blank for details expansion -->
+                        </thead>
+                        <tbody>
+                            @for (trial of displayedTrials(); track trial.nctId) {
+                                <!-- Trial Row Item -->
+                                <tr [class.expanded-row-active]="expandedTrialId() === trial.nctId" [class.selected-row]="isTrialSelected(trial.nctId)">
+                                    <td [class.selected-row]="isTrialSelected(trial.nctId)"></td>
+                                    <td>{{ trial.id }}</td>
+                                    <td class="trial-title-cell">
+                                        <a [href]="'https://clinicaltrials.gov/study/' + trial.nctId" target="_blank" class="trial-link">
+                                            {{ trial.briefTitle }}
+                                        </a>
+                                    </td>
+                                    <td>{{ trial.enrollmentCount | number }}</td>
+                                    <td></td> <!-- layout note - should indicate complete or terminated -->
+                                    <td>
+                                        <button class="btn-link" (click)="toggleTrialExpansion(trial.nctId)">
+                                            {{ expandedTrialId() === trial.nctId ? 'Hide Details' : 'Details' }}
+                                            <span class="triangle" [class.rotated]="expandedTrialId() === trial.nctId">▶</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Expanded Trial Details Row -->
+                                <tr class="detail-row" [class.expanded]="expandedTrialId() === trial.nctId">
+                                    <td colspan="6">
+                                        <div class="detail-wrapper">
+                                            <div class="detail-content"> <!-- layout note - like another mini table inside it kind of, rows of info -->
+                                                <div class="detail-section">
+                                                    <span class="detail-label">Date:</span>
+                                                    {{ trial.startDate | date:'MM/dd/yyyy' }} - {{ trial.completionDate | date:'MM/dd/yyyy' }}
+                                                </div>
+
+                                                <div class="detail-section">
+                                                    <span class="detail-label">Phase:</span> {{ trial.phase }}
+                                                    <span class="detail-label">Company:</span> {{ trial.phase }}
+                                                </div>
+                                                
+                                                <div class="detail-section">
+                                                    <span class="detail-label">Clinical Sites:</span>
+                                                    <ul class="sites-list">
+                                                        @for (site of trial.sites; track site) {
+                                                            <li>{{ site }}</li>
+                                                        }
+                                                    </ul>
+                                                </div>
+
+                                                <div class="detail-section">
+                                                    <span class="detail-label">Description:</span>
+                                                    <p>{{ trial.description }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+    </div>
+
+
+</div>
