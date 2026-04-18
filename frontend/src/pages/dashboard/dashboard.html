@@ -204,72 +204,71 @@
                                         <select [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value); activeFilter.set(null)">
                                             <option value="" [selected]="statusFilter() === ''">All Statuses</option>
                                             @for (status of uniqueStatuses(); track status) {
-                                                <option [value]="status" [selected]="statusFilter() === status">{{ status }}</option>
+                                                <option [value]="status" [selected]="statusFilter() === status">{{ status.split('_').join(' ') }}</option>
                                             }
                                         </select>
                                     </div>
                                 }                            </th>
-                            <th>Details</th>
-                        </tr>
-                    </thead>
-                    @if (displayedTrials().length === 0 && !isLoading()) {
-                        <tbody>
-                            <tr>
+                                <th>Details</th>
+                                </tr>
+                                </thead>
+                                @if (displayedTrials().length === 0 && !isLoading()) {
+                                <tbody>
+                                <tr>
                                 <td colspan="6">
-                                    <div class="alert-container">
-                                        <div class="alert-box no-results">
-                                            <span class="alert-icon">ℹ️</span>
-                                            <div class="alert-text">
-                                                <h3>No Results</h3>
-                                                <p>Try adjusting your search criteria or filters to find matching trials.</p>
-                                            </div>
+                                <div class="alert-container">
+                                    <div class="alert-box no-results">
+                                        <span class="alert-icon">ℹ️</span>
+                                        <div class="alert-text">
+                                            <h3>No Results</h3>
+                                            <p>Try adjusting your search criteria or filters to find matching trials.</p>
                                         </div>
                                     </div>
+                                </div>
                                 </td>
-                            </tr>
-                        </tbody>
-                    }
-                    @else if (displayedTrials().length >= DISPLAY_THRESHOLD) {
-                        <tbody>
-                            <tr>
+                                </tr>
+                                </tbody>
+                                }
+                                @else if (displayedTrials().length >= DISPLAY_THRESHOLD) {
+                                <tbody>
+                                <tr>
                                 <td colspan="6">
-                                    <div class="alert-container">
-                                        <div class="alert-box warning">
-                                            <span class="alert-icon">⚠️</span>
-                                            <div class="alert-text">
-                                                <h3>Too many results to display</h3>
-                                                <p>Please apply more specific criteria to reduce results below {{ DISPLAY_THRESHOLD | number }}.</p>
-                                            </div>
+                                <div class="alert-container">
+                                    <div class="alert-box warning">
+                                        <span class="alert-icon">⚠️</span>
+                                        <div class="alert-text">
+                                            <h3>Too many results to display</h3>
+                                            <p>Please apply more specific criteria to reduce results below {{ DISPLAY_THRESHOLD | number }}.</p>
                                         </div>
                                     </div>
+                                </div>
                                 </td>
-                            </tr>
-                        </tbody>
-                    }
-                    @else {
-                        <tbody>
-                            @for (trial of displayedTrials(); track trial.nctId) {
+                                </tr>
+                                </tbody>
+                                }
+                                @else {
+                                <tbody>
+                                @for (trial of displayedTrials(); track trial.nctId) {
                                 <tr [class.expanded-row-active]="expandedTrialId() === trial.nctId" [class.selected-row]="isTrialSelected(trial.nctId)">
-                                    <td class="selection-cell">
-                                        <input type="checkbox" class="custom-checkbox" [checked]="isTrialSelected(trial.nctId)" (change)="toggleTrialSelection(trial.nctId)" aria-label="Select trial">
-                                    </td>
-                                    <td class="nct-id-cell">{{ trial.nctId }}</td>
-                                    <td class="trial-title-cell">
-                                        <a [href]="'https://clinicaltrials.gov/study/' + trial.nctId" target="_blank" class="trial-link">
-                                            {{ trial.briefTitle }}
-                                        </a>
-                                    </td>
-                                    <td>{{ trial.enrollmentCount | number }}</td>
-                                    <td>
-                                        <span class="status-badge" 
-                                            [class.status-completed]="trial.overallStatus === 'COMPLETED'"
-                                            [class.status-terminated]="trial.overallStatus.toLowerCase().includes('terminated') || trial.overallStatus.toLowerCase().includes('withdrawn')" 
-                                            [class.status-unknown]="trial.overallStatus.toLowerCase() === 'unknown'"
-                                            [class.status-active]="trial.overallStatus !== 'COMPLETED' && !trial.overallStatus.toLowerCase().includes('terminated') && !trial.overallStatus.toLowerCase().includes('withdrawn') && trial.overallStatus.toLowerCase() !== 'unknown'">
-                                            {{ trial.overallStatus }}
-                                        </span>
-                                    </td>
-                                    <td>
+                                <td class="selection-cell">
+                                    <input type="checkbox" class="custom-checkbox" [checked]="isTrialSelected(trial.nctId)" (change)="toggleTrialSelection(trial.nctId)" aria-label="Select trial">
+                                </td>
+                                <td class="nct-id-cell">{{ trial.nctId }}</td>
+                                <td class="trial-title-cell">
+                                    <a [href]="'https://clinicaltrials.gov/study/' + trial.nctId" target="_blank" class="trial-link">
+                                        {{ trial.briefTitle }}
+                                    </a>
+                                </td>
+                                <td>{{ trial.enrollmentCount | number }}</td>
+                                <td>
+                                    <span class="status-badge" 
+                                        [class.status-completed]="trial.overallStatus === 'COMPLETED'"
+                                        [class.status-terminated]="trial.overallStatus.toLowerCase().includes('terminated') || trial.overallStatus.toLowerCase().includes('withdrawn')" 
+                                        [class.status-unknown]="trial.overallStatus.toLowerCase() === 'unknown'"
+                                        [class.status-active]="trial.overallStatus !== 'COMPLETED' && !trial.overallStatus.toLowerCase().includes('terminated') && !trial.overallStatus.toLowerCase().includes('withdrawn') && trial.overallStatus.toLowerCase() !== 'unknown'">
+                                        {{ trial.overallStatus.split('_').join(' ') }}
+                                    </span>
+                                </td>                                    <td>
                                         <button class="btn-link" (click)="toggleTrialExpansion(trial.nctId)">
                                             {{ expandedTrialId() === trial.nctId ? 'Hide' : 'Details' }}
                                             <span class="triangle" [class.rotated]="expandedTrialId() === trial.nctId">▶</span>
