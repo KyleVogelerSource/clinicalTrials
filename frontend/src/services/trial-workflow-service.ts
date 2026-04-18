@@ -130,6 +130,7 @@ export class TrialWorkflowService {
             sponsor: study.protocolSection.sponsorCollaboratorsModule?.leadSponsor?.name || 'Unknown',
             phase: study.protocolSection.designModule?.phases?.[0] || 'N/A',
             description: study.protocolSection.descriptionModule?.briefSummary || '',
+            overallStatus: study.protocolSection.statusModule?.overallStatus || 'Unknown',
             sites: locations.map(loc => loc.facility).filter((f): f is string => !!f)
         }
     }

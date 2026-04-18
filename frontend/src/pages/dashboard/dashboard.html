@@ -126,6 +126,12 @@
                     <span class="results-meta">Showing {{ displayedTrials().length }} of {{ foundTrials().length }} Matches</span>
                 </div>
                 <div class="table-controls">
+                    <div class="date-range-filter">
+                        <label for="startDate">From:</label>
+                        <input type="date" id="startDate" [value]="startDateFilter()" (change)="startDateFilter.set($any($event.target).value)">
+                        <label for="endDate">To:</label>
+                        <input type="date" id="endDate" [value]="endDateFilter()" (change)="endDateFilter.set($any($event.target).value)">
+                    </div>
                     <label for="sortOrder">Order By:</label>
                     <select id="sortOrder" [value]="sortOrder()" (change)="setSortOrder($any($event.target).value)">
                         <option value="date_desc">Date (Newest)</option>
@@ -134,6 +140,8 @@
                         <option value="enrollment_asc">Participants (Least)</option>
                         <option value="name_asc">Name (A-Z)</option>
                         <option value="name_desc">Name (Z-A)</option>
+                        <option value="status_asc">Status (A-Z)</option>
+                        <option value="status_desc">Status (Z-A)</option>
                     </select>
                 </div>
             </div>
@@ -190,8 +198,12 @@
                                     </td>
                                     <td>{{ trial.enrollmentCount | number }}</td>
                                     <td>
-                                        <span class="status-badge" [class.status-terminated]="trial.description.toLowerCase().includes('terminated')">
-                                            {{ trial.description.toLowerCase().includes('terminated') ? 'Terminated' : 'Complete' }}
+                                        <span class="status-badge" 
+                                            [class.status-completed]="trial.overallStatus === 'COMPLETED'"
+                                            [class.status-terminated]="trial.overallStatus.toLowerCase().includes('terminated') || trial.overallStatus.toLowerCase().includes('withdrawn')" 
+                                            [class.status-unknown]="trial.overallStatus.toLowerCase() === 'unknown'"
+                                            [class.status-active]="trial.overallStatus !== 'COMPLETED' && !trial.overallStatus.toLowerCase().includes('terminated') && !trial.overallStatus.toLowerCase().includes('withdrawn') && trial.overallStatus.toLowerCase() !== 'unknown'">
+                                            {{ trial.overallStatus }}
                                         </span>
                                     </td>
                                     <td>
