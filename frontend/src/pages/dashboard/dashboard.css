@@ -170,6 +170,29 @@
     gap: 0.4rem;
 }
 
+.date-range-filter {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-right: 0.75rem;
+    padding-right: 0.75rem;
+    border-right: 1px solid #e1e4e8;
+}
+
+.date-range-filter label {
+    font-size: 0.75rem;
+    color: #586069;
+}
+
+.date-range-filter input[type="date"] {
+    padding: 0.15rem 0.3rem;
+    font-size: 0.75rem;
+    border-radius: 2px;
+    border: 1px solid #d1d5da;
+    background-color: #fff;
+    color: #24292e;
+}
+
 .table-controls label {
     font-size: 0.75rem;
     color: #586069;
@@ -282,15 +305,29 @@
     border-radius: 2px;
     font-size: 0.7rem;
     font-weight: 600;
-    background: #dafbe1;
-    color: #1a7f37;
     white-space: nowrap;
     text-transform: uppercase;
 }
 
-.status-terminated {
+.status-badge.status-completed {
+    background: #dafbe1;
+    color: #1a7f37;
+}
+
+.status-badge.status-terminated {
     background: #ffebe9;
     color: #cf222e;
+}
+
+.status-badge.status-unknown {
+    background: #f6f8fa;
+    color: #6a737d;
+    border: 1px solid #d1d5da;
+}
+
+.status-badge.status-active {
+    background: #fff8c5;
+    color: #9a6700;
 }
 
 /* Loading Overlay */

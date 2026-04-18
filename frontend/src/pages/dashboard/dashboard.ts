@@ -47,7 +47,9 @@ export class Dashboard implements OnInit {
     expandedTrialId = signal<string | null>(null);
     conditionMatches = signal<string[]>([]);
     conditionValue = signal('');
-    sortOrder = signal<'date_desc' | 'date_asc' | 'enrollment_desc' | 'enrollment_asc' | 'name_asc' | 'name_desc'>('date_desc');
+    sortOrder = signal<'date_desc' | 'date_asc' | 'enrollment_desc' | 'enrollment_asc' | 'name_asc' | 'name_desc' | 'status_asc' | 'status_desc'>('date_desc');
+    startDateFilter = signal<string>('');
+    endDateFilter = signal<string>('');
 
     // Service State Proxies
     selectedTrialIds = this.workflowService.selectedTrialIds;
@@ -71,7 +73,17 @@ export class Dashboard implements OnInit {
     });
 
     displayedTrials = computed(() => {
-        const trials = [...this.foundTrials()];
+        let trials = [...this.foundTrials()];
+        const start = this.startDateFilter();
+        const end = this.endDateFilter();
+
+        if (start) {
+            trials = trials.filter(t => t.startDate >= start);
+        }
+        if (end) {
+            trials = trials.filter(t => t.startDate <= end);
+        }
+
         const order = this.sortOrder();
 
         return trials.sort((a, b) => {
@@ -88,6 +100,10 @@ export class Dashboard implements OnInit {
                     return a.briefTitle.localeCompare(b.briefTitle);
                 case 'name_desc':
                     return b.briefTitle.localeCompare(a.briefTitle);
+                case 'status_asc':
+                    return a.overallStatus.localeCompare(b.overallStatus);
+                case 'status_desc':
+                    return b.overallStatus.localeCompare(a.overallStatus);
                 default:
                     return 0;
             }
