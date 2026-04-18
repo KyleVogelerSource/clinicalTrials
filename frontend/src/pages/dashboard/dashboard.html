@@ -2,16 +2,16 @@
 
     <!-- Top Info Bar -->
     <div class="section">
-        <div class="info-bar-layout"> <!-- layout note - left side text, right buttons -->
+        <div class="info-bar-layout">
             <div class="info-bar-text">
                 <h2>Design & Match</h2>
                 <p>Welcome to Cardinal Trials. To begin, input your trial parameters in the form below. Then select
                     from among the candidate trials to compare against from the table on the right. Once ready, click
-                    'Process' to create your feasibility report. Or import your data from a previous</p>
+                    'Process' to create your feasibility report.</p>
             </div>
             <div class="info-bar-buttons">
-                <button class="btn btn-primary">Process</button> <!-- layout note - should only be enabled if >0 trials are selected. -->
-                <button class="btn">Import</button>
+                <button class="btn btn-primary btn-prominent" (click)="onProcess()" [disabled]="selectedTrialIds().length === 0">Process</button>
+                <button class="btn btn-thin">Import</button>
             </div>
         </div>
     </div>
@@ -20,56 +20,142 @@
     <div class="workbench-layout">
         
         <!-- User's Input Form -->
-        <div class="section metadata-layout">
-            <!-- layout note - a <form> probably isn't appropriate here any longer since it isn't being "submitted" I think, but not sure. 
-                               We want changes to happenen every time the user makes a selection change. 
-                               
-                               Fields we expect for searching: 
-                               Disease / Condition
-                               Phase
-                               Patient Alloction Type
-                               Intervention Model
-                               Blinding / Masking Type
+        <div class="metadata-layout" [formGroup]="searchForm">
+            <div class="section form-card">
+                <div class="form-section">
+                    <h3>Search Criteria</h3>
+                    
+                    <div class="form-group">
+                        <label for="condition">Disease/Condition</label>
+                        <app-auto-complete-input
+                            inputId="condition"
+                            placeholderText="e.g., Type 2 Diabetes"
+                            [suggestions]="conditionMatches()"
+                            [value]="conditionValue()"
+                            [clearOnSelect]="false"
+                            (searchQueryChange)="onConditionSearch($event)"
+                            (itemSelected)="onConditionSelected($event)"
+                        />
+                    </div>
 
-                               For the User's Trial specifically (does not feed into search table):
-                               Number of patients
-                               Number of inclusions
-                               number of exclusions
-                               number of outcomes
-                               number of sites
-                               number of... there's one more thing but I didn't catch it
-            -->
+                    <div class="form-group">
+                        <label for="phase">Current Phase</label>
+                        <select id="phase" formControlName="phase">
+                            @for (option of phaseOptions; track option) {
+                                <option [value]="option">{{ option }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="allocationType">Patient Allocation Type</label>
+                        <select id="allocationType" formControlName="allocationType">
+                            @for (option of allocationOptions; track option) {
+                                <option [value]="option">{{ option }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="intervention">Intervention Model</label>
+                        <select id="intervention" formControlName="interventionModel">
+                            <option [ngValue]="null">Any</option>
+                            @for (option of interventionOptions; track option) {
+                                <option [value]="option">{{ option }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="blinding">Blinding/Masking Type</label>
+                        <select id="blinding" formControlName="blindingType">
+                            @for (option of blindingOptions; track option) {
+                                <option [value]="option">{{ option }}</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section form-card">
+                <div class="form-section user-trial-section">
+                    <h3>User's Trial Specifics</h3>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="userPatients">Patients</label>
+                            <input id="userPatients" type="number" formControlName="userPatients" placeholder="e.g., 250" />
+                        </div>
+                        <div class="form-group">
+                            <label for="userInclusions">Inclusions</label>
+                            <input id="userInclusions" type="number" formControlName="userInclusions" placeholder="e.g., 5" />
+                        </div>
+                        <div class="form-group">
+                            <label for="userExclusions">Exclusions</label>
+                            <input id="userExclusions" type="number" formControlName="userExclusions" placeholder="e.g., 10" />
+                        </div>
+                        <div class="form-group">
+                            <label for="userOutcomes">Outcomes</label>
+                            <input id="userOutcomes" type="number" formControlName="userOutcomes" placeholder="e.g., 2" />
+                        </div>
+                        <div class="form-group">
+                            <label for="userSites">Sites</label>
+                            <input id="userSites" type="number" formControlName="userSites" placeholder="e.g., 12" />
+                        </div>
+                        <div class="form-group">
+                            <label for="userArms">Arms/Interventions</label>
+                            <input id="userArms" type="number" formControlName="userArms" placeholder="e.g., 2" />
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Matching Trials Display -->
         <div class="section table-layout">
-            <app-loading-indicator /> <!-- layout note - loading indicator only blocks the table view -->
+            @if (isLoading()) {
+                <div class="table-loading-overlay">
+                    <app-loading-indicator [visible]="true" [local]="true" />
+                </div>
+            }
             
             <!-- Table Info -->
             <div class="table-header">
-                <h3>Matching Trials</h3>
-                <span>Showing {{ displayedTrials().length }} of {{ foundTrials().length }} Matches</span>
-                <div class="filter-icon"></div> <!-- layout note - something the user can click to show an "Order By" selection -->
+                <div class="table-header-left">
+                    <h3>Matching Trials</h3>
+                    <span class="results-meta">Showing {{ displayedTrials().length }} of {{ foundTrials().length }} Matches</span>
+                </div>
+                <div class="table-controls">
+                    <label for="sortOrder">Order By:</label>
+                    <select id="sortOrder" [value]="sortOrder()" (change)="setSortOrder($any($event.target).value)">
+                        <option value="date_desc">Date (Newest)</option>
+                        <option value="date_asc">Date (Oldest)</option>
+                        <option value="enrollment_desc">Participants (Most)</option>
+                        <option value="enrollment_asc">Participants (Least)</option>
+                        <option value="name_asc">Name (A-Z)</option>
+                        <option value="name_desc">Name (Z-A)</option>
+                    </select>
+                </div>
             </div>
 
-            @if (displayedTrials().length === 0) {
+            @if (displayedTrials().length === 0 && !isLoading()) {
                 <div class="alert-container">
                     <div class="alert-box no-results">
                         <span class="alert-icon">ℹ️</span>
                         <div class="alert-text">
                             <h3>No Results</h3>
-                            <p></p>
+                            <p>Try adjusting your search criteria to find matching trials.</p>
                         </div>
                     </div>
                 </div>
             }
-            @elseif (displayedTrials().length > DISPLAY_THRESHOLD) {
+            @else if (displayedTrials().length > DISPLAY_THRESHOLD) {
                 <div class="alert-container">
-                    <div class="alert-box no-results">
+                    <div class="alert-box warning">
                         <span class="alert-icon">⚠️</span>
                         <div class="alert-text">
                             <h3>Too many results to display</h3>
-                            <p>Please apply more specific keywords or a narrower date range to reduce the results below {{ DISPLAY_THRESHOLD | number }} to select individual trials.</p>
+                            <p>Please apply more specific criteria to reduce results below {{ DISPLAY_THRESHOLD | number }}.</p>
                         </div>
                     </div>
                 </div>
@@ -79,63 +165,77 @@
                 <div class="table-content">
                     <table class="trials-table">
                         <thead>
-                            <th class="selection-cell">
-                                <input type="checkbox" [checked]="isAllSelected()" (change)="toggleAllSelection()" aria-label="Select all trials">
-                            </th>
-                            <th>Trial ID</th>
-                            <th>Name</th>
-                            <th>Participants</th>
-                            <th>Status</th>
-                            <th></th> <!-- layout note - left blank for details expansion -->
+                            <tr>
+                                <th class="selection-cell" style="text-align:center;">
+                                    <input type="checkbox" class="custom-checkbox" [checked]="isAllSelected()" (change)="toggleAllSelection()" aria-label="Select all trials">
+                                </th>
+                                <th>Trial ID</th>
+                                <th>Name</th>
+                                <th>Participants</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
                         </thead>
                         <tbody>
                             @for (trial of displayedTrials(); track trial.nctId) {
-                                <!-- Trial Row Item -->
                                 <tr [class.expanded-row-active]="expandedTrialId() === trial.nctId" [class.selected-row]="isTrialSelected(trial.nctId)">
-                                    <td [class.selected-row]="isTrialSelected(trial.nctId)"></td>
-                                    <td>{{ trial.id }}</td>
+                                    <td class="selection-cell">
+                                        <input type="checkbox" class="custom-checkbox" [checked]="isTrialSelected(trial.nctId)" (change)="toggleTrialSelection(trial.nctId)" aria-label="Select trial">
+                                    </td>
+                                    <td class="nct-id-cell">{{ trial.nctId }}</td>
                                     <td class="trial-title-cell">
                                         <a [href]="'https://clinicaltrials.gov/study/' + trial.nctId" target="_blank" class="trial-link">
                                             {{ trial.briefTitle }}
                                         </a>
                                     </td>
                                     <td>{{ trial.enrollmentCount | number }}</td>
-                                    <td></td> <!-- layout note - should indicate complete or terminated -->
+                                    <td>
+                                        <span class="status-badge" [class.status-terminated]="trial.description.toLowerCase().includes('terminated')">
+                                            {{ trial.description.toLowerCase().includes('terminated') ? 'Terminated' : 'Complete' }}
+                                        </span>
+                                    </td>
                                     <td>
                                         <button class="btn-link" (click)="toggleTrialExpansion(trial.nctId)">
-                                            {{ expandedTrialId() === trial.nctId ? 'Hide Details' : 'Details' }}
+                                            {{ expandedTrialId() === trial.nctId ? 'Hide' : 'Details' }}
                                             <span class="triangle" [class.rotated]="expandedTrialId() === trial.nctId">▶</span>
                                         </button>
                                     </td>
                                 </tr>
                                 
-                                <!-- Expanded Trial Details Row -->
                                 <tr class="detail-row" [class.expanded]="expandedTrialId() === trial.nctId">
                                     <td colspan="6">
                                         <div class="detail-wrapper">
-                                            <div class="detail-content"> <!-- layout note - like another mini table inside it kind of, rows of info -->
-                                                <div class="detail-section">
-                                                    <span class="detail-label">Date:</span>
-                                                    {{ trial.startDate | date:'MM/dd/yyyy' }} - {{ trial.completionDate | date:'MM/dd/yyyy' }}
-                                                </div>
-
-                                                <div class="detail-section">
-                                                    <span class="detail-label">Phase:</span> {{ trial.phase }}
-                                                    <span class="detail-label">Company:</span> {{ trial.phase }}
+                                            <div class="detail-content">
+                                                <div class="detail-grid">
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Date:</span>
+                                                        {{ trial.startDate | date:'MM/dd/yyyy' }} - {{ trial.completionDate | date:'MM/dd/yyyy' }}
+                                                    </div>
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Phase:</span> {{ trial.phase }}
+                                                    </div>
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Company:</span> {{ trial.sponsor }}
+                                                    </div>
                                                 </div>
                                                 
                                                 <div class="detail-section">
                                                     <span class="detail-label">Clinical Sites:</span>
-                                                    <ul class="sites-list">
-                                                        @for (site of trial.sites; track site) {
-                                                            <li>{{ site }}</li>
-                                                        }
-                                                    </ul>
+                                                    <div class="sites-list-container">
+                                                        <ul class="sites-list">
+                                                            @for (site of trial.sites.slice(0, 10); track site) {
+                                                                <li>{{ site }}</li>
+                                                            }
+                                                            @if (trial.sites.length > 10) {
+                                                                <li class="more-sites">+ {{ trial.sites.length - 10 }} more sites</li>
+                                                            }
+                                                        </ul>
+                                                    </div>
                                                 </div>
 
                                                 <div class="detail-section">
                                                     <span class="detail-label">Description:</span>
-                                                    <p>{{ trial.description }}</p>
+                                                    <p class="description-text">{{ trial.description }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -149,6 +249,5 @@
         </div>
 
     </div>
-
 
 </div>

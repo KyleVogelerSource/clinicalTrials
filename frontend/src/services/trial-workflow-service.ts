@@ -1,4 +1,5 @@
 import { Injectable, signal, inject } from "@angular/core";
+import { Observable, map, tap } from "rxjs";
 import { TrialResultsRequest } from "@shared/dto/TrialResultsRequest";
 import { ClinicalTrialSearchRequest } from "@shared/dto/ClinicalTrialSearchRequest";
 import { ClinicalStudyService } from "./clinical-study.service";
@@ -100,6 +101,15 @@ export class TrialWorkflowService {
 
         // Clear previous selections on new search
         this.selectedTrialIds.set([]);
+    }
+
+    searchTrialsV2(request: ClinicalTrialSearchRequest): Observable<StudyTrial[]> {
+        return this.clinicalStudyService.searchStudies(request).pipe(
+            tap(response => {
+                response.studies.forEach(study => this.trialCache.set(study.protocolSection.identificationModule.nctId, study));
+            }),
+            map(response => response.studies.map(study => this.toStudyTrial(study)))
+        );
     }
 
     private toStudyTrial(study : ClinicalTrialStudy) : StudyTrial {
