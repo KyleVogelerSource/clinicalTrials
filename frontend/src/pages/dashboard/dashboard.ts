@@ -26,6 +26,9 @@ import { ClinicalTrialSearchRequest } from "@shared/dto/ClinicalTrialSearchReque
         DecimalPipe,
         DatePipe
     ],
+    host: {
+        '(document:click)': 'onDocumentClick($event)'
+    },
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Dashboard implements OnInit {
@@ -50,11 +53,22 @@ export class Dashboard implements OnInit {
     sortOrder = signal<'date_desc' | 'date_asc' | 'enrollment_desc' | 'enrollment_asc' | 'name_asc' | 'name_desc' | 'status_asc' | 'status_desc'>('date_desc');
     startDateFilter = signal<string>('');
     endDateFilter = signal<string>('');
+    
+    // Column Filters
+    nameFilter = signal<string>('');
+    statusFilter = signal<string>('');
+    participantsFilter = signal<number | null>(null);
+    activeFilter = signal<string | null>(null);
 
     // Service State Proxies
     selectedTrialIds = this.workflowService.selectedTrialIds;
 
     DISPLAY_THRESHOLD = 1000;
+
+    uniqueStatuses = computed(() => {
+        const statuses = new Set(this.foundTrials().map(t => t.overallStatus));
+        return Array.from(statuses).sort();
+    });
 
     searchForm = new FormGroup({
         condition: new FormControl<string>('', [Validators.required]),
@@ -74,15 +88,22 @@ export class Dashboard implements OnInit {
 
     displayedTrials = computed(() => {
         let trials = [...this.foundTrials()];
+        
+        // Apply Date Range
         const start = this.startDateFilter();
         const end = this.endDateFilter();
+        if (start) trials = trials.filter(t => t.startDate >= start);
+        if (end) trials = trials.filter(t => t.startDate <= end);
 
-        if (start) {
-            trials = trials.filter(t => t.startDate >= start);
-        }
-        if (end) {
-            trials = trials.filter(t => t.startDate <= end);
-        }
+        // Apply Column Filters
+        const nameF = this.nameFilter().toLowerCase();
+        if (nameF) trials = trials.filter(t => t.briefTitle.toLowerCase().includes(nameF));
+
+        const statusF = this.statusFilter();
+        if (statusF) trials = trials.filter(t => t.overallStatus === statusF);
+
+        const partF = this.participantsFilter();
+        if (partF !== null) trials = trials.filter(t => t.enrollmentCount >= partF);
 
         const order = this.sortOrder();
 
@@ -109,6 +130,44 @@ export class Dashboard implements OnInit {
             }
         });
     });
+
+    toggleSort(column: 'date' | 'enrollment' | 'name' | 'status') {
+        const current = this.sortOrder();
+        let next: any;
+
+        switch (column) {
+            case 'date':
+                next = current === 'date_desc' ? 'date_asc' : 'date_desc';
+                break;
+            case 'enrollment':
+                next = current === 'enrollment_desc' ? 'enrollment_asc' : 'enrollment_desc';
+                break;
+            case 'name':
+                next = current === 'name_asc' ? 'name_desc' : 'name_asc';
+                break;
+            case 'status':
+                next = current === 'status_asc' ? 'status_desc' : 'status_asc';
+                break;
+        }
+        this.sortOrder.set(next);
+    }
+
+    toggleFilter(column: string, event: Event) {
+        event.stopPropagation();
+        if (this.activeFilter() === column) {
+            this.activeFilter.set(null);
+        } else {
+            this.activeFilter.set(column);
+        }
+    }
+
+    clearFilters() {
+        this.nameFilter.set('');
+        this.statusFilter.set('');
+        this.participantsFilter.set(null);
+        this.startDateFilter.set('');
+        this.endDateFilter.set('');
+    }
 
     isAllSelected = computed(() => {
         const displayed = this.displayedTrials();
@@ -148,6 +207,7 @@ export class Dashboard implements OnInit {
                 }
 
                 this.isLoading.set(true);
+                this.clearFilters();
                 const request: ClinicalTrialSearchRequest = {
                     condition: values.condition,
                     phase: this.mapPhase(values.phase!),
@@ -243,6 +303,13 @@ export class Dashboard implements OnInit {
 
         this.workflowService.processResults();
         this.router.navigate(['/results']);
+    }
+
+    onDocumentClick(event: MouseEvent) {
+        const target = event.target as HTMLElement;
+        if (this.activeFilter() && !target.closest('.filter-popover')) {
+            this.activeFilter.set(null);
+        }
     }
 
     private mapPhase(phase: string): string | undefined {

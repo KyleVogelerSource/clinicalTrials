@@ -79,32 +79,32 @@
 
             <div class="section form-card">
                 <div class="form-section user-trial-section">
-                    <h3>User's Trial Specifics</h3>
+                    <h3>Your Trial Specifics</h3>
                     
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="userPatients">Patients</label>
-                            <input id="userPatients" type="number" formControlName="userPatients" placeholder="-" />
-                        </div>
-                        <div class="form-group">
-                            <label for="userInclusions">Inclusions</label>
-                            <input id="userInclusions" type="number" formControlName="userInclusions" placeholder="-" />
-                        </div>
-                        <div class="form-group">
-                            <label for="userExclusions">Exclusions</label>
-                            <input id="userExclusions" type="number" formControlName="userExclusions" placeholder="-" />
-                        </div>
-                        <div class="form-group">
-                            <label for="userOutcomes">Outcomes</label>
-                            <input id="userOutcomes" type="number" formControlName="userOutcomes" placeholder="-" />
+                            <input id="userPatients" type="number" formControlName="userPatients" placeholder="-" min="0" />
                         </div>
                         <div class="form-group">
                             <label for="userSites">Sites</label>
-                            <input id="userSites" type="number" formControlName="userSites" placeholder="-" />
+                            <input id="userSites" type="number" formControlName="userSites" placeholder="-" min="0" />
+                        </div>
+                        <div class="form-group">
+                            <label for="userInclusions">Inclusions</label>
+                            <input id="userInclusions" type="number" formControlName="userInclusions" placeholder="-" min="0" />
+                        </div>
+                        <div class="form-group">
+                            <label for="userExclusions">Exclusions</label>
+                            <input id="userExclusions" type="number" formControlName="userExclusions" placeholder="-" min="0" />
+                        </div>
+                        <div class="form-group">
+                            <label for="userOutcomes">Outcomes</label>
+                            <input id="userOutcomes" type="number" formControlName="userOutcomes" placeholder="-" min="0" />
                         </div>
                         <div class="form-group">
                             <label for="userArms">Arms/Interventions</label>
-                            <input id="userArms" type="number" formControlName="userArms" placeholder="-" />
+                            <input id="userArms" type="number" formControlName="userArms" placeholder="-" min="0" />
                         </div>
                     </div>
                 </div>
@@ -132,58 +132,121 @@
                         <label for="endDate">To:</label>
                         <input type="date" id="endDate" [value]="endDateFilter()" (change)="endDateFilter.set($any($event.target).value)">
                     </div>
-                    <label for="sortOrder">Order By:</label>
-                    <select id="sortOrder" [value]="sortOrder()" (change)="setSortOrder($any($event.target).value)">
-                        <option value="date_desc">Date (Newest)</option>
-                        <option value="date_asc">Date (Oldest)</option>
-                        <option value="enrollment_desc">Participants (Most)</option>
-                        <option value="enrollment_asc">Participants (Least)</option>
-                        <option value="name_asc">Name (A-Z)</option>
-                        <option value="name_desc">Name (Z-A)</option>
-                        <option value="status_asc">Status (A-Z)</option>
-                        <option value="status_desc">Status (Z-A)</option>
-                    </select>
+                    <button class="btn-link clear-filters-btn" (click)="clearFilters()" [hidden]="!nameFilter() && !statusFilter() && !participantsFilter() && !startDateFilter() && !endDateFilter()">
+                        Clear Filters
+                    </button>
                 </div>
             </div>
 
-            @if (displayedTrials().length === 0 && !isLoading()) {
-                <div class="alert-container">
-                    <div class="alert-box no-results">
-                        <span class="alert-icon">ℹ️</span>
-                        <div class="alert-text">
-                            <h3>No Results</h3>
-                            <p>Try adjusting your search criteria to find matching trials.</p>
-                        </div>
-                    </div>
-                </div>
-            }
-            @else if (displayedTrials().length > DISPLAY_THRESHOLD) {
-                <div class="alert-container">
-                    <div class="alert-box warning">
-                        <span class="alert-icon">⚠️</span>
-                        <div class="alert-text">
-                            <h3>Too many results to display</h3>
-                            <p>Please apply more specific criteria to reduce results below {{ DISPLAY_THRESHOLD | number }}.</p>
-                        </div>
-                    </div>
-                </div>
-            }
-            @else {
-                <!-- Table of Trials-->
-                <div class="table-content">
-                    <table class="trials-table">
-                        <thead>
+            
+            <!-- Table of Trials-->
+            <div class="table-content">
+                <table class="trials-table">
+                    <thead>
+                        <tr>
+                            <th class="selection-cell" style="text-align:center;">
+                                <input type="checkbox" class="custom-checkbox" [checked]="isAllSelected()" (change)="toggleAllSelection()" aria-label="Select all trials">
+                            </th>
+                            <th class="sortable-header" (click)="toggleSort('date')">
+                                Trial ID
+                                <span class="sort-indicator" [class.active]="sortOrder().startsWith('date')">
+                                    {{ sortOrder() === 'date_asc' ? '↑' : '↓' }}
+                                </span>
+                            </th>
+                            <th class="sortable-header" (click)="toggleSort('name')">
+                                <div class="header-content">
+                                    Name
+                                    <span class="sort-indicator" [class.active]="sortOrder().startsWith('name')">
+                                        {{ sortOrder() === 'name_asc' ? '↑' : '↓' }}
+                                    </span>
+                                    <button class="filter-trigger" [class.filter-active]="nameFilter()" (click)="toggleFilter('name', $event)">🔍</button>
+                                </div>
+                                @if (activeFilter() === 'name') {
+                                    <div class="filter-popover" (click)="$event.stopPropagation()">
+                                        <input type="text" placeholder="Search titles..." 
+                                            [value]="nameFilter()" 
+                                            (input)="nameFilter.set($any($event.target).value)"
+                                            (keyup.enter)="activeFilter.set(null)"
+                                            autofocus>
+                                    </div>
+                                }
+                            </th>
+                            <th class="sortable-header" (click)="toggleSort('enrollment')">
+                                <div class="header-content">
+                                    Participants
+                                    <span class="sort-indicator" [class.active]="sortOrder().startsWith('enrollment')">
+                                        {{ sortOrder() === 'enrollment_asc' ? '↑' : '↓' }}
+                                    </span>
+                                    <button class="filter-trigger" [class.filter-active]="participantsFilter() !== null" (click)="toggleFilter('participants', $event)">🔍</button>
+                                </div>
+                                @if (activeFilter() === 'participants') {
+                                    <div class="filter-popover" (click)="$event.stopPropagation()">
+                                        <label>Min Participants:</label>
+                                        <input type="number" 
+                                            [value]="participantsFilter()" 
+                                            (input)="participantsFilter.set($any($event.target).value ? +$any($event.target).value : null)"
+                                            (keyup.enter)="activeFilter.set(null)"
+                                            min="0"
+                                            autofocus>
+                                    </div>
+                                }
+                            </th>
+                            <th class="sortable-header" (click)="toggleSort('status')">
+                                <div class="header-content">
+                                    Status
+                                    <span class="sort-indicator" [class.active]="sortOrder().startsWith('status')">
+                                        {{ sortOrder() === 'status_asc' ? '↑' : '↓' }}
+                                    </span>
+                                    <button class="filter-trigger" [class.filter-active]="statusFilter()" (click)="toggleFilter('status', $event)">🔍</button>
+                                </div>
+                                @if (activeFilter() === 'status') {
+                                    <div class="filter-popover" (click)="$event.stopPropagation()">
+                                        <select [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value); activeFilter.set(null)">
+                                            <option value="" [selected]="statusFilter() === ''">All Statuses</option>
+                                            @for (status of uniqueStatuses(); track status) {
+                                                <option [value]="status" [selected]="statusFilter() === status">{{ status }}</option>
+                                            }
+                                        </select>
+                                    </div>
+                                }                            </th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    @if (displayedTrials().length === 0 && !isLoading()) {
+                        <tbody>
                             <tr>
-                                <th class="selection-cell" style="text-align:center;">
-                                    <input type="checkbox" class="custom-checkbox" [checked]="isAllSelected()" (change)="toggleAllSelection()" aria-label="Select all trials">
-                                </th>
-                                <th>Trial ID</th>
-                                <th>Name</th>
-                                <th>Participants</th>
-                                <th>Status</th>
-                                <th></th>
+                                <td colspan="6">
+                                    <div class="alert-container">
+                                        <div class="alert-box no-results">
+                                            <span class="alert-icon">ℹ️</span>
+                                            <div class="alert-text">
+                                                <h3>No Results</h3>
+                                                <p>Try adjusting your search criteria or filters to find matching trials.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
                             </tr>
-                        </thead>
+                        </tbody>
+                    }
+                    @else if (displayedTrials().length >= DISPLAY_THRESHOLD) {
+                        <tbody>
+                            <tr>
+                                <td colspan="6">
+                                    <div class="alert-container">
+                                        <div class="alert-box warning">
+                                            <span class="alert-icon">⚠️</span>
+                                            <div class="alert-text">
+                                                <h3>Too many results to display</h3>
+                                                <p>Please apply more specific criteria to reduce results below {{ DISPLAY_THRESHOLD | number }}.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    }
+                    @else {
                         <tbody>
                             @for (trial of displayedTrials(); track trial.nctId) {
                                 <tr [class.expanded-row-active]="expandedTrialId() === trial.nctId" [class.selected-row]="isTrialSelected(trial.nctId)">
@@ -255,9 +318,9 @@
                                 </tr>
                             }
                         </tbody>
-                    </table>
-                </div>
-            }
+                    }
+                </table>
+            </div>
         </div>
 
     </div>
