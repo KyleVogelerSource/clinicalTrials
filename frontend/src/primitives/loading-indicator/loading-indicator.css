@@ -16,6 +16,11 @@
     text-align: center;
 }
 
+.loading-container.local-container {
+    position: relative;
+    padding: 2rem;
+}
+
 .spinner {
     width: 60px;
     height: 60px;
