@@ -4,8 +4,10 @@ import { KeywordSelector } from '../../primitives/keyword-selector/keyword-selec
 import { Router } from '@angular/router';
 import { CommonModule, DecimalPipe, DatePipe } from '@angular/common';
 import { TrialWorkflowService } from '../../services/trial-workflow-service';
-import { AuthService } from '../../services/auth.service';
+import { PermissionService } from '../../services/permission.service';
 import { StudyTrial } from '../../models/study-trial';
+import { buildDesignerExportJson } from '../../services/designer-criteria-file.service';
+import { ACTION_NAMES } from '@shared/auth/action-names';
 
 @Component({
     selector: 'app-selection',
@@ -18,7 +20,7 @@ import { StudyTrial } from '../../models/study-trial';
 export class Selection {
     router = inject(Router);
     workflowService = inject(TrialWorkflowService);
-    authService = inject(AuthService);
+    permissionService = inject(PermissionService);
 
     private lastFoundTrialsKey = '';
     private shouldAutoSelectForCurrentResults = true;
@@ -28,10 +30,13 @@ export class Selection {
     filterWords = this.workflowService.filterWords;
     fromDate = this.workflowService.fromDate;
     toDate = this.workflowService.toDate;
+    importNotice = this.workflowService.importNotice;
 
     expandedTrialId = signal<string | null>(null);
     selectedTrialIds = this.workflowService.selectedTrialIds;
-    canCompareTrials = signal(false);
+    canCompareTrials = this.permissionService.watch(ACTION_NAMES.trialBenchmarking);
+    hasCriteriaToExport = computed(() => this.workflowService.inputParams() !== null);
+    canExportCriteria = this.permissionService.watch(ACTION_NAMES.searchCriteriaExport);
 
     DISPLAY_THRESHOLD = 1000;
 
@@ -102,13 +107,6 @@ export class Selection {
     });
 
     constructor() {
-        if (this.authService.isLoggedIn()) {
-            this.authService.hasAction('trial_benchmarking').subscribe({
-                next: (allowed) => this.canCompareTrials.set(allowed),
-                error: () => this.canCompareTrials.set(false),
-            });
-        }
-
         // Automatically select all if filtered count is below threshold
         effect(() => {
             const foundTrialsKey = this.foundTrials().map(trial => trial.nctId).join('|');
@@ -191,9 +189,32 @@ export class Selection {
         this.router.navigate(['/designer']);
     }
 
+    dismissImportNotice() {
+        this.workflowService.setImportNotice(null);
+    }
+
     onNext() {
         this.workflowService.processResults();
         this.router.navigate(['/results']);
+    }
+
+    onExportCriteria() {
+        if (!this.canExportCriteria()) {
+            return;
+        }
+
+        const criteria = this.workflowService.inputParams();
+        if (!criteria) {
+            return;
+        }
+
+        const blob = new Blob([buildDesignerExportJson(criteria)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'clinicaltrials-search-criteria.json';
+        link.click();
+        URL.revokeObjectURL(url);
     }
 
     onCompare() {

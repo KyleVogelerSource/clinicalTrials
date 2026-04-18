@@ -9,6 +9,7 @@ import { DesignModel } from "../models/design-model";
 import { StudyTrial } from "../models/study-trial";
 import { ClinicalTrialStudy } from "@shared/dto/ClinicalTrialStudiesResponse";
 import { MetricRow, ResultsModel } from "../models/results-model";
+import { mapDesignModelToExecutionSearchRequest } from "./saved-search-criteria-mapper";
 
 const PHASE_MAP: Record<string, string> = {
     'Early Phase 1': 'EARLY_PHASE1',
@@ -50,6 +51,7 @@ export class TrialWorkflowService {
     filterWords = signal<string[]>([]);
     fromDate = signal<string>("");
     toDate = signal<string>("");
+    importNotice = signal<string | null>(null);
 
     // Results state
     selectedTrialIds = signal<string[]>([]);
@@ -61,6 +63,7 @@ export class TrialWorkflowService {
         this.filterWords.set([]);
         this.fromDate.set("");
         this.toDate.set("");
+        this.importNotice.set(null);
         this.selectedTrialIds.set([]);
         this.results.set(new ResultsModel());
     }
@@ -69,19 +72,19 @@ export class TrialWorkflowService {
         this.inputParams.set(inputs);
     }
 
+    setImportNotice(message: string | null) {
+        this.importNotice.set(message);
+    }
+
     searchTrials() {
         const input = this.inputParams();
         if (!input) return;
 
         const request: ClinicalTrialSearchRequest = {
-            condition: input.condition ?? undefined,
-            phase: input.phase ? PHASE_MAP[input.phase] : undefined,
-            interventionModel: input.interventionModel ? INTERVENTION_MODEL_MAP[input.interventionModel] : undefined,
-            sex: input.sex ?? undefined,
-            minAge: input.minAge ?? undefined,
-            maxAge: input.maxAge ?? undefined,
-            requiredConditions: input.required ?? [],
-            ineligibleConditions: input.ineligible ?? [],
+            ...mapDesignModelToExecutionSearchRequest(input, {
+                phaseByLabel: PHASE_MAP,
+                interventionModelByLabel: INTERVENTION_MODEL_MAP,
+            }),
             pageSize: 100
         };
 

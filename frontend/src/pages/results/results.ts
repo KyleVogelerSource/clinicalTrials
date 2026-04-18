@@ -15,6 +15,9 @@ import { ResultsApiService } from '../../services/results-api.service';
 import { TrialWorkflowService } from '../../services/trial-workflow-service';
 import { StudyTrial } from '../../models/study-trial';
 import { metricNames, MetricRow } from '../../models/results-model';
+import { buildDesignerExportJson } from '../../services/designer-criteria-file.service';
+import { ACTION_NAMES } from '@shared/auth/action-names';
+import { PermissionService } from '../../services/permission.service';
 
 interface ComparisonMetric {
     key: string;
@@ -71,9 +74,13 @@ export class Results implements OnInit {
     private router = inject(Router);
     private apiService = inject(ResultsApiService);
     private workflowService = inject(TrialWorkflowService);
+    private permissionService = inject(PermissionService);
 
     model = this.workflowService.results;
     data = computed(() => this.workflowService.results().trialResults);
+    errorMessage = signal<string>('');
+    hasCriteriaToExport = computed(() => this.workflowService.inputParams() !== null);
+    canExportCriteria = this.permissionService.watch(ACTION_NAMES.searchCriteriaExport);
 
     // heatmap
     heatmapData = computed(() => {
@@ -227,5 +234,24 @@ export class Results implements OnInit {
 
     onBack(): void {
         this.router.navigate(['/designer']);
+    }
+
+    onExportCriteria(): void {
+        if (!this.canExportCriteria()) {
+            return;
+        }
+
+        const criteria = this.workflowService.inputParams();
+        if (!criteria) {
+            return;
+        }
+
+        const blob = new Blob([buildDesignerExportJson(criteria)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'clinicaltrials-search-criteria.json';
+        link.click();
+        URL.revokeObjectURL(url);
     }
 }

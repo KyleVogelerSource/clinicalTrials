@@ -385,6 +385,34 @@ export async function updateAccessibleSavedSearch(
   return mapSavedSearch(updatedRow);
 }
 
+export async function deleteOwnedSavedSearch(
+  savedSearchId: number,
+  ownerUserId: number
+): Promise<void> {
+  const pool = getDbPool();
+  const result = await pool.query(
+    `DELETE FROM saved_searches
+     WHERE id = $1
+       AND owner_user_id = $2`,
+    [savedSearchId, ownerUserId]
+  );
+
+  if ((result.rowCount ?? 0) > 0) {
+    return;
+  }
+
+  const existing = await pool.query(
+    `SELECT owner_user_id FROM saved_searches WHERE id = $1 LIMIT 1`,
+    [savedSearchId]
+  );
+
+  if ((existing.rowCount ?? 0) === 0) {
+    throw new Error("SAVED_SEARCH_NOT_FOUND");
+  }
+
+  throw new Error("SAVED_SEARCH_FORBIDDEN");
+}
+
 function normalizeShareInput(input: SavedSearchShareRequest): SavedSearchShareRequest {
   return {
     username: input.username.trim(),

@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { PermissionService } from '../../services/permission.service';
 import {
   AdminActionSummary,
   AdminRoleActionSummary,
@@ -9,6 +10,7 @@ import {
   AdminUserRoleSummary,
   AdminUserSummary,
 } from '../../services/admin.service';
+import { ACTION_NAMES } from '@shared/auth/action-names';
 
 @Component({
   selector: 'app-admin',
@@ -20,6 +22,9 @@ import {
 export class Admin {
   private readonly authService = inject(AuthService);
   private readonly adminService = inject(AdminService);
+  private readonly permissionService = inject(PermissionService);
+  private readonly canManageRoles = this.permissionService.watch(ACTION_NAMES.userRoles);
+  private adminDataRequested = false;
 
   protected readonly loading = signal(true);
   protected readonly authorized = signal(false);
@@ -42,26 +47,29 @@ export class Admin {
   protected selectedUserRoleId: number | null = null;
 
   constructor() {
-    if (!this.authService.isLoggedIn()) {
-      this.loading.set(false);
-      this.authorized.set(false);
-      return;
-    }
-
-    this.authService.hasAction('user_roles').subscribe({
-      next: (allowed) => {
-        this.authorized.set(allowed);
-        if (!allowed) {
-          this.loading.set(false);
-          return;
-        }
-
-        this.loadAdminData();
-      },
-      error: () => {
+    effect(() => {
+      if (!this.authService.isLoggedIn()) {
         this.authorized.set(false);
         this.loading.set(false);
-      },
+        this.adminDataRequested = false;
+        return;
+      }
+
+      const allowed = this.canManageRoles();
+      this.authorized.set(allowed);
+      if (!allowed) {
+        this.loading.set(false);
+        this.adminDataRequested = false;
+        return;
+      }
+
+      if (this.adminDataRequested) {
+        return;
+      }
+
+      this.adminDataRequested = true;
+      this.loading.set(true);
+      this.loadAdminData();
     });
   }
 
