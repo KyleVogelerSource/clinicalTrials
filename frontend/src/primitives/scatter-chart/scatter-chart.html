@@ -1,3 +1,10 @@
 <div class="chart-wrapper">
+    <div class="chart-export-toolbar">
+        @if (isZoomed()) {
+            <button class="export-btn reset-btn" (click)="resetZoom()">Reset</button>
+        }
+        <button class="export-btn" (click)="exportPng()">PNG</button>
+        <button class="export-btn" (click)="exportCsv()">CSV</button>
+    </div>
     <canvas #chartCanvas></canvas>
 </div>

@@ -1,35 +1,36 @@
 .app-header {
     display: flex;
     align-items: center;
-    gap: 4em;
-    padding: .125em;
+    gap: 2rem;
+    padding: 0.1rem 0.5rem;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     border-bottom: solid 1px var(--app-gray);
+    background-color: #fff;
 }
 
 .auth-slot {
     margin-left: auto;
     display: flex;
     align-items: center;
-    gap: .75rem;
-    padding-right: .75rem;
+    gap: 0.5rem;
+    padding-right: 0.5rem;
 }
 
 .user-greeting {
-    font-size: .9rem;
+    font-size: 0.85rem;
     font-weight: 600;
     color: var(--app-blue);
 }
 
 .btn-login,
 .btn-logout {
-    padding: .4rem .95rem;
-    border-radius: 6px;
-    font-size: .9rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
     transition: background .18s, color .18s;
-    border: 2px solid var(--app-blue);
+    border: 1.5px solid var(--app-blue);
 }
 
 .btn-login {
@@ -51,12 +52,13 @@
     list-style: none;
     margin: 0;
     padding: 0;
-    gap: 2em;
+    gap: 1.5rem;
 
     li a{
         text-decoration: none;
-        text-underline-offset: .25em;
+        text-underline-offset: 0.2rem;
         font-weight: 500;
+        font-size: 0.9rem;
         color: var(--app-blue);
         transition: color .2s ease-in-out;
 

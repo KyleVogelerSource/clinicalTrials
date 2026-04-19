@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, signal 
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { Logo } from '../primitives/logo/logo';
 import { LoginModal } from '../primitives/login-modal/login-modal';
+import { LoadingIndicator } from '../primitives/loading-indicator/loading-indicator';
 import { DebugStatusResponse, DebugStatusService } from '../services/debug-status.service';
 import { DebugMessageService } from '../services/debug-message.service';
 import { AuthService } from '../services/auth.service';
@@ -10,7 +11,7 @@ import { ACTION_NAMES } from '@shared/auth/action-names';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Logo, LoginModal],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Logo, LoginModal, LoadingIndicator],
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush

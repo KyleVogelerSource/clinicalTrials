@@ -1,7 +1,8 @@
-import { Component, ChangeDetectionStrategy, input, effect, viewChild, ElementRef, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, effect, viewChild, ElementRef, OnDestroy, signal } from '@angular/core';
 import { Chart, ScatterController, PointElement, LinearScale, Tooltip, Legend, Title } from 'chart.js';
+import zoomPlugin from 'chartjs-plugin-zoom';
 
-Chart.register(ScatterController, PointElement, LinearScale, Tooltip, Legend, Title);
+Chart.register(ScatterController, PointElement, LinearScale, Tooltip, Legend, Title, zoomPlugin);
 
 export interface ScatterChartDataset {
     label: string;
@@ -31,6 +32,7 @@ export class ScatterChart implements OnDestroy {
 
     canvasRef = viewChild<ElementRef<HTMLCanvasElement>>('chartCanvas');
 
+    isZoomed = signal(false);
     private chart: Chart | null = null;
 
     constructor() {
@@ -43,6 +45,7 @@ export class ScatterChart implements OnDestroy {
     }
 
     private renderChart(data: ScatterChartData, canvas: HTMLCanvasElement): void {
+        this.isZoomed.set(false);
         this.chart?.destroy();
         this.chart = new Chart(canvas, {
             type: 'scatter',
@@ -61,6 +64,23 @@ export class ScatterChart implements OnDestroy {
                                 const label = context.dataset.label || '';
                                 return `${label}: (${context.parsed.x}, ${context.parsed.y})`;
                             },
+                        },
+                    },
+                    zoom: {
+                        pan: {
+                            enabled: true,
+                            mode: 'xy',
+                            onPanComplete: () => this.isZoomed.set(true),
+                        },
+                        zoom: {
+                            wheel: { enabled: true },
+                            pinch: { enabled: true },
+                            drag: {
+                                enabled: true,
+                                modifierKey: 'shift',
+                            },
+                            mode: 'xy',
+                            onZoomComplete: () => this.isZoomed.set(true),
                         },
                     },
                 },
@@ -87,6 +107,36 @@ export class ScatterChart implements OnDestroy {
                 },
             },
         });
+    }
+
+    resetZoom(): void {
+        this.chart?.resetZoom();
+        this.isZoomed.set(false);
+    }
+
+    exportPng(): void {
+        if (!this.chart) return;
+        const link = document.createElement('a');
+        link.download = 'scatter-chart.png';
+        link.href = this.chart.toBase64Image();
+        link.click();
+    }
+
+    exportCsv(): void {
+        const data = this.chartData();
+        const rows: string[] = ['Dataset,X,Y'];
+        data.datasets.forEach(dataset => {
+            dataset.data.forEach(point => {
+                rows.push([dataset.label, point.x, point.y].join(','));
+            });
+        });
+        const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'scatter-chart.csv';
+        link.click();
+        URL.revokeObjectURL(url);
     }
 
     ngOnDestroy(): void {
