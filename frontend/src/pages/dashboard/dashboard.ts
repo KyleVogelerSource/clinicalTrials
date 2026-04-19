@@ -255,6 +255,7 @@ export class Dashboard implements OnInit {
             next: (trials) => {
                 if (trials) {
                     this.foundTrials.set(trials);
+                    this.workflowService.foundTrials.set(trials);
                 }
             },
             error: (err) => {
@@ -330,11 +331,19 @@ export class Dashboard implements OnInit {
             maxAge: null,
             sex: '',
             required: [],
-            ineligible: []
+            ineligible: [],
+
+            // User Trial Specifics
+            userPatients: values.userPatients ?? null,
+            userSites: values.userSites ?? null,
+            userInclusions: values.userInclusions ?? null,
+            userExclusions: values.userExclusions ?? null,
+            userOutcomes: values.userOutcomes ?? null,
+            userArms: values.userArms ?? null,
         });
 
-        this.workflowService.processResults();
-        this.router.navigate(['/results']);
+        this.workflowService.processResultsV2();
+        this.router.navigate(['/analysis']);
     }
 
     onDocumentClick(event: MouseEvent) {

@@ -8,5 +8,13 @@ export interface DesignModel {
     maxAge: number | null,
     sex: string,
     required: string[],
-    ineligible: string[]
+    ineligible: string[],
+    
+    // User Trial Specifics
+    userPatients: number | null,
+    userSites: number | null,
+    userInclusions: number | null,
+    userExclusions: number | null,
+    userOutcomes: number | null,
+    userArms: number | null,
 }
