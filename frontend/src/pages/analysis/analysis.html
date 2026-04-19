@@ -23,7 +23,7 @@
         <div class="info-grid">
             
             <!-- Viability Score -->
-            <div class="card card-medium">
+            <div class="card card-half">
                 <div class="card-header">
                     <h4>Protocol Viability</h4>
                     <span class="status-badge" [ngClass]="viabilityColor()">
@@ -42,7 +42,7 @@
             </div>
 
             <!-- Recruitment Velocity -->
-            <div class="card card-medium">
+            <div class="card card-half">
                 <div class="card-header">
                     <h4>Recruitment Velocity</h4>
                 </div>
@@ -95,8 +95,8 @@
                 </div>
             </div>
 
-            <!-- Heatmap - Now Full Width -->
-            <div class="card card-full" style="height: 400px;">
+            <!-- Heatmap - Full Width -->
+            <div class="card card-full card-tall">
                 <div class="card-header">
                     <h4>Global Site Distribution</h4>
                 </div>
@@ -118,8 +118,8 @@
                 </div>
             </div>
 
-            <!-- Expected Timeline - Now sharing row with plot -->
-            <div class="card card-medium">
+            <!-- Expected Timeline -->
+            <div class="card card-half card-tall">
                 <div class="card-header">
                     <h4>Expected Timeline</h4>
                 </div>
@@ -134,12 +134,12 @@
                 </div>
             </div>
 
-            <!-- Data Plot - sharing row with timeline -->
-            <div class="card card-medium">
+            <!-- Data Plot -->
+            <div class="card card-half card-tall">
                 <div class="card-header">
                     <div class="header-with-info">
                         <h4>Metric Correlation Plot</h4>
-                        <span class="info-icon" title="Shows how two metrics correlate across your selected trials. Intersecting points represent individual trials.">ⓘ</span>
+                        <span class="info-icon" title="Explore correlations between different trial metrics. High correlation (r close to 1 or -1) indicates a strong design pattern.">ⓘ</span>
                     </div>
                     <div class="plot-selectors">
                         <select [value]="dataPlotX()" (change)="dataPlotX.set($any($event.target).value)">
@@ -169,7 +169,7 @@
                 <div class="card-header">
                     <div class="header-with-info">
                         <h4>Metric Intersection Matrix (Co-occurrence %)</h4>
-                        <span class="info-icon" title="Shows the percentage of trials that exhibit both intersecting metrics. High values indicate a strong co-occurrence in study design.">ⓘ</span>
+                        <span class="info-icon" title="Shows the percentage of selected trials that share both metrics. Identifies common complexity drivers in similar studies.">ⓘ</span>
                     </div>
                 </div>
                 <div class="card-body">
@@ -202,7 +202,7 @@
                 </div>
             </div>
 
-            <!-- Comparison Table - RESTORED OLD STYLE -->
+            <!-- Comparison Table - RESTORED CHECKMARK STYLE -->
             <div class="card card-full">
                 <div class="card-header">
                     <h4>Benchmarked Trials Comparison</h4>
@@ -212,7 +212,6 @@
                             placeholder="Search trials..."
                             [value]="comparisonSearch()"
                             (input)="onComparisonSearch($event)"
-                            aria-label="Search comparison trials"
                         >
                     </div>
                 </div>
@@ -249,13 +248,14 @@
                                                 target="_blank"
                                                 class="trial-link"
                                             >{{ row.trial.briefTitle }}</a>
+                                            <div class="trial-meta-sub">{{ row.trial.nctId }}</div>
                                         </td>
                                         @for (metric of comparisonMetrics; track metric.key) {
                                             <td class="metric-cell">
                                                 @if (row.metrics[metric.key]) {
-                                                    <span class="check">&#10003;</span>
+                                                    <span class="check">✓</span>
                                                 } @else {
-                                                    <span class="cross">&#10007;</span>
+                                                    <span class="cross">✗</span>
                                                 }
                                             </td>
                                         }
