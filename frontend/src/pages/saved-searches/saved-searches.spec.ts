@@ -132,6 +132,12 @@ describe('SavedSearches', () => {
       sex: 'Female',
       required: ['Hypertension'],
       ineligible: ['Heart Failure'],
+      userPatients: null,
+      userSites: null,
+      userInclusions: null,
+      userExclusions: null,
+      userOutcomes: null,
+      userArms: null,
     });
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/designer']);
   });
@@ -169,6 +175,12 @@ describe('SavedSearches', () => {
       sex: 'All',
       required: [],
       ineligible: [],
+      userPatients: null,
+      userSites: null,
+      userInclusions: null,
+      userExclusions: null,
+      userOutcomes: null,
+      userArms: null,
     });
   });
 
@@ -204,6 +216,12 @@ describe('SavedSearches', () => {
       sex: 'Female',
       required: [],
       ineligible: [],
+      userPatients: null,
+      userSites: null,
+      userInclusions: null,
+      userExclusions: null,
+      userOutcomes: null,
+      userArms: null,
     });
   });
 
