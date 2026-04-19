@@ -215,7 +215,6 @@ export class TrialWorkflowService {
                 row.interventionCount = trial.interventionCount;
                 row.collaboratorCount = trial.collaboratorCount;
                 row.maskingIntensity = trial.maskingInfo.length;
-                row.geographicSpread = trial.geoLocations.length;
                 row.conditionCount = trial.conditionCount;
                 return row;
             });
@@ -285,16 +284,15 @@ export class TrialWorkflowService {
                 return { name: m.name, correlation: m.invert ? -correlation : correlation, key: m.key, invert: m.invert };
             });
 
-            const topDrivers = drivers.sort((a, b) => Math.abs(b.correlation) - Math.abs(a.correlation)).slice(0, 3);
+            const significantDrivers = drivers.filter(d => Math.abs(d.correlation) >= 0.05);
+            const topDrivers = significantDrivers.sort((a, b) => Math.abs(b.correlation) - Math.abs(a.correlation)).slice(0, 3);
             const recruitmentByImpact = topDrivers.map((driver) => {
-                const label = `${driver.name} [r=${Math.abs(driver.correlation).toFixed(2)}]`;
-                const values = validTrials.map((r: MetricRow) => (r as any)[driver.key] as number);
-                const median = values.sort((a: number, b: number) => a - b)[Math.floor(values.length / 2)];
-                const favoredTrials = validTrials.filter((r: MetricRow) => driver.invert ? (r as any)[driver.key] <= median : (r as any)[driver.key] >= median);
                 return { 
-                    label, 
-                    avgDays: favoredTrials.length > 0 ? Math.round(favoredTrials.reduce((acc: number, r: MetricRow) => acc + r.timelineSlippage, 0) / favoredTrials.length) : 0,
-                    participantCount: favoredTrials.length > 0 ? Math.round(favoredTrials.reduce((acc: number, r: MetricRow) => acc + r.totalEnrollment, 0) / favoredTrials.length) : 0
+                    label: driver.name,
+                    correlation: driver.correlation,
+                    impactText: driver.correlation > 0 ? 'Speeds up recruitment' : 'Slows down recruitment',
+                    avgDays: 0,
+                    participantCount: 0
                 };
             });
 

@@ -91,7 +91,6 @@ describe('Results', () => {
             collaboratorCount: 1,
             timelineSlippage: 14,
             maskingIntensity: 2,
-            geographicSpread: 1,
             conditionCount: 2,
         }];
 

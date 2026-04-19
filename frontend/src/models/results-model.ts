@@ -20,7 +20,6 @@ export const metricNames: string[] = [
     "Collaborator Count",
     "Timeline Slippage",
     "Masking Intensity",
-    "Geographic Spread",
     "Condition Count"
 ];
 
@@ -40,7 +39,6 @@ export class MetricRow {
     collaboratorCount: number = 0;
     timelineSlippage: number = 0;
     maskingIntensity: number = 0;
-    geographicSpread: number = 0;
     conditionCount: number = 0;
 
     // TODO: Should probably keep these nullable and later filter out points where x or y are null
@@ -50,7 +48,8 @@ export class MetricRow {
         "Recruitment Velocity": (r) => r.recruitmentVelocity,
         "Inclusion Strictness": (r) => r.inclusionStrictness,
         "Exclusion Strictness": (r) => r.exclusionStrictness,
-        "Site Efficiency": (r) => r.siteEfficiency,        "Outcome Density": (r) => r.outcomeDensity,
+        "Site Efficiency": (r) => r.siteEfficiency,
+        "Outcome Density": (r) => r.outcomeDensity,
         "Age Span": (r) => r.ageSpan,
         "Min Age": (r) => r.minAge,
         "Max Age": (r) => r.maxAge,
@@ -58,7 +57,6 @@ export class MetricRow {
         "Collaborator Count": (r) => r.collaboratorCount,
         "Timeline Slippage": (r) => r.timelineSlippage,
         "Masking Intensity": (r) => r.maskingIntensity,
-        "Geographic Spread": (r) => r.geographicSpread,
         "Condition Count": (r) => r.conditionCount,
     };
 }
