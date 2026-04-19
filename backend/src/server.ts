@@ -227,11 +227,21 @@ app.post("/api/clinical-trials/benchmark", async (req: Request, res: Response) =
     return;
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY ?? "";
-  if (!apiKey) {
+  const anthropicKey = process.env.ANTHROPIC_API_KEY ?? "";
+  const voyageKey = process.env.VOYAGE_API_KEY ?? "";
+
+  if (!anthropicKey) {
     res.status(500).json({
       error: "Configuration Error",
       message: "ANTHROPIC_API_KEY is not configured.",
+    });
+    return;
+  }
+
+  if (!voyageKey) {
+    res.status(500).json({
+      error: "Configuration Error",
+      message: "VOYAGE_API_KEY is not configured.",
     });
     return;
   }
@@ -242,7 +252,8 @@ app.post("/api/clinical-trials/benchmark", async (req: Request, res: Response) =
       trials,
       proposedTrial ?? null,
       topK ?? 15,
-      apiKey
+      anthropicKey,
+      voyageKey
     );
     res.status(200).json(result);
   } catch (err) {
