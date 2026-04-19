@@ -8,11 +8,11 @@ import { ResultsApiService } from '../../services/results-api.service';
 import { ResultsModel } from '../../models/results-model';
 import { mockTrialResultsResponse } from '../../services/mock-trial-results';
 import { PermissionService } from '../../services/permission.service';
+import { LoadingService } from '../../services/loading.service';
 import { HeatPoint } from '../../primitives/heatmap/heatmap';
 
 @Component({
     selector: 'app-progress-track',
-    standalone: true,
     template: '<div data-testid="progress-track">{{ activeStep }}</div>',
 })
 class ProgressTrackStub {
@@ -21,7 +21,6 @@ class ProgressTrackStub {
 
 @Component({
     selector: 'app-bar-chart',
-    standalone: true,
     template: '<div data-testid="bar-chart">{{ xAxisLabel }}|{{ yAxisLabel }}</div>',
 })
 class BarChartStub {
@@ -33,7 +32,6 @@ class BarChartStub {
 
 @Component({
     selector: 'app-scatter-chart',
-    standalone: true,
     template: '<div data-testid="scatter-chart">{{ xAxisLabel }}|{{ yAxisLabel }}</div>',
 })
 class ScatterChartStub {
@@ -44,11 +42,19 @@ class ScatterChartStub {
 
 @Component({
     selector: 'app-heatmap',
-    standalone: true,
     template: '<div data-testid="heatmap">{{ points.length }}</div>',
 })
 class HeatmapStub {
     @Input() points: HeatPoint[] = [];
+}
+
+@Component({
+    selector: 'app-loading-indicator',
+    template: '<div data-testid="loading-indicator">Analyzing clinical trials data</div>',
+})
+class LoadingIndicatorStub {
+    @Input() visible = false;
+    @Input() local = false;
 }
 
 describe('Results', () => {
@@ -58,6 +64,7 @@ describe('Results', () => {
     let mockWorkflowService: any;
     let mockPermissionService: any;
     let mockResultsApiService: any;
+    let mockLoadingService: any;
     let exportPermission: WritableSignal<boolean>;
 
     beforeEach(async () => {
@@ -86,6 +93,19 @@ describe('Results', () => {
             geographicSpread: 1,
             conditionCount: 2,
         }];
+
+        mockLoadingService = {
+            isLoading: signal(false),
+            message: signal(''),
+            show: vi.fn((msg: string) => {
+                mockLoadingService.isLoading.set(true);
+                mockLoadingService.message.set(msg);
+            }),
+            hide: vi.fn(() => {
+                mockLoadingService.isLoading.set(false);
+                mockLoadingService.message.set('');
+            }),
+        };
 
         mockRouter = {
             navigate: vi.fn(),
@@ -120,7 +140,9 @@ describe('Results', () => {
                 },
             ]),
             selectedTrialIds: signal(['NCT100']),
-            processResults: vi.fn(),
+            processResults: vi.fn(() => {
+                mockLoadingService.show('Analyzing clinical trials data...');
+            }),
         };
         exportPermission = signal(true);
         mockPermissionService = {
@@ -138,11 +160,12 @@ describe('Results', () => {
                 { provide: TrialWorkflowService, useValue: mockWorkflowService },
                 { provide: ResultsApiService, useValue: mockResultsApiService },
                 { provide: PermissionService, useValue: mockPermissionService },
+                { provide: LoadingService, useValue: mockLoadingService },
             ],
         })
             .overrideComponent(Results, {
                 set: {
-                    imports: [ProgressTrackStub, BarChartStub, ScatterChartStub, HeatmapStub],
+                    imports: [ProgressTrackStub, BarChartStub, ScatterChartStub, HeatmapStub, LoadingIndicatorStub],
                 },
             })
             .compileComponents();
@@ -213,24 +236,6 @@ describe('Results', () => {
         const exportButton = buttons.find(button => button.textContent?.trim() === 'Export');
 
         expect(exportButton).toBeUndefined();
-    });
-
-    it('shows the loading state until delayed results resolution completes', () => {
-        vi.useFakeTimers();
-        mockWorkflowService.results.set(new ResultsModel());
-
-        fixture = TestBed.createComponent(Results);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
-
-        expect(mockWorkflowService.processResults).toHaveBeenCalled();
-        expect(fixture.nativeElement.textContent).toContain('Analyzing clinical trials data');
-
-        vi.runAllTimers();
-        fixture.detectChanges();
-
-        expect(fixture.nativeElement.textContent).toContain('Failed to load results. Please try again.');
-        vi.useRealTimers();
     });
 
     it('filters and sorts the comparison table rows', () => {

@@ -35,6 +35,8 @@
 
 <router-outlet />
 
+<app-loading-indicator />
+
 @if (debugEnabled()) {
   <div class="debug-bar" role="status" aria-live="polite">
     @if (debugError()) {
