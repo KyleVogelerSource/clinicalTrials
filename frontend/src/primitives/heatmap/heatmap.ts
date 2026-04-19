@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, input, effect, viewChild, ElementRef, OnDestroy, PLATFORM_ID, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-// @ts-ignore — no type declarations for leaflet-image
+// @ts-expect-error — no type declarations for leaflet-image
 import leafletImage from 'leaflet-image';
 import * as L from 'leaflet';
 import 'leaflet.heat';
