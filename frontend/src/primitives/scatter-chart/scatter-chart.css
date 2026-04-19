@@ -32,3 +32,25 @@
 .export-btn:hover {
     opacity: 1;
 }
+
+.reset-btn {
+    background: #193F6A;
+    color: #fff;
+    border-color: #193F6A;
+    opacity: 0.9;
+}
+
+.reset-btn:hover {
+    opacity: 1;
+}
+
+.chart-zoom-hint {
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: #aaa;
+    pointer-events: none;
+    white-space: nowrap;
+}
