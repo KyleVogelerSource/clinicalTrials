@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { Home } from '../pages/home/home';
+import { Dashboard } from '../pages/dashboard/dashboard';
 import { Designer } from '../pages/designer/designer';
 import { Selection } from '../pages/selection/selection';
 import { authGuard } from './auth.guard';
@@ -7,6 +8,10 @@ import { authGuard } from './auth.guard';
 export const routes: Routes = [
     {
         path: '',
+        component: Dashboard
+    },
+    {
+        path: 'home',
         component: Home
     },
     {

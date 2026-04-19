@@ -52,7 +52,7 @@ describe('Designer', () => {
             getDefaultSex: vi.fn().mockReturnValue('All')
         };
         mockWorkflowService = {
-            inputParams: vi.fn().mockReturnValue(null),
+            inputParams: signal(null),
             setInputs: vi.fn(),
             setImportNotice: vi.fn(),
             searchTrials: vi.fn(),
@@ -187,7 +187,7 @@ describe('Designer', () => {
     });
 
     it('restores all saved designer values from workflow state', () => {
-        mockWorkflowService.inputParams.mockReturnValue({
+        mockWorkflowService.inputParams.set({
             condition: 'Diabetes',
             phase: 'Phase 3',
             allocationType: 'Randomized',
