@@ -108,6 +108,19 @@ Each chart primitive has built-in export buttons (top-right corner):
 - **ScatterChart** (`primitives/scatter-chart/`) — PNG via `chart.toBase64Image()`, CSV with columns `Dataset,X,Y`
 - **Heatmap** (`primitives/heatmap/`) — PNG via `leaflet-image` library; button shows `Exporting…` while rasterizing; `leaflet-image` is allowlisted in `angular.json` under `allowedCommonJsDependencies`
 
+### Scatter chart zoom
+`ScatterChart` uses `chartjs-plugin-zoom` (+ `hammerjs` for touch) for interactive zooming:
+
+| Interaction | Behavior |
+|---|---|
+| Scroll wheel | Zoom in/out centered on cursor |
+| Pinch (touch) | Zoom in/out |
+| Shift + drag | Box-select zoom into a region |
+| Click + drag | Pan while zoomed |
+| Reset button | Returns to full view (only shown when zoomed/panned) |
+
+`hammerjs` is allowlisted in `angular.json` under `allowedCommonJsDependencies`. `isZoomed` signal drives the Reset button visibility.
+
 ### Debug mode
 Add `?debug=true` to the URL to show a debug bar polling `/api/debug/status` every 10s.
 
@@ -134,4 +147,4 @@ DB credentials (local): host `localhost`, db/user/password all `clinicaltrials`.
 
 ## Repository
 **GitHub:** https://github.com/KyleVogelerSource/clinicalTrials
-**Active branch:** `FE-Graph-Export-(Bar,-Scatter,-heat-map)`
+**Active branch:** `FE-Scatter-Plot-Zoom`
