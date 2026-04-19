@@ -1,8 +1,8 @@
 import { Component, ChangeDetectionStrategy, input, effect, viewChild, ElementRef, OnDestroy, signal } from '@angular/core';
-import { Chart, ScatterController, PointElement, LinearScale, Tooltip, Legend, Title } from 'chart.js';
+import { Chart, ScatterController, LineController, LineElement, PointElement, LinearScale, Tooltip, Legend, Title } from 'chart.js';
 import zoomPlugin from 'chartjs-plugin-zoom';
 
-Chart.register(ScatterController, PointElement, LinearScale, Tooltip, Legend, Title, zoomPlugin);
+Chart.register(ScatterController, LineController, LineElement, PointElement, LinearScale, Tooltip, Legend, Title, zoomPlugin);
 
 export interface ScatterChartDataset {
     label: string;
@@ -29,6 +29,8 @@ export class ScatterChart implements OnDestroy {
     xAxisLabel = input<string>('');
     yAxisLabel = input<string>('');
     showLegend = input<boolean>(true);
+    type = input<'scatter' | 'line'>('scatter');
+    enableZoom = input<boolean>(true);
 
     canvasRef = viewChild<ElementRef<HTMLCanvasElement>>('chartCanvas');
 
@@ -48,11 +50,19 @@ export class ScatterChart implements OnDestroy {
         this.isZoomed.set(false);
         this.chart?.destroy();
         this.chart = new Chart(canvas, {
-            type: 'scatter',
+            type: this.type(),
             data,
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                elements: {
+                    line: {
+                        tension: 0.4
+                    },
+                    point: {
+                        radius: this.type() === 'line' ? 0 : 3
+                    }
+                },
                 plugins: {
                     legend: {
                         display: this.showLegend() && data.datasets.length > 0,
@@ -68,15 +78,19 @@ export class ScatterChart implements OnDestroy {
                     },
                     zoom: {
                         pan: {
-                            enabled: true,
+                            enabled: this.enableZoom(),
                             mode: 'xy',
+                            modifierKey: 'ctrl',
                             onPanComplete: () => this.isZoomed.set(true),
                         },
                         zoom: {
-                            wheel: { enabled: true },
-                            pinch: { enabled: true },
+                            wheel: { 
+                                enabled: this.enableZoom(),
+                                modifierKey: 'ctrl'
+                            },
+                            pinch: { enabled: this.enableZoom() },
                             drag: {
-                                enabled: true,
+                                enabled: this.enableZoom(),
                                 modifierKey: 'shift',
                             },
                             mode: 'xy',
@@ -110,7 +124,7 @@ export class ScatterChart implements OnDestroy {
     }
 
     resetZoom(): void {
-        this.chart?.resetZoom();
+        (this.chart as any)?.resetZoom();
         this.isZoomed.set(false);
     }
 

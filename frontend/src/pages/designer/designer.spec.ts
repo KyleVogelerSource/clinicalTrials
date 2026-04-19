@@ -331,6 +331,12 @@ describe('Designer', () => {
             sex: 'Female',
             required: ['Hypertension'],
             ineligible: ['Heart Failure'],
+            userPatients: null,
+            userSites: null,
+            userInclusions: null,
+            userExclusions: null,
+            userOutcomes: null,
+            userArms: null,
         });
         expect(mockWorkflowService.searchTrials).toHaveBeenCalled();
         expect(mockRouter.navigate).toHaveBeenCalledWith(['/selection']);

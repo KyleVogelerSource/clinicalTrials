@@ -25,6 +25,12 @@ describe('TrialWorkflowService', () => {
     sex: 'All',
     required: ['Obesity'],
     ineligible: ['Pregnancy'],
+    userPatients: null,
+    userSites: null,
+    userInclusions: null,
+    userExclusions: null,
+    userOutcomes: null,
+    userArms: null,
   };
 
   const study = {
@@ -51,6 +57,7 @@ describe('TrialWorkflowService', () => {
         collaborators: [{ name: 'Partner A' }, { name: 'Partner B' }],
       },
       statusModule: {
+        overallStatus: 'Completed',
         startDateStruct: { date: '2024-01-01' },
         completionDateStruct: { date: '2024-04-10' },
         primaryCompletionDateStruct: { date: '2024-04-10' },

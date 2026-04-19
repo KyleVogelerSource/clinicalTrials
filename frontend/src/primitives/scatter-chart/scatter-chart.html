@@ -7,4 +7,7 @@
         <button class="export-btn" (click)="exportCsv()">CSV</button>
     </div>
     <canvas #chartCanvas></canvas>
+    @if (enableZoom()) {
+        <div class="chart-zoom-hint">Ctrl + Scroll to zoom, Ctrl + Drag to pan</div>
+    }
 </div>

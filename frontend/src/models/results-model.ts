@@ -30,6 +30,7 @@ export class MetricRow {
     siteCount: number = 0;
     recruitmentVelocity: number = 0;
     inclusionStrictness: number = 0; // aka Eligibility criteria count
+    exclusionStrictness: number = 0;
     siteEfficiency: number = 0;
     outcomeDensity: number = 0;
     ageSpan: number = 0;
@@ -47,9 +48,9 @@ export class MetricRow {
         "Total Enrollment": (r) => r.totalEnrollment,
         "Site Count": (r) => r.siteCount,
         "Recruitment Velocity": (r) => r.recruitmentVelocity,
-        "Inclusion Strictnes": (r) => r.inclusionStrictness,
-        "Site Efficiency": (r) => r.siteEfficiency,
-        "Outcome Density": (r) => r.outcomeDensity,
+        "Inclusion Strictness": (r) => r.inclusionStrictness,
+        "Exclusion Strictness": (r) => r.exclusionStrictness,
+        "Site Efficiency": (r) => r.siteEfficiency,        "Outcome Density": (r) => r.outcomeDensity,
         "Age Span": (r) => r.ageSpan,
         "Min Age": (r) => r.minAge,
         "Max Age": (r) => r.maxAge,
