@@ -8,11 +8,55 @@ import { ScatterChart, ScatterChartData } from "../../primitives/scatter-chart/s
 import { Heatmap } from "../../primitives/heatmap/heatmap";
 import { LoadingIndicator } from "../../primitives/loading-indicator/loading-indicator";
 import { metricNames, MetricRow } from "../../models/results-model";
+import { StudyTrial } from "../../models/study-trial";
 
 interface IntersectionRow {
     name: string;
     values: number[];
 }
+
+interface ComparisonMetric {
+    key: string;
+    label: string;
+    fn: (trial: StudyTrial, phase: string) => boolean;
+}
+
+interface ComparisonRow {
+    trial: StudyTrial;
+    metrics: Record<string, boolean>;
+}
+
+const COMPARISON_METRICS: ComparisonMetric[] = [
+    {
+        key: 'phaseMatch',
+        label: 'Phase Match',
+        fn: (t, phase) => {
+            if (!phase) return false;
+            const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+            return normalize(t.phase) === normalize(phase);
+        }
+    },
+    {
+        key: 'highEnrollment',
+        label: 'High Enrollment',
+        fn: (t) => t.enrollmentCount >= 200,
+    },
+    {
+        key: 'hasStartDate',
+        label: 'Has Start Date',
+        fn: (t) => !!t.startDate,
+    },
+    {
+        key: 'hasEndDate',
+        label: 'Completion Date',
+        fn: (t) => !!t.completionDate,
+    },
+    {
+        key: 'hasDescription',
+        label: 'Has Description',
+        fn: (t) => t.description.trim().length > 0,
+    },
+];
 
 @Component({
     selector: "app-analysis",
@@ -25,7 +69,6 @@ interface IntersectionRow {
         ScatterChart,
         Heatmap,
         LoadingIndicator,
-        DecimalPipe,
         DatePipe
     ],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -130,8 +173,11 @@ export class Analysis implements OnInit {
             "Site Count",
             "Recruitment Velocity",
             "Inclusion Strictness",
+            "Exclusion Strictness",
             "Outcome Density",
-            "Age Span"
+            "Age Span",
+            "Intervention Count",
+            "Condition Count"
         ];
 
         return selectedMetrics.map(rowMetric => {
@@ -158,15 +204,12 @@ export class Analysis implements OnInit {
         "Site Count",
         "Recruitment Velocity",
         "Inclusion Strictness",
+        "Exclusion Strictness",
         "Outcome Density",
-        "Age Span"
+        "Age Span",
+        "Intervention Count",
+        "Condition Count"
     ];
-
-    comparisonRows = computed(() => {
-        const trials = this.workflowService.foundTrials();
-        const selectedIds = new Set(this.workflowService.selectedTrialIds());
-        return trials.filter(t => selectedIds.has(t.nctId));
-    });
 
     topSites = computed(() => {
         const trials = this.selectedTrialIds().map(id => (this.workflowService as any).trialCache.get(id));
@@ -249,6 +292,44 @@ export class Analysis implements OnInit {
         });
     });
 
+    // Comparison table logic
+    readonly comparisonMetrics = COMPARISON_METRICS;
+    comparisonSearch = signal('');
+    comparisonSortKey = signal('');
+    comparisonSortAsc = signal(true);
+
+    comparisonRows = computed<ComparisonRow[]>(() => {
+        const search = this.comparisonSearch().toLowerCase();
+        const phase = this.workflowService.inputParams()?.phase ?? '';
+        const sortKey = this.comparisonSortKey();
+        const sortAsc = this.comparisonSortAsc();
+        
+        const selectedIds = new Set(this.workflowService.selectedTrialIds());
+        const allTrials = this.workflowService.foundTrials();
+        const trials = allTrials.filter(t => selectedIds.has(t.nctId));
+
+        let rows: ComparisonRow[] = trials.map(trial => ({
+            trial,
+            metrics: Object.fromEntries(
+                COMPARISON_METRICS.map(m => [m.key, m.fn(trial, phase)])
+            ),
+        }));
+
+        if (search) {
+            rows = rows.filter(r => r.trial.briefTitle.toLowerCase().includes(search));
+        }
+
+        if (sortKey) {
+            rows = [...rows].sort((a, b) => {
+                const av = a.metrics[sortKey] ? 1 : 0;
+                const bv = b.metrics[sortKey] ? 1 : 0;
+                return sortAsc ? bv - av : av - bv;
+            });
+        }
+
+        return rows;
+    });
+
     ngOnInit(): void {
         if (this.workflowService.selectedTrialIds().length === 0) {
             this.router.navigate(['/']);
@@ -272,5 +353,18 @@ export class Analysis implements OnInit {
         a.download = `feasibility-report-${new Date().getTime()}.json`;
         a.click();
         URL.revokeObjectURL(url);
+    }
+
+    onComparisonSearch(event: Event) {
+        this.comparisonSearch.set((event.target as HTMLInputElement).value);
+    }
+
+    onComparisonSort(key: string) {
+        if (this.comparisonSortKey() === key) {
+            this.comparisonSortAsc.update(v => !v);
+        } else {
+            this.comparisonSortKey.set(key);
+            this.comparisonSortAsc.set(true);
+        }
     }
 }

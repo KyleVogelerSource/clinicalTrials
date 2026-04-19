@@ -30,6 +30,7 @@ export class ScatterChart implements OnDestroy {
     yAxisLabel = input<string>('');
     showLegend = input<boolean>(true);
     type = input<'scatter' | 'line'>('scatter');
+    enableZoom = input<boolean>(true);
 
     canvasRef = viewChild<ElementRef<HTMLCanvasElement>>('chartCanvas');
 
@@ -77,15 +78,19 @@ export class ScatterChart implements OnDestroy {
                     },
                     zoom: {
                         pan: {
-                            enabled: true,
+                            enabled: this.enableZoom(),
                             mode: 'xy',
+                            modifierKey: 'ctrl',
                             onPanComplete: () => this.isZoomed.set(true),
                         },
                         zoom: {
-                            wheel: { enabled: true },
-                            pinch: { enabled: true },
+                            wheel: { 
+                                enabled: this.enableZoom(),
+                                modifierKey: 'ctrl'
+                            },
+                            pinch: { enabled: this.enableZoom() },
                             drag: {
-                                enabled: true,
+                                enabled: this.enableZoom(),
                                 modifierKey: 'shift',
                             },
                             mode: 'xy',

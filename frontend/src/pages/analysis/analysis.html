@@ -3,13 +3,13 @@
     <!-- Analysis Heading -->
     <div class="heading">
         <div class="heading-left">
-            <button class="btn-link" (click)="onBack()">← Back to Design</button>
+            <button class="btn btn-prominent" (click)="onBack()">← Back to Design</button>
             <h2>Feasibility Report: {{ inputParams()?.condition || 'Selected Trials' }}</h2>
             <p class="meta-info">Generated on {{ data()?.timestamp | date:'medium' }} • {{ inputParams()?.phase || 'Any Phase' }}</p>
         </div>
         <div class="heading-right">
-            <button class="btn btn-thin" (click)="onPrint()">Print</button>
-            <button class="btn btn-primary" (click)="onExport()">Export JSON</button>
+            <button class="btn btn-prominent" (click)="onPrint()">Print</button>
+            <button class="btn btn-primary btn-prominent" (click)="onExport()">Export JSON</button>
         </div>
     </div>
 
@@ -23,7 +23,7 @@
         <div class="info-grid">
             
             <!-- Viability Score -->
-            <div class="card card-small">
+            <div class="card card-medium">
                 <div class="card-header">
                     <h4>Protocol Viability</h4>
                     <span class="status-badge" [ngClass]="viabilityColor()">
@@ -42,7 +42,7 @@
             </div>
 
             <!-- Recruitment Velocity -->
-            <div class="card card-small">
+            <div class="card card-medium">
                 <div class="card-header">
                     <h4>Recruitment Velocity</h4>
                 </div>
@@ -52,11 +52,17 @@
                         {{ data()?.avgRecruitmentDays }}<span class="unit"> days</span>
                     </div>
                     
-                    @if (recruitmentChartData(); as chartData) {
-                        <div class="mini-chart-container">
-                            <app-bar-chart [chartData]="chartData" xAxisLabel="Drivers" yAxisLabel="Days" [grouped]="true" />
-                        </div>
-                    }
+                    <div class="drivers-list">
+                        <h5>Top Recruitment Drivers</h5>
+                        <ul>
+                            @for (driver of data()?.recruitmentByImpact; track $index) {
+                                <li>
+                                    <span class="driver-label">{{ driver.label }}</span>
+                                    <span class="driver-impact">{{ driver.avgDays }} days avg</span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
                 </div>
             </div>
 
@@ -76,9 +82,9 @@
                                     </span>
                                 </div>
                                 <div class="benchmark-chart">
-                                    <app-scatter-chart [chartData]="b.chartData" [showLegend]="false" type="line" />
+                                    <app-scatter-chart [chartData]="b.chartData" [showLegend]="false" type="line" [enableZoom]="false" />
                                     <!-- User position marker -->
-                                    <div class="user-line" [style.left.%]="50 + (b.zScore * 15)"></div>
+                                    <div class="user-line" [style.left.%]="50 + (b.zScore * 15)" [attr.data-val]="b.userVal"></div>
                                 </div>
                                 <div class="benchmark-stats">
                                     Avg: {{ b.mean }} | σ: {{ b.stdDev }}
@@ -89,24 +95,8 @@
                 </div>
             </div>
 
-            <!-- Expected Timeline -->
-            <div class="card card-large">
-                <div class="card-header">
-                    <h4>Expected Timeline</h4>
-                </div>
-                <div class="card-body">
-                    @if (timelineChartData(); as chartData) {
-                        <div class="chart-container">
-                            <app-bar-chart [chartData]="chartData" xAxisLabel="Patient Cohorts" yAxisLabel="Timeline (Days)" [grouped]="true" />
-                        </div>
-                    } @else {
-                        <p class="no-data">Insufficient data to generate timeline projections.</p>
-                    }
-                </div>
-            </div>
-
-            <!-- Heatmap -->
-            <div class="card card-medium">
+            <!-- Heatmap - Now Full Width -->
+            <div class="card card-full" style="height: 400px;">
                 <div class="card-header">
                     <h4>Global Site Distribution</h4>
                 </div>
@@ -128,10 +118,29 @@
                 </div>
             </div>
 
-            <!-- Data Plot -->
+            <!-- Expected Timeline - Now sharing row with plot -->
             <div class="card card-medium">
                 <div class="card-header">
-                    <h4>Metric Correlation Plot</h4>
+                    <h4>Expected Timeline</h4>
+                </div>
+                <div class="card-body">
+                    @if (timelineChartData(); as chartData) {
+                        <div class="chart-container">
+                            <app-bar-chart [chartData]="chartData" xAxisLabel="Patient Cohorts" yAxisLabel="Timeline (Days)" [grouped]="true" />
+                        </div>
+                    } @else {
+                        <p class="no-data">Insufficient data to generate timeline projections.</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Data Plot - sharing row with timeline -->
+            <div class="card card-medium">
+                <div class="card-header">
+                    <div class="header-with-info">
+                        <h4>Metric Correlation Plot</h4>
+                        <span class="info-icon" title="Shows how two metrics correlate across your selected trials. Intersecting points represent individual trials.">ⓘ</span>
+                    </div>
                     <div class="plot-selectors">
                         <select [value]="dataPlotX()" (change)="dataPlotX.set($any($event.target).value)">
                             @for (name of metricNamesList; track $index) {
@@ -158,7 +167,10 @@
             <!-- Metric Intersection Matrix -->
             <div class="card card-full">
                 <div class="card-header">
-                    <h4>Metric Intersection Matrix (Co-occurrence %)</h4>
+                    <div class="header-with-info">
+                        <h4>Metric Intersection Matrix (Co-occurrence %)</h4>
+                        <span class="info-icon" title="Shows the percentage of trials that exhibit both intersecting metrics. High values indicate a strong co-occurrence in study design.">ⓘ</span>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="matrix-wrapper">
@@ -190,34 +202,68 @@
                 </div>
             </div>
 
-            <!-- Comparison Table -->
+            <!-- Comparison Table - RESTORED OLD STYLE -->
             <div class="card card-full">
                 <div class="card-header">
                     <h4>Benchmarked Trials Comparison</h4>
+                    <div class="comparison-search">
+                        <input
+                            type="text"
+                            placeholder="Search trials..."
+                            [value]="comparisonSearch()"
+                            (input)="onComparisonSearch($event)"
+                            aria-label="Search comparison trials"
+                        >
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="table-wrapper">
                         <table class="comparison-table">
                             <thead>
                                 <tr>
-                                    <th>Trial ID</th>
-                                    <th>Title</th>
-                                    <th>Phase</th>
-                                    <th>Enrollment</th>
-                                    <th>Status</th>
+                                    <th class="trial-col">Trial</th>
+                                    @for (metric of comparisonMetrics; track metric.key) {
+                                        <th
+                                            class="metric-col"
+                                            (click)="onComparisonSort(metric.key)"
+                                            [class.sorted]="comparisonSortKey() === metric.key"
+                                        >
+                                            {{ metric.label }}
+                                            <span class="sort-icon">
+                                                @if (comparisonSortKey() === metric.key) {
+                                                    {{ comparisonSortAsc() ? '▲' : '▼' }}
+                                                } @else {
+                                                    ▽
+                                                }
+                                            </span>
+                                        </th>
+                                    }
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (trial of comparisonRows(); track trial.nctId) {
+                                @for (row of comparisonRows(); track row.trial.nctId) {
                                     <tr>
-                                        <td>{{ trial.nctId }}</td>
-                                        <td class="title-cell">{{ trial.briefTitle }}</td>
-                                        <td>{{ trial.phase }}</td>
-                                        <td>{{ trial.enrollmentCount | number }}</td>
-                                        <td>
-                                            <span class="status-badge" [class.status-completed]="trial.overallStatus === 'COMPLETED'">
-                                                {{ trial.overallStatus.split('_').join(' ') }}
-                                            </span>
+                                        <td class="trial-name-cell">
+                                            <a
+                                                [href]="'https://clinicaltrials.gov/study/' + row.trial.nctId"
+                                                target="_blank"
+                                                class="trial-link"
+                                            >{{ row.trial.briefTitle }}</a>
+                                        </td>
+                                        @for (metric of comparisonMetrics; track metric.key) {
+                                            <td class="metric-cell">
+                                                @if (row.metrics[metric.key]) {
+                                                    <span class="check">&#10003;</span>
+                                                } @else {
+                                                    <span class="cross">&#10007;</span>
+                                                }
+                                            </td>
+                                        }
+                                    </tr>
+                                } @empty {
+                                    <tr>
+                                        <td [attr.colspan]="comparisonMetrics.length + 1" class="no-results">
+                                            No trials match your search.
                                         </td>
                                     </tr>
                                 }
