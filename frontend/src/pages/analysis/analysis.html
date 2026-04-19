@@ -1,0 +1,95 @@
+<div class="container">
+
+    <!-- Analysis Heading -->
+    <div class="heading"> <!-- layout note - page header, perhaps gives the user a chance to name this. Allows the user to export it or print it -->
+    </div>
+
+    <!-- Analysis Results -->
+    <div class="info-container"> <!-- layout note - this section contains all the cars for the analysis results -->
+        
+        <!-- Viabliity Score -->
+        <div class="card">
+            <h4>Viability</h4>
+            <div class="viability-score"> <!-- layout note - would like colorized indication to go along with the score to signify user did good (90 is probably pretty hard to get, don't know the logic yet) -->
+                84<span class="viability-score-denominator">/100</span>
+            </div>
+            <div class="viability-summary">
+                <h5>Summary</h5>
+                <p></p>
+            </div>
+        </div>
+
+        <!-- Recruitment Velocity -->
+        <div class="card">
+            <h4>Recruitment Velocity</h4>
+            <p>Average Days per participant</p>
+            <div class="recruitment-velocity">
+                1.8<span class=""> days</span>
+            </div>
+            <ul></ul> <!-- layout note - any "significant" correlation metrics here (not sure what would be significant highst I saw was r ~= 0.10, so maybe highest ones?) -->
+        </div>
+
+        <!-- Expected Timeline -->
+        <div class="card"> <!-- layout note - since this is a graph of expected vs actual, it's probably a bigger card than those first two -->
+            <h4>Expected Timeline</h4>
+            
+        </div>
+
+        <!-- Benchmark Histograms -->
+        <div class="card"> <!-- layout note - a set of graphical benchmarks. Was unsure if I should put them in one card or each have their own. -->
+            <h4>Benchmarks</h4>
+            <!-- layout note - here we would ist out each of the benchmark measurments we are doing.
+                               Each has the following:
+                                * A label for what is being measured
+                                * A graph that displays:
+                                ** a histogram curve of all the trails being compared
+                                ** a histogram curve of only the completed trials
+                                ** a line and its integer value showing where the user's trial data falls
+                                * The stanard deviations for the user's value 
+                               Include a key to label what each color means.
+                               
+                               The benchmarks being measured I know of are:
+                                * number of patients
+                                * number of inclusion criterias
+                                * number of exclusion criterias
+                                * number of outcomes being measured
+                                * number of sites bing used
+                                * (and then there is one more that starts with "Co" but it's cut off from my material so unless you can find something that makes sense just leave it for now.) 
+
+                                Perhaps there shuld also be some sort of visual indicator to show if the value the user's input is at is good or bad.
+                                Maybe via changing the background color of the card or something, I'm not sure. Thought he user can probably tell just by looking at where the line is anyway.
+                                -->
+        </div>
+
+        <!-- Heatmap -->
+        <div class="card"> <!-- layout note - another graph and another larger card. -->
+            <h4>Site Locations</h4>
+            <!-- insert heatmap here -->
+            <ul></ul> <!-- layout note - we should also include a list of the top repeated sites to the side -->
+        </div>
+
+        <!-- Data Plot -->
+        <div class="card"> <!-- layout note - another large one -->
+            <h4>Data Plot</h4>
+            <!-- layout note - We need to explain what each metric we're choosing against the axis is, they aren't obvious by naem.
+                               Also, feedback that came back was how to know which ones to look at.
+                               Maybe if we find a correlation between some of these we can suggest it? Not sure how we should handle it.
+                               If we do calculate the correlations ahead of time, maybe we list the most significant correlations in a list that the user can click to show that plot.-->
+        </div>
+
+        <!-- Meic intersection matrix -->
+        <div class="card">
+            <h4>Metric Intersection Matrix</h4>
+            <!-- layout note - this is a grid, like a multiplication table. It should list metrics that show up together what percentage of the time.
+                            And the column x and row x should be the same metric. 
+                            This is new to the application by the way. -->
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="card">
+            <h4>Comparison Table</h4> <!-- layout note - maybe there's a better name for this? -->
+            <!-- layout note - same comparison table we were using before -->
+        </div>
+    </div>
+
+</div>

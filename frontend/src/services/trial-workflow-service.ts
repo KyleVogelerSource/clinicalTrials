@@ -367,27 +367,27 @@ export class TrialWorkflowService {
         });
 
         const request = this.createResultsRequest();
-        if (request) {
-            this.apiService.getResults(request).pipe(
-                finalize(() => this.loadingService.hide())
-            ).subscribe({
-                next: (aiResults) => {
-                    this.results.update(current => {
-                        current.trialResults = aiResults;
-                        return { ...current };
-                    });
-                },
-                error: (err) => {
-                    console.error("AI Results failed", err);
-                    this.results.update(current => {
-                        current.trialResults!.overallSummary = "Failed to load detailed AI analysis.";
-                        return { ...current };
-                    });
-                }
-            });
-        } else {
+        // if (request) {
+        //     this.apiService.getResults(request).pipe(
+        //         finalize(() => this.loadingService.hide())
+        //     ).subscribe({
+        //         next: (aiResults) => {
+        //             this.results.update(current => {
+        //                 current.trialResults = aiResults;
+        //                 return { ...current };
+        //             });
+        //         },
+        //         error: (err) => {
+        //             console.error("AI Results failed", err);
+        //             this.results.update(current => {
+        //                 current.trialResults!.overallSummary = "Failed to load detailed AI analysis.";
+        //                 return { ...current };
+        //             });
+        //         }
+        //     });
+        // } else {
             this.loadingService.hide();
-        }
+        //}
     }
 
     createResultsRequest() : TrialResultsRequest | undefined {
