@@ -240,7 +240,8 @@ export class Analysis implements OnInit {
                             backgroundColor: 'rgba(25, 63, 106, 0.1)',
                             pointRadius: 0,
                             showLine: points.length > 0,
-                            tension: 0.4
+                            tension: 0.4,
+                            fill: true
                         }
                     ]
                 }
