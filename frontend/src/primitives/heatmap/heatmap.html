@@ -1,7 +1,7 @@
 <div class="map-wrapper" role="application" aria-label="Geographical heatmap showing clinical trial distribution">
     <div class="map-export-toolbar">
-        <button class="export-btn" (click)="exportPng()" [disabled]="exporting()" title="Export as PNG">
-            {{ exporting() ? 'Exporting…' : 'PNG' }}
+        <button class="export-btn" (click)="exportPng()" [disabled]="exporting()">
+            @if (exporting()) { Exporting… } @else { PNG }
         </button>
     </div>
     <div #mapContainer class="map-container"></div>
