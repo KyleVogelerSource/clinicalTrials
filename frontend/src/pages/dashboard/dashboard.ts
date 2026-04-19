@@ -256,6 +256,10 @@ export class Dashboard implements OnInit {
                 if (trials) {
                     this.foundTrials.set(trials);
                     this.workflowService.foundTrials.set(trials);
+                    
+                    // Auto-select all results
+                    const allIds = trials.map(t => t.nctId);
+                    this.selectedTrialIds.set(allIds);
                 }
             },
             error: (err) => {
