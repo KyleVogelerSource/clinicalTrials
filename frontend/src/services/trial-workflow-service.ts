@@ -326,6 +326,13 @@ export class TrialWorkflowService {
             ).subscribe({
                 next: (aiResults) => {
                     this.results.update(current => {
+                        // Preserve locally calculated data
+                        if (current.trialResults) {
+                            aiResults.timelineBuckets = current.trialResults.timelineBuckets;
+                            aiResults.recruitmentByImpact = current.trialResults.recruitmentByImpact;
+                            aiResults.avgRecruitmentDays = current.trialResults.avgRecruitmentDays;
+                            aiResults.participantTarget = current.trialResults.participantTarget;
+                        }
                         current.trialResults = aiResults;
                         return { ...current };
                     });
