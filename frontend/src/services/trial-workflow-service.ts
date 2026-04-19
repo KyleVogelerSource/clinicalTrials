@@ -1,6 +1,7 @@
 import { Injectable, signal, inject } from "@angular/core";
-import { Observable, map, tap } from "rxjs";
+import { Observable, map, tap, finalize } from "rxjs";
 import { TrialResultsRequest } from "@shared/dto/TrialResultsRequest";
+import { TrialResultsResponse } from "@shared/dto/TrialResultsResponse";
 import { ClinicalTrialSearchRequest } from "@shared/dto/ClinicalTrialSearchRequest";
 import { ClinicalStudyService } from "./clinical-study.service";
 import { ResultsApiService } from "./results-api.service";
@@ -347,10 +348,11 @@ export class TrialWorkflowService {
             const totalEnrollment = validTrials.reduce((acc, r) => acc + r.totalEnrollment, 0);
             const participantTarget = validTrials.length > 0 ? Math.round(totalEnrollment / validTrials.length) : 0;
 
+            // Initialize trialResults locally as a fallback or placeholder
             current.trialResults = {
                 timestamp: new Date(),
-                overallScore: 75, // Simplified static score
-                overallSummary: 'Calculated from selected trial metrics.',
+                overallScore: 0,
+                overallSummary: 'Calculating...',
                 totalTrialsFound: trials.length,
                 queryCondition: this.inputParams()?.condition ?? 'Selected Trials',
                 avgRecruitmentDays,
@@ -364,7 +366,28 @@ export class TrialWorkflowService {
             return current;
         });
 
-        this.loadingService.hide();
+        const request = this.createResultsRequest();
+        if (request) {
+            this.apiService.getResults(request).pipe(
+                finalize(() => this.loadingService.hide())
+            ).subscribe({
+                next: (aiResults) => {
+                    this.results.update(current => {
+                        current.trialResults = aiResults;
+                        return { ...current };
+                    });
+                },
+                error: (err) => {
+                    console.error("AI Results failed", err);
+                    this.results.update(current => {
+                        current.trialResults!.overallSummary = "Failed to load detailed AI analysis.";
+                        return { ...current };
+                    });
+                }
+            });
+        } else {
+            this.loadingService.hide();
+        }
     }
 
     createResultsRequest() : TrialResultsRequest | undefined {
