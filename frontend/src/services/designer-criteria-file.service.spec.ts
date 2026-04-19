@@ -30,6 +30,12 @@ describe('designer-criteria-file.service', () => {
       sex: 'Female',
       required: ['Hypertension'],
       ineligible: ['Heart Failure'],
+      userPatients: null,
+      userSites: null,
+      userInclusions: null,
+      userExclusions: null,
+      userOutcomes: null,
+      userArms: null,
     }));
 
     expect(json.format).toBe('clinicaltrials-designer-criteria');
@@ -57,6 +63,12 @@ describe('designer-criteria-file.service', () => {
       sex: 'Female',
       required: [],
       ineligible: [],
+      userPatients: null,
+      userSites: null,
+      userInclusions: null,
+      userExclusions: null,
+      userOutcomes: null,
+      userArms: null,
     });
   });
 
@@ -77,6 +89,12 @@ describe('designer-criteria-file.service', () => {
       sex: 'All',
       required: [],
       ineligible: [],
+      userPatients: null,
+      userSites: null,
+      userInclusions: null,
+      userExclusions: null,
+      userOutcomes: null,
+      userArms: null,
     });
   });
 });
