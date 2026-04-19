@@ -11,6 +11,7 @@ import { StudyTrial } from "../models/study-trial";
 import { ClinicalTrialStudy } from "@shared/dto/ClinicalTrialStudiesResponse";
 import { MetricRow, ResultsModel } from "../models/results-model";
 import { mapDesignModelToExecutionSearchRequest } from "./saved-search-criteria-mapper";
+import { HeatPoint } from "../primitives/heatmap/heatmap";
 
 const PHASE_MAP: Record<string, string> = {
     'Early Phase 1': 'EARLY_PHASE1',
@@ -140,95 +141,76 @@ export class TrialWorkflowService {
     }
 
     processResults() {
+        this.processResultsV2();
+    }
+
+    processResultsV2() {
         this.loadingService.show('Analyzing clinical trials data...');
         const trials = this.selectedTrialIds().map(id => this.trialCache.get(id));
         const plotData = trials.map(trial => ({
             id: trial?.protocolSection.identificationModule.nctId,
-
-            // Plots
             terminationCause: trial?.protocolSection.statusModule?.whyStopped ?? null,
             geoLocations: trial?.protocolSection.contactsLocationsModule?.locations?.map(loc => ({
                 geoPoint: loc.geoPoint,
                 city: loc.city,
-                country: loc.country
+                country: loc.country,
+                facility: loc.facility
             })) ?? [],
             startDate: trial?.protocolSection.statusModule?.startDateStruct,
             completionDate: trial?.protocolSection.statusModule?.completionDateStruct,
-
-            // Metrics - Get transformed into { x: number, y : number, label: string (optional) }
             totalEnrollment: trial?.protocolSection.designModule?.enrollmentInfo?.count ?? 0,
             siteCount: trial?.protocolSection.contactsLocationsModule?.locations?.length ?? 0,
-            /* Duration = completionDate - startDate */
-            /* Recruitment Velocity = total Enrollment / Duration */
             inclusionStrictness: trial?.protocolSection.eligibilityModule?.eligibilityCriteria?.split(' ').length ?? 0,
-            /* site efficiency = total enrollment / site count */
             outcomeDensity: (trial?.protocolSection.outcomesModule?.primaryOutcomes?.length ?? 0) + (trial?.protocolSection.outcomesModule?.secondaryOutcomes?.length ?? 0),
             minAge: trial?.protocolSection.eligibilityModule?.minimumAge,
             maxAge: trial?.protocolSection.eligibilityModule?.maximumAge,
-            /* Age Span = maxAge - minAge */
             interventionCount: trial?.protocolSection.armsInterventionsModule?.interventions?.length ?? 0,
             collaboratorCount: trial?.protocolSection.sponsorCollaboratorsModule?.collaborators?.length ?? 0,
             completedDate: trial?.protocolSection.statusModule?.primaryCompletionDateStruct,
-            /* Timeline Slippage */
             maskingInfo: trial?.protocolSection.designModule?.designInfo?.maskingInfo?.whoMasked ?? [],
-            conditionCount: trial?.protocolSection.conditionsModule?.conditions?.length ?? 0
+            conditionCount: trial?.protocolSection.conditionsModule?.conditions?.length ?? 0,
+            status: trial?.protocolSection.statusModule?.overallStatus ?? 'UNKNOWN',
+            eligibilityCriteria: trial?.protocolSection.eligibilityModule?.eligibilityCriteria ?? ''
         }));
 
-        const terminations = new Map<string, number>([
-            ["Completed", 0]
-        ]);
-        plotData.forEach((trial) => {
-            if (trial.terminationCause) {
-                //terminations.set(trial.terminationCause, (terminations.get(trial.terminationCause) || 0) + 1);
-                terminations.set("Terminated", (terminations.get("Terminated") || 0) + 1);
-            } else {
-                terminations.set("Completed", (terminations.get("Completed") || 0) + 1);
-            }
-        });
-
         this.results.update(current => {
-            if (current == null) {
-                current = new ResultsModel();
-            }
-
-            current.terminationReasons = Array.from(terminations.entries()).map(([reason, count]) => ({ reason, count }));
+            current = new ResultsModel();
+            
+            // Site Locations & Top Sites
             current.siteLocations = plotData.flatMap(trial => 
                 trial.geoLocations.map(loc =>{
                     if (!loc.geoPoint || !loc.geoPoint.lat || !loc.geoPoint.lon) return null;
-                    return ({
-                        longitude: loc.geoPoint.lon,
-                        latitude: loc.geoPoint.lat
-                    })
-                }).filter(loc => loc !== null)
+                    return ({ longitude: loc.geoPoint.lon, latitude: loc.geoPoint.lat });
+                }).filter((loc): loc is HeatPoint => loc !== null)
             );
 
+            // Metric Rows
             current.metricRows = plotData.map(trial => {
                 const row = new MetricRow();
-
                 const completedDate = trial.completedDate ? Date.parse(trial.completedDate.date) : null;
                 const startDate = trial.startDate ? Date.parse(trial.startDate.date) : null;
                 if (completedDate && startDate) {
                     const diff = (completedDate - startDate) / (1000 * 60 * 60 * 24);
                     row.timelineSlippage = diff;
-                    if (diff > 0) {
-                        row.recruitmentVelocity = trial.totalEnrollment / diff;
-                    }
+                    if (diff > 0) row.recruitmentVelocity = trial.totalEnrollment / diff;
                 }
-
-                if (trial.maxAge) {
-                    row.maxAge = parseInt(trial.maxAge);
-                }
-                if (trial.minAge) {
-                    row.minAge = parseInt(trial.minAge);
-                }
-                if (trial.minAge && trial.maxAge) {
-                    row.ageSpan = row.maxAge - row.minAge;
-                }
+                if (trial.maxAge) row.maxAge = parseInt(trial.maxAge);
+                if (trial.minAge) row.minAge = parseInt(trial.minAge);
+                if (trial.minAge && trial.maxAge) row.ageSpan = row.maxAge - row.minAge;
                 
                 row.id = trial.id ?? 'Unknown';
                 row.totalEnrollment = trial.totalEnrollment;
                 row.siteCount = trial.siteCount;
                 row.inclusionStrictness = trial.inclusionStrictness;
+                
+                // Estimate exclusion strictness by splitting criteria
+                const criteria = trial.eligibilityCriteria;
+                const parts = criteria.split(/exclusion criteria/i);
+                row.exclusionStrictness = parts.length > 1 ? parts[1].split(' ').length : 0;
+                if (parts.length > 1 && row.inclusionStrictness > row.exclusionStrictness) {
+                    row.inclusionStrictness = parts[0].split(' ').length;
+                }
+
                 row.siteEfficiency = trial.siteCount == 0 ? 0 : (trial.totalEnrollment / trial.siteCount);
                 row.outcomeDensity = trial.outcomeDensity;
                 row.interventionCount = trial.interventionCount;
@@ -241,124 +223,95 @@ export class TrialWorkflowService {
 
             // Calculate derived results for charts
             const validTrials = current.metricRows.filter(r => r.timelineSlippage > 0);
-            
-            // Driver Analysis for Recruitment Velocity
-            const metricsToTest = [
-                { name: 'Site Count', key: 'siteCount', invert: false },
-                { name: 'Inclusion Strictness', key: 'inclusionStrictness', invert: true }, // Less strict = faster
-                { name: 'Age Span', key: 'ageSpan', invert: false },
-                { name: 'Intervention Count', key: 'interventionCount', invert: true }, // Fewer = faster
-                { name: 'Collaborator Count', key: 'collaboratorCount', invert: false },
-                { name: 'Outcome Density', key: 'outcomeDensity', invert: true } // Fewer = faster
-            ];
 
-            const drivers = metricsToTest.map(m => {
-                const values = validTrials.map(r => (r as any)[m.key] as number);
-                const velocities = validTrials.map(r => r.recruitmentVelocity);
-                
-                // Simple Pearson Correlation
-                const n = values.length;
-                if (n < 2) return { name: m.name, correlation: 0, key: m.key, invert: m.invert };
-                
-                const sumX = values.reduce((a, b) => a + b, 0);
-                const sumY = velocities.reduce((a, b) => a + b, 0);
-                const sumXY = values.reduce((acc, x, i) => acc + x * velocities[i], 0);
-                const sumX2 = values.reduce((a, b) => a + b * b, 0);
-                const sumY2 = velocities.reduce((a, b) => a + b * b, 0);
-                
-                const numerator = (n * sumXY) - (sumX * sumY);
-                const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
-                
-                const correlation = denominator === 0 ? 0 : numerator / denominator;
-                return { name: m.name, correlation: m.invert ? -correlation : correlation, key: m.key, invert: m.invert };
-            });
-
-            // Pick top 3 drivers by absolute correlation
-            const topDrivers = drivers
-                .sort((a, b) => Math.abs(b.correlation) - Math.abs(a.correlation))
-                .slice(0, 3);
-
-            const recruitmentByImpact = topDrivers.map((driver) => {
-                const absCorr = Math.abs(driver.correlation);
-                const label = `${driver.name} r = ${absCorr.toFixed(2)}`;
-                
-                // Filter trials that perform "well" on this driver
-                const values = validTrials.map(r => (r as any)[driver.key] as number);
-                const median = values.sort((a, b) => a - b)[Math.floor(values.length / 2)];
-                
-                const favoredTrials = validTrials.filter(r => {
-                    const val = (r as any)[driver.key];
-                    return driver.invert ? val <= median : val >= median;
-                });
-
-                const avgDays = favoredTrials.length > 0 
-                    ? Math.round(favoredTrials.reduce((acc, r) => acc + r.timelineSlippage, 0) / favoredTrials.length)
-                    : 0;
-                const participantCount = favoredTrials.length > 0
-                    ? Math.round(favoredTrials.reduce((acc, r) => acc + r.totalEnrollment, 0) / favoredTrials.length)
-                    : 0;
-
-                return { label, avgDays, participantCount };
-            });
-
-            // Expected Timeline by Enrollment - Dynamic Adaptive Binning
+            // Expected Timeline binning logic
             const enrollments = validTrials
-                .map(r => r.totalEnrollment)
-                .sort((a, b) => a - b);
+                .map((r: MetricRow) => r.totalEnrollment)
+                .sort((a: number, b: number) => a - b);
 
-            let timelineData: any[] = [];
-
+            let timelineBuckets: any[] = [];
             if (enrollments.length > 0) {
-                const maxBuckets = Math.min(10, Math.ceil(enrollments.length / 2)); // At least 2 trials per bucket
+                const maxBuckets = Math.min(6, Math.ceil(enrollments.length / 2));
                 const bucketSize = Math.max(1, Math.floor(enrollments.length / maxBuckets));
-                
                 const boundaries: number[] = [0];
                 for (let i = 1; i < maxBuckets; i++) {
                     const rawVal = enrollments[i * bucketSize];
-                    // Round to nearest 50, but ensure it's increasing
                     const rounded = Math.max(boundaries[boundaries.length - 1] + 50, Math.round(rawVal / 50) * 50);
-                    if (rounded < enrollments[enrollments.length - 1]) {
-                        boundaries.push(rounded);
-                    }
+                    if (rounded < enrollments[enrollments.length - 1]) boundaries.push(rounded);
                 }
                 boundaries.push(Infinity);
 
-                timelineData = [];
                 for (let i = 0; i < boundaries.length - 1; i++) {
                     const min = boundaries[i];
                     const max = boundaries[i + 1];
                     const label = max === Infinity ? `${min}+` : `${min}-${max}`;
-                    
-                    const trialsInBucket = validTrials.filter(r => 
-                        r.totalEnrollment >= min && (max === Infinity ? true : r.totalEnrollment < max)
-                    );
-
+                    const trialsInBucket = validTrials.filter((r: MetricRow) => r.totalEnrollment >= min && (max === Infinity ? true : r.totalEnrollment < max));
                     if (trialsInBucket.length > 0) {
-                        const actualDays = Math.round(trialsInBucket.reduce((acc, r) => acc + r.timelineSlippage, 0) / trialsInBucket.length);
-                        const estimatedDays = actualDays > 0 ? Math.round(actualDays * (0.8 + Math.random() * 0.15)) : 0;
-                        timelineData.push({ patientBucket: label, estimatedDays, actualDays });
+                        const actualDays = Math.round(trialsInBucket.reduce((acc: number, r: MetricRow) => acc + r.timelineSlippage, 0) / trialsInBucket.length);
+                        const estimatedDays = Math.round(actualDays * 0.9);
+                        timelineBuckets.push({ patientBucket: label, estimatedDays, actualDays });
                     }
                 }
             }
 
-            const avgRecruitmentDays = validTrials.length > 0
-                ? Math.round(validTrials.reduce((acc, r) => acc + r.timelineSlippage, 0) / validTrials.length)
-                : 0;
-            
-            const totalEnrollment = validTrials.reduce((acc, r) => acc + r.totalEnrollment, 0);
-            const participantTarget = validTrials.length > 0 ? Math.round(totalEnrollment / validTrials.length) : 0;
+            // Termination distribution for report
+            const terminations = new Map<string, number>();
+            plotData.forEach(t => {
+                const status = t.status.split('_').join(' ');
+                terminations.set(status, (terminations.get(status) || 0) + 1);
+            });
+            current.terminationReasons = Array.from(terminations.entries()).map(([reason, count]) => ({ reason, count }));
 
-            // Initialize trialResults locally as a fallback or placeholder
+            // Driver Analysis
+            const metricsToTest = [
+                { name: 'Site Count', key: 'siteCount', invert: false },
+                { name: 'Inclusion Strictness', key: 'inclusionStrictness', invert: true },
+                { name: 'Age Span', key: 'ageSpan', invert: false },
+                { name: 'Intervention Count', key: 'interventionCount', invert: true },
+                { name: 'Outcome Density', key: 'outcomeDensity', invert: true }
+            ];
+
+            const drivers = metricsToTest.map(m => {
+                const values = validTrials.map((r: MetricRow) => (r as any)[m.key] as number);
+                const velocities = validTrials.map((r: MetricRow) => r.recruitmentVelocity);
+                const n = values.length;
+                if (n < 2) return { name: m.name, correlation: 0, key: m.key, invert: m.invert };
+                const sumX = values.reduce((a: number, b: number) => a + b, 0);
+                const sumY = velocities.reduce((a: number, b: number) => a + b, 0);
+                const sumXY = values.reduce((acc: number, x: number, i: number) => acc + x * velocities[i], 0);
+                const sumX2 = values.reduce((a: number, b: number) => a + b * b, 0);
+                const sumY2 = velocities.reduce((a: number, b: number) => a + b * b, 0);
+                const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+                const correlation = denominator === 0 ? 0 : ((n * sumXY) - (sumX * sumY)) / denominator;
+                return { name: m.name, correlation: m.invert ? -correlation : correlation, key: m.key, invert: m.invert };
+            });
+
+            const topDrivers = drivers.sort((a, b) => Math.abs(b.correlation) - Math.abs(a.correlation)).slice(0, 3);
+            const recruitmentByImpact = topDrivers.map((driver) => {
+                const label = `${driver.name} (r=${Math.abs(driver.correlation).toFixed(2)})`;
+                const values = validTrials.map((r: MetricRow) => (r as any)[driver.key] as number);
+                const median = values.sort((a: number, b: number) => a - b)[Math.floor(values.length / 2)];
+                const favoredTrials = validTrials.filter((r: MetricRow) => driver.invert ? (r as any)[driver.key] <= median : (r as any)[driver.key] >= median);
+                return { 
+                    label, 
+                    avgDays: favoredTrials.length > 0 ? Math.round(favoredTrials.reduce((acc: number, r: MetricRow) => acc + r.timelineSlippage, 0) / favoredTrials.length) : 0,
+                    participantCount: favoredTrials.length > 0 ? Math.round(favoredTrials.reduce((acc: number, r: MetricRow) => acc + r.totalEnrollment, 0) / favoredTrials.length) : 0
+                };
+            });
+
+            const avgRecruitmentDays = validTrials.length > 0 ? Math.round(validTrials.reduce((acc: number, r: MetricRow) => acc + r.timelineSlippage, 0) / validTrials.length) : 0;
+            const participantTarget = validTrials.length > 0 ? Math.round(validTrials.reduce((acc: number, r: MetricRow) => acc + r.totalEnrollment, 0) / validTrials.length) : 0;
+
             current.trialResults = {
                 timestamp: new Date(),
                 overallScore: 0,
-                overallSummary: 'Calculating...',
+                overallSummary: 'Generating detailed analysis...',
                 totalTrialsFound: trials.length,
                 queryCondition: this.inputParams()?.condition ?? 'Selected Trials',
                 avgRecruitmentDays,
                 participantTarget,
                 recruitmentByImpact,
-                timelineBuckets: timelineData,
+                timelineBuckets,
                 terminationReasons: current.terminationReasons,
                 generatedAt: new Date().toISOString()
             };
@@ -367,27 +320,27 @@ export class TrialWorkflowService {
         });
 
         const request = this.createResultsRequest();
-        // if (request) {
-        //     this.apiService.getResults(request).pipe(
-        //         finalize(() => this.loadingService.hide())
-        //     ).subscribe({
-        //         next: (aiResults) => {
-        //             this.results.update(current => {
-        //                 current.trialResults = aiResults;
-        //                 return { ...current };
-        //             });
-        //         },
-        //         error: (err) => {
-        //             console.error("AI Results failed", err);
-        //             this.results.update(current => {
-        //                 current.trialResults!.overallSummary = "Failed to load detailed AI analysis.";
-        //                 return { ...current };
-        //             });
-        //         }
-        //     });
-        // } else {
+        if (request) {
+            this.apiService.getResults(request).pipe(
+                finalize(() => this.loadingService.hide())
+            ).subscribe({
+                next: (aiResults) => {
+                    this.results.update(current => {
+                        current.trialResults = aiResults;
+                        return { ...current };
+                    });
+                },
+                error: (err) => {
+                    console.error("AI Results failed", err);
+                    this.results.update(current => {
+                        if (current.trialResults) current.trialResults.overallSummary = "Failed to load detailed AI analysis.";
+                        return { ...current };
+                    });
+                }
+            });
+        } else {
             this.loadingService.hide();
-        //}
+        }
     }
 
     createResultsRequest() : TrialResultsRequest | undefined {

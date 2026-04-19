@@ -99,5 +99,13 @@ export function normalizeImportedCriteria(
     ineligible: Array.isArray(input.ineligible)
       ? input.ineligible.map(item => String(item).trim()).filter(Boolean)
       : [],
+
+    // User Trial Specifics
+    userPatients: toNullableNumber(input.userPatients),
+    userSites: toNullableNumber(input.userSites),
+    userInclusions: toNullableNumber(input.userInclusions),
+    userExclusions: toNullableNumber(input.userExclusions),
+    userOutcomes: toNullableNumber(input.userOutcomes),
+    userArms: toNullableNumber(input.userArms),
   };
 }

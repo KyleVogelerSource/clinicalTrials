@@ -338,7 +338,7 @@
                                                     <span class="detail-label">Clinical Sites:</span>
                                                     <div class="sites-list-container">
                                                         <ul class="sites-list">
-                                                            @for (site of trial.sites.slice(0, 10); track site) {
+                                                            @for (site of trial.sites.slice(0, 10); track $index) {
                                                                 <li>{{ site }}</li>
                                                             }
                                                             @if (trial.sites.length > 10) {

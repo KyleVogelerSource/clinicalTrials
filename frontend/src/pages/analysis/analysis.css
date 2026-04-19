@@ -1,0 +1,386 @@
+.container {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    background-color: #f8fafc;
+    min-height: 100vh;
+}
+
+.heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.heading-left h2 {
+    margin: 0.5rem 0 0.25rem 0;
+    font-size: 1.5rem;
+    color: #1e293b;
+}
+
+.meta-info {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.heading-right {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1.25rem;
+}
+
+.card {
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-header {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header h4 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    font-weight: 700;
+}
+
+.card-body {
+    padding: 1rem;
+    flex: 1;
+}
+
+/* Card Sizing */
+.card-small {
+    grid-column: span 2;
+}
+
+.card-medium {
+    grid-column: span 3;
+}
+
+.card-large {
+    grid-column: span 4;
+}
+
+.card-full {
+    grid-column: span 6;
+}
+
+/* Viability Score */
+.viability-score {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1;
+    margin-bottom: 1rem;
+}
+
+.viability-score-denominator {
+    font-size: 1.25rem;
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+.viability-summary h5 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+.viability-summary p {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #334155;
+}
+
+/* Recruitment Velocity */
+.recruitment-velocity {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #193F6A;
+    margin-bottom: 0.5rem;
+}
+
+.recruitment-velocity .unit {
+    font-size: 1rem;
+    color: #64748b;
+    font-weight: 400;
+}
+
+.stat-subtitle {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin: 0 0 0.25rem 0;
+}
+
+.mini-chart-container {
+    height: 120px;
+    margin-top: 1rem;
+}
+
+/* Charts */
+.chart-container {
+    height: 300px;
+    width: 100%;
+}
+
+/* Heatmap Layout */
+.heatmap-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+}
+
+.heatmap-container {
+    height: 250px;
+}
+
+.top-sites h5 {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.8rem;
+    color: #475569;
+}
+
+.top-sites ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.top-sites li {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.8rem;
+}
+
+.site-name {
+    color: #334155;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+
+.site-count {
+    font-weight: 600;
+    color: #088989;
+}
+
+/* Plot Selectors */
+.plot-selectors {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.plot-selectors select {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+}
+
+.vs {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+/* Intersection Matrix */
+.matrix-wrapper {
+    overflow-x: auto;
+}
+
+.matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.matrix-table th {
+    font-size: 0.7rem;
+    color: #64748b;
+    padding: 0.5rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+.matrix-table td {
+    padding: 2px;
+}
+
+.row-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #334155;
+    padding-right: 1rem;
+    white-space: nowrap;
+}
+
+.matrix-cell {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #1e293b;
+    border-radius: 2px;
+}
+
+.matrix-cell.high-val {
+    color: white;
+}
+
+/* Comparison Table */
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.comparison-table th {
+    text-align: left;
+    padding: 0.75rem;
+    background-color: #f8fafc;
+    border-bottom: 2px solid #e2e8f0;
+    color: #475569;
+}
+
+.comparison-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.title-cell {
+    max-width: 400px;
+    color: #0f172a;
+    font-weight: 500;
+}
+
+/* Loading State */
+.loading-overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem;
+    color: #64748b;
+}
+
+/* Responsive Tweak */
+/* Benchmarks */
+.benchmarks-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.benchmark-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.benchmark-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.benchmark-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+.benchmark-val {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #193F6A;
+}
+
+.benchmark-val.high-dev {
+    color: #DC344D;
+}
+
+.benchmark-chart {
+    height: 120px;
+    position: relative;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.user-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #088989;
+    z-index: 5;
+    box-shadow: 0 0 4px rgba(8, 137, 137, 0.5);
+}
+
+.user-line::after {
+    content: 'User';
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #088989;
+    text-transform: uppercase;
+}
+
+.benchmark-stats {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    text-align: center;
+}
+
+@media (max-width: 1200px) {
+    .info-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .card-small, .card-medium, .card-large, .card-full {
+        grid-column: span 2;
+    }
+}
+
+@media print {
+    .container {
+        padding: 0;
+        background-color: white;
+    }
+    .heading-right, .btn-link {
+        display: none;
+    }
+    .info-grid {
+        gap: 0.5in;
+    }
+}
