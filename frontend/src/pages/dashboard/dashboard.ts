@@ -13,6 +13,9 @@ import { AutoCompleteInput } from "../../primitives/auto-complete-input/auto-com
 import { KeywordSelector } from "../../primitives/keyword-selector/keyword-selector";
 import { StudyTrial } from "../../models/study-trial";
 import { ClinicalTrialSearchRequest } from "@shared/dto/ClinicalTrialSearchRequest";
+import { PermissionService } from "../../services/permission.service";
+import { ACTION_NAMES } from "@shared/auth/action-names";
+import { parseDesignerCriteriaFile } from "../../services/designer-criteria-file.service";
 
 @Component({
     selector: "app-dashboard",
@@ -39,12 +42,14 @@ export class Dashboard implements OnInit {
     private authService = inject(AuthService);
     private savedSearchService = inject(SavedSearchService);
     private router = inject(Router);
+    private permissionService = inject(PermissionService);
 
     // Form Options
     phaseOptions = this.clinicalStudiesService.getPhases();
     allocationOptions = this.clinicalStudiesService.getAllocations();
     interventionOptions = this.clinicalStudiesService.getInterventionModels();
     blindingOptions = this.clinicalStudiesService.getMaskingTypes();
+    sexOptions = this.clinicalStudiesService.getSexes();
 
     // Local State
     isLoading = signal(false);
@@ -62,6 +67,11 @@ export class Dashboard implements OnInit {
     participantsFilter = signal<number | null>(null);
     keywordFilter = signal<string[]>([]);
     activeFilter = signal<string | null>(null);
+
+    // Import State
+    importStatus = signal<'idle' | 'success' | 'error'>('idle');
+    importMessage = signal('');
+    canImportCriteria = this.permissionService.watch(ACTION_NAMES.searchCriteriaImport);
 
     // Service State Proxies
     selectedTrialIds = this.workflowService.selectedTrialIds;
@@ -331,6 +341,54 @@ export class Dashboard implements OnInit {
         const target = event.target as HTMLElement;
         if (this.activeFilter() && !target.closest('.filter-popover')) {
             this.activeFilter.set(null);
+        }
+    }
+
+    async onImportFile(event: Event) {
+        if (!this.canImportCriteria()) {
+            return;
+        }
+
+        const input = event.target as HTMLInputElement | null;
+        const file = input?.files?.[0];
+        if (!file) return;
+
+        try {
+            const content = await file.text();
+            const criteria = parseDesignerCriteriaFile(content, file.name, {
+                phase: this.clinicalStudiesService.getDefaultPhase(),
+                phases: this.phaseOptions,
+                allocationType: this.clinicalStudiesService.getDefaultAllocation(),
+                allocations: this.allocationOptions,
+                interventionModels: this.interventionOptions,
+                blindingType: this.clinicalStudiesService.getDefaultMaskingType(),
+                blindingTypes: this.blindingOptions,
+                sex: this.clinicalStudiesService.getDefaultSex(),
+                sexes: this.sexOptions,
+            });
+
+            this.searchForm.patchValue({
+                condition: criteria.condition,
+                phase: criteria.phase,
+                allocationType: criteria.allocationType,
+                interventionModel: criteria.interventionModel,
+                blindingType: criteria.blindingType
+            });
+            this.conditionValue.set(criteria.condition);
+            this.workflowService.setInputs(criteria);
+            this.importStatus.set('success');
+            this.importMessage.set(`Imported criteria from ${file.name}.`);
+            
+            // Trigger search manually to ensure it happens immediately
+            this.searchForm.updateValueAndValidity();
+        } catch (err) {
+            console.error('Import failed', err);
+            this.importStatus.set('error');
+            this.importMessage.set('Could not import criteria file. Use a valid JSON export.');
+        } finally {
+            if (input) {
+                input.value = '';
+            }
         }
     }
 
