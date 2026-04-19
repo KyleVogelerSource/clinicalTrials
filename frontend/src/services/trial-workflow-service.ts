@@ -1,7 +1,6 @@
 import { Injectable, signal, inject } from "@angular/core";
 import { Observable, map, tap, finalize } from "rxjs";
 import { TrialResultsRequest } from "@shared/dto/TrialResultsRequest";
-import { TrialResultsResponse } from "@shared/dto/TrialResultsResponse";
 import { ClinicalTrialSearchRequest } from "@shared/dto/ClinicalTrialSearchRequest";
 import { ClinicalStudyService } from "./clinical-study.service";
 import { ResultsApiService } from "./results-api.service";
@@ -229,7 +228,7 @@ export class TrialWorkflowService {
                 .map((r: MetricRow) => r.totalEnrollment)
                 .sort((a: number, b: number) => a - b);
 
-            let timelineBuckets: any[] = [];
+            const timelineBuckets: any[] = [];
             if (enrollments.length > 0) {
                 const maxBuckets = Math.min(6, Math.ceil(enrollments.length / 2));
                 const bucketSize = Math.max(1, Math.floor(enrollments.length / maxBuckets));
