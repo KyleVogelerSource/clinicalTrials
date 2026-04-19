@@ -48,7 +48,7 @@
 
 .chart-zoom-hint {
     position: absolute;
-    top: 35px;
+    bottom: 8px;
     right: 8px;
     font-size: 10px;
     color: #94a3b8;

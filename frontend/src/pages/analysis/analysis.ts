@@ -74,7 +74,6 @@ export const metricDescriptions: Record<string, string> = {
     "Collaborator Count": "Number of organizations partnering with the lead sponsor.",
     "Timeline Slippage": "Difference between planned and actual completion duration in days.",
     "Masking Intensity": "Number of groups (Participants, Providers, etc.) blinded from study assignments.",
-    "Geographic Spread": "Number of unique geographic locations where sites are established.",
     "Condition Count": "Number of diseases or conditions being addressed in the protocol."
 };
 
@@ -111,10 +110,69 @@ export class Analysis implements OnInit {
         return Math.abs(val);
     }
 
+    displayPhase = computed(() => {
+        const phase = this.inputParams()?.phase;
+        if (!phase || phase === 'N/A' || phase === 'NA') return 'Any Phase';
+        return phase;
+    });
+
+    estimatedDuration = computed(() => {
+        const d = this.data();
+        const userPatients = this.inputParams()?.userPatients;
+        if (!d || !userPatients || d.avgRecruitmentDays <= 0 || d.participantTarget <= 0) return null;
+        
+        const velocity = d.participantTarget / d.avgRecruitmentDays; // participants per day
+        return Math.round(userPatients / velocity);
+    });
+
+    estimatedCompletionDate = computed(() => {
+        const days = this.estimatedDuration();
+        if (!days) return null;
+        const date = new Date();
+        date.setDate(date.getDate() + days);
+        return date;
+    });
+
     // Charts Configuration
     dataPlotX = signal(metricNames[0]);
     dataPlotY = signal(metricNames[1]);
     metricNamesList = metricNames;
+
+    suggestedCorrelations = computed(() => {
+        const trials = this.results().metricRows;
+        if (!trials || trials.length < 2) return [];
+
+        const metrics = this.metricNamesList;
+        const correlations: {x: string, y: string, r: number}[] = [];
+
+        for (let i = 0; i < metrics.length; i++) {
+            for (let j = i + 1; j < metrics.length; j++) {
+                const m1 = metrics[i];
+                const m2 = metrics[j];
+                const extract1 = MetricRow.metricExtractors[m1];
+                const extract2 = MetricRow.metricExtractors[m2];
+
+                const values = trials.map(t => ({ x: extract1(t), y: extract2(t) }))
+                    .filter((v): v is {x: number, y: number} => v.x !== null && v.y !== null);
+                
+                if (values.length < 2) continue;
+
+                const n = values.length;
+                const sumX = values.reduce((a, b) => a + b.x, 0);
+                const sumY = values.reduce((a, b) => a + b.y, 0);
+                const sumXY = values.reduce((a, b) => a + (b.x * b.y), 0);
+                const sumX2 = values.reduce((a, b) => a + (b.x * b.x), 0);
+                const sumY2 = values.reduce((a, b) => a + (b.y * b.y), 0);
+
+                const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+                const r = denominator === 0 ? 0 : ((n * sumXY) - (sumX * sumY)) / denominator;
+
+                correlations.push({ x: m1, y: m2, r });
+            }
+        }
+
+        return correlations.sort((a, b) => Math.abs(b.r) - Math.abs(a.r)).slice(0, 3);
+    });
 
     viabilityColor = computed(() => {
         const score = this.data()?.overallScore ?? 0;
@@ -127,16 +185,16 @@ export class Analysis implements OnInit {
         const d = this.data();
         if (!d || !d.recruitmentByImpact) return null;
         return {
-            labels: d.recruitmentByImpact.map(b => b.label),
+            labels: d.recruitmentByImpact.map((b: any) => b.label),
             datasets: [
                 {
                     label: 'Avg Days',
-                    data: d.recruitmentByImpact.map(b => b.avgDays),
+                    data: d.recruitmentByImpact.map((b: any) => b.avgDays),
                     backgroundColor: '#193F6A',
                 },
                 {
                     label: 'Participants',
-                    data: d.recruitmentByImpact.map(b => b.participantCount),
+                    data: d.recruitmentByImpact.map((b: any) => b.participantCount),
                     backgroundColor: '#35c0c0',
                 },
             ],
@@ -192,47 +250,35 @@ export class Analysis implements OnInit {
         const trials = this.results().metricRows;
         if (!trials || trials.length === 0) return [];
 
-        const selectedMetrics = [
-            "Total Enrollment",
-            "Site Count",
-            "Recruitment Velocity",
-            "Inclusion Strictness",
-            "Exclusion Strictness",
-            "Outcome Density",
-            "Age Span",
-            "Intervention Count",
-            "Condition Count"
+        const rowFactors = [
+            { name: 'High Enrollment (>200)', check: (t: MetricRow) => t.totalEnrollment > 200 },
+            { name: 'Multi-Site (>5)', check: (t: MetricRow) => t.siteCount > 5 },
+            { name: 'Long Duration (>1yr)', check: (t: MetricRow) => t.timelineSlippage > 365 }
         ];
 
-        return selectedMetrics.map(rowMetric => {
-            const rowValues = selectedMetrics.map(colMetric => {
-                if (rowMetric === colMetric) return 100;
-                
-                const extractorRow = MetricRow.metricExtractors[rowMetric];
-                const extractorCol = MetricRow.metricExtractors[colMetric];
+        const colFactors = [
+            { name: 'Strict Inclusions (>10)', check: (t: MetricRow) => t.inclusionStrictness > 10 },
+            { name: 'Many Interventions (>2)', check: (t: MetricRow) => t.interventionCount > 2 },
+            { name: 'Many Outcomes (>5)', check: (t: MetricRow) => t.outcomeDensity > 5 },
+            { name: 'Wide Age Span (>40)', check: (t: MetricRow) => (t.ageSpan ?? 0) > 40 }
+        ];
 
-                const coOccurrences = trials.filter(t => {
-                    const valR = extractorRow(t);
-                    const valC = extractorCol(t);
-                    return valR !== null && valR > 0 && valC !== null && valC > 0;
-                }).length;
-
-                return Math.round((coOccurrences / trials.length) * 100);
+        return rowFactors.map(row => {
+            const rowTrials = trials.filter(t => row.check(t));
+            const values = colFactors.map(col => {
+                if (rowTrials.length === 0) return 0;
+                const coOccurrences = rowTrials.filter(t => col.check(t)).length;
+                return Math.round((coOccurrences / rowTrials.length) * 100);
             });
-            return { name: rowMetric, values: rowValues };
+            return { name: row.name, values };
         });
     });
 
     matrixHeaders = [
-        "Total Enrollment",
-        "Site Count",
-        "Recruitment Velocity",
-        "Inclusion Strictness",
-        "Exclusion Strictness",
-        "Outcome Density",
-        "Age Span",
-        "Intervention Count",
-        "Condition Count"
+        "Strict Inclusions (>10)",
+        "Many Interventions (>2)",
+        "Many Outcomes (>5)",
+        "Wide Age Span (>40)"
     ];
 
     topSites = computed(() => {

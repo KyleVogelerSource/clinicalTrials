@@ -5,7 +5,7 @@
         <div class="heading-left">
             <button class="btn btn-prominent" (click)="onBack()">← Back to Design</button>
             <h2>Feasibility Report: {{ inputParams()?.condition || 'Selected Trials' }}</h2>
-            <p class="meta-info">Generated on {{ data()?.timestamp | date:'medium' }} • {{ inputParams()?.phase || 'Any Phase' }}</p>
+            <p class="meta-info">Generated on {{ data()?.timestamp | date:'medium' }} • {{ displayPhase() }}</p>
         </div>
         <div class="heading-right">
             <button class="btn btn-prominent" (click)="onPrint()">Print</button>
@@ -58,8 +58,12 @@
                             @for (driver of data()?.recruitmentByImpact; track $index) {
                                 <li>
                                     <span class="driver-label">{{ driver.label }}</span>
-                                    <span class="driver-impact">{{ driver.avgDays }} days avg</span>
+                                    <span class="driver-impact" [class.positive]="driver.correlation! > 0" [class.negative]="driver.correlation! < 0">
+                                        {{ driver.impactText }} (r = {{ driver.correlation!.toFixed(2) }})
+                                    </span>
                                 </li>
+                            } @empty {
+                                <li class="no-drivers-msg">No statistically significant drivers found for this trial set.</li>
                             }
                         </ul>
                     </div>
@@ -69,7 +73,7 @@
             <!-- Benchmark Histograms -->
             <div class="card card-full">
                 <div class="card-header">
-                    <h4>Cohort Benchmarks</h4>
+                    <h4>Benchmarks</h4>
                 </div>
                 <div class="card-body">
                     <div class="benchmarks-grid">
@@ -84,7 +88,7 @@
                                             (change)="onUpdateBenchmark(b.paramKey, $any($event.target).value)"
                                             min="0"
                                             class="benchmark-input">
-                                        <span class="benchmark-z">({{ b.zScore > 0 ? '+' : '' }}{{ b.zScore }}σ)</span>
+                                        <span class="benchmark-z">{{ b.zScore > 0 ? '+' : '' }}{{ b.zScore }}σ</span>
                                     </div>
                                 </div>
                                 <div class="benchmark-chart">
@@ -125,7 +129,12 @@
             <!-- Expected Timeline -->
             <div class="card card-half card-tall">
                 <div class="card-header">
-                    <h4>Expected Timeline</h4>
+                    <div class="header-with-info">
+                        <h4>Expected Timeline</h4>
+                        @if (estimatedCompletionDate(); as date) {
+                            <span class="meta-info">Est. Complete: {{ date | date:'mediumDate' }}</span>
+                        }
+                    </div>
                 </div>
                 <div class="card-body">
                     @if (timelineChartData(); as chartData) {
@@ -160,12 +169,20 @@
                     </div>
                 </div>
                 <div class="card-body">
+                    <div class="plot-suggestions">
+                        <span class="suggestion-label">Suggested:</span>
+                        @for (sugg of suggestedCorrelations(); track $index) {
+                            <button class="btn-link suggestion-btn" (click)="dataPlotX.set(sugg.x); dataPlotY.set(sugg.y)">
+                                {{ sugg.x }} vs {{ sugg.y }}
+                            </button>
+                        }
+                    </div>
                     <div class="metric-descriptions">
                         <div class="desc-item"><strong>{{ dataPlotX() }}:</strong> {{ descriptions[dataPlotX()] }}</div>
                         <div class="desc-item"><strong>{{ dataPlotY() }}:</strong> {{ descriptions[dataPlotY()] }}</div>
                     </div>
                     @if (dataPlotData(); as plotData) {
-                        <div class="chart-container" style="height: calc(100% - 40px);">
+                        <div class="chart-container" style="height: calc(100% - 80px);">
                             <app-scatter-chart [chartData]="plotData" [xAxisLabel]="dataPlotX()" [yAxisLabel]="dataPlotY()" />
                         </div>
                     }
@@ -197,7 +214,7 @@
                                         <td class="row-label">{{ row.name }}</td>
                                         @for (val of row.values; track $index) {
                                             <td>
-                                                <div class="matrix-cell" [style.background-color]="'rgba(8, 137, 137, ' + (val/100) + ')'" [class.high-val]="val > 50" [title]="descriptions[row.name]">
+                                                <div class="matrix-cell" [style.background-color]="'rgba(8, 137, 137, ' + (val/100) + ')'" [class.high-val]="val > 50">
                                                     {{ val }}%
                                                 </div>
                                             </td>
