@@ -11,4 +11,5 @@ export interface StudyTrial {
     sites: string[];
     phase: string;
     description: string;
+    overallStatus: string;
 }

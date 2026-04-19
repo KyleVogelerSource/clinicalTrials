@@ -15,218 +15,213 @@
             </button>
         </div>
     }
-
-    <!-- Loading state -->
-    @if (loadState() === 'loading') {
-        <div class="loading-state">
-            <div class="spinner"></div>
-            <p>Analyzing clinical trials data...</p>
-        </div>
-    }
-
-    <!-- Error state -->
-    @else if (loadState() === 'error') {
-        <div class="error-state">
-            <p>{{ errorMessage() }}</p>
-            <button class="btn btn-primary" (click)="onBack()">Back to Designer</button>
-        </div>
-    }
-
-    <!-- Loaded state -->
-    @else {
+    
+    @if (data()) {
         <div class="results-layout">
 
-            <!-- Sticky sidebar nav -->
-            <nav class="sidebar-nav">
-                <ul>
-                    <li><a href="#overview">Overview</a></li>
-                    <li><a href="#recruitment-velocity">Recruitment Velocity</a></li>
-                    <li><a href="#expected-timeline">Expected Timeline</a></li>
-                    <li><a href="#heatmap">Heatmap</a></li>
-                    <li><a href="#data-plot">Data Plot</a></li>
-                    <li><a href="#benchmarks">Benchmarks</a></li>
-                    <li><a href="#comparison-table">Comparison Table</a></li>
-                </ul>
-            </nav>
+                <!-- Sticky sidebar nav -->
+                <nav class="sidebar-nav">
+                    <ul>
+                        <li><a href="#overview">Overview</a></li>
+                        <li><a href="#recruitment-velocity">Recruitment Velocity</a></li>
+                        <li><a href="#expected-timeline">Expected Timeline</a></li>
+                        <li><a href="#heatmap">Heatmap</a></li>
+                        <li><a href="#data-plot">Data Plot</a></li>
+                        <li><a href="#benchmarks">Benchmarks</a></li>
+                        <li><a href="#comparison-table">Comparison Table</a></li>
+                    </ul>
+                </nav>
 
-            <!-- Scrollable main content -->
-            <main class="results-content">
+                <!-- Scrollable main content -->
+                <main class="results-content">
 
-                <!-- Overview -->
-                <section id="overview" class="results-section">
-                    <h2>Overview</h2>
-                    <div class="overview-grid">
-                        <div class="score-ring">
-                            <span class="score-ring__value">{{ data()?.overallScore }}</span>
-                            <span class="score-ring__label">Score</span>
+                    <!-- Overview -->
+                    <section id="overview" class="results-section">
+                        <h2>Overview</h2>
+                        <div class="overview-grid">
+                            <div class="score-ring">
+                                <span class="score-ring__value">{{ data()?.overallScore }}</span>
+                                <span class="score-ring__label">Score</span>
+                            </div>
+                            <p class="overview-description">
+                                Based on <strong>{{ data()?.totalTrialsFound }}</strong> previous trials
+                                for <strong>{{ data()?.queryCondition }}</strong>, the parameters you
+                                supplied for your clinical trial has a fair chance of completion.
+                            </p>
                         </div>
-                        <p class="overview-description">
-                            Based on <strong>{{ data()?.totalTrialsFound }}</strong> previous trials
-                            for <strong>{{ data()?.queryCondition }}</strong>, the parameters you
-                            supplied for your clinical trial has a fair chance of completion.
+
+                        @if (terminationChartData(); as chartData) {
+                            <h3>Trials by Termination Reason</h3>
+                            <app-bar-chart
+                                [chartData]="chartData"
+                                xAxisLabel="Termination Reason"
+                                yAxisLabel="# of Trials"
+                            />
+                        }
+                    </section>
+
+                    <!-- Recruitment Velocity -->
+                    <section id="recruitment-velocity" class="results-section">
+                        <h2>Recruitment Velocity</h2>
+                        <p class="section-stat">
+                            <strong>{{ data()?.avgRecruitmentDays }} days</strong> on average &nbsp;/&nbsp;
+                            <strong>{{ data()?.participantTarget }}</strong> participants
                         </p>
-                    </div>
 
-                    @if (terminationChartData(); as chartData) {
-                        <h3>Trials by Termination Reason</h3>
-                        <app-bar-chart
-                            [chartData]="chartData"
-                            xAxisLabel="Termination Reason"
-                            yAxisLabel="# of Trials"
-                        />
-                    }
-                </section>
-
-                <!-- Recruitment Velocity -->
-                <section id="recruitment-velocity" class="results-section">
-                    <h2>Recruitment Velocity</h2>
-                    <p class="section-stat">
-                        <strong>{{ data()?.avgRecruitmentDays }} days</strong> on average &nbsp;/&nbsp;
-                        <strong>{{ data()?.participantTarget }}</strong> participants
-                    </p>
-
-                    @if (recruitmentChartData(); as chartData) {
-                        <app-bar-chart
-                            [chartData]="chartData"
-                            [grouped]="true"
-                            xAxisLabel="Impact Level"
-                            yAxisLabel="Days / Participants"
-                        />
-                    }
-                </section>
-
-                <!-- Expected Timeline -->
-                <section id="expected-timeline" class="results-section">
-                    <h2>Expected Timeline</h2>
-                    
-                    @if (timelineChartData(); as chartData) {
-                    <app-bar-chart
-                            [chartData]="chartData"
-                            [grouped]="true"
-                            xAxisLabel="# of Patients"
-                            yAxisLabel="Days"
-                        />
-                    }
-                    @else {
-                        <p class="coming-soon">No Data Available</p>
-                    }
-                </section>
-
-                <!-- HeatMap -->
-                <section id="heatmap" class="results-section">
-                    <h2>Heatmap</h2>
-                    @if (heatmapData(); as heatmapData) {
-                        <app-heatmap [points]="heatmapData"/>
-                    }
-                    @else {
-                        <p class="coming-soon">No Data Available</p>
-                    }
-                </section>
-
-                <!-- Metric Comparison Plot -->
-                <section id="data-plot" class="results-section">
-                    <h2>Data Plot</h2>
-                    
-                    <select [value]="dataPlotX()" (change)="dataPlotX.set($any($event.target).value)">
-                        @for (name of model().metricNames; track name) {
-                            <option value="{{ name }}">{{ name }}</option>
+                        @if (recruitmentByImpact(); as chartData) {
+                            <app-bar-chart
+                                [chartData]="chartData"
+                                [grouped]="true"
+                                xAxisLabel="Primary Drivers"
+                                yAxisLabel="Days / Participants"
+                            />
                         }
-                    </select>
-                    
-                    <select [value]="dataPlotY()" (change)="dataPlotY.set($any($event.target).value)">
-                        @for (name of model().metricNames; track name) {
-                            <option value="{{ name }}">{{ name }}</option>
+                    </section>
+
+                    <!-- Expected Timeline -->
+                    <section id="expected-timeline" class="results-section">
+                        <h2>Expected Timeline</h2>
+                        
+                        @if (timelineChartData(); as chartData) {
+                        <app-bar-chart
+                                [chartData]="chartData"
+                                [grouped]="true"
+                                xAxisLabel="# of Patients"
+                                yAxisLabel="Days"
+                            />
                         }
-                    </select>
+                        @else {
+                            <p class="coming-soon">No Data Available</p>
+                        }
+                    </section>
 
-                    @if (dataPlotData(); as plotData) {
-                        <app-scatter-chart 
-                            [chartData]="plotData" 
-                            xAxisLabel="{{ dataPlotX() }}" 
-                            yAxisLabel="{{ dataPlotY() }}" />
-                    }
-                    @else {
-                        <p class="coming-soon">No Data Available</p>
-                    }
-                </section>
+                    <!-- HeatMap -->
+                    <section id="heatmap" class="results-section">
+                        <h2>Heatmap</h2>
+                        @if (heatmapData(); as heatmapData) {
+                            <app-heatmap [points]="heatmapData"/>
+                        }
+                        @else {
+                            <p class="coming-soon">No Data Available</p>
+                        }
+                    </section>
 
-                <!-- TODO -->
-                <section id="benchmarks" class="results-section results-section--placeholder">
-                    <h2>Benchmarks</h2>
-                    <p class="coming-soon">Coming soon</p>
-                </section>
-
-                <section id="comparison-table" class="results-section">
-                    <div class="comparison-header">
-                        <h2>Comparison Table</h2>
-                        <div class="comparison-search">
-                            <span class="search-icon">&#128269;</span>
-                            <input
-                                type="text"
-                                placeholder="Search trials..."
-                                [value]="comparisonSearch()"
-                                (input)="onComparisonSearch($event)"
-                                aria-label="Search comparison trials"
-                            >
-                        </div>
-                    </div>
-
-                    <div class="comparison-table-wrapper">
-                        <table class="comparison-table">
-                            <thead>
-                                <tr>
-                                    <th class="trial-col">Trial</th>
-                                    @for (metric of comparisonMetrics; track metric.key) {
-                                        <th
-                                            class="metric-col"
-                                            (click)="onComparisonSort(metric.key)"
-                                            [class.sorted]="comparisonSortKey() === metric.key"
-                                        >
-                                            {{ metric.label }}
-                                            <span class="sort-icon">
-                                                @if (comparisonSortKey() === metric.key) {
-                                                    {{ comparisonSortAsc() ? '&#9650;' : '&#9660;' }}
-                                                } @else {
-                                                    &#9661;
-                                                }
-                                            </span>
-                                        </th>
+                    <!-- Metric Comparison Plot -->
+                    <section id="data-plot" class="results-section">
+                        <h2>Data Plot</h2>
+                        
+                        <div class="plot-controls form-row">
+                            <div class="form-group">
+                                <label for="x-axis-select">X-Axis Metric</label>
+                                <select id="x-axis-select" (change)="dataPlotX.set($any($event.target).value)">
+                                    @for (name of model().metricNames; track name) {
+                                        <option [value]="name" [selected]="name === dataPlotX()">{{ name }}</option>
                                     }
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @for (row of comparisonRows(); track row.trial.nctId) {
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="y-axis-select">Y-Axis Metric</label>
+                                <select id="y-axis-select" (change)="dataPlotY.set($any($event.target).value)">
+                                    @for (name of model().metricNames; track name) {
+                                        <option [value]="name" [selected]="name === dataPlotY()">{{ name }}</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        @if (dataPlotData(); as plotData) {
+                            <app-scatter-chart 
+                                [chartData]="plotData" 
+                                xAxisLabel="{{ dataPlotX() }}" 
+                                yAxisLabel="{{ dataPlotY() }}" />
+                        }
+                        @else {
+                            <p class="coming-soon">No Data Available</p>
+                        }
+                    </section>
+
+                    <!-- TODO -->
+                    <section id="benchmarks" class="results-section results-section--placeholder">
+                        <h2>Benchmarks</h2>
+                        <p class="coming-soon">Coming soon</p>
+                    </section>
+
+                    <section id="comparison-table" class="results-section">
+                        <div class="comparison-header">
+                            <h2>Comparison Table</h2>
+                            <div class="comparison-search">
+                                <span class="search-icon">&#128269;</span>
+                                <input
+                                    type="text"
+                                    placeholder="Search trials..."
+                                    [value]="comparisonSearch()"
+                                    (input)="onComparisonSearch($event)"
+                                    aria-label="Search comparison trials"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="comparison-table-wrapper">
+                            <table class="comparison-table">
+                                <thead>
                                     <tr>
-                                        <td class="trial-name-cell">
-                                            <a
-                                                [href]="'https://clinicaltrials.gov/study/' + row.trial.nctId"
-                                                target="_blank"
-                                                class="trial-link"
-                                            >{{ row.trial.briefTitle }}</a>
-                                        </td>
+                                        <th class="trial-col">Trial</th>
                                         @for (metric of comparisonMetrics; track metric.key) {
-                                            <td class="metric-cell">
-                                                @if (row.metrics[metric.key]) {
-                                                    <span class="check">&#10003;</span>
-                                                } @else {
-                                                    <span class="cross">&#10007;</span>
-                                                }
-                                            </td>
+                                            <th
+                                                class="metric-col"
+                                                (click)="onComparisonSort(metric.key)"
+                                                [class.sorted]="comparisonSortKey() === metric.key"
+                                            >
+                                                {{ metric.label }}
+                                                <span class="sort-icon">
+                                                    @if (comparisonSortKey() === metric.key) {
+                                                        {{ comparisonSortAsc() ? '&#9650;' : '&#9660;' }}
+                                                    } @else {
+                                                        &#9661;
+                                                    }
+                                                </span>
+                                            </th>
                                         }
                                     </tr>
-                                } @empty {
-                                    <tr>
-                                        <td [attr.colspan]="comparisonMetrics.length + 1" class="no-results">
-                                            No trials match your search.
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
+                                </thead>
+                                <tbody>
+                                    @for (row of comparisonRows(); track row.trial.nctId) {
+                                        <tr>
+                                            <td class="trial-name-cell">
+                                                <a
+                                                    [href]="'https://clinicaltrials.gov/study/' + row.trial.nctId"
+                                                    target="_blank"
+                                                    class="trial-link"
+                                                >{{ row.trial.briefTitle }}</a>
+                                            </td>
+                                            @for (metric of comparisonMetrics; track metric.key) {
+                                                <td class="metric-cell">
+                                                    @if (row.metrics[metric.key]) {
+                                                        <span class="check">&#10003;</span>
+                                                    } @else {
+                                                        <span class="cross">&#10007;</span>
+                                                    }
+                                                </td>
+                                            }
+                                        </tr>
+                                    } @empty {
+                                        <tr>
+                                            <td [attr.colspan]="comparisonMetrics.length + 1" class="no-results">
+                                                No trials match your search.
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
 
-            </main>
+                </main>
+            </div>
+    } @else {
+        <div class="loading-state-container">
+            <app-loading-indicator [visible]="true" [local]="true" />
         </div>
     }
 

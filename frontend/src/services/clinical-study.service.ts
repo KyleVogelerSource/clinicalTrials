@@ -102,6 +102,7 @@ export class ClinicalStudyService {
                 sponsor: 'PharmaCorp',
                 phase: 'Phase 3',
                 description: 'This study evaluates the safety and efficacy of a new oral medication for adults with Type 2 Diabetes who are not well-controlled on metformin.',
+                overallStatus: 'COMPLETED',
                 sites: ['Massachusetts General Hospital', 'Beth Israel Deaconess Medical Center', 'Tufts Medical Center']
             },
             {
@@ -115,6 +116,7 @@ export class ClinicalStudyService {
                 sponsor: 'HealthInst',
                 phase: 'N/A',
                 description: 'A longitudinal study observing the effects of a Mediterranean-style diet on blood pressure and cardiac event rates in high-risk populations.',
+                overallStatus: 'RECRUITING',
                 sites: ['Mount Sinai Hospital', 'NewYork-Presbyterian Hospital', 'NYU Langone Health']
             },
             {
@@ -128,6 +130,7 @@ export class ClinicalStudyService {
                 sponsor: 'BioTech Solutions',
                 phase: 'Phase 2',
                 description: 'Randomized, double-blind study to determine the optimal dose of Drug X for preventing severe asthma exacerbations.',
+                overallStatus: 'COMPLETED',
                 sites: ['UCSF Medical Center', 'California Pacific Medical Center', 'Stanford Health Care']
             },
             {
@@ -141,6 +144,7 @@ export class ClinicalStudyService {
                 sponsor: 'GlobalPharma',
                 phase: 'Phase 3',
                 description: 'Multi-center trial evaluating a monoclonal antibody targeting amyloid plaques in patients with early-stage Alzheimer disease.',
+                overallStatus: 'ACTIVE_NOT_RECRUITING',
                 sites: ['Guy\'s and St Thomas\' NHS Foundation Trust', 'University College London Hospitals', 'King\'s College Hospital']
             },
             {
@@ -154,6 +158,7 @@ export class ClinicalStudyService {
                 sponsor: 'PedsResearch',
                 phase: 'Phase 2',
                 description: 'A randomized controlled trial examining lifestyle interventions to reduce insulin resistance in obese adolescents aged 12-18.',
+                overallStatus: 'COMPLETED',
                 sites: ['Lurie Children\'s Hospital', 'Rush University Medical Center']
             },
             {
@@ -167,6 +172,7 @@ export class ClinicalStudyService {
                 sponsor: 'DiabetesCare Inc',
                 phase: 'Phase 3',
                 description: 'Double-blind placebo-controlled trial evaluating metformin in adults with pre-diabetes to delay or prevent onset of Type 2 Diabetes.',
+                overallStatus: 'COMPLETED',
                 sites: ['Houston Methodist Hospital', 'UTHealth McGovern Medical School']
             },
             {
@@ -180,6 +186,7 @@ export class ClinicalStudyService {
                 sponsor: 'CardioInst',
                 phase: 'Phase 2',
                 description: 'Structured exercise program for patients recovering from acute heart failure events, measuring 6-month readmission rates.',
+                overallStatus: 'RECRUITING',
                 sites: ['Cleveland Clinic', 'University Hospitals Cleveland Medical Center']
             },
             {
@@ -193,6 +200,7 @@ export class ClinicalStudyService {
                 sponsor: 'RespiPharma',
                 phase: 'Phase 3',
                 description: 'Multi-center trial of a long-acting bronchodilator in patients with moderate-to-severe persistent asthma inadequately controlled by inhaled corticosteroids.',
+                overallStatus: 'ACTIVE_NOT_RECRUITING',
                 sites: ['Toronto General Hospital', 'Sunnybrook Health Sciences Centre', 'Mount Sinai Hospital Toronto']
             },
             {
@@ -206,6 +214,7 @@ export class ClinicalStudyService {
                 sponsor: 'NeuroGen',
                 phase: 'Phase 2',
                 description: 'A multi-site randomized trial of a neuroprotective agent to slow progression from mild cognitive impairment to Alzheimer disease.',
+                overallStatus: 'RECRUITING',
                 sites: ['Mayo Clinic Rochester', 'Johns Hopkins Hospital', 'UCSF Memory and Aging Center']
             },
             {
@@ -219,6 +228,7 @@ export class ClinicalStudyService {
                 sponsor: 'TeleHealth Corp',
                 phase: 'N/A',
                 description: 'A pragmatic trial of a telemedicine-based hypertension management program versus usual care, measuring systolic BP reduction at 12 months.',
+                overallStatus: 'ACTIVE_NOT_RECRUITING',
                 sites: ['Kaiser Permanente Northern California', 'Geisinger Health System']
             },
             {
@@ -232,6 +242,7 @@ export class ClinicalStudyService {
                 sponsor: 'EndoPharm',
                 phase: 'Phase 3',
                 description: 'A head-to-head comparison of two GLP-1 receptor agonists in patients with Type 2 Diabetes and cardiovascular risk factors.',
+                overallStatus: 'RECRUITING',
                 sites: ['Penn Medicine', 'Temple University Hospital']
             },
             {
@@ -245,6 +256,7 @@ export class ClinicalStudyService {
                 sponsor: 'LungHealth Foundation',
                 phase: 'Phase 2',
                 description: 'Assessment of a structured pulmonary rehabilitation program in patients who developed asthma following COVID-19 infection.',
+                overallStatus: 'COMPLETED',
                 sites: ['UW Medical Center', 'Swedish Medical Center Seattle']
             },
             {
@@ -258,6 +270,7 @@ export class ClinicalStudyService {
                 sponsor: 'NutritionFirst',
                 phase: 'N/A',
                 description: 'A dietary intervention trial examining the effect of a standardized low-sodium meal plan on blood pressure in hypertensive adults.',
+                overallStatus: 'COMPLETED',
                 sites: ['Emory University Hospital', 'Grady Memorial Hospital']
             },
             {
@@ -271,6 +284,7 @@ export class ClinicalStudyService {
                 sponsor: 'NeuralPath Therapeutics',
                 phase: 'Phase 2',
                 description: 'A phase 2 trial of a novel tau-targeting immunotherapy in patients with early-stage Alzheimer disease confirmed by PET imaging.',
+                overallStatus: 'RECRUITING',
                 sites: ['UC San Diego Health', 'Scripps Health', 'Sharp HealthCare']
             },
             {
@@ -284,6 +298,7 @@ export class ClinicalStudyService {
                 sponsor: 'CommunityHealth Alliance',
                 phase: 'N/A',
                 description: 'A community-based randomized trial of culturally tailored lifestyle interventions in high-risk Hispanic adults to prevent Type 2 Diabetes.',
+                overallStatus: 'COMPLETED',
                 sites: ['Cedars-Sinai Medical Center', 'LAC+USC Medical Center', 'Kaiser Permanente Los Angeles']
             },
         ];
