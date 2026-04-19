@@ -12,27 +12,10 @@ import express, { NextFunction, Request, Response } from "express";
 import { initializeDatabase, isDatabaseConnected, probeDatabaseConnection } from "./storage/PostgresClient";
 import { registerUser, loginUser } from "./auth/AuthService";
 import { authenticateToken, AuthenticatedRequest, requireAction, userHasAction } from "./auth/authMiddleware";
-import {
-  assignRoleAction,
-  assignUserRole,
-  createAdminUser,
-  createRole,
-  deleteRoleAction,
-  deleteUserRole,
-  getAdminSnapshot,
-} from "./services/AdminService";
+import { assignRoleAction, assignUserRole, createAdminUser, createRole, deleteRoleAction, deleteUserRole, getAdminSnapshot } from "./services/AdminService";
 import { SavedSearchShareRequest, SavedSearchUpsertRequest } from "./dto/SavedSearchDto";
 import { TrialCompareRequest } from "./dto/TrialCompareDto";
-import {
-  createSavedSearch,
-  deleteOwnedSavedSearch,
-  getAccessibleSavedSearch,
-  listOwnedSavedSearches,
-  listSharedSavedSearches,
-  runSavedSearch,
-  shareSavedSearch,
-  updateAccessibleSavedSearch,
-} from "./services/SavedSearchService";
+import { createSavedSearch, deleteOwnedSavedSearch, getAccessibleSavedSearch, listOwnedSavedSearches, listSharedSavedSearches, runSavedSearch, shareSavedSearch, updateAccessibleSavedSearch } from "./services/SavedSearchService";
 import { compareTrials } from "./services/TrialCompareService";
 import { validateSavedSearchShareRequest, validateSavedSearchUpsertRequest } from "./validators/SavedSearchValidator";
 import { validateTrialCompareRequest } from "./validators/TrialCompareValidator";
@@ -209,8 +192,7 @@ app.post("/api/clinical-trials/results", async (req: Request, res: Response) => 
 });
 
 // POST /api/clinical-trials/benchmark
-// BE-7 + BE-8 + BE-9: synopsis → embed → similarity rank
-// Accepts the user's scenario request + a pre-built candidate pool.
+// Accepts the user's scenario request and a pre-built candidate pool.
 // Returns Top-K trials ranked by cosine similarity to the proposed design.
 app.post("/api/clinical-trials/benchmark", async (req: Request, res: Response) => {
   const { trials, proposedTrial, topK, ...request } = req.body as TrialResultsRequest & {
@@ -227,11 +209,21 @@ app.post("/api/clinical-trials/benchmark", async (req: Request, res: Response) =
     return;
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY ?? "";
-  if (!apiKey) {
+  const anthropicKey = process.env.ANTHROPIC_API_KEY ?? "";
+  const voyageKey = process.env.VOYAGE_API_KEY ?? "";
+
+  if (!anthropicKey) {
     res.status(500).json({
       error: "Configuration Error",
       message: "ANTHROPIC_API_KEY is not configured.",
+    });
+    return;
+  }
+
+  if (!voyageKey) {
+    res.status(500).json({
+      error: "Configuration Error",
+      message: "VOYAGE_API_KEY is not configured.",
     });
     return;
   }
@@ -242,7 +234,8 @@ app.post("/api/clinical-trials/benchmark", async (req: Request, res: Response) =
       trials,
       proposedTrial ?? null,
       topK ?? 15,
-      apiKey
+      anthropicKey,
+      voyageKey
     );
     res.status(200).json(result);
   } catch (err) {

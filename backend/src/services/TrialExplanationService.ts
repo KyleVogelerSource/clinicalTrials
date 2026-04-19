@@ -15,8 +15,8 @@ function formatNumericBenchmark(b: NumericBenchmark): string {
         `Attribute: ${b.attribute}`,
         `  Proposed value: ${b.proposedValue ?? "not specified"}`,
         `  Pool median: ${b.poolMedian} | Mean: ${b.poolMean} | P25: ${b.poolP25} | P75: ${b.poolP75}`,
-        `  Proposed percentile: ${b.proposedPercentile ?? "N/A"}`,
-        `  Outlier flag: ${b.outlier}`,
+        `  Proposed percentile: ${b.insufficientData ? "N/A (insufficient pool data)" : (b.proposedPercentile ?? "N/A")}`,
+        `  Outlier flag: ${b.insufficientData ? "SUPPRESSED (pool too small)" : b.outlier}`,
     ];
     return lines.join("\n");
 }
@@ -33,7 +33,7 @@ function formatCategoricalBenchmark(b: CategoricalBenchmark): string {
         `  Proposed value: ${b.proposedValue}`,
         `  Pool frequency: ${freqStr}`,
         `  Proposed value appears in ${b.proposedFrequencyPct}% of pool trials`,
-        `  Uncommon: ${b.uncommon}`,
+        `  Uncommon: ${b.insufficientData ? "N/A (pool too small)" : b.uncommon}`,
     ].join("\n");
 }
 
@@ -46,24 +46,27 @@ function buildExplanationPrompt(request: TrialResultsRequest, topTrials: ScoredT
     const categoricalSections = outliers.categorical.map(formatCategoricalBenchmark).join("\n\n");
 
     const outlierFlags = [
-        ...outliers.numeric.filter((b) => b.outlier !== "NORMAL").map(
-            (b) => `${b.attribute} is ${b.outlier} (${b.proposedPercentile}th percentile)`
-        ),
-        ...outliers.categorical.filter((b) => b.uncommon).map(
-            (b) => `${b.attribute} "${b.proposedValue}" is uncommon in similar trials (${b.proposedFrequencyPct}%)`
-        ),
+        ...outliers.numeric
+            .filter((b) => b.outlier !== "NORMAL" && !b.insufficientData)
+            .map((b) => `${b.attribute} is ${b.outlier} (${b.proposedPercentile}th percentile)`),
+        ...outliers.categorical
+            .filter((b) => b.uncommon && !b.insufficientData)
+            .map((b) => `${b.attribute} "${b.proposedValue}" is uncommon in similar trials (${b.proposedFrequencyPct}%)`),
     ];
 
-    return `You are summarizing a clinical trial benchmarking analysis for a clinical operations professional.
+    const poolSizeNote =
+        outliers.poolSize < outliers.thresholds.minPoolSize
+            ? `\nNOTE: The pool contains only ${outliers.poolSize} trials (minimum recommended: ${outliers.thresholds.minPoolSize}). Statistical outlier flags have been suppressed. Interpret benchmark values with caution.`
+            : "";
 
-PROPOSED TRIAL DESIGN:
+    return `PROPOSED TRIAL DESIGN:
 - Condition: ${request.condition ?? "not specified"}
 - Phase: ${request.phase ?? "not specified"}
 - Intervention model: ${request.interventionModel ?? "not specified"}
 - Allocation: ${request.allocationType ?? "not specified"}
 - Sex: ${request.sex ?? "not specified"}
 - Age range: ${request.minAge ?? "any"} to ${request.maxAge ?? "any"}
-
+${poolSizeNote}
 TOP SIMILAR HISTORICAL TRIALS (by cosine similarity):
 ${topTrialSummaries}
 
@@ -76,7 +79,7 @@ ${categoricalSections}
 OUTLIER FLAGS:
 ${outlierFlags.length > 0 ? outlierFlags.map((f) => `- ${f}`).join("\n") : "No outliers detected."}
 
-Write a 3–4 paragraph plain-language explanation of these findings for a clinical operations professional. 
+Write a 3–4 paragraph plain-language explanation of these findings for a clinical operations professional.
 - Paragraph 1: Briefly describe what similar trials look like based on the top matches.
 - Paragraph 2: Discuss how the proposed trial's enrollment compares to historical norms, citing the specific percentile and median values above.
 - Paragraph 3: Address any outlier flags. If none, say the design appears typical for this trial type.
@@ -85,11 +88,19 @@ Write a 3–4 paragraph plain-language explanation of these findings for a clini
 Use only the statistics provided. Do not invent numbers. Write in plain English without bullet points or headers.`;
 }
 
+const SYSTEM_PROMPT =
+    "You are a clinical operations analyst summarizing a trial benchmarking report. " +
+    "You write clear, accurate, plain-language summaries grounded exclusively in the statistics provided. " +
+    "You never invent numbers, percentiles, or trial details not present in the prompt.";
+
 export async function generateExplanation(request: TrialResultsRequest, topTrials: ScoredTrial[], outliers: OutlierDetectionResult, apiKey: string): Promise<ExplanationResult> {
+    const generatedAt = new Date().toISOString();
+
     if (topTrials.length === 0) {
         return {
-            explanation: "No similar historical trials were found for the proposed design. Consider broadening the search parameters.",
-            generatedAt: new Date().toISOString(),
+            explanation:
+                "No similar historical trials were found for the proposed design. Consider broadening the search parameters.",
+            generatedAt,
         };
     }
 
@@ -105,6 +116,7 @@ export async function generateExplanation(request: TrialResultsRequest, topTrial
         body: JSON.stringify({
             model: ANTHROPIC_MODEL,
             max_tokens: 1000,
+            system: SYSTEM_PROMPT,
             messages: [{ role: "user", content: userPrompt }],
         }),
     });
@@ -124,8 +136,5 @@ export async function generateExplanation(request: TrialResultsRequest, topTrial
         .join("")
         .trim();
 
-    return {
-        explanation,
-        generatedAt: new Date().toISOString(),
-    };
+    return { explanation, generatedAt };
 }

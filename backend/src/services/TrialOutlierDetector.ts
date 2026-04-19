@@ -3,6 +3,7 @@ import { NormalizedTrial } from "../models/NormalizedTrial";
 export interface OutlierThresholds {
     lowerPercentile: number;
     upperPercentile: number;
+    minPoolSize: number;
 }
 
 export type OutlierDirection = "HIGH" | "LOW" | "NORMAL";
@@ -18,6 +19,7 @@ export interface NumericBenchmark {
     poolP75: number;
     proposedPercentile: number | null;
     outlier: OutlierDirection;
+    insufficientData: boolean;
 }
 
 export interface CategoricalBenchmark {
@@ -26,6 +28,7 @@ export interface CategoricalBenchmark {
     poolFrequency: Record<string, number>;
     proposedFrequencyPct: number;
     uncommon: boolean;
+    insufficientData: boolean;
 }
 
 export interface OutlierDetectionResult {
@@ -38,6 +41,7 @@ export interface OutlierDetectionResult {
 const DEFAULT_THRESHOLDS: OutlierThresholds = {
     lowerPercentile: 10,
     upperPercentile: 90,
+    minPoolSize: 10,
 };
 
 function sortedNumbers(values: number[]): number[] {
@@ -90,14 +94,16 @@ function trialDurationDays(trial: NormalizedTrial): number | null {
 
 function buildNumericBenchmark(attribute: string, proposedValue: number | null, poolValues: number[], thresholds: OutlierThresholds): NumericBenchmark {
     const sorted = sortedNumbers(poolValues);
+    const insufficientData = sorted.length < thresholds.minPoolSize;
 
     const proposedPercentile =
         proposedValue !== null && sorted.length > 0
             ? percentileRank(sorted, proposedValue)
             : null;
 
+    // Only flag outliers when we have enough data to trust the percentile estimate
     let outlier: OutlierDirection = "NORMAL";
-    if (proposedPercentile !== null) {
+    if (!insufficientData && proposedPercentile !== null) {
         if (proposedPercentile >= thresholds.upperPercentile) outlier = "HIGH";
         else if (proposedPercentile <= thresholds.lowerPercentile) outlier = "LOW";
     }
@@ -113,10 +119,13 @@ function buildNumericBenchmark(attribute: string, proposedValue: number | null, 
         poolP75: percentile(sorted, 75),
         proposedPercentile,
         outlier,
+        insufficientData,
     };
 }
 
-function buildCategoricalBenchmark(attribute: string, proposedValue: string, poolValues: string[]): CategoricalBenchmark {
+function buildCategoricalBenchmark(attribute: string, proposedValue: string, poolValues: string[], thresholds: OutlierThresholds): CategoricalBenchmark {
+    const insufficientData = poolValues.length < thresholds.minPoolSize;
+
     const freq: Record<string, number> = {};
     for (const v of poolValues) {
         freq[v] = (freq[v] ?? 0) + 1;
@@ -133,23 +142,12 @@ function buildCategoricalBenchmark(attribute: string, proposedValue: string, poo
         proposedValue,
         poolFrequency: freq,
         proposedFrequencyPct,
-        uncommon: proposedFrequencyPct < 20,
+        uncommon: !insufficientData && proposedFrequencyPct < 20,
+        insufficientData,
     };
 }
 
-export function detectOutliers(
-rankedPool: NormalizedTrial[],
-    proposedValues: {
-        enrollmentCount?: number | null;
-        phase?: string;
-        studyType?: string;
-        sex?: string;
-        startDate?: string | null;
-        completionDate?: string | null;
-    },
-    thresholds: OutlierThresholds = DEFAULT_THRESHOLDS
-): OutlierDetectionResult {
-
+export function detectOutliers(rankedPool: NormalizedTrial[], proposedValues: { enrollmentCount?: number | null; phase?: string; studyType?: string; sex?: string; startDate?: string | null; completionDate?: string | null; }, thresholds: OutlierThresholds = DEFAULT_THRESHOLDS): OutlierDetectionResult {
     const poolEnrollments = rankedPool.map((t) => t.enrollmentCount).filter((n) => n > 0);
     const enrollmentBenchmark = buildNumericBenchmark(
         "enrollmentCount",
@@ -182,21 +180,24 @@ rankedPool: NormalizedTrial[],
     const phaseBenchmark = buildCategoricalBenchmark(
         "phase",
         proposedValues.phase ?? "UNKNOWN",
-        poolPhases
+        poolPhases,
+        thresholds
     );
 
     const poolStudyTypes = rankedPool.map((t) => t.studyType);
     const studyTypeBenchmark = buildCategoricalBenchmark(
         "studyType",
         proposedValues.studyType ?? "UNKNOWN",
-        poolStudyTypes
+        poolStudyTypes,
+        thresholds
     );
 
     const poolSex = rankedPool.map((t) => t.sex);
     const sexBenchmark = buildCategoricalBenchmark(
         "sex",
         proposedValues.sex ?? "ALL",
-        poolSex
+        poolSex,
+        thresholds
     );
 
     return {
