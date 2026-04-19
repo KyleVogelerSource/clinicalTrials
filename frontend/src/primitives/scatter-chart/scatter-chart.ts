@@ -89,6 +89,31 @@ export class ScatterChart implements OnDestroy {
         });
     }
 
+    exportPng(): void {
+        if (!this.chart) return;
+        const link = document.createElement('a');
+        link.download = 'scatter-chart.png';
+        link.href = this.chart.toBase64Image();
+        link.click();
+    }
+
+    exportCsv(): void {
+        const data = this.chartData();
+        const rows: string[] = ['Dataset,X,Y'];
+        data.datasets.forEach(dataset => {
+            dataset.data.forEach(point => {
+                rows.push([dataset.label, point.x, point.y].join(','));
+            });
+        });
+        const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'scatter-chart.csv';
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+
     ngOnDestroy(): void {
         this.chart?.destroy();
     }

@@ -41,10 +41,10 @@ The backend has its own `tsconfig.json` under `backend/`. The frontend has its o
 
 ## Commands
 
-### Backend (run from `clinicalTrials/`)
+### Backend (run from `clinicalTrials/backend/`)
 ```bash
 npm install
-npm run dev        # ts-node-dev with --respawn, serves on port 3000
+DB_HOST=localhost npm run dev   # ts-node-dev with --respawn, serves on port 3000
 ```
 
 ### Frontend (run from `clinicalTrials/frontend/`)
@@ -101,9 +101,37 @@ Designer (step 1) → Selection (step 2) → Results (step 3)
 ### Authentication
 JWT-based auth. `AuthInterceptor` attaches Bearer tokens to all HTTP requests. `AuthService` manages login state with Angular signals. Login/register via `LoginModal` primitive in the app header.
 
+### Chart export
+Each chart primitive has built-in export buttons (top-right corner):
+
+- **BarChart** (`primitives/bar-chart/`) — PNG via `chart.toBase64Image()`, CSV serialized from `chartData` input
+- **ScatterChart** (`primitives/scatter-chart/`) — PNG via `chart.toBase64Image()`, CSV with columns `Dataset,X,Y`
+- **Heatmap** (`primitives/heatmap/`) — PNG via `leaflet-image` library; button shows `Exporting…` while rasterizing; `leaflet-image` is allowlisted in `angular.json` under `allowedCommonJsDependencies`
+
 ### Debug mode
 Add `?debug=true` to the URL to show a debug bar polling `/api/debug/status` every 10s.
 
+## Local development (no Docker)
+
+PostgreSQL 16 is installed via Homebrew. Start all three services before running the app:
+
+```bash
+brew services start postgresql@16
+cd clinicalTrials/backend && DB_HOST=localhost npm run dev   # port 3000
+cd clinicalTrials/frontend && npm start                      # port 4200
+```
+
+Start Postgres **before** the backend — the backend connects at startup and won't retry if Postgres isn't ready.
+
+To stop everything:
+```bash
+brew services stop postgresql@16
+kill $(lsof -ti:3000)
+kill $(lsof -ti:4200)
+```
+
+DB credentials (local): host `localhost`, db/user/password all `clinicaltrials`.
+
 ## Repository
 **GitHub:** https://github.com/KyleVogelerSource/clinicalTrials
-**Active branch:** `FE-Faceted-Search`
+**Active branch:** `FE-Graph-Export-(Bar,-Scatter,-heat-map)`
