@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from "@angular/core";
 import { CommonModule, DecimalPipe, DatePipe } from "@angular/common";
 import { Router } from "@angular/router";
+import { FormsModule } from "@angular/forms";
 
 import { TrialWorkflowService } from "../../services/trial-workflow-service";
 import { BarChart, BarChartData } from "../../primitives/bar-chart/bar-chart";
@@ -58,6 +59,25 @@ const COMPARISON_METRICS: ComparisonMetric[] = [
     },
 ];
 
+export const metricDescriptions: Record<string, string> = {
+    "Total Enrollment": "The total number of participants planned for the study.",
+    "Site Count": "The number of clinical site facilities participating in the trial.",
+    "Recruitment Velocity": "The speed of enrollment measured in participants per day.",
+    "Inclusion Strictness": "Word count of inclusion criteria; higher numbers imply more complex enrollment.",
+    "Exclusion Strictness": "Word count of exclusion criteria; higher numbers imply more restrictive disqualifiers.",
+    "Site Efficiency": "Ratio of total enrollment to site count (participants per site).",
+    "Outcome Density": "Total count of primary and secondary outcome measures.",
+    "Age Span": "The difference between maximum and minimum eligibility age.",
+    "Min Age": "The minimum required age of participants.",
+    "Max Age": "The maximum allowed age of participants.",
+    "Intervention Count": "Number of unique drugs, devices, or procedures being tested.",
+    "Collaborator Count": "Number of organizations partnering with the lead sponsor.",
+    "Timeline Slippage": "Difference between planned and actual completion duration in days.",
+    "Masking Intensity": "Number of groups (Participants, Providers, etc.) blinded from study assignments.",
+    "Geographic Spread": "Number of unique geographic locations where sites are established.",
+    "Condition Count": "Number of diseases or conditions being addressed in the protocol."
+};
+
 @Component({
     selector: "app-analysis",
     templateUrl: "./analysis.html",
@@ -65,6 +85,7 @@ const COMPARISON_METRICS: ComparisonMetric[] = [
     standalone: true,
     imports: [
         CommonModule,
+        FormsModule,
         BarChart,
         ScatterChart,
         Heatmap,
@@ -82,7 +103,10 @@ export class Analysis implements OnInit {
     selectedTrialIds = this.workflowService.selectedTrialIds;
     
     data = computed(() => this.results().trialResults);
+    descriptions = metricDescriptions;
     
+    heatmapFocus = signal<[number, number] | null>(null);
+
     abs(val: number): number {
         return Math.abs(val);
     }
@@ -213,20 +237,24 @@ export class Analysis implements OnInit {
 
     topSites = computed(() => {
         const trials = this.selectedTrialIds().map(id => (this.workflowService as any).trialCache.get(id));
-        const siteCounts = new Map<string, number>();
+        const siteData = new Map<string, { count: number, coords: [number, number] | null }>();
         
         trials.forEach((trial: any) => {
             trial?.protocolSection?.contactsLocationsModule?.locations?.forEach((loc: any) => {
                 if (loc.facility) {
-                    siteCounts.set(loc.facility, (siteCounts.get(loc.facility) || 0) + 1);
+                    const existing = siteData.get(loc.facility);
+                    const count = (existing?.count || 0) + 1;
+                    const coords = existing?.coords || (loc.geoPoint?.lat ? [loc.geoPoint.lat, loc.geoPoint.lon] : null);
+                    siteData.set(loc.facility, { count, coords });
                 }
             });
         });
 
-        return Array.from(siteCounts.entries())
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 5)
-            .map(([name, count]) => ({ name, count }));
+        return Array.from(siteData.entries())
+            .filter(([_, data]) => data.count > 1)
+            .sort((a, b) => b[1].count - a[1].count)
+            .slice(0, 12)
+            .map(([name, data]) => ({ name, count: data.count, coords: data.coords }));
     });
 
     benchmarks = computed(() => {
@@ -235,11 +263,11 @@ export class Analysis implements OnInit {
 
         const user = this.inputParams();
         const metrics = [
-            { label: 'Patients', key: 'totalEnrollment', userVal: user?.userPatients ?? 0 },
-            { label: 'Inclusions', key: 'inclusionStrictness', userVal: user?.userInclusions ?? 0 },
-            { label: 'Exclusions', key: 'exclusionStrictness', userVal: user?.userExclusions ?? 0 },
-            { label: 'Outcomes', key: 'outcomeDensity', userVal: user?.userOutcomes ?? 0 },
-            { label: 'Sites', key: 'siteCount', userVal: user?.userSites ?? 0 }
+            { label: 'Patients', key: 'totalEnrollment', paramKey: 'userPatients', userVal: user?.userPatients ?? 0 },
+            { label: 'Inclusions', key: 'inclusionStrictness', paramKey: 'userInclusions', userVal: user?.userInclusions ?? 0 },
+            { label: 'Exclusions', key: 'exclusionStrictness', paramKey: 'userExclusions', userVal: user?.userExclusions ?? 0 },
+            { label: 'Outcomes', key: 'outcomeDensity', paramKey: 'userOutcomes', userVal: user?.userOutcomes ?? 0 },
+            { label: 'Sites', key: 'siteCount', paramKey: 'userSites', userVal: user?.userSites ?? 0 }
         ];
 
         return metrics.map(m => {
@@ -249,9 +277,9 @@ export class Analysis implements OnInit {
             const stdDev = Math.sqrt(variance);
             
             // Generate Normal Distribution Curve Points
-            const points: {x: number, y: number}[] = [];
+            const curvePoints: {x: number, y: number}[] = [];
+            let maxY = 0;
             
-            // Safety Check: If stdDev is 0, we can't draw a normal curve
             if (stdDev > 0) {
                 const min = Math.max(0, mean - 3 * stdDev);
                 const max = mean + 3 * stdDev;
@@ -261,15 +289,23 @@ export class Analysis implements OnInit {
                 if (step > 0) {
                     for (let x = min; x <= max; x += step) {
                         const y = (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mean) / stdDev, 2));
-                        points.push({ x, y });
+                        curvePoints.push({ x, y });
+                        if (y > maxY) maxY = y;
                     }
                 }
             }
+
+            // Secondary dataset for vertical user line
+            const userLinePoints = [
+                { x: m.userVal, y: 0 },
+                { x: m.userVal, y: maxY || 0.1 }
+            ];
 
             const userZScore = stdDev === 0 ? 0 : (m.userVal - mean) / stdDev;
 
             return {
                 label: m.label,
+                paramKey: m.paramKey,
                 userVal: m.userVal,
                 mean: Math.round(mean * 10) / 10,
                 stdDev: Math.round(stdDev * 10) / 10,
@@ -278,13 +314,21 @@ export class Analysis implements OnInit {
                     datasets: [
                         {
                             label: 'Distribution',
-                            data: points,
+                            data: curvePoints,
                             borderColor: '#193F6A',
                             backgroundColor: 'rgba(25, 63, 106, 0.1)',
                             pointRadius: 0,
-                            showLine: points.length > 0,
+                            showLine: curvePoints.length > 0,
                             tension: 0.4,
                             fill: true
+                        },
+                        {
+                            label: 'User',
+                            data: userLinePoints,
+                            borderColor: '#088989',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            showLine: true
                         }
                     ]
                 }
@@ -365,6 +409,23 @@ export class Analysis implements OnInit {
         } else {
             this.comparisonSortKey.set(key);
             this.comparisonSortAsc.set(true);
+        }
+    }
+
+    onUpdateBenchmark(paramKey: string, value: string) {
+        const val = value === '' ? null : parseInt(value);
+        const params = this.inputParams();
+        if (params) {
+            this.workflowService.setInputs({
+                ...params,
+                [paramKey]: val
+            });
+        }
+    }
+
+    onFocusSite(coords: [number, number] | null) {
+        if (coords) {
+            this.heatmapFocus.set(coords);
         }
     }
 }

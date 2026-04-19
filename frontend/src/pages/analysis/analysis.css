@@ -112,6 +112,11 @@
     grid-column: span 3;
 }
 
+.card-large {
+    grid-column: span 4;
+    height: 350px;
+}
+
 .card-full {
     grid-column: span 6;
 }
@@ -229,6 +234,7 @@
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 1.5rem;
+    height: 100%;
 }
 
 .heatmap-container {
@@ -263,6 +269,15 @@
     font-size: 0.8rem;
 }
 
+.interactive-site {
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.interactive-site:hover {
+    background-color: #f1f5f9;
+}
+
 .site-name {
     color: #334155;
     white-space: nowrap;
@@ -292,6 +307,19 @@
     font-size: 0.65rem;
     color: #94a3b8;
     font-weight: 600;
+}
+
+.metric-descriptions {
+    margin-bottom: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.desc-item {
+    font-size: 0.7rem;
+    color: #64748b;
+    line-height: 1.4;
 }
 
 /* Intersection Matrix */
@@ -432,13 +460,27 @@
     color: #475569;
 }
 
-.benchmark-val {
-    font-size: 0.85rem;
-    font-weight: 700;
+.benchmark-val-editor {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.benchmark-input {
+    width: 60px;
+    padding: 0.15rem 0.3rem !important;
+    font-size: 0.8rem !important;
+    border: 1px solid #d1d5da !important;
+    border-radius: 2px !important;
+}
+
+.benchmark-z {
+    font-size: 0.75rem;
+    font-weight: 600;
     color: #193F6A;
 }
 
-.benchmark-val.high-dev {
+.benchmark-z.high-dev {
     color: #DC344D;
 }
 
@@ -448,29 +490,6 @@
     border-bottom: 2px solid #e2e8f0;
 }
 
-.user-line {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background-color: #088989;
-    z-index: 5;
-    box-shadow: 0 0 4px rgba(8, 137, 137, 0.5);
-}
-
-.user-line::after {
-    content: attr(data-val);
-    position: absolute;
-    top: -15px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.65rem;
-    font-weight: 700;
-    color: #088989;
-    background: white;
-    padding: 0 2px;
-}
-
 .benchmark-stats {
     font-size: 0.7rem;
     color: #94a3b8;
@@ -478,7 +497,14 @@
 }
 
 /* Loading State */
-.loading-overlay {
+.loading-full-page {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 10000;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -491,7 +517,7 @@
     .info-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    .card-small, .card-medium, .card-large, .card-full {
+    .card-small, .card-medium, .card-large, .card-full, .card-half {
         grid-column: span 2;
     }
 }
