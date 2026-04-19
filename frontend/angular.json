@@ -37,7 +37,8 @@
             "allowedCommonJsDependencies": [
               "leaflet",
               "leaflet.heat",
-              "leaflet-image"
+              "leaflet-image",
+              "hammerjs"
             ]
           },
           "configurations": {
