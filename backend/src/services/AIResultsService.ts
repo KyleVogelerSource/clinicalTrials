@@ -5,7 +5,73 @@ import { TrialResultsResponse } from "../dto/TrialResultsResponse";
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_MODEL = "claude-sonnet-4-20250514";
 
-export async function generateAIResults(request: TrialResultsRequest, trials: NormalizedTrial[]): Promise<TrialResultsResponse> {
+// JSON Schema for the response — stricter than embedding the TypeScript interface
+// as a comment, and gives the model a machine-readable contract to satisfy.
+const RESPONSE_SCHEMA = {
+    type: "object",
+    required: [
+        "overallScore",
+        "totalTrialsFound",
+        "queryCondition",
+        "terminationReasons",
+        "avgRecruitmentDays",
+        "participantTarget",
+        "recruitmentByImpact",
+        "timelineBuckets",
+    ],
+    properties: {
+        overallScore: { type: "number", minimum: 0, maximum: 100 },
+        totalTrialsFound: { type: "integer", minimum: 0 },
+        queryCondition: { type: ["string", "null"] },
+        terminationReasons: {
+            type: "array",
+            items: {
+                type: "object",
+                required: ["reason", "count"],
+                properties: {
+                    reason: { type: "string" },
+                    count: { type: "integer", minimum: 0 },
+                },
+            },
+        },
+        avgRecruitmentDays: { type: "number", minimum: 0 },
+        participantTarget: { type: "number", minimum: 0 },
+        recruitmentByImpact: {
+            type: "array",
+            items: {
+                type: "object",
+                required: ["label", "avgDays", "participantCount"],
+                properties: {
+                    label: { type: "string" },
+                    avgDays: { type: "number", minimum: 0 },
+                    participantCount: { type: "integer", minimum: 0 },
+                },
+            },
+        },
+        timelineBuckets: {
+            type: "array",
+            items: {
+                type: "object",
+                required: ["patientBucket", "estimatedDays", "actualDays"],
+                properties: {
+                    patientBucket: { type: "string" },
+                    estimatedDays: { type: "number", minimum: 0 },
+                    actualDays: { type: "number", minimum: 0 },
+                },
+            },
+        },
+    },
+    additionalProperties: false,
+};
+
+const SYSTEM_PROMPT = `You are a clinical trial analyst. Given trial data, return a JSON object matching the provided schema exactly.
+Return ONLY valid JSON. No markdown, no explanation, no backticks, no trailing commas.
+Derive all values from the actual trial data provided — do not invent numbers.`;
+
+export async function generateAIResults(
+    request: TrialResultsRequest,
+    trials: NormalizedTrial[]
+): Promise<TrialResultsResponse> {
     const trialsJson = JSON.stringify(
         trials.map((t) => ({
             nctId: t.nctId,
@@ -26,36 +92,28 @@ export async function generateAIResults(request: TrialResultsRequest, trials: No
         }))
     );
 
-    const systemPrompt = `You are a clinical trial analyst. Analyze the provided clinical trial data and return a JSON object matching the exact TypeScript interface below. Return ONLY valid JSON with no markdown, no explanation, no backticks.
-
-        interface TerminationReasonBar { reason: string; count: number; }
-        interface RecruitmentImpactBar { label: string; avgDays: number; participantCount: number; }
-        interface TimelineBar { patientBucket: string; estimatedDays: number; actualDays: number; }
-        interface TrialResultsResponse {
-        overallScore: number;          // 0-100 feasibility score based on trial characteristics
-        totalTrialsFound: number;      // total number of trials analyzed
-        queryCondition: string | null; // the primary condition searched
-        terminationReasons: TerminationReasonBar[];  // inferred likely termination risk factors with estimated counts
-        avgRecruitmentDays: number;    // estimated avg days to recruit based on enrollment counts and trial durations
-        participantTarget: number;     // median enrollment target across trials
-        recruitmentByImpact: RecruitmentImpactBar[]; // 3 buckets: High/Medium/Low Impact with avgDays and participantCount
-        timelineBuckets: TimelineBar[]; // 5 patient count buckets: "0–50", "51–100", "101–250", "251–500", "500+" with estimated/actual days
-        generatedAt: string;           // ISO timestamp
-        }`;
-
     const userPrompt = `Analyze these ${trials.length} clinical trials for the condition "${request.condition ?? "unspecified"}".
 
-    Search parameters:
-    - Phase: ${request.phase ?? "Any"}
-    - Sex: ${request.sex ?? "Any"}
-    - Age range: ${request.minAge ?? "Any"} to ${request.maxAge ?? "Any"}
-    - Allocation: ${request.allocationType ?? "Any"}
-    - Intervention model: ${request.interventionModel ?? "Any"}
+Search parameters:
+- Phase: ${request.phase ?? "Any"}
+- Sex: ${request.sex ?? "Any"}
+- Age range: ${request.minAge ?? "Any"} to ${request.maxAge ?? "Any"}
+- Allocation: ${request.allocationType ?? "Any"}
+- Intervention model: ${request.interventionModel ?? "Any"}
 
-    Trials data:
-    ${trialsJson}
+Required JSON schema:
+${JSON.stringify(RESPONSE_SCHEMA, null, 2)}
 
-    Generate a realistic TrialResultsResponse JSON based on actual patterns in this data. Use real enrollment counts, dates, and statuses from the trials to derive meaningful estimates. For terminationReasons, analyze overallStatus fields and typical trial failure modes. For timeline buckets, use actual completion vs start dates where available.`;
+Trials data:
+${trialsJson}
+
+Generate a TrialResultsResponse JSON based on actual patterns in this data.
+- overallScore: 0–100 feasibility score based on trial characteristics
+- Use real enrollment counts, dates, and statuses to derive meaningful estimates
+- terminationReasons: analyze overallStatus fields and typical trial failure modes
+- timelineBuckets must use exactly these 5 patient count labels: "0–50", "51–100", "101–250", "251–500", "500+"
+- recruitmentByImpact must use exactly these 3 labels: "High Impact", "Medium Impact", "Low Impact"
+- Use actual completion vs start dates where available for timeline data`;
 
     const response = await fetch(ANTHROPIC_API_URL, {
         method: "POST",
@@ -67,7 +125,7 @@ export async function generateAIResults(request: TrialResultsRequest, trials: No
         body: JSON.stringify({
             model: ANTHROPIC_MODEL,
             max_tokens: 2000,
-            system: systemPrompt,
+            system: SYSTEM_PROMPT,
             messages: [{ role: "user", content: userPrompt }],
         }),
     });
@@ -85,9 +143,15 @@ export async function generateAIResults(request: TrialResultsRequest, trials: No
 
     const cleaned = text.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
 
+    let parsed: TrialResultsResponse;
     try {
-        return JSON.parse(cleaned) as TrialResultsResponse;
+        parsed = JSON.parse(cleaned) as TrialResultsResponse;
     } catch {
         throw new Error(`Failed to parse AI response as JSON: ${cleaned.substring(0, 200)}`);
     }
+
+    // Always stamp with a server-authoritative timestamp
+    parsed.generatedAt = new Date().toISOString();
+
+    return parsed;
 }

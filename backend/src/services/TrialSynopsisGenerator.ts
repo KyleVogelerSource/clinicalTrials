@@ -1,6 +1,8 @@
 import { NormalizedTrial } from "../models/NormalizedTrial";
 
-const MAX_DESCRIPTION_CHARS = 2000;
+// Single source of truth for synopsis truncation limits.
+// Used both when building synopses and when deciding how much text to embed.
+export const SYNOPSIS_ELIGIBILITY_MAX_CHARS = 2000;
 
 export interface SynopsisResult {
     nctId: string;
@@ -38,8 +40,8 @@ export function generateSynopsis(trial: NormalizedTrial): SynopsisResult {
     }
 
     if (trial.eligibilityCriteria) {
-        const truncated = trial.eligibilityCriteria.slice(0, MAX_DESCRIPTION_CHARS);
-        const wasTruncated = trial.eligibilityCriteria.length > MAX_DESCRIPTION_CHARS;
+        const truncated = trial.eligibilityCriteria.slice(0, SYNOPSIS_ELIGIBILITY_MAX_CHARS);
+        const wasTruncated = trial.eligibilityCriteria.length > SYNOPSIS_ELIGIBILITY_MAX_CHARS;
         parts.push(`Eligibility: ${truncated}${wasTruncated ? "..." : ""}`);
     }
 

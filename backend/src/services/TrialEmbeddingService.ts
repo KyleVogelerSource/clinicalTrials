@@ -1,7 +1,8 @@
-const CLAUDE_API_URL = "https://api.anthropic.com/v1/messages";
-const CLAUDE_MODEL = "claude-haiku-4-5-20251001";
-const EMBEDDING_DIM = 128;
-const BATCH_SIZE = 10;
+import { NormalizedTrial } from "../models/NormalizedTrial";
+
+const VOYAGE_API_URL = "https://api.voyageai.com/v1/embeddings";
+const VOYAGE_MODEL = "voyage-3";
+const BATCH_SIZE = 128;
 
 export interface TrialEmbedding {
     nctId: string;
@@ -13,73 +14,88 @@ export interface EmbeddingBatchResult {
     totalInputTokens: number;
 }
 
-async function claudeEmbedOne(text: string, apiKey: string): Promise<number[]> {
-    const response = await fetch(CLAUDE_API_URL, {
+async function voyageEmbedBatch(
+    inputs: Array<{ nctId: string; text: string }>,
+    apiKey: string
+): Promise<TrialEmbedding[]> {
+    const texts = inputs.map((i) => i.text);
+
+    const response = await fetch(VOYAGE_API_URL, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "x-api-key": apiKey,
-            "anthropic-version": "2023-06-01",
+            Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-            model: CLAUDE_MODEL,
-            max_tokens: 1024,
-            system: `You are a text embedding engine. Given input text, return a JSON array of exactly ${EMBEDDING_DIM} floats between -1 and 1 representing the semantic content. Return ONLY the JSON array. No explanation, no markdown, no backticks.`,
-            messages: [
-                {
-                    role: "user",
-                    content: `Embed this clinical trial synopsis:\n\n${text.slice(0, 1500)}`,
-                },
-            ],
+            model: VOYAGE_MODEL,
+            input: texts,
+            input_type: "document",
         }),
     });
 
     if (!response.ok) {
         const err = await response.text();
-        throw new Error(`Claude embedding error ${response.status}: ${err}`);
+        throw new Error(`Voyage embedding error ${response.status}: ${err}`);
     }
 
     const data = (await response.json()) as {
-        content: Array<{ type: string; text: string }>;
+        data: Array<{ index: number; embedding: number[] }>;
     };
 
-    const raw = data.content
-        .filter((b) => b.type === "text")
-        .map((b) => b.text)
-        .join("")
-        .replace(/```json\s*/g, "")
-        .replace(/```\s*/g, "")
-        .trim();
+    const sorted = [...data.data].sort((a, b) => a.index - b.index);
 
-    const parsed = JSON.parse(raw) as number[];
-
-    if (!Array.isArray(parsed) || parsed.length === 0) {
-        throw new Error(`Claude returned invalid embedding: ${raw.substring(0, 100)}`);
-    }
-
-    if (parsed.length > EMBEDDING_DIM) return parsed.slice(0, EMBEDDING_DIM);
-    if (parsed.length < EMBEDDING_DIM) return [...parsed, ...Array(EMBEDDING_DIM - parsed.length).fill(0)];
-    return parsed;
+    return sorted.map((item, i) => ({
+        nctId: inputs[i].nctId,
+        embedding: item.embedding,
+    }));
 }
 
-export async function generateEmbeddings(synopses: Array<{ nctId: string; synopsis: string }>, apiKey: string): Promise<EmbeddingBatchResult> {
+export async function generateEmbeddings(
+    synopses: Array<{ nctId: string; synopsis: string }>,
+    apiKey: string
+): Promise<EmbeddingBatchResult> {
     const allEmbeddings: TrialEmbedding[] = [];
+    const failed: string[] = [];
 
     for (let i = 0; i < synopses.length; i += BATCH_SIZE) {
         const batch = synopses.slice(i, i + BATCH_SIZE);
         const batchNum = Math.floor(i / BATCH_SIZE) + 1;
 
-        console.log(`[TrialEmbeddingService] Embedding batch ${batchNum} — ${batch.length} synopses`);
+        console.log(
+            `[TrialEmbeddingService] Embedding batch ${batchNum} — ${batch.length} texts`
+        );
 
-        for (const s of batch) {
-            console.log(`[TrialEmbeddingService] Embedding: ${s.nctId}`);
-            const embedding = await claudeEmbedOne(s.synopsis, apiKey);
-            allEmbeddings.push({ nctId: s.nctId, embedding });
+        try {
+            const inputs = batch.map((s) => ({ nctId: s.nctId, text: s.synopsis }));
+            const results = await voyageEmbedBatch(inputs, apiKey);
+            allEmbeddings.push(...results);
+        } catch (err) {
+            console.error(`[TrialEmbeddingService] Batch ${batchNum} failed:`, err);
+            // Fall back: push zero-vectors so the pipeline can continue
+            for (const s of batch) {
+                failed.push(s.nctId);
+                console.warn(`[TrialEmbeddingService] Using zero-vector fallback for ${s.nctId}`);
+                // We don't know the embedding dimension yet — will be resolved below
+                allEmbeddings.push({ nctId: s.nctId, embedding: [] });
+            }
         }
+    }
+    const dim = allEmbeddings.find((e) => e.embedding.length > 0)?.embedding.length ?? 1024;
+
+    for (const e of allEmbeddings) {
+        if (e.embedding.length === 0) {
+            e.embedding = Array(dim).fill(0);
+        }
+    }
+
+    if (failed.length > 0) {
+        console.warn(
+            `[TrialEmbeddingService] ${failed.length} trials used zero-vector fallback: ${failed.join(", ")}`
+        );
     }
 
     return {
         embeddings: allEmbeddings,
-        totalInputTokens: 0,
+        totalInputTokens: 0, // Voyage doesn't expose token counts in the same way
     };
 }
