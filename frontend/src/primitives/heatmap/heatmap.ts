@@ -1,5 +1,7 @@
-import { Component, ChangeDetectionStrategy, input, effect, viewChild, ElementRef, OnDestroy, PLATFORM_ID, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, effect, viewChild, ElementRef, OnDestroy, PLATFORM_ID, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+// @ts-ignore — no type declarations for leaflet-image
+import leafletImage from 'leaflet-image';
 import * as L from 'leaflet';
 import 'leaflet.heat';
 
@@ -31,6 +33,8 @@ export class Heatmap implements OnDestroy {
 
     mapContainer = viewChild<ElementRef<HTMLDivElement>>('mapContainer');
     
+    exporting = signal(false);
+
     private map: L.Map | null = null;
     private heatmapLayer: L.Layer | null = null;
     private platformId = inject(PLATFORM_ID);
@@ -87,6 +91,19 @@ export class Heatmap implements OnDestroy {
             const bounds = L.latLngBounds(points.map(p => [p.latitude, p.longitude]));
             this.map.fitBounds(bounds, { padding: [20, 20] });
         }
+    }
+
+    exportPng(): void {
+        if (!this.map || this.exporting()) return;
+        this.exporting.set(true);
+        leafletImage(this.map, (err: Error | null, canvas: HTMLCanvasElement) => {
+            this.exporting.set(false);
+            if (err || !canvas) return;
+            const link = document.createElement('a');
+            link.download = 'heatmap.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
     }
 
     ngOnDestroy(): void {
