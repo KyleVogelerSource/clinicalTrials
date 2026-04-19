@@ -145,10 +145,22 @@ export class Analysis implements OnInit {
         const metrics = this.metricNamesList;
         const correlations: {x: string, y: string, r: number}[] = [];
 
+        // Redundant metric pairs to ignore (mathematically dependent)
+        const forbiddenPairs = new Set([
+            "Age Span|Max Age", "Max Age|Age Span",
+            "Age Span|Min Age", "Min Age|Age Span",
+            "Max Age|Min Age", "Min Age|Max Age",
+            "Total Enrollment|Site Efficiency", "Site Efficiency|Total Enrollment",
+            "Site Count|Site Efficiency", "Site Efficiency|Site Count"
+        ]);
+
         for (let i = 0; i < metrics.length; i++) {
             for (let j = i + 1; j < metrics.length; j++) {
                 const m1 = metrics[i];
                 const m2 = metrics[j];
+                
+                if (forbiddenPairs.has(`${m1}|${m2}`)) continue;
+
                 const extract1 = MetricRow.metricExtractors[m1];
                 const extract2 = MetricRow.metricExtractors[m2];
 
