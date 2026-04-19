@@ -1,10 +1,12 @@
 name: Deploy Backend
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
       - 'backend/**'
+      - 'shared/**'
       - '.github/workflows/deploy-backend.yml'
 
 permissions:
@@ -51,6 +53,8 @@ jobs:
     needs: validate-backend
     runs-on: ubuntu-latest
     environment: production
+    env:
+      IMAGE_SHA_TAG: ${{ github.sha }}
 
     steps:
       - name: Checkout
@@ -76,19 +80,31 @@ jobs:
 
       - name: Build Docker image
         run: |
+          echo "Building backend image for commit $IMAGE_SHA_TAG"
           docker build -t ${{ secrets.ECR_REPOSITORY }} ./backend
           docker tag ${{ secrets.ECR_REPOSITORY }}:latest \
-            ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:$IMAGE_SHA_TAG
           docker tag ${{ secrets.ECR_REPOSITORY }}:latest \
             ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest
 
       - name: Push Docker image
         run: |
-          docker push ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
+          echo "Pushing image tags:"
+          echo "  - ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:$IMAGE_SHA_TAG"
+          echo "  - ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest"
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:$IMAGE_SHA_TAG
           docker push ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest
+
+      - name: Describe current App Runner service
+        run: |
+          aws apprunner describe-service \
+            --service-arn "${{ secrets.APP_RUNNER_SERVICE_ARN }}" \
+            --query 'Service.{ServiceUrl:ServiceUrl,Status:Status,SourceConfiguration:SourceConfiguration}' \
+            --output json
 
       - name: Deploy latest image to App Runner
         run: |
+          echo "Starting App Runner deployment for commit $IMAGE_SHA_TAG"
           aws apprunner start-deployment \
             --service-arn "${{ secrets.APP_RUNNER_SERVICE_ARN }}"
 
@@ -123,3 +139,17 @@ jobs:
           cat /tmp/status.json || true
           echo "::error title=Backend readiness failed::Backend did not become ready with DB connectivity."
           exit 1
+
+      - name: Write deployment summary
+        if: success()
+        run: |
+          {
+            echo "## Backend Deployment"
+            echo ""
+            echo "- Commit SHA: \`$IMAGE_SHA_TAG\`"
+            echo "- Image tags pushed:"
+            echo "  - \`${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:$IMAGE_SHA_TAG\`"
+            echo "  - \`${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest\`"
+            echo "- App Runner service: \`${{ secrets.APP_RUNNER_SERVICE_ARN }}\`"
+            echo "- Health check URL: \`https://ppjtwpmmjp.us-east-1.awsapprunner.com/api/debug/status\`"
+          } >> "$GITHUB_STEP_SUMMARY"
