@@ -30,6 +30,7 @@ export class Heatmap implements OnDestroy {
     points = input.required<HeatPoint[]>();
     zoom = input<number>(2);
     center = input<[number, number]>([20, 0]); // Default to a global view
+    focusPoint = input<[number, number] | null>(null);
 
     mapContainer = viewChild<ElementRef<HTMLDivElement>>('mapContainer');
     
@@ -52,6 +53,13 @@ export class Heatmap implements OnDestroy {
             }
 
             this.updateHeatmap(this.points());
+        });
+
+        effect(() => {
+            const point = this.focusPoint();
+            if (point && this.map) {
+                this.map.setView(point, 12, { animate: true });
+            }
         });
     }
 

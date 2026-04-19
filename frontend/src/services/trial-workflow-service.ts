@@ -288,7 +288,7 @@ export class TrialWorkflowService {
 
             const topDrivers = drivers.sort((a, b) => Math.abs(b.correlation) - Math.abs(a.correlation)).slice(0, 3);
             const recruitmentByImpact = topDrivers.map((driver) => {
-                const label = `${driver.name} (r=${Math.abs(driver.correlation).toFixed(2)})`;
+                const label = `${driver.name} [r=${Math.abs(driver.correlation).toFixed(2)}]`;
                 const values = validTrials.map((r: MetricRow) => (r as any)[driver.key] as number);
                 const median = values.sort((a: number, b: number) => a - b)[Math.floor(values.length / 2)];
                 const favoredTrials = validTrials.filter((r: MetricRow) => driver.invert ? (r as any)[driver.key] <= median : (r as any)[driver.key] >= median);
@@ -299,8 +299,10 @@ export class TrialWorkflowService {
                 };
             });
 
-            const avgRecruitmentDays = validTrials.length > 0 ? Math.round(validTrials.reduce((acc: number, r: MetricRow) => acc + r.timelineSlippage, 0) / validTrials.length) : 0;
-            const participantTarget = validTrials.length > 0 ? Math.round(validTrials.reduce((acc: number, r: MetricRow) => acc + r.totalEnrollment, 0) / validTrials.length) : 0;
+            const totalDays = validTrials.reduce((acc: number, r: MetricRow) => acc + r.timelineSlippage, 0);
+            const totalEnrollmentVal = validTrials.reduce((acc: number, r: MetricRow) => acc + r.totalEnrollment, 0);
+            const avgRecruitmentDays = totalEnrollmentVal > 0 ? Math.round((totalDays / totalEnrollmentVal) * 10) / 10 : 0;
+            const participantTarget = validTrials.length > 0 ? Math.round(totalEnrollmentVal / validTrials.length) : 0;
 
             current.trialResults = {
                 timestamp: new Date(),

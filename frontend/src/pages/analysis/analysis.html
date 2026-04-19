@@ -14,7 +14,7 @@
     </div>
 
     @if (!data()) {
-        <div class="loading-overlay">
+        <div class="loading-full-page">
             <app-loading-indicator [visible]="true" [local]="true" />
             <p>Analyzing clinical trials data and generating insights...</p>
         </div>
@@ -35,7 +35,7 @@
                         {{ data()?.overallScore }}<span class="viability-score-denominator">/100</span>
                     </div>
                     <div class="viability-summary">
-                        <h5>AI Summary</h5>
+                        <h5>Summary</h5>
                         <p>{{ data()?.overallSummary }}</p>
                     </div>
                 </div>
@@ -69,7 +69,7 @@
             <!-- Benchmark Histograms -->
             <div class="card card-full">
                 <div class="card-header">
-                    <h4>Cohort Benchmarks (Normal Distribution)</h4>
+                    <h4>Cohort Benchmarks</h4>
                 </div>
                 <div class="card-body">
                     <div class="benchmarks-grid">
@@ -77,14 +77,18 @@
                             <div class="benchmark-item">
                                 <div class="benchmark-meta">
                                     <span class="benchmark-label">{{ b.label }}</span>
-                                    <span class="benchmark-val" [class.high-dev]="abs(b.zScore) > 1">
-                                        {{ b.userVal }} ({{ b.zScore > 0 ? '+' : '' }}{{ b.zScore }}σ)
-                                    </span>
+                                    <div class="benchmark-val-editor">
+                                        <label class="input-label">Proposed:</label>
+                                        <input type="number" 
+                                            [value]="b.userVal" 
+                                            (change)="onUpdateBenchmark(b.paramKey, $any($event.target).value)"
+                                            min="0"
+                                            class="benchmark-input">
+                                        <span class="benchmark-z">({{ b.zScore > 0 ? '+' : '' }}{{ b.zScore }}σ)</span>
+                                    </div>
                                 </div>
                                 <div class="benchmark-chart">
                                     <app-scatter-chart [chartData]="b.chartData" [showLegend]="false" type="line" [enableZoom]="false" />
-                                    <!-- User position marker -->
-                                    <div class="user-line" [style.left.%]="50 + (b.zScore * 15)" [attr.data-val]="b.userVal"></div>
                                 </div>
                                 <div class="benchmark-stats">
                                     Avg: {{ b.mean }} | σ: {{ b.stdDev }}
@@ -102,14 +106,14 @@
                 </div>
                 <div class="card-body heatmap-layout">
                     <div class="heatmap-container">
-                        <app-heatmap [points]="heatmapPoints()" />
+                        <app-heatmap [points]="heatmapPoints()" [focusPoint]="heatmapFocus()" />
                     </div>
                     <div class="top-sites">
                         <h5>Top Active Sites</h5>
                         <ul>
                             @for (site of topSites(); track $index) {
-                                <li>
-                                    <span class="site-name">{{ site.name }}</span>
+                                <li class="interactive-site" (click)="onFocusSite(site.coords)">
+                                    <span class="site-name" [title]="site.name">{{ site.name }}</span>
                                     <span class="site-count">{{ site.count }}</span>
                                 </li>
                             }
@@ -142,13 +146,13 @@
                         <span class="info-icon" title="Explore correlations between different trial metrics. High correlation (r close to 1 or -1) indicates a strong design pattern.">ⓘ</span>
                     </div>
                     <div class="plot-selectors">
-                        <select [value]="dataPlotX()" (change)="dataPlotX.set($any($event.target).value)">
+                        <select [ngModel]="dataPlotX()" (ngModelChange)="dataPlotX.set($event)">
                             @for (name of metricNamesList; track $index) {
                                 <option [value]="name">{{ name }}</option>
                             }
                         </select>
                         <span class="vs">vs</span>
-                        <select [value]="dataPlotY()" (change)="dataPlotY.set($any($event.target).value)">
+                        <select [ngModel]="dataPlotY()" (ngModelChange)="dataPlotY.set($event)">
                             @for (name of metricNamesList; track $index) {
                                 <option [value]="name">{{ name }}</option>
                             }
@@ -156,8 +160,12 @@
                     </div>
                 </div>
                 <div class="card-body">
+                    <div class="metric-descriptions">
+                        <div class="desc-item"><strong>{{ dataPlotX() }}:</strong> {{ descriptions[dataPlotX()] }}</div>
+                        <div class="desc-item"><strong>{{ dataPlotY() }}:</strong> {{ descriptions[dataPlotY()] }}</div>
+                    </div>
                     @if (dataPlotData(); as plotData) {
-                        <div class="chart-container">
+                        <div class="chart-container" style="height: calc(100% - 40px);">
                             <app-scatter-chart [chartData]="plotData" [xAxisLabel]="dataPlotX()" [yAxisLabel]="dataPlotY()" />
                         </div>
                     }
@@ -189,7 +197,7 @@
                                         <td class="row-label">{{ row.name }}</td>
                                         @for (val of row.values; track $index) {
                                             <td>
-                                                <div class="matrix-cell" [style.background-color]="'rgba(8, 137, 137, ' + (val/100) + ')'" [class.high-val]="val > 50">
+                                                <div class="matrix-cell" [style.background-color]="'rgba(8, 137, 137, ' + (val/100) + ')'" [class.high-val]="val > 50" [title]="descriptions[row.name]">
                                                     {{ val }}%
                                                 </div>
                                             </td>

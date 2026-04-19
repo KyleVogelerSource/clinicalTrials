@@ -48,11 +48,13 @@
 
 .chart-zoom-hint {
     position: absolute;
-    bottom: 6px;
-    left: 50%;
-    transform: translateX(-50%);
+    top: 35px;
+    right: 8px;
     font-size: 10px;
-    color: #aaa;
+    color: #94a3b8;
     pointer-events: none;
     white-space: nowrap;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 2px 4px;
+    border-radius: 2px;
 }
