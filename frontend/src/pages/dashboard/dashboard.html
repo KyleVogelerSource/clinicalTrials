@@ -7,7 +7,7 @@
                 <h2>Design & Match</h2>
                 <p>Welcome to Cardinal Trials. To begin, input your trial parameters in the form below. Then select
                     from among the candidate trials to compare against from the table on the right. Once ready, click
-                    'Process' to create your feasibility report.</p>
+                    <b>Process</b> to create your feasibility report.</p>
             </div>
             <div class="info-bar-buttons">
                 <button class="btn btn-primary btn-prominent" (click)="onProcess()"
@@ -338,7 +338,7 @@
                                                     <span class="detail-label">Clinical Sites:</span>
                                                     <div class="sites-list-container">
                                                         <ul class="sites-list">
-                                                            @for (site of trial.sites.slice(0, 10); track site) {
+                                                            @for (site of trial.sites.slice(0, 10); track $index) {
                                                                 <li>{{ site }}</li>
                                                             }
                                                             @if (trial.sites.length > 10) {

@@ -1,0 +1,286 @@
+<div class="container">
+
+    <!-- Analysis Heading -->
+    <div class="heading">
+        <div class="heading-left">
+            <button class="btn btn-prominent" (click)="onBack()">← Back to Design</button>
+            <h2>Feasibility Report: {{ inputParams()?.condition || 'Selected Trials' }}</h2>
+            <p class="meta-info">Generated on {{ data()?.timestamp | date:'medium' }} • {{ inputParams()?.phase || 'Any Phase' }}</p>
+        </div>
+        <div class="heading-right">
+            <button class="btn btn-prominent" (click)="onPrint()">Print</button>
+            <button class="btn btn-primary btn-prominent" (click)="onExport()">Export JSON</button>
+        </div>
+    </div>
+
+    @if (!data()) {
+        <div class="loading-full-page">
+            <app-loading-indicator [visible]="true" [local]="true" />
+            <p>Analyzing clinical trials data and generating insights...</p>
+        </div>
+    } @else {
+        <!-- Analysis Results -->
+        <div class="info-grid">
+            
+            <!-- Viability Score -->
+            <div class="card card-half">
+                <div class="card-header">
+                    <h4>Protocol Viability</h4>
+                    <span class="status-badge" [ngClass]="viabilityColor()">
+                        {{ data()?.overallScore! >= 80 ? 'High' : (data()?.overallScore! >= 60 ? 'Medium' : 'Low') }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="viability-score">
+                        {{ data()?.overallScore }}<span class="viability-score-denominator">/100</span>
+                    </div>
+                    <div class="viability-summary">
+                        <h5>Summary</h5>
+                        <p>{{ data()?.overallSummary }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recruitment Velocity -->
+            <div class="card card-half">
+                <div class="card-header">
+                    <h4>Recruitment Velocity</h4>
+                </div>
+                <div class="card-body">
+                    <p class="stat-subtitle">Average Days per Participant</p>
+                    <div class="recruitment-velocity">
+                        {{ data()?.avgRecruitmentDays }}<span class="unit"> days</span>
+                    </div>
+                    
+                    <div class="drivers-list">
+                        <h5>Top Recruitment Drivers</h5>
+                        <ul>
+                            @for (driver of data()?.recruitmentByImpact; track $index) {
+                                <li>
+                                    <span class="driver-label">{{ driver.label }}</span>
+                                    <span class="driver-impact">{{ driver.avgDays }} days avg</span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Benchmark Histograms -->
+            <div class="card card-full">
+                <div class="card-header">
+                    <h4>Cohort Benchmarks</h4>
+                </div>
+                <div class="card-body">
+                    <div class="benchmarks-grid">
+                        @for (b of benchmarks(); track b.label) {
+                            <div class="benchmark-item">
+                                <div class="benchmark-meta">
+                                    <span class="benchmark-label">{{ b.label }}</span>
+                                    <div class="benchmark-val-editor">
+                                        <label class="input-label">Proposed:</label>
+                                        <input type="number" 
+                                            [value]="b.userVal" 
+                                            (change)="onUpdateBenchmark(b.paramKey, $any($event.target).value)"
+                                            min="0"
+                                            class="benchmark-input">
+                                        <span class="benchmark-z">({{ b.zScore > 0 ? '+' : '' }}{{ b.zScore }}σ)</span>
+                                    </div>
+                                </div>
+                                <div class="benchmark-chart">
+                                    <app-scatter-chart [chartData]="b.chartData" [showLegend]="false" type="line" [enableZoom]="false" />
+                                </div>
+                                <div class="benchmark-stats">
+                                    Avg: {{ b.mean }} | σ: {{ b.stdDev }}
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Heatmap - Full Width -->
+            <div class="card card-full card-tall">
+                <div class="card-header">
+                    <h4>Global Site Distribution</h4>
+                </div>
+                <div class="card-body heatmap-layout">
+                    <div class="heatmap-container">
+                        <app-heatmap [points]="heatmapPoints()" [focusPoint]="heatmapFocus()" />
+                    </div>
+                    <div class="top-sites">
+                        <h5>Top Active Sites</h5>
+                        <ul>
+                            @for (site of topSites(); track $index) {
+                                <li class="interactive-site" (click)="onFocusSite(site.coords)">
+                                    <span class="site-name" [title]="site.name">{{ site.name }}</span>
+                                    <span class="site-count">{{ site.count }}</span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expected Timeline -->
+            <div class="card card-half card-tall">
+                <div class="card-header">
+                    <h4>Expected Timeline</h4>
+                </div>
+                <div class="card-body">
+                    @if (timelineChartData(); as chartData) {
+                        <div class="chart-container">
+                            <app-bar-chart [chartData]="chartData" xAxisLabel="Patient Cohorts" yAxisLabel="Timeline (Days)" [grouped]="true" />
+                        </div>
+                    } @else {
+                        <p class="no-data">Insufficient data to generate timeline projections.</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Data Plot -->
+            <div class="card card-half card-tall">
+                <div class="card-header">
+                    <div class="header-with-info">
+                        <h4>Metric Correlation Plot</h4>
+                        <span class="info-icon" title="Explore correlations between different trial metrics. High correlation (r close to 1 or -1) indicates a strong design pattern.">ⓘ</span>
+                    </div>
+                    <div class="plot-selectors">
+                        <select [ngModel]="dataPlotX()" (ngModelChange)="dataPlotX.set($event)">
+                            @for (name of metricNamesList; track $index) {
+                                <option [value]="name">{{ name }}</option>
+                            }
+                        </select>
+                        <span class="vs">vs</span>
+                        <select [ngModel]="dataPlotY()" (ngModelChange)="dataPlotY.set($event)">
+                            @for (name of metricNamesList; track $index) {
+                                <option [value]="name">{{ name }}</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="metric-descriptions">
+                        <div class="desc-item"><strong>{{ dataPlotX() }}:</strong> {{ descriptions[dataPlotX()] }}</div>
+                        <div class="desc-item"><strong>{{ dataPlotY() }}:</strong> {{ descriptions[dataPlotY()] }}</div>
+                    </div>
+                    @if (dataPlotData(); as plotData) {
+                        <div class="chart-container" style="height: calc(100% - 40px);">
+                            <app-scatter-chart [chartData]="plotData" [xAxisLabel]="dataPlotX()" [yAxisLabel]="dataPlotY()" />
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Metric Intersection Matrix -->
+            <div class="card card-full">
+                <div class="card-header">
+                    <div class="header-with-info">
+                        <h4>Metric Intersection Matrix (Co-occurrence %)</h4>
+                        <span class="info-icon" title="Shows the percentage of selected trials that share both metrics. Identifies common complexity drivers in similar studies.">ⓘ</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="matrix-wrapper">
+                        <table class="matrix-table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    @for (header of matrixHeaders; track $index) {
+                                        <th>{{ header }}</th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (row of intersectionMatrix(); track $index) {
+                                    <tr>
+                                        <td class="row-label">{{ row.name }}</td>
+                                        @for (val of row.values; track $index) {
+                                            <td>
+                                                <div class="matrix-cell" [style.background-color]="'rgba(8, 137, 137, ' + (val/100) + ')'" [class.high-val]="val > 50" [title]="descriptions[row.name]">
+                                                    {{ val }}%
+                                                </div>
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparison Table - RESTORED CHECKMARK STYLE -->
+            <div class="card card-full">
+                <div class="card-header">
+                    <h4>Benchmarked Trials Comparison</h4>
+                    <div class="comparison-search">
+                        <input
+                            type="text"
+                            placeholder="Search trials..."
+                            [value]="comparisonSearch()"
+                            (input)="onComparisonSearch($event)"
+                        >
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-wrapper">
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th class="trial-col">Trial</th>
+                                    @for (metric of comparisonMetrics; track metric.key) {
+                                        <th
+                                            class="metric-col"
+                                            (click)="onComparisonSort(metric.key)"
+                                            [class.sorted]="comparisonSortKey() === metric.key"
+                                        >
+                                            {{ metric.label }}
+                                            <span class="sort-icon">
+                                                @if (comparisonSortKey() === metric.key) {
+                                                    {{ comparisonSortAsc() ? '▲' : '▼' }}
+                                                } @else {
+                                                    ▽
+                                                }
+                                            </span>
+                                        </th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (row of comparisonRows(); track row.trial.nctId) {
+                                    <tr>
+                                        <td class="trial-name-cell">
+                                            <a
+                                                [href]="'https://clinicaltrials.gov/study/' + row.trial.nctId"
+                                                target="_blank"
+                                                class="trial-link"
+                                            >{{ row.trial.briefTitle }}</a>
+                                            <div class="trial-meta-sub">{{ row.trial.nctId }}</div>
+                                        </td>
+                                        @for (metric of comparisonMetrics; track metric.key) {
+                                            <td class="metric-cell">
+                                                @if (row.metrics[metric.key]) {
+                                                    <span class="check">✓</span>
+                                                } @else {
+                                                    <span class="cross">✗</span>
+                                                }
+                                            </td>
+                                        }
+                                    </tr>
+                                } @empty {
+                                    <tr>
+                                        <td [attr.colspan]="comparisonMetrics.length + 1" class="no-results">
+                                            No trials match your search.
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>

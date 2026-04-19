@@ -81,6 +81,7 @@ describe('Results', () => {
             siteCount: 5,
             recruitmentVelocity: 1.5,
             inclusionStrictness: 12,
+            exclusionStrictness: 3,
             siteEfficiency: 24,
             outcomeDensity: 3,
             ageSpan: 40,

@@ -65,6 +65,12 @@ describe('saved-search-criteria-mapper', () => {
       sex: 'All',
       required: ['Hypertension'],
       ineligible: [],
+      userPatients: null,
+      userSites: null,
+      userInclusions: null,
+      userExclusions: null,
+      userOutcomes: null,
+      userArms: null,
     });
   });
 
@@ -102,6 +108,12 @@ describe('saved-search-criteria-mapper', () => {
       sex: 'Female',
       required: [],
       ineligible: [],
+      userPatients: null,
+      userSites: null,
+      userInclusions: null,
+      userExclusions: null,
+      userOutcomes: null,
+      userArms: null,
     });
   });
 

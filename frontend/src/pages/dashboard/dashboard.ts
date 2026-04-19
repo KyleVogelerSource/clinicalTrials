@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from "@angular/core";
 import { CommonModule, DecimalPipe, DatePipe } from "@angular/common";
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
-import { debounceTime, distinctUntilChanged, switchMap, tap, of, finalize } from "rxjs";
+import { debounceTime, distinctUntilChanged, switchMap, of, finalize } from "rxjs";
 
 import { ClinicalStudyService } from "../../services/clinical-study.service";
 import { TrialWorkflowService } from "../../services/trial-workflow-service";
@@ -255,6 +255,11 @@ export class Dashboard implements OnInit {
             next: (trials) => {
                 if (trials) {
                     this.foundTrials.set(trials);
+                    this.workflowService.foundTrials.set(trials);
+                    
+                    // Auto-select all results
+                    const allIds = trials.map(t => t.nctId);
+                    this.selectedTrialIds.set(allIds);
                 }
             },
             error: (err) => {
@@ -330,11 +335,19 @@ export class Dashboard implements OnInit {
             maxAge: null,
             sex: '',
             required: [],
-            ineligible: []
+            ineligible: [],
+
+            // User Trial Specifics
+            userPatients: values.userPatients ?? null,
+            userSites: values.userSites ?? null,
+            userInclusions: values.userInclusions ?? null,
+            userExclusions: values.userExclusions ?? null,
+            userOutcomes: values.userOutcomes ?? null,
+            userArms: values.userArms ?? null,
         });
 
-        this.workflowService.processResults();
-        this.router.navigate(['/results']);
+        this.workflowService.processResultsV2();
+        this.router.navigate(['/analysis']);
     }
 
     onDocumentClick(event: MouseEvent) {

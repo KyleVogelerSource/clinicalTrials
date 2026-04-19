@@ -24,6 +24,14 @@ export interface DesignerFormValue {
   sex?: string | null;
   required?: string[] | null;
   ineligible?: string[] | null;
+
+  // User Trial Specifics
+  userPatients?: number | null;
+  userSites?: number | null;
+  userInclusions?: number | null;
+  userExclusions?: number | null;
+  userOutcomes?: number | null;
+  userArms?: number | null;
 }
 
 export interface SearchExecutionMappings {
@@ -94,5 +102,13 @@ export function mapSavedSearchCriteriaToDesignModel(
     sex: resolveOptionValue(criteria.sex, defaults.sexes, defaults.sex),
     required: criteria.requiredConditions ?? [],
     ineligible: criteria.ineligibleConditions ?? [],
+
+    // User Trial Specifics (not typically saved in basic search criteria)
+    userPatients: null,
+    userSites: null,
+    userInclusions: null,
+    userExclusions: null,
+    userOutcomes: null,
+    userArms: null,
   };
 }
