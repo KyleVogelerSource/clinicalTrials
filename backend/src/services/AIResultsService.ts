@@ -6,7 +6,6 @@ const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_MODEL = "claude-sonnet-4-20250514";
 
 // JSON Schema for the response — stricter than embedding the TypeScript interface
-// as a comment, and gives the model a machine-readable contract to satisfy.
 const RESPONSE_SCHEMA = {
     type: "object",
     required: [
@@ -68,10 +67,7 @@ const SYSTEM_PROMPT = `You are a clinical trial analyst. Given trial data, retur
 Return ONLY valid JSON. No markdown, no explanation, no backticks, no trailing commas.
 Derive all values from the actual trial data provided — do not invent numbers.`;
 
-export async function generateAIResults(
-    request: TrialResultsRequest,
-    trials: NormalizedTrial[]
-): Promise<TrialResultsResponse> {
+export async function generateAIResults(request: TrialResultsRequest, trials: NormalizedTrial[]): Promise<TrialResultsResponse> {
     const trialsJson = JSON.stringify(
         trials.map((t) => ({
             nctId: t.nctId,

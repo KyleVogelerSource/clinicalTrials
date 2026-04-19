@@ -1,5 +1,3 @@
-import { NormalizedTrial } from "../models/NormalizedTrial";
-
 const VOYAGE_API_URL = "https://api.voyageai.com/v1/embeddings";
 const VOYAGE_MODEL = "voyage-3";
 const BATCH_SIZE = 128;
@@ -14,10 +12,7 @@ export interface EmbeddingBatchResult {
     totalInputTokens: number;
 }
 
-async function voyageEmbedBatch(
-    inputs: Array<{ nctId: string; text: string }>,
-    apiKey: string
-): Promise<TrialEmbedding[]> {
+async function voyageEmbedBatch(inputs: Array<{ nctId: string; text: string }>,apiKey: string): Promise<TrialEmbedding[]> {
     const texts = inputs.map((i) => i.text);
 
     const response = await fetch(VOYAGE_API_URL, {
@@ -50,10 +45,7 @@ async function voyageEmbedBatch(
     }));
 }
 
-export async function generateEmbeddings(
-    synopses: Array<{ nctId: string; synopsis: string }>,
-    apiKey: string
-): Promise<EmbeddingBatchResult> {
+export async function generateEmbeddings(synopses: Array<{ nctId: string; synopsis: string }>,apiKey: string): Promise<EmbeddingBatchResult> {
     const allEmbeddings: TrialEmbedding[] = [];
     const failed: string[] = [];
 
@@ -75,7 +67,6 @@ export async function generateEmbeddings(
             for (const s of batch) {
                 failed.push(s.nctId);
                 console.warn(`[TrialEmbeddingService] Using zero-vector fallback for ${s.nctId}`);
-                // We don't know the embedding dimension yet — will be resolved below
                 allEmbeddings.push({ nctId: s.nctId, embedding: [] });
             }
         }
@@ -96,6 +87,6 @@ export async function generateEmbeddings(
 
     return {
         embeddings: allEmbeddings,
-        totalInputTokens: 0, // Voyage doesn't expose token counts in the same way
+        totalInputTokens: 0,
     };
 }

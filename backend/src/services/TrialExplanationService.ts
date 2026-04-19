@@ -37,11 +37,7 @@ function formatCategoricalBenchmark(b: CategoricalBenchmark): string {
     ].join("\n");
 }
 
-function buildExplanationPrompt(
-    request: TrialResultsRequest,
-    topTrials: ScoredTrial[],
-    outliers: OutlierDetectionResult
-): string {
+function buildExplanationPrompt(request: TrialResultsRequest, topTrials: ScoredTrial[], outliers: OutlierDetectionResult): string {
     const topTrialSummaries = topTrials.slice(0, 5).map((st, i) =>
         `  ${i + 1}. ${st.trial.briefTitle} (${st.trial.nctId}) — similarity: ${st.similarityScore}, status: ${st.trial.overallStatus}, enrollment: ${st.trial.enrollmentCount}`
     ).join("\n");
@@ -97,13 +93,7 @@ const SYSTEM_PROMPT =
     "You write clear, accurate, plain-language summaries grounded exclusively in the statistics provided. " +
     "You never invent numbers, percentiles, or trial details not present in the prompt.";
 
-export async function generateExplanation(
-    request: TrialResultsRequest,
-    topTrials: ScoredTrial[],
-    outliers: OutlierDetectionResult,
-    apiKey: string
-): Promise<ExplanationResult> {
-    // Server-authoritative timestamp — never rely on the model to generate this
+export async function generateExplanation(request: TrialResultsRequest, topTrials: ScoredTrial[], outliers: OutlierDetectionResult, apiKey: string): Promise<ExplanationResult> {
     const generatedAt = new Date().toISOString();
 
     if (topTrials.length === 0) {

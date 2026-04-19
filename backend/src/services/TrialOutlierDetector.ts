@@ -3,8 +3,6 @@ import { NormalizedTrial } from "../models/NormalizedTrial";
 export interface OutlierThresholds {
     lowerPercentile: number;
     upperPercentile: number;
-    /** Minimum pool size before outlier flags are reported. Below this threshold
-     *  percentile estimates are too noisy to be meaningful. */
     minPoolSize: number;
 }
 
@@ -21,7 +19,6 @@ export interface NumericBenchmark {
     poolP75: number;
     proposedPercentile: number | null;
     outlier: OutlierDirection;
-    /** True when the pool was too small to produce reliable percentile estimates. */
     insufficientData: boolean;
 }
 
@@ -95,12 +92,7 @@ function trialDurationDays(trial: NormalizedTrial): number | null {
     return Math.round((end - start) / (1000 * 60 * 60 * 24));
 }
 
-function buildNumericBenchmark(
-    attribute: string,
-    proposedValue: number | null,
-    poolValues: number[],
-    thresholds: OutlierThresholds
-): NumericBenchmark {
+function buildNumericBenchmark(attribute: string, proposedValue: number | null, poolValues: number[], thresholds: OutlierThresholds): NumericBenchmark {
     const sorted = sortedNumbers(poolValues);
     const insufficientData = sorted.length < thresholds.minPoolSize;
 
@@ -131,12 +123,7 @@ function buildNumericBenchmark(
     };
 }
 
-function buildCategoricalBenchmark(
-    attribute: string,
-    proposedValue: string,
-    poolValues: string[],
-    thresholds: OutlierThresholds
-): CategoricalBenchmark {
+function buildCategoricalBenchmark(attribute: string, proposedValue: string, poolValues: string[], thresholds: OutlierThresholds): CategoricalBenchmark {
     const insufficientData = poolValues.length < thresholds.minPoolSize;
 
     const freq: Record<string, number> = {};
@@ -155,24 +142,12 @@ function buildCategoricalBenchmark(
         proposedValue,
         poolFrequency: freq,
         proposedFrequencyPct,
-        // Only flag as uncommon when we have enough data to be confident
         uncommon: !insufficientData && proposedFrequencyPct < 20,
         insufficientData,
     };
 }
 
-export function detectOutliers(
-    rankedPool: NormalizedTrial[],
-    proposedValues: {
-        enrollmentCount?: number | null;
-        phase?: string;
-        studyType?: string;
-        sex?: string;
-        startDate?: string | null;
-        completionDate?: string | null;
-    },
-    thresholds: OutlierThresholds = DEFAULT_THRESHOLDS
-): OutlierDetectionResult {
+export function detectOutliers(rankedPool: NormalizedTrial[], proposedValues: { enrollmentCount?: number | null; phase?: string; studyType?: string; sex?: string; startDate?: string | null; completionDate?: string | null; }, thresholds: OutlierThresholds = DEFAULT_THRESHOLDS): OutlierDetectionResult {
     const poolEnrollments = rankedPool.map((t) => t.enrollmentCount).filter((n) => n > 0);
     const enrollmentBenchmark = buildNumericBenchmark(
         "enrollmentCount",

@@ -18,10 +18,6 @@ export interface BenchmarkPipelineResult extends SimilarityRankingResult {
 }
 
 // In-memory embedding cache keyed by NCT ID.
-// Embeddings for known historical trials never change — we only need to compute
-// them once per server process.  A persistent cache (e.g. Postgres column) would
-// survive restarts; this is the in-process tier that eliminates redundant calls
-// within a session.
 const embeddingCache = new Map<string, number[]>();
 
 function getCachedEmbeddings(nctIds: string[]): {
@@ -45,7 +41,6 @@ function getCachedEmbeddings(nctIds: string[]): {
 
 function storeEmbeddingsInCache(embeddings: TrialEmbedding[]): void {
     for (const e of embeddings) {
-        // Don't cache the ephemeral "proposed" synopsis — it changes per request
         if (e.nctId !== "__proposed__") {
             embeddingCache.set(e.nctId, e.embedding);
         }
@@ -93,14 +88,7 @@ function buildProposedSynopsisFromRequest(request: TrialResultsRequest): string 
     return parts.join("\n");
 }
 
-export async function runBenchmarkPipeline(
-    request: TrialResultsRequest,
-    candidatePool: NormalizedTrial[],
-    proposedTrial: NormalizedTrial | null = null,
-    topK = 15,
-    anthropicApiKey: string,
-    voyageApiKey: string
-): Promise<BenchmarkPipelineResult> {
+export async function runBenchmarkPipeline(request: TrialResultsRequest, candidatePool: NormalizedTrial[], proposedTrial: NormalizedTrial | null = null, topK = 15, anthropicApiKey: string, voyageApiKey: string): Promise<BenchmarkPipelineResult> {
     const emptyOutliers = detectOutliers([], {});
 
     if (candidatePool.length === 0) {
@@ -124,7 +112,6 @@ export async function runBenchmarkPipeline(
         };
     }
 
-    // --- Synopsis generation ---
     const candidateSynopses = generateSynopses(candidatePool);
 
     const proposedSynopsisText = proposedTrial
@@ -133,7 +120,6 @@ export async function runBenchmarkPipeline(
 
     const proposedNctId = proposedTrial?.nctId ?? "__proposed__";
 
-    // --- Embedding cache check (P1) ---
     const candidateNctIds = candidateSynopses.map((s) => s.nctId);
     const { hits: cachedEmbeddings, misses: missedNctIds } = getCachedEmbeddings(candidateNctIds);
 
@@ -141,12 +127,10 @@ export async function runBenchmarkPipeline(
         `[TrialBenchmarkPipeline] Cache: ${cachedEmbeddings.length} hits, ${missedNctIds.length} misses`
     );
 
-    // Always embed the proposed synopsis (ephemeral, never cached)
     const synopsesToEmbed: Array<{ nctId: string; synopsis: string }> = [
         { nctId: proposedNctId, synopsis: proposedSynopsisText },
     ];
 
-    // Only embed candidates that aren't in the cache
     for (const s of candidateSynopses) {
         if (missedNctIds.includes(s.nctId)) {
             synopsesToEmbed.push(s);
