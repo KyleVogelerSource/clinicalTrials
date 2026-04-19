@@ -12,9 +12,20 @@
             <div class="info-bar-buttons">
                 <button class="btn btn-primary btn-prominent" (click)="onProcess()"
                     [disabled]="selectedTrialIds().length === 0">Process</button>
-                <button class="btn btn-thin">Import</button>
+                @if (canImportCriteria()) {
+                    <label class="btn btn-thin import-label" for="criteriaImport" title="Import search criteria JSON">
+                        Import
+                    </label>
+                    <input id="criteriaImport" type="file" class="visually-hidden" accept=".json,application/json" (change)="onImportFile($event)">
+                }
             </div>
         </div>
+        @if (importStatus() !== 'idle') {
+            <div class="import-status-bar" [class.is-error]="importStatus() === 'error'">
+                {{ importMessage() }}
+                <button class="close-status" (click)="importStatus.set('idle')">&times;</button>
+            </div>
+        }
     </div>
 
     <!-- Container for Metadata and Search Table -->
