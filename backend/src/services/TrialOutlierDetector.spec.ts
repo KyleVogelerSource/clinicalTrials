@@ -28,25 +28,29 @@ function makeTrial(overrides: Partial<NormalizedTrial> = {}): NormalizedTrial {
 describe("detectOutliers — BE-10", () => {
     describe("enrollment count benchmarks", () => {
         it("flags HIGH when proposed enrollment is in top percentile", () => {
-            const pool = [50, 100, 150, 200, 250].map((n, i) =>
-                makeTrial({ nctId: `NCT0000000${i}`, enrollmentCount: n })
+            // Pool must be >= minPoolSize (10) for outlier flags to fire
+            const pool = [50, 75, 100, 125, 150, 175, 200, 225, 250, 275].map((n, i) =>
+                makeTrial({ nctId: `NCT000000${i}`, enrollmentCount: n })
             );
 
             const result = detectOutliers(pool, { enrollmentCount: 900 });
             const eb = result.numeric.find((b) => b.attribute === "enrollmentCount")!;
 
+            expect(eb.insufficientData).toBe(false);
             expect(eb.outlier).toBe("HIGH");
             expect(eb.proposedValue).toBe(900);
         });
 
         it("flags LOW when proposed enrollment is in bottom percentile", () => {
-            const pool = [100, 200, 300, 400, 500].map((n, i) =>
-                makeTrial({ nctId: `NCT0000000${i}`, enrollmentCount: n })
+            // Pool must be >= minPoolSize (10) for outlier flags to fire
+            const pool = [100, 150, 200, 250, 300, 350, 400, 450, 500, 550].map((n, i) =>
+                makeTrial({ nctId: `NCT000000${i}`, enrollmentCount: n })
             );
 
             const result = detectOutliers(pool, { enrollmentCount: 5 });
             const eb = result.numeric.find((b) => b.attribute === "enrollmentCount")!;
 
+            expect(eb.insufficientData).toBe(false);
             expect(eb.outlier).toBe("LOW");
         });
 
@@ -113,14 +117,16 @@ describe("detectOutliers — BE-10", () => {
 
     describe("categorical benchmarks", () => {
         it("marks phase as uncommon when it appears in fewer than 20% of pool trials", () => {
+            // Pool must be >= minPoolSize (10) for uncommon flag to fire
             const pool = [
-                ...Array(8).fill(null).map((_, i) => makeTrial({ nctId: `NCT00${i}`, phase: "PHASE3" })),
+                ...Array(9).fill(null).map((_, i) => makeTrial({ nctId: `NCT00${i}`, phase: "PHASE3" })),
                 makeTrial({ nctId: "NCT009", phase: "PHASE1" }),
             ];
 
             const result = detectOutliers(pool, { phase: "PHASE1" });
             const pb = result.categorical.find((b) => b.attribute === "phase")!;
 
+            expect(pb.insufficientData).toBe(false);
             expect(pb.uncommon).toBe(true);
             expect(pb.proposedFrequencyPct).toBeLessThan(20);
         });
@@ -168,14 +174,14 @@ describe("detectOutliers — BE-10", () => {
         });
 
         it("respects custom thresholds", () => {
-            const pool = [100, 200, 300, 400, 500].map((n, i) =>
-                makeTrial({ nctId: `NCT0000000${i}`, enrollmentCount: n })
+            const pool = [100, 150, 200, 250, 300, 350, 400, 450, 500, 550].map((n, i) =>
+                makeTrial({ nctId: `NCT000000${i}`, enrollmentCount: n })
             );
 
             const result = detectOutliers(
                 pool,
-                { enrollmentCount: 500 },
-                { lowerPercentile: 40, upperPercentile: 60 }
+                { enrollmentCount: 550 },
+                { lowerPercentile: 40, upperPercentile: 60, minPoolSize: 5 }
             );
 
             const eb = result.numeric.find((b) => b.attribute === "enrollmentCount")!;
