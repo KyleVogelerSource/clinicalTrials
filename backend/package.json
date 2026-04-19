@@ -10,7 +10,7 @@
     "test:functional": "vitest run src/**/*.integration.spec.ts src/*.integration.spec.ts --passWithNoTests",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc --project tsconfig.json --outDir dist",
-    "start": "node dist/src/server.js"
+    "start": "node dist/server.js"
   },
   "repository": {
     "type": "git",
