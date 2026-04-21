@@ -252,6 +252,63 @@ export class TrialWorkflowService {
                 }
             }
 
+            // Sibling-Adjusted Timeline (Overall Duration)
+            const design = this.inputParams();
+            const targetEnrollment = design?.userPatients ?? 0;
+            let adjustedVelocity = 0;
+            let velocityStdDev = 0;
+            let siblingCount = 0;
+
+            if (targetEnrollment > 0 && validTrials.length > 0) {
+                // Try to find structural siblings (±50% enrollment)
+                let siblings = validTrials.filter(r => 
+                    r.totalEnrollment >= targetEnrollment * 0.5 && 
+                    r.totalEnrollment <= targetEnrollment * 1.5
+                );
+
+                // Fallback: if too few siblings, widen the net
+                if (siblings.length < 3) {
+                    siblings = validTrials.filter(r => 
+                        r.totalEnrollment >= targetEnrollment * 0.25 && 
+                        r.totalEnrollment <= targetEnrollment * 4
+                    );
+                }
+
+                // Ultimate fallback: all valid trials
+                if (siblings.length < 3) {
+                    siblings = validTrials;
+                }
+
+                siblingCount = siblings.length;
+                const velocities = siblings.map(s => s.recruitmentVelocity);
+                const sum = velocities.reduce((a, b) => a + b, 0);
+                adjustedVelocity = sum / siblings.length;
+
+                // Calculate StdDev for range
+                if (siblings.length > 1) {
+                    const avg = adjustedVelocity;
+                    const squareDiffs = velocities.map(v => Math.pow(v - avg, 2));
+                    const avgSquareDiff = squareDiffs.reduce((a, b) => a + b, 0) / squareDiffs.length;
+                    velocityStdDev = Math.sqrt(avgSquareDiff);
+                }
+            }
+
+            // Global avg as fallback if target enrollment is missing or no siblings
+            const globalTotalDays = validTrials.reduce((acc: number, r: MetricRow) => acc + r.timelineSlippage, 0);
+            const globalTotalEnrollmentVal = validTrials.reduce((acc: number, r: MetricRow) => acc + r.totalEnrollment, 0);
+            const globalVelocity = globalTotalEnrollmentVal > 0 ? globalTotalEnrollmentVal / globalTotalDays : 0;
+            
+            const finalVelocity = adjustedVelocity > 0 ? adjustedVelocity : globalVelocity;
+            const estDays = targetEnrollment > 0 && finalVelocity > 0 ? Math.round(targetEnrollment / finalVelocity) : 0;
+            
+            // Range based on std dev
+            let minDays = 0;
+            let maxDays = 0;
+            if (estDays > 0 && velocityStdDev > 0 && finalVelocity > velocityStdDev) {
+                minDays = Math.round(targetEnrollment / (finalVelocity + velocityStdDev));
+                maxDays = Math.round(targetEnrollment / (finalVelocity - velocityStdDev));
+            }
+
             // Termination distribution for report
             const terminations = new Map<string, number>();
             plotData.forEach(t => {
@@ -296,23 +353,21 @@ export class TrialWorkflowService {
                 };
             });
 
-            const totalDays = validTrials.reduce((acc: number, r: MetricRow) => acc + r.timelineSlippage, 0);
-            const totalEnrollmentVal = validTrials.reduce((acc: number, r: MetricRow) => acc + r.totalEnrollment, 0);
-            const avgRecruitmentDays = totalEnrollmentVal > 0 ? Math.round((totalDays / totalEnrollmentVal) * 10) / 10 : 0;
-            const participantTarget = validTrials.length > 0 ? Math.round(totalEnrollmentVal / validTrials.length) : 0;
-
             current.trialResults = {
                 timestamp: new Date(),
                 overallScore: 0,
                 overallSummary: 'Generating detailed analysis...',
                 totalTrialsFound: trials.length,
                 queryCondition: this.inputParams()?.condition ?? 'Selected Trials',
-                avgRecruitmentDays,
-                participantTarget,
+                avgRecruitmentDays: estDays, // Refactored to represent estimated duration in days
+                participantTarget: targetEnrollment,
                 recruitmentByImpact,
                 timelineBuckets,
                 terminationReasons: current.terminationReasons,
-                generatedAt: new Date().toISOString()
+                generatedAt: new Date().toISOString(),
+                // Pass range info for UI
+                timelineRange: maxDays > 0 ? `${minDays} - ${maxDays}` : undefined,
+                siblingCount
             };
 
             return current;
@@ -331,6 +386,8 @@ export class TrialWorkflowService {
                             aiResults.recruitmentByImpact = current.trialResults.recruitmentByImpact;
                             aiResults.avgRecruitmentDays = current.trialResults.avgRecruitmentDays;
                             aiResults.participantTarget = current.trialResults.participantTarget;
+                            aiResults.timelineRange = current.trialResults.timelineRange;
+                            aiResults.siblingCount = current.trialResults.siblingCount;
                         }
                         current.trialResults = aiResults;
                         return { ...current };

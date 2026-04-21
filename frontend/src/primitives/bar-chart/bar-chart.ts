@@ -11,6 +11,9 @@ import {
     Chart,
     BarController,
     BarElement,
+    LineController,
+    LineElement,
+    PointElement,
     CategoryScale,
     LinearScale,
     Tooltip,
@@ -18,7 +21,18 @@ import {
     Title,
 } from 'chart.js';
 
-Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend, Title);
+Chart.register(
+    BarController, 
+    BarElement, 
+    LineController, 
+    LineElement, 
+    PointElement, 
+    CategoryScale, 
+    LinearScale, 
+    Tooltip, 
+    Legend, 
+    Title
+);
 
 export interface BarChartDataset {
     label: string;
@@ -26,6 +40,10 @@ export interface BarChartDataset {
     backgroundColor: string | string[];
     borderColor?: string | string[];
     borderWidth?: number;
+    type?: 'bar' | 'line';
+    pointRadius?: number;
+    tension?: number;
+    order?: number;
 }
 
 export interface BarChartData {
@@ -63,7 +81,7 @@ export class BarChart implements OnDestroy {
         this.chart?.destroy();
         this.chart = new Chart(canvas, {
             type: 'bar',
-            data,
+            data: data as any,
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
