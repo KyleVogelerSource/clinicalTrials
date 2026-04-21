@@ -7,9 +7,9 @@ import { TrialWorkflowService } from "../../services/trial-workflow-service";
 import { BarChart, BarChartData, BarChartDataset } from "../../primitives/bar-chart/bar-chart";
 import { ScatterChart, ScatterChartData } from "../../primitives/scatter-chart/scatter-chart";
 import { Heatmap } from "../../primitives/heatmap/heatmap";
-import { LoadingIndicator } from "../../primitives/loading-indicator/loading-indicator";
 import { metricNames, MetricRow } from "../../models/results-model";
 import { StudyTrial } from "../../models/study-trial";
+import { LoadingService } from "../../services/loading.service";
 
 interface IntersectionRow {
     name: string;
@@ -88,7 +88,6 @@ export const metricDescriptions: Record<string, string> = {
         BarChart,
         ScatterChart,
         Heatmap,
-        LoadingIndicator,
         DatePipe
     ],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -96,6 +95,7 @@ export const metricDescriptions: Record<string, string> = {
 export class Analysis implements OnInit {
     private workflowService = inject(TrialWorkflowService);
     private router = inject(Router);
+    loadingService = inject(LoadingService);
 
     results = this.workflowService.results;
     inputParams = this.workflowService.inputParams;
@@ -457,7 +457,11 @@ export class Analysis implements OnInit {
     ngOnInit(): void {
         if (this.workflowService.selectedTrialIds().length === 0) {
             this.router.navigate(['/']);
+            return;
         }
+        
+        // Trigger processing if it hasn't been done yet or we want to re-process
+        this.workflowService.processResultsV2();
     }
 
     onBack() {
