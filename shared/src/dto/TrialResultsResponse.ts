@@ -22,6 +22,10 @@ export interface TrialResultsResponse {
     participantTarget: number;
     recruitmentByImpact: RecruitmentImpactBar[];
     timelineBuckets: TimelineBar[];
+    
+    // Sibling-adjusted timeline fields
+    timelineRange?: string;
+    siblingCount?: number;
 
     // OBSELETE
     terminationReasons: TerminationReasonBar[];

@@ -41,13 +41,13 @@
                 </div>
             </div>
 
-            <!-- Recruitment Velocity -->
+            <!-- Estimated Duration (Refocused from Recruitment Velocity) -->
             <div class="card card-half">
                 <div class="card-header">
-                    <h4>Recruitment Velocity</h4>
+                    <h4>Estimated Duration</h4>
                 </div>
                 <div class="card-body">
-                    <p class="stat-subtitle">Average Days per Participant</p>
+                    <p class="stat-subtitle">Projected Days to Target Enrollment</p>
                     <div class="recruitment-velocity">
                         {{ data()?.avgRecruitmentDays }}<span class="unit"> days</span>
                     </div>
@@ -129,16 +129,14 @@
             <!-- Expected Timeline -->
             <div class="card card-half card-tall">
                 <div class="card-header">
-                    <div class="header-with-info">
-                        <h4>Expected Timeline</h4>
-                        @if (estimatedCompletionDate(); as date) {
-                            <span class="meta-info">Est. Complete: {{ date | date:'mediumDate' }}</span>
-                        }
-                    </div>
+                    <h4>Expected Timeline</h4>
+                    <span class="status-badge status-active">
+                        Target: {{ inputParams()?.userPatients || 0 }} Patients
+                    </span>
                 </div>
                 <div class="card-body">
                     @if (timelineChartData(); as chartData) {
-                        <div class="chart-container">
+                        <div class="chart-container" style="height: 100%;">
                             <app-bar-chart [chartData]="chartData" xAxisLabel="Patient Ranges" yAxisLabel="Timeline (Days)" [grouped]="true" />
                         </div>
                     } @else {
