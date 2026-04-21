@@ -13,14 +13,8 @@
         </div>
     </div>
 
-    @if (!data()) {
-        <div class="loading-full-page">
-            <app-loading-indicator [visible]="true" [local]="true" />
-            <p>Analyzing clinical trials data and generating insights...</p>
-        </div>
-    } @else {
-        <!-- Analysis Results -->
-        <div class="info-grid">
+    <!-- Analysis Results -->
+    <div class="info-grid">
             
             <!-- Viability Score -->
             <div class="card card-half">
@@ -296,6 +290,5 @@
                 </div>
             </div>
         </div>
-    }
 
 </div>
