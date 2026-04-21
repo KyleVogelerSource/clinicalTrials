@@ -145,32 +145,53 @@ export class TrialWorkflowService {
 
     processResultsV2() {
         this.loadingService.show('Analyzing clinical trials data...');
+
+        const countCriteriaItems = (text: string): number => {
+            if (!text) return 0;
+            // Split by lines and look for markers like "-", "*", "1.", etc. at the start of non-empty lines
+            const lines = text.split('\n');
+            const criteriaLines = lines.filter(line => {
+                const trimmed = line.trim();
+                return trimmed.startsWith('-') || trimmed.startsWith('*') || /^\d+\./.test(trimmed);
+            });
+            // If no clear markers, fallback to non-empty lines but cap it to avoid huge numbers
+            return criteriaLines.length > 0 ? criteriaLines.length : lines.filter(l => l.trim().length > 5).length;
+        };
+
         const trials = this.selectedTrialIds().map(id => this.trialCache.get(id));
-        const plotData = trials.map(trial => ({
-            id: trial?.protocolSection.identificationModule.nctId,
-            terminationCause: trial?.protocolSection.statusModule?.whyStopped ?? null,
-            geoLocations: trial?.protocolSection.contactsLocationsModule?.locations?.map(loc => ({
-                geoPoint: loc.geoPoint,
-                city: loc.city,
-                country: loc.country,
-                facility: loc.facility
-            })) ?? [],
-            startDate: trial?.protocolSection.statusModule?.startDateStruct,
-            completionDate: trial?.protocolSection.statusModule?.completionDateStruct,
-            totalEnrollment: trial?.protocolSection.designModule?.enrollmentInfo?.count ?? 0,
-            siteCount: trial?.protocolSection.contactsLocationsModule?.locations?.length ?? 0,
-            inclusionStrictness: trial?.protocolSection.eligibilityModule?.eligibilityCriteria?.split(' ').length ?? 0,
-            outcomeDensity: (trial?.protocolSection.outcomesModule?.primaryOutcomes?.length ?? 0) + (trial?.protocolSection.outcomesModule?.secondaryOutcomes?.length ?? 0),
-            minAge: trial?.protocolSection.eligibilityModule?.minimumAge,
-            maxAge: trial?.protocolSection.eligibilityModule?.maximumAge,
-            interventionCount: trial?.protocolSection.armsInterventionsModule?.interventions?.length ?? 0,
-            collaboratorCount: trial?.protocolSection.sponsorCollaboratorsModule?.collaborators?.length ?? 0,
-            completedDate: trial?.protocolSection.statusModule?.primaryCompletionDateStruct,
-            maskingInfo: trial?.protocolSection.designModule?.designInfo?.maskingInfo?.whoMasked ?? [],
-            conditionCount: trial?.protocolSection.conditionsModule?.conditions?.length ?? 0,
-            status: trial?.protocolSection.statusModule?.overallStatus ?? 'UNKNOWN',
-            eligibilityCriteria: trial?.protocolSection.eligibilityModule?.eligibilityCriteria ?? ''
-        }));
+        const plotData = trials.map(trial => {
+            const criteria = trial?.protocolSection.eligibilityModule?.eligibilityCriteria ?? '';
+            const parts = criteria.split(/exclusion criteria/i);
+            const inclusionText = parts[0];
+            const exclusionText = parts.length > 1 ? parts[1] : '';
+
+            return {
+                id: trial?.protocolSection.identificationModule.nctId,
+                terminationCause: trial?.protocolSection.statusModule?.whyStopped ?? null,
+                geoLocations: trial?.protocolSection.contactsLocationsModule?.locations?.map(loc => ({
+                    geoPoint: loc.geoPoint,
+                    city: loc.city,
+                    country: loc.country,
+                    facility: loc.facility
+                })) ?? [],
+                startDate: trial?.protocolSection.statusModule?.startDateStruct,
+                completionDate: trial?.protocolSection.statusModule?.completionDateStruct,
+                totalEnrollment: trial?.protocolSection.designModule?.enrollmentInfo?.count ?? 0,
+                siteCount: trial?.protocolSection.contactsLocationsModule?.locations?.length ?? 0,
+                inclusionStrictness: countCriteriaItems(inclusionText),
+                exclusionStrictness: countCriteriaItems(exclusionText),
+                outcomeDensity: (trial?.protocolSection.outcomesModule?.primaryOutcomes?.length ?? 0) + (trial?.protocolSection.outcomesModule?.secondaryOutcomes?.length ?? 0),
+                minAge: trial?.protocolSection.eligibilityModule?.minimumAge,
+                maxAge: trial?.protocolSection.eligibilityModule?.maximumAge,
+                interventionCount: trial?.protocolSection.armsInterventionsModule?.interventions?.length ?? 0,
+                collaboratorCount: trial?.protocolSection.sponsorCollaboratorsModule?.collaborators?.length ?? 0,
+                completedDate: trial?.protocolSection.statusModule?.primaryCompletionDateStruct,
+                maskingInfo: trial?.protocolSection.designModule?.designInfo?.maskingInfo?.whoMasked ?? [],
+                conditionCount: trial?.protocolSection.conditionsModule?.conditions?.length ?? 0,
+                status: trial?.protocolSection.statusModule?.overallStatus ?? 'UNKNOWN',
+                eligibilityCriteria: criteria
+            };
+        });
 
         this.results.update(current => {
             current = new ResultsModel();
@@ -201,14 +222,7 @@ export class TrialWorkflowService {
                 row.totalEnrollment = trial.totalEnrollment;
                 row.siteCount = trial.siteCount;
                 row.inclusionStrictness = trial.inclusionStrictness;
-                
-                // Estimate exclusion strictness by splitting criteria
-                const criteria = trial.eligibilityCriteria;
-                const parts = criteria.split(/exclusion criteria/i);
-                row.exclusionStrictness = parts.length > 1 ? parts[1].split(' ').length : 0;
-                if (parts.length > 1 && row.inclusionStrictness > row.exclusionStrictness) {
-                    row.inclusionStrictness = parts[0].split(' ').length;
-                }
+                row.exclusionStrictness = trial.exclusionStrictness;
 
                 row.siteEfficiency = trial.siteCount == 0 ? 0 : (trial.totalEnrollment / trial.siteCount);
                 row.outcomeDensity = trial.outcomeDensity;
