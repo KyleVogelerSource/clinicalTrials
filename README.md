@@ -1,29 +1,187 @@
-# ClinicalTrials API
+# ClinicalTrials
 
-A simple TypeScript + Express API for local development of the Clinical Trials backend.
+ClinicalTrials is a full-stack application for designing, searching, filtering, selecting, and comparing clinical trial candidates. It combines an Angular frontend, an Express/TypeScript backend, shared DTOs, MeSH terminology data, and a PostgreSQL database.
 
-This project currently exposes a small set of local endpoints and includes a starter service that returns an empty `ClinicalTrialStudiesResponse` object.
+The app supports a multi-step clinical trial workflow:
 
-## Prerequisites
+- Build trial search criteria in the Designer.
+- Search ClinicalTrials.gov through the backend API.
+- Review and filter candidate trials.
+- Save, import, export, and share search criteria.
+- Compare selected trials using weighted benchmarking dimensions.
+- Manage users, roles, and permissions through the admin area.
 
-Before running this project, make sure the following are installed:
+## Deploy Locally With Docker Compose
 
-- [Node.js](https://nodejs.org/) (LTS recommended)
-- npm (included with Node.js)
+The recommended local setup uses Docker Compose. Docker will create and run everything the app needs, so you do not need to install the frontend, backend, or database separately.
 
-You can verify installation with:
+### What Docker Will Start
 
-```bash
-node -v
-npm -v
+```text
+Your browser
+    |
+    | http://localhost
+    v
++------------------+
+| Nginx gateway    |
+| port 80          |
++--------+---------+
+         |
+         +------------------------------+
+         |                              |
+         | page requests                | API requests
+         v                              v
++------------------+          +------------------+
+| Angular frontend |          | Express backend  |
+| container        |          | container        |
+| port 4200        |          | port 3000        |
++------------------+          +--------+---------+
+                                      |
+                                      | database connection
+                                      v
+                             +------------------+
+                             | PostgreSQL       |
+                             | container        |
+                             | port 5432        |
+                             +------------------+
 ```
 
+In plain English: open one website in your browser, and Docker runs the web app, API, and database behind the scenes.
 
-# Medical Subjecct Headings (MeSH)
+### 1. Install Docker Desktop
 
-Collection of biomedical terms which is used by ClinicalTrials.gov and other systems.
+Install Docker Desktop for your operating system:
 
-The data provided can be extract in order to feed our termonology refernces.
+- Mac: https://docs.docker.com/desktop/setup/install/mac-install/
+- Windows: https://docs.docker.com/desktop/setup/install/windows-install/
+- Linux: https://docs.docker.com/desktop/setup/install/linux/
+
+After installing it, open Docker Desktop and leave it running. On Windows, use the WSL 2 option if Docker asks which backend to use.
+
+### 2. Open a Terminal
+
+Use the terminal for your operating system:
+
+- Mac: open `Terminal`.
+- Windows: open `PowerShell`.
+- Linux: open your usual terminal app.
+
+### 3. Download the Project
+
+Run these commands:
+
+Mac or Linux:
+
+```bash
+git clone https://github.com/KyleVogelerSource/clinicalTrials.git
+cd clinicalTrials
+```
+
+Windows PowerShell:
+
+```powershell
+git clone https://github.com/KyleVogelerSource/clinicalTrials.git
+cd clinicalTrials
+```
+
+If `git clone` is not available, download the repository as a ZIP file from GitHub, unzip it, and open a terminal inside the unzipped `clinicalTrials` folder.
+
+### 4. Start the App
+
+Run this command from the main `clinicalTrials` folder, the same folder that contains `docker-compose.yml`.
+
+Mac or Linux:
+
+```bash
+docker compose up --build
+```
+
+Windows PowerShell:
+
+```powershell
+docker compose up --build
+```
+
+The first run can take several minutes because Docker has to download images and install app dependencies. Leave this terminal window open while using the app.
+
+If your computer says `docker compose` is not recognized, try the older Docker Compose command:
+
+```bash
+docker-compose up --build
+```
+
+### 5. Open the App in Your Browser
+
+When the terminal output slows down and the containers are running, open your browser and go to:
+
+```text
+http://localhost
+```
+
+That is the local version of the ClinicalTrials app.
+
+Optional backend checks:
+
+```text
+http://localhost/api/health
+http://localhost/api/debug/status
+```
+
+### 6. Stop the App
+
+Go back to the terminal where Docker is running and press:
+
+```text
+Ctrl + C
+```
+
+Then run:
+
+Mac or Linux:
+
+```bash
+docker compose down
+```
+
+Windows PowerShell:
+
+```powershell
+docker compose down
+```
+
+### 7. Reset the Local Database
+
+Only do this if you want to erase the local PostgreSQL data and start fresh:
+
+Mac or Linux:
+
+```bash
+docker compose down --volumes
+```
+
+Windows PowerShell:
+
+```powershell
+docker compose down --volumes
+```
+
+## Project Layout
+
+```text
+clinicalTrials/
+├── backend/          # Express.js backend API
+├── frontend/         # Angular SPA
+├── shared/           # Shared DTOs and static terminology data
+├── docker/           # Nginx reverse proxy config
+├── terraform/        # AWS infrastructure
+└── docker-compose.yml
+```
+
+## Medical Subject Headings (MeSH)
+
+Collection of biomedical terms used by ClinicalTrials.gov and other systems.
+
+The data provided can be extracted to feed the app's terminology references.
 
 ## Source
 desc2026.xml - https://www.nlm.nih.gov/databases/download/mesh.html
