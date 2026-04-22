@@ -161,7 +161,7 @@ describe('TrialWorkflowService', () => {
       selectedTrialIds: ['NCT100'],
     }));
     expect(service.results().terminationReasons).toEqual([{ reason: 'Completed', count: 1 }]);
-    expect(service.results().siteLocations).toEqual([{ latitude: 42.36, longitude: -71.05 }]);
+    expect(service.results().siteLocations).toEqual([{ latitude: 42.36, longitude: -71.05, label: "Boston Medical Center", subLabel: "Boston, USA" }]);
     expect(service.results().metricRows[0]).toEqual(expect.objectContaining({
       id: 'NCT100',
       totalEnrollment: 200,
