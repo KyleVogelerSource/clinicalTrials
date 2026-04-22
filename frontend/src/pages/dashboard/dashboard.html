@@ -34,6 +34,39 @@
         <!-- User's Input Form -->
         <div class="metadata-layout" [formGroup]="searchForm">
             <div class="section form-card">
+                <div class="form-section user-trial-section">
+                    <h3>Your Trial Specifics</h3>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="userPatients">Patients</label>
+                            <input id="userPatients" type="number" formControlName="userPatients" placeholder="-" min="0" />
+                        </div>
+                        <div class="form-group">
+                            <label for="userSites">Sites</label>
+                            <input id="userSites" type="number" formControlName="userSites" placeholder="-" min="0" />
+                        </div>
+                        <div class="form-group">
+                            <label for="userInclusions">Inclusions</label>
+                            <input id="userInclusions" type="number" formControlName="userInclusions" placeholder="-" min="0" />
+                        </div>
+                        <div class="form-group">
+                            <label for="userExclusions">Exclusions</label>
+                            <input id="userExclusions" type="number" formControlName="userExclusions" placeholder="-" min="0" />
+                        </div>
+                        <div class="form-group">
+                            <label for="userOutcomes">Outcomes</label>
+                            <input id="userOutcomes" type="number" formControlName="userOutcomes" placeholder="-" min="0" />
+                        </div>
+                        <div class="form-group">
+                            <label for="userArms">Arms/Interventions</label>
+                            <input id="userArms" type="number" formControlName="userArms" placeholder="-" min="0" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section form-card">
                 <div class="form-section">
                     <h3>Search Criteria</h3>
 
@@ -84,38 +117,6 @@
                 </div>
             </div>
 
-            <div class="section form-card">
-                <div class="form-section user-trial-section">
-                    <h3>Your Trial Specifics</h3>
-
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="userPatients">Patients</label>
-                            <input id="userPatients" type="number" formControlName="userPatients" placeholder="-" min="0" />
-                        </div>
-                        <div class="form-group">
-                            <label for="userSites">Sites</label>
-                            <input id="userSites" type="number" formControlName="userSites" placeholder="-" min="0" />
-                        </div>
-                        <div class="form-group">
-                            <label for="userInclusions">Inclusions</label>
-                            <input id="userInclusions" type="number" formControlName="userInclusions" placeholder="-" min="0" />
-                        </div>
-                        <div class="form-group">
-                            <label for="userExclusions">Exclusions</label>
-                            <input id="userExclusions" type="number" formControlName="userExclusions" placeholder="-" min="0" />
-                        </div>
-                        <div class="form-group">
-                            <label for="userOutcomes">Outcomes</label>
-                            <input id="userOutcomes" type="number" formControlName="userOutcomes" placeholder="-" min="0" />
-                        </div>
-                        <div class="form-group">
-                            <label for="userArms">Arms/Interventions</label>
-                            <input id="userArms" type="number" formControlName="userArms" placeholder="-" min="0" />
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Matching Trials Display -->

@@ -16,6 +16,7 @@ import { ClinicalTrialSearchRequest } from "@shared/dto/ClinicalTrialSearchReque
 import { PermissionService } from "../../services/permission.service";
 import { ACTION_NAMES } from "@shared/auth/action-names";
 import { parseDesignerCriteriaFile } from "../../services/designer-criteria-file.service";
+import { LoadingService } from "../../services/loading.service";
 
 @Component({
     selector: "app-dashboard",
@@ -43,6 +44,7 @@ export class Dashboard implements OnInit {
     private savedSearchService = inject(SavedSearchService);
     private router = inject(Router);
     private permissionService = inject(PermissionService);
+    private loadingService = inject(LoadingService);
 
     // Form Options
     phaseOptions = this.clinicalStudiesService.getPhases();
@@ -346,8 +348,13 @@ export class Dashboard implements OnInit {
             userArms: values.userArms ?? null,
         });
 
-        this.workflowService.processResultsV2();
-        this.router.navigate(['/analysis']);
+        this.loadingService.show('Analyzing clinical trials data...');
+        
+        // Small delay to ensure loader renders before we start heavy processing or routing
+        setTimeout(() => {
+            this.workflowService.processResultsV2();
+            this.router.navigate(['/analysis']);
+        }, 50);
     }
 
     onDocumentClick(event: MouseEvent) {

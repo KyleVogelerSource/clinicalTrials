@@ -3,7 +3,6 @@ import { isPlatformBrowser } from '@angular/common';
 // @ts-expect-error — no type declarations for leaflet-image
 import leafletImage from 'leaflet-image';
 import * as L from 'leaflet';
-import 'leaflet.heat';
 
 // Extend Leaflet's namespace to include the heatLayer method
 declare module 'leaflet' {
@@ -17,6 +16,8 @@ export interface HeatPoint {
     latitude: number;
     longitude: number;
     intensity?: number;
+    label?: string;
+    subLabel?: string;
 }
 
 @Component({
@@ -38,10 +39,11 @@ export class Heatmap implements OnDestroy {
 
     private map: L.Map | null = null;
     private heatmapLayer: L.Layer | null = null;
+    private markerLayer: L.LayerGroup | null = null;
     private platformId = inject(PLATFORM_ID);
 
     constructor() {
-        effect(() => {
+        effect(async () => {
             // Leaflet needs the DOM, so ensure we are in the browser
             if (!isPlatformBrowser(this.platformId)) return;
 
@@ -49,10 +51,15 @@ export class Heatmap implements OnDestroy {
             if (!container) return;
 
             if (!this.map) {
+                // Ensure L is global for Leaflet plugins
+                (window as any).L = L;
+                // Dynamically import leaflet.heat to ensure L is global before it runs
+                // @ts-expect-error - no type declarations for leaflet.heat
+                await import('leaflet.heat');
                 this.initMap(container.nativeElement);
             }
 
-            this.updateHeatmap(this.points());
+            this.updateMapLayers(this.points());
         });
 
         effect(() => {
@@ -67,21 +74,27 @@ export class Heatmap implements OnDestroy {
         this.map = L.map(element, {
             center: this.center(),
             zoom: this.zoom(),
-            scrollWheelZoom: false, // Better for UX in a dashboard
+            scrollWheelZoom: false,
         });
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
         }).addTo(this.map);
+
+        // Listen for zoom changes to toggle between heatmap and markers
+        this.map.on('zoomend', () => {
+            this.syncLayerVisibility();
+        });
     }
 
-    private updateHeatmap(points: HeatPoint[]): void {
+    private updateMapLayers(points: HeatPoint[]): void {
         if (!this.map) return;
 
-        if (this.heatmapLayer) {
-            this.map.removeLayer(this.heatmapLayer);
-        }
+        // Clear existing
+        if (this.heatmapLayer) this.map.removeLayer(this.heatmapLayer);
+        if (this.markerLayer) this.map.removeLayer(this.markerLayer);
 
+        // 1. Setup Heatmap Layer
         const heatData: [number, number, number][] = points.map(p => [
             p.latitude, 
             p.longitude, 
@@ -89,16 +102,70 @@ export class Heatmap implements OnDestroy {
         ]);
 
         this.heatmapLayer = L.heatLayer(heatData, {
-            radius: 25,
+            radius: 20,
             blur: 15,
             maxZoom: 10,
-        }).addTo(this.map);
+        });
+
+        // 2. Setup Marker Layer (Circle Pins)
+        this.markerLayer = L.layerGroup();
+        points.forEach(p => {
+            const marker = L.circleMarker([p.latitude, p.longitude], {
+                radius: 6,
+                fillColor: '#DC344D', // Use our "Proposed/User" red for definition
+                color: '#fff',
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.8
+            });
+            
+            if (p.label) {
+                const tooltipContent = p.subLabel 
+                    ? `<strong>${p.label}</strong><br/>${p.subLabel}`
+                    : `<strong>${p.label}</strong>`;
+                marker.bindTooltip(tooltipContent, {
+                    direction: 'top',
+                    offset: [0, -5],
+                    className: 'site-tooltip'
+                });
+            }
+            
+            marker.addTo(this.markerLayer!);
+        });
+
+        // Add them to map
+        this.heatmapLayer.addTo(this.map);
+        this.markerLayer.addTo(this.map);
+
+        this.syncLayerVisibility();
 
         // Optionally fit bounds if there are points
         if (points.length > 0) {
             const bounds = L.latLngBounds(points.map(p => [p.latitude, p.longitude]));
             this.map.fitBounds(bounds, { padding: [20, 20] });
         }
+    }
+
+    private syncLayerVisibility(): void {
+        if (!this.map || !this.heatmapLayer || !this.markerLayer) return;
+
+        const zoom = this.map.getZoom();
+        
+        // At low zoom (global), emphasize heatmap. At high zoom (local), emphasize markers.
+        if (zoom < 5) {
+            // Global view: Show heatmap, Hide markers
+            if (!this.map.hasLayer(this.heatmapLayer)) this.heatmapLayer.addTo(this.map);
+            if (this.map.hasLayer(this.markerLayer)) this.map.removeLayer(this.markerLayer);
+        } else {
+            // Zoomed in: Show markers, Hide heatmap (or keep it faint)
+            if (this.map.hasLayer(this.heatmapLayer)) this.map.removeLayer(this.heatmapLayer);
+            if (!this.map.hasLayer(this.markerLayer)) this.markerLayer.addTo(this.map);
+        }
+    }
+
+    private updateHeatmap(points: HeatPoint[]): void {
+        // Deprecated by updateMapLayers, but keeping for compatibility if called elsewhere
+        this.updateMapLayers(points);
     }
 
     exportPng(): void {

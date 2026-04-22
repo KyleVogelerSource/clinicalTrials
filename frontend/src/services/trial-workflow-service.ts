@@ -145,42 +145,69 @@ export class TrialWorkflowService {
 
     processResultsV2() {
         this.loadingService.show('Analyzing clinical trials data...');
+
+        const countCriteriaItems = (text: string): number => {
+            if (!text) return 0;
+            // Split by lines and look for markers like "-", "*", "1.", etc. at the start of non-empty lines
+            const lines = text.split('\n');
+            const criteriaLines = lines.filter(line => {
+                const trimmed = line.trim();
+                return trimmed.startsWith('-') || trimmed.startsWith('*') || /^\d+\./.test(trimmed);
+            });
+            // If no clear markers, fallback to non-empty lines but cap it to avoid huge numbers
+            return criteriaLines.length > 0 ? criteriaLines.length : lines.filter(l => l.trim().length > 5).length;
+        };
+
         const trials = this.selectedTrialIds().map(id => this.trialCache.get(id));
-        const plotData = trials.map(trial => ({
-            id: trial?.protocolSection.identificationModule.nctId,
-            terminationCause: trial?.protocolSection.statusModule?.whyStopped ?? null,
-            geoLocations: trial?.protocolSection.contactsLocationsModule?.locations?.map(loc => ({
-                geoPoint: loc.geoPoint,
-                city: loc.city,
-                country: loc.country,
-                facility: loc.facility
-            })) ?? [],
-            startDate: trial?.protocolSection.statusModule?.startDateStruct,
-            completionDate: trial?.protocolSection.statusModule?.completionDateStruct,
-            totalEnrollment: trial?.protocolSection.designModule?.enrollmentInfo?.count ?? 0,
-            siteCount: trial?.protocolSection.contactsLocationsModule?.locations?.length ?? 0,
-            inclusionStrictness: trial?.protocolSection.eligibilityModule?.eligibilityCriteria?.split(' ').length ?? 0,
-            outcomeDensity: (trial?.protocolSection.outcomesModule?.primaryOutcomes?.length ?? 0) + (trial?.protocolSection.outcomesModule?.secondaryOutcomes?.length ?? 0),
-            minAge: trial?.protocolSection.eligibilityModule?.minimumAge,
-            maxAge: trial?.protocolSection.eligibilityModule?.maximumAge,
-            interventionCount: trial?.protocolSection.armsInterventionsModule?.interventions?.length ?? 0,
-            collaboratorCount: trial?.protocolSection.sponsorCollaboratorsModule?.collaborators?.length ?? 0,
-            completedDate: trial?.protocolSection.statusModule?.primaryCompletionDateStruct,
-            maskingInfo: trial?.protocolSection.designModule?.designInfo?.maskingInfo?.whoMasked ?? [],
-            conditionCount: trial?.protocolSection.conditionsModule?.conditions?.length ?? 0,
-            status: trial?.protocolSection.statusModule?.overallStatus ?? 'UNKNOWN',
-            eligibilityCriteria: trial?.protocolSection.eligibilityModule?.eligibilityCriteria ?? ''
-        }));
+        const plotData = trials.map(trial => {
+            const criteria = trial?.protocolSection.eligibilityModule?.eligibilityCriteria ?? '';
+            const parts = criteria.split(/exclusion criteria/i);
+            const inclusionText = parts[0];
+            const exclusionText = parts.length > 1 ? parts[1] : '';
+
+            return {
+                id: trial?.protocolSection.identificationModule.nctId,
+                terminationCause: trial?.protocolSection.statusModule?.whyStopped ?? null,
+                geoLocations: trial?.protocolSection.contactsLocationsModule?.locations?.map(loc => ({
+                    geoPoint: loc.geoPoint,
+                    city: loc.city,
+                    country: loc.country,
+                    facility: loc.facility
+                })) ?? [],
+                startDate: trial?.protocolSection.statusModule?.startDateStruct,
+                completionDate: trial?.protocolSection.statusModule?.completionDateStruct,
+                totalEnrollment: trial?.protocolSection.designModule?.enrollmentInfo?.count ?? 0,
+                siteCount: trial?.protocolSection.contactsLocationsModule?.locations?.length ?? 0,
+                inclusionStrictness: countCriteriaItems(inclusionText),
+                exclusionStrictness: countCriteriaItems(exclusionText),
+                outcomeDensity: (trial?.protocolSection.outcomesModule?.primaryOutcomes?.length ?? 0) + (trial?.protocolSection.outcomesModule?.secondaryOutcomes?.length ?? 0),
+                minAge: trial?.protocolSection.eligibilityModule?.minimumAge,
+                maxAge: trial?.protocolSection.eligibilityModule?.maximumAge,
+                interventionCount: trial?.protocolSection.armsInterventionsModule?.interventions?.length ?? 0,
+                collaboratorCount: trial?.protocolSection.sponsorCollaboratorsModule?.collaborators?.length ?? 0,
+                completedDate: trial?.protocolSection.statusModule?.primaryCompletionDateStruct,
+                maskingInfo: trial?.protocolSection.designModule?.designInfo?.maskingInfo?.whoMasked ?? [],
+                conditionCount: trial?.protocolSection.conditionsModule?.conditions?.length ?? 0,
+                status: trial?.protocolSection.statusModule?.overallStatus ?? 'UNKNOWN',
+                eligibilityCriteria: criteria
+            };
+        });
 
         this.results.update(current => {
             current = new ResultsModel();
             
             // Site Locations & Top Sites
             current.siteLocations = plotData.flatMap(trial => 
-                trial.geoLocations.map(loc =>{
+                trial.geoLocations.map(loc => {
                     if (!loc.geoPoint || !loc.geoPoint.lat || !loc.geoPoint.lon) return null;
-                    return ({ longitude: loc.geoPoint.lon, latitude: loc.geoPoint.lat });
-                }).filter((loc): loc is HeatPoint => loc !== null)
+                    const point: HeatPoint = { 
+                        longitude: loc.geoPoint.lon, 
+                        latitude: loc.geoPoint.lat,
+                        label: loc.facility || 'Clinical Site',
+                        subLabel: `${loc.city || ''}${loc.city && loc.country ? ', ' : ''}${loc.country || ''}`
+                    };
+                    return point;
+                }).filter((loc): loc is HeatPoint => !!loc)
             );
 
             // Metric Rows
@@ -201,14 +228,7 @@ export class TrialWorkflowService {
                 row.totalEnrollment = trial.totalEnrollment;
                 row.siteCount = trial.siteCount;
                 row.inclusionStrictness = trial.inclusionStrictness;
-                
-                // Estimate exclusion strictness by splitting criteria
-                const criteria = trial.eligibilityCriteria;
-                const parts = criteria.split(/exclusion criteria/i);
-                row.exclusionStrictness = parts.length > 1 ? parts[1].split(' ').length : 0;
-                if (parts.length > 1 && row.inclusionStrictness > row.exclusionStrictness) {
-                    row.inclusionStrictness = parts[0].split(' ').length;
-                }
+                row.exclusionStrictness = trial.exclusionStrictness;
 
                 row.siteEfficiency = trial.siteCount == 0 ? 0 : (trial.totalEnrollment / trial.siteCount);
                 row.outcomeDensity = trial.outcomeDensity;
@@ -250,6 +270,63 @@ export class TrialWorkflowService {
                         timelineBuckets.push({ patientBucket: label, estimatedDays, actualDays });
                     }
                 }
+            }
+
+            // Sibling-Adjusted Timeline (Overall Duration)
+            const design = this.inputParams();
+            const targetEnrollment = design?.userPatients ?? 0;
+            let adjustedVelocity = 0;
+            let velocityStdDev = 0;
+            let siblingCount = 0;
+
+            if (targetEnrollment > 0 && validTrials.length > 0) {
+                // Try to find structural siblings (±50% enrollment)
+                let siblings = validTrials.filter(r => 
+                    r.totalEnrollment >= targetEnrollment * 0.5 && 
+                    r.totalEnrollment <= targetEnrollment * 1.5
+                );
+
+                // Fallback: if too few siblings, widen the net
+                if (siblings.length < 3) {
+                    siblings = validTrials.filter(r => 
+                        r.totalEnrollment >= targetEnrollment * 0.25 && 
+                        r.totalEnrollment <= targetEnrollment * 4
+                    );
+                }
+
+                // Ultimate fallback: all valid trials
+                if (siblings.length < 3) {
+                    siblings = validTrials;
+                }
+
+                siblingCount = siblings.length;
+                const velocities = siblings.map(s => s.recruitmentVelocity);
+                const sum = velocities.reduce((a, b) => a + b, 0);
+                adjustedVelocity = sum / siblings.length;
+
+                // Calculate StdDev for range
+                if (siblings.length > 1) {
+                    const avg = adjustedVelocity;
+                    const squareDiffs = velocities.map(v => Math.pow(v - avg, 2));
+                    const avgSquareDiff = squareDiffs.reduce((a, b) => a + b, 0) / squareDiffs.length;
+                    velocityStdDev = Math.sqrt(avgSquareDiff);
+                }
+            }
+
+            // Global avg as fallback if target enrollment is missing or no siblings
+            const globalTotalDays = validTrials.reduce((acc: number, r: MetricRow) => acc + r.timelineSlippage, 0);
+            const globalTotalEnrollmentVal = validTrials.reduce((acc: number, r: MetricRow) => acc + r.totalEnrollment, 0);
+            const globalVelocity = globalTotalEnrollmentVal > 0 ? globalTotalEnrollmentVal / globalTotalDays : 0;
+            
+            const finalVelocity = adjustedVelocity > 0 ? adjustedVelocity : globalVelocity;
+            const estDays = targetEnrollment > 0 && finalVelocity > 0 ? Math.round(targetEnrollment / finalVelocity) : 0;
+            
+            // Range based on std dev
+            let minDays = 0;
+            let maxDays = 0;
+            if (estDays > 0 && velocityStdDev > 0 && finalVelocity > velocityStdDev) {
+                minDays = Math.round(targetEnrollment / (finalVelocity + velocityStdDev));
+                maxDays = Math.round(targetEnrollment / (finalVelocity - velocityStdDev));
             }
 
             // Termination distribution for report
@@ -296,23 +373,21 @@ export class TrialWorkflowService {
                 };
             });
 
-            const totalDays = validTrials.reduce((acc: number, r: MetricRow) => acc + r.timelineSlippage, 0);
-            const totalEnrollmentVal = validTrials.reduce((acc: number, r: MetricRow) => acc + r.totalEnrollment, 0);
-            const avgRecruitmentDays = totalEnrollmentVal > 0 ? Math.round((totalDays / totalEnrollmentVal) * 10) / 10 : 0;
-            const participantTarget = validTrials.length > 0 ? Math.round(totalEnrollmentVal / validTrials.length) : 0;
-
             current.trialResults = {
                 timestamp: new Date(),
                 overallScore: 0,
                 overallSummary: 'Generating detailed analysis...',
                 totalTrialsFound: trials.length,
                 queryCondition: this.inputParams()?.condition ?? 'Selected Trials',
-                avgRecruitmentDays,
-                participantTarget,
+                avgRecruitmentDays: estDays, // Refactored to represent estimated duration in days
+                participantTarget: targetEnrollment,
                 recruitmentByImpact,
                 timelineBuckets,
                 terminationReasons: current.terminationReasons,
-                generatedAt: new Date().toISOString()
+                generatedAt: new Date().toISOString(),
+                // Pass range info for UI
+                timelineRange: maxDays > 0 ? `${minDays} - ${maxDays}` : undefined,
+                siblingCount
             };
 
             return current;
@@ -331,6 +406,8 @@ export class TrialWorkflowService {
                             aiResults.recruitmentByImpact = current.trialResults.recruitmentByImpact;
                             aiResults.avgRecruitmentDays = current.trialResults.avgRecruitmentDays;
                             aiResults.participantTarget = current.trialResults.participantTarget;
+                            aiResults.timelineRange = current.trialResults.timelineRange;
+                            aiResults.siblingCount = current.trialResults.siblingCount;
                         }
                         current.trialResults = aiResults;
                         return { ...current };

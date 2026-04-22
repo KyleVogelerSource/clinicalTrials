@@ -3,7 +3,7 @@
   <nav class="top-nav">
     <ul>
       <li><a [routerLink]="['/']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a></li>
-      <li><a [routerLink]="['designer']" routerLinkActive="active">Designer</a></li>
+      <!-- <li><a [routerLink]="['designer']" routerLinkActive="active">Designer</a></li> -->
       @if (authService.isLoggedIn()) {
         <li><a [routerLink]="['/saved-searches']" routerLinkActive="active">Saved Searches</a></li>
       }

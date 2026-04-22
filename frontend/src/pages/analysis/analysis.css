@@ -291,6 +291,36 @@
     padding: 0.5rem 0;
 }
 
+/* Status Badges */
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.status-badge.status-completed {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.status-badge.status-active {
+    background-color: #e0f2fe;
+    color: #075985;
+}
+
+.status-badge.status-terminated {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.status-badge.status-unknown {
+    background-color: #f1f5f9;
+    color: #475569;
+}
+
 /* Charts */
 .chart-container {
     height: 100%;
@@ -359,6 +389,42 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 400px;
+}
+
+/* Timeline Summary */
+.timeline-summary {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    border: 1px solid #e2e8f0;
+}
+
+.timeline-stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.timeline-stat-item .label {
+    font-size: 0.65rem;
+    color: #64748b;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.timeline-stat-item .value {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #193F6A;
+}
+
+.timeline-stat-item.completion-date .value {
+    color: #088989;
 }
 
 /* Intersection Matrix */

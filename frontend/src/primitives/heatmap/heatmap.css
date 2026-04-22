@@ -48,6 +48,22 @@
     z-index: 1;
 }
 
+/* Tooltip Styles */
+:host ::ng-deep .site-tooltip {
+    background-color: rgba(25, 63, 106, 0.95);
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-family: inherit;
+    font-size: 0.75rem;
+    padding: 6px 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+:host ::ng-deep .site-tooltip::before {
+    border-top-color: rgba(25, 63, 106, 0.95);
+}
+
 /* Ensure Leaflet's zoom controls follow accessibility needs if tabbed into */
 :focus-visible {
     outline: 2px solid var(--app-teal);
