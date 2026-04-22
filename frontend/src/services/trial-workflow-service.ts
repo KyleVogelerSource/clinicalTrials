@@ -198,10 +198,16 @@ export class TrialWorkflowService {
             
             // Site Locations & Top Sites
             current.siteLocations = plotData.flatMap(trial => 
-                trial.geoLocations.map(loc =>{
+                trial.geoLocations.map(loc => {
                     if (!loc.geoPoint || !loc.geoPoint.lat || !loc.geoPoint.lon) return null;
-                    return ({ longitude: loc.geoPoint.lon, latitude: loc.geoPoint.lat });
-                }).filter((loc): loc is HeatPoint => loc !== null)
+                    const point: HeatPoint = { 
+                        longitude: loc.geoPoint.lon, 
+                        latitude: loc.geoPoint.lat,
+                        label: loc.facility || 'Clinical Site',
+                        subLabel: `${loc.city || ''}${loc.city && loc.country ? ', ' : ''}${loc.country || ''}`
+                    };
+                    return point;
+                }).filter((loc): loc is HeatPoint => !!loc)
             );
 
             // Metric Rows
