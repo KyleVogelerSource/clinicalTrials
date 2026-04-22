@@ -3,7 +3,6 @@ import { isPlatformBrowser } from '@angular/common';
 // @ts-expect-error — no type declarations for leaflet-image
 import leafletImage from 'leaflet-image';
 import * as L from 'leaflet';
-import 'leaflet.heat';
 
 // Extend Leaflet's namespace to include the heatLayer method
 declare module 'leaflet' {
@@ -41,7 +40,7 @@ export class Heatmap implements OnDestroy {
     private platformId = inject(PLATFORM_ID);
 
     constructor() {
-        effect(() => {
+        effect(async () => {
             // Leaflet needs the DOM, so ensure we are in the browser
             if (!isPlatformBrowser(this.platformId)) return;
 
@@ -49,6 +48,11 @@ export class Heatmap implements OnDestroy {
             if (!container) return;
 
             if (!this.map) {
+                // Ensure L is global for Leaflet plugins
+                (window as any).L = L;
+                // Dynamically import leaflet.heat to ensure L is global before it runs
+                // @ts-expect-error - no type declarations for leaflet.heat
+                await import('leaflet.heat');
                 this.initMap(container.nativeElement);
             }
 
