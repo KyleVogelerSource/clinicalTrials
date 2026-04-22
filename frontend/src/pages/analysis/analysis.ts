@@ -212,7 +212,6 @@ export class Analysis implements OnInit {
 
     timelineChartData = computed<BarChartData | null>(() => {
         const d = this.data();
-        const user = this.inputParams();
         if (!d || !d.timelineBuckets || d.timelineBuckets.length === 0) return null;
 
         const labels = d.timelineBuckets.map(b => b.patientBucket);
