@@ -2,8 +2,6 @@ export interface RecruitmentImpactBar {
     label: string;
     avgDays: number;
     participantCount: number;
-    correlation?: number;
-    impactText?: string;
 }
 
 export interface TimelineBar {
@@ -23,13 +21,34 @@ export interface TrialResultsResponse {
     recruitmentByImpact: RecruitmentImpactBar[];
     timelineBuckets: TimelineBar[];
 
-    // OBSELETE
+    // OBSOLETE
     terminationReasons: TerminationReasonBar[];
     generatedAt: string;
 }
 
-// OBSELETE
+// OBSOLETE
 export interface TerminationReasonBar {
     reason: string;
     count: number;
+}
+
+// How commonly a single proposed criterion appears across the historical pool, and which trials explicitly contain it.
+export interface CriterionMatch {
+    description: string;
+    conceptId?: string | null;
+    poolMatchPct: number;
+    matchingTrialIds: string[];
+}
+
+export interface EligibilityCriteriaComparison {
+    inclusion: CriterionMatch[];
+    exclusion: CriterionMatch[];
+}
+
+// A single metric measurement for one trial.
+export interface TrialMetricEntry {
+    nctId: string;
+    briefTitle: string;
+    metric: string; // Metric key such as enrollmentCount, phase, durationDays
+    value: string | number | null;
 }
