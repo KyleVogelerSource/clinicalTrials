@@ -18,6 +18,8 @@ describe("generateAIResults", () => {
     requiredConditions: [],
     ineligibleConditions: [],
     selectedTrialIds: ["NCT0001"],
+    inclusionCriteria: [],
+    exclusionCriteria: [],
   };
 
   const trials: NormalizedTrial[] = [
