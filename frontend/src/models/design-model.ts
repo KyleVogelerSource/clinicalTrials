@@ -1,3 +1,5 @@
+import { EligibilityCriterion } from '@shared/dto/TrialResultsRequest';
+
 export interface DesignModel {
     condition: string,
     phase: string,
@@ -9,7 +11,7 @@ export interface DesignModel {
     sex: string,
     required: string[],
     ineligible: string[],
-    
+
     // User Trial Specifics
     userPatients: number | null,
     userSites: number | null,
@@ -17,4 +19,8 @@ export interface DesignModel {
     userExclusions: number | null,
     userOutcomes: number | null,
     userArms: number | null,
+
+    // Eligibility criteria for benchmark comparison
+    inclusionCriteria: EligibilityCriterion[],
+    exclusionCriteria: EligibilityCriterion[],
 }

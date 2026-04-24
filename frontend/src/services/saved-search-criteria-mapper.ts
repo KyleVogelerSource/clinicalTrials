@@ -110,5 +110,9 @@ export function mapSavedSearchCriteriaToDesignModel(
     userExclusions: null,
     userOutcomes: null,
     userArms: null,
+
+    // Eligibility criteria for benchmark comparison
+    inclusionCriteria: [],
+    exclusionCriteria: [],
   };
 }
