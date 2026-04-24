@@ -2,6 +2,8 @@ export interface RecruitmentImpactBar {
     label: string;
     avgDays: number;
     participantCount: number;
+    correlation?: number | null;
+    impactText?: string | null;
 }
 
 export interface TimelineBar {
