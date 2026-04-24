@@ -1,20 +1,8 @@
-@if (isLoading()) {
-    @if (local()) {
-        <div class="loading-container local-container">
-            <div class="spinner"></div>
-            @if (loadingService.message(); as msg) {
-                <p class="loading-message">{{ msg }}</p>
-            }
-        </div>
-    } @else {
-        <div class="loading-overlay" role="status" aria-live="polite">
-            <div class="loading-container">
-                <div class="spinner"></div>
-                @if (loadingService.message(); as msg) {
-                    <p class="loading-message">{{ msg }}</p>
-                }
-            </div>
-        </div>
-    }
+@if (visible()) {
+    <div class="loading-container local-container">
+        <div class="spinner"></div>
+        @if (message(); as msg) {
+            <p class="loading-message">{{ msg }}</p>
+        }
+    </div>
 }
-
