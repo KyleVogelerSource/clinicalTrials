@@ -337,6 +337,8 @@ describe('Designer', () => {
             userExclusions: null,
             userOutcomes: null,
             userArms: null,
+            inclusionCriteria: [],
+            exclusionCriteria: [],
         });
         expect(mockWorkflowService.searchTrials).toHaveBeenCalled();
         expect(mockRouter.navigate).toHaveBeenCalledWith(['/selection']);

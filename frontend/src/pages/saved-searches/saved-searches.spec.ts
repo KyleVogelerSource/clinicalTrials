@@ -138,6 +138,8 @@ describe('SavedSearches', () => {
       userExclusions: null,
       userOutcomes: null,
       userArms: null,
+      inclusionCriteria: [],
+      exclusionCriteria: [],
     });
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/designer']);
   });
@@ -181,6 +183,8 @@ describe('SavedSearches', () => {
       userExclusions: null,
       userOutcomes: null,
       userArms: null,
+      inclusionCriteria: [],
+      exclusionCriteria: [],
     });
   });
 
@@ -222,6 +226,8 @@ describe('SavedSearches', () => {
       userExclusions: null,
       userOutcomes: null,
       userArms: null,
+      inclusionCriteria: [],
+      exclusionCriteria: [],
     });
   });
 
