@@ -107,5 +107,9 @@ export function normalizeImportedCriteria(
     userExclusions: toNullableNumber(input.userExclusions),
     userOutcomes: toNullableNumber(input.userOutcomes),
     userArms: toNullableNumber(input.userArms),
+
+    // Eligibility criteria for benchmark comparison
+    inclusionCriteria: Array.isArray(input.inclusionCriteria) ? input.inclusionCriteria : [],
+    exclusionCriteria: Array.isArray(input.exclusionCriteria) ? input.exclusionCriteria : [],
   };
 }
