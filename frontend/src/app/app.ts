@@ -8,6 +8,7 @@ import { DebugMessageService } from '../services/debug-message.service';
 import { AuthService } from '../services/auth.service';
 import { PermissionService } from '../services/permission.service';
 import { ACTION_NAMES } from '@shared/auth/action-names';
+import { LoadingService } from '../services/loading.service';
 
 @Component({
   selector: 'app-root',
@@ -23,6 +24,7 @@ export class App {
   private readonly router = inject(Router);
   protected readonly authService = inject(AuthService);
   private readonly permissionService = inject(PermissionService);
+  protected readonly loadingService = inject(LoadingService);
 
   protected readonly debugEnabled = signal(false);
   protected readonly debugStatus = signal<DebugStatusResponse | null>(null);
