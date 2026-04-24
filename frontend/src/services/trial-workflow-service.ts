@@ -443,6 +443,8 @@ export class TrialWorkflowService {
             requiredConditions: input.required ?? [],
             ineligibleConditions: input.ineligible ?? [],
             selectedTrialIds: this.selectedTrialIds(),
+            inclusionCriteria: input.inclusionCriteria ?? [],
+            exclusionCriteria: input.exclusionCriteria ?? [],
         };
 
         return request;
