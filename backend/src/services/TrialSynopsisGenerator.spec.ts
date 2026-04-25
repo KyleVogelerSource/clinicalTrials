@@ -1,29 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { generateSynopsis, generateSynopses } from "./TrialSynopsisGenerator";
-import { NormalizedTrial } from "../models/NormalizedTrial";
-
-function makeTrial(overrides: Partial<NormalizedTrial> = {}): NormalizedTrial {
-    return {
-        nctId: "NCT00000001",
-        briefTitle: "A Test Trial",
-        phase: "PHASE2",
-        studyType: "INTERVENTIONAL",
-        overallStatus: "COMPLETED",
-        enrollmentCount: 100,
-        enrollmentType: "ACTUAL",
-        startDate: "2020-01",
-        completionDate: "2022-06",
-        conditions: ["Diabetes Mellitus, Type 2"],
-        interventions: ["Drug X", "Placebo"],
-        eligibilityCriteria: "Inclusion: Adults 18-65. Exclusion: Pregnancy.",
-        sex: "ALL",
-        minimumAge: "18 Years",
-        maximumAge: "65 Years",
-        primaryOutcomes: ["HbA1c reduction at 12 weeks"],
-        sponsor: "Test Sponsor",
-        ...overrides,
-    };
-}
+import { makeTrial } from "./TestHelpers";
 
 describe("TrialSynopsisGenerator — BE-7", () => {
     it("returns the correct nctId", () => {
