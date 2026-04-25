@@ -7,6 +7,8 @@ import { NormalizedTrial, ReferenceTrial } from "../src/models/NormalizedTrial";
 import { TrialResultsRequest } from "./dto/TrialResultsRequest";
 import { generateAIResults } from "./services/AIResultsService";
 import { runBenchmarkPipeline } from "./services/TrialBenchmarkPipeline";
+import { normalizeTrialStudy } from "./services/TrialNormalizer";
+import { ClinicalTrialStudy } from "./dto/ClinicalTrialStudiesResponse";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import { initializeDatabase, isDatabaseConnected, probeDatabaseConnection } from "./storage/PostgresClient";
@@ -35,7 +37,7 @@ function requireDatabaseConnection(_req: Request, res: Response, next: NextFunct
   next();
 }
 
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 app.use(cors());
 
 const allowedOrigins = ["http://localhost:4200", "https://d8rtqu8bq9oyq.cloudfront.net", "https://cardinaltrials.com"];
@@ -191,6 +193,56 @@ app.post("/api/clinical-trials/results", async (req: Request, res: Response) => 
   }
 });
 
+// Detect whether an object is a raw ClinicalTrials API study (has protocolSection) or an already-normalized NormalizedTrial. Normalize raw studies on the fly.
+function normalizeIfRaw(trial: unknown): NormalizedTrial {
+  if (trial && typeof trial === "object" && "protocolSection" in trial) {
+    return normalizeTrialStudy(trial as ClinicalTrialStudy);
+  }
+  return sanitizeTrial(trial as Partial<NormalizedTrial>);
+}
+
+function sanitizeTrial(t: Partial<NormalizedTrial>): NormalizedTrial {
+  return {
+    nctId: t.nctId ?? "",
+    briefTitle: t.briefTitle ?? "",
+    officialTitle: t.officialTitle ?? null,
+    acronym: t.acronym ?? null,
+    phase: t.phase ?? "UNKNOWN",
+    studyType: t.studyType ?? "UNKNOWN",
+    overallStatus: t.overallStatus ?? "UNKNOWN",
+    whyStopped: t.whyStopped ?? null,
+    hasResults: t.hasResults ?? false,
+    enrollmentCount: t.enrollmentCount ?? 0,
+    enrollmentType: t.enrollmentType ?? "ESTIMATED",
+    startDate: t.startDate ?? null,
+    completionDate: t.completionDate ?? null,
+    allocation: t.allocation ?? null,
+    interventionModel: t.interventionModel ?? null,
+    primaryPurpose: t.primaryPurpose ?? null,
+    masking: t.masking ?? null,
+    whoMasked: t.whoMasked ?? [],
+    armCount: t.armCount ?? 0,
+    conditions: t.conditions ?? [],
+    interventions: t.interventions ?? [],
+    interventionTypes: t.interventionTypes ?? [],
+    eligibilityCriteria: t.eligibilityCriteria ?? "",
+    sex: t.sex ?? "ALL",
+    minimumAge: t.minimumAge ?? null,
+    maximumAge: t.maximumAge ?? null,
+    healthyVolunteers: t.healthyVolunteers ?? null,
+    stdAges: t.stdAges ?? [],
+    primaryOutcomes: t.primaryOutcomes ?? [],
+    secondaryOutcomes: t.secondaryOutcomes ?? [],
+    sponsor: t.sponsor ?? null,
+    sponsorClass: t.sponsorClass ?? null,
+    collaboratorCount: t.collaboratorCount ?? 0,
+    locationCount: t.locationCount ?? 0,
+    countries: t.countries ?? [],
+    hasDmc: t.hasDmc ?? null,
+    meshTerms: t.meshTerms ?? [],
+  };
+}
+
 // POST /api/clinical-trials/benchmark
 // Accepts the user's scenario request and a pre-built candidate pool.
 // Returns Top-K trials ranked by cosine similarity to the proposed design.
@@ -231,8 +283,8 @@ app.post("/api/clinical-trials/benchmark", async (req: Request, res: Response) =
   try {
     const result = await runBenchmarkPipeline(
       request,
-      trials,
-      proposedTrial ?? null,
+      trials.map(normalizeIfRaw),
+      proposedTrial ? normalizeIfRaw(proposedTrial) : null,
       topK ?? 15,
       anthropicKey,
       voyageKey

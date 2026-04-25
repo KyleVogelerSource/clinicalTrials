@@ -4,11 +4,16 @@ import { generateEmbeddings, TrialEmbedding } from "./TrialEmbeddingService";
 import { rankBySimiliarity, SimilarityRankingResult } from "./TrialSimilarityService";
 import { detectOutliers, OutlierDetectionResult } from "./TrialOutlierDetector";
 import { generateExplanation, ExplanationResult } from "./TrialExplanationService";
+import { matchEligibilityCriteria } from "./TrialEligibilityMatcher";
+import { buildComparisonMetrics } from "./TrialComparisonMetrics";
 import { TrialResultsRequest } from "../dto/TrialResultsRequest";
+import { EligibilityCriteriaComparison, TrialMetricEntry } from "../dto/TrialResultsResponse";
 
 export interface BenchmarkPipelineResult extends SimilarityRankingResult {
     outliers: OutlierDetectionResult;
     explanation: ExplanationResult;
+    eligibilityComparison: EligibilityCriteriaComparison;
+    comparisonMetrics: TrialMetricEntry[];
     pipelineSteps: {
         synopsesGenerated: number;
         embeddingsGenerated: number;
@@ -103,6 +108,8 @@ export async function runBenchmarkPipeline(request: TrialResultsRequest, candida
                     "No similar historical trials were found for the proposed design. Consider broadening the search parameters.",
                 generatedAt: new Date().toISOString(),
             },
+            eligibilityComparison: { inclusion: [], exclusion: [] },
+            comparisonMetrics: [],
             pipelineSteps: {
                 synopsesGenerated: 0,
                 embeddingsGenerated: 0,
@@ -184,10 +191,22 @@ export async function runBenchmarkPipeline(request: TrialResultsRequest, candida
         anthropicApiKey
     );
 
+    const rankedTrials = rankingResult.rankedTrials.map((st) => st.trial);
+
+    const eligibilityComparison = matchEligibilityCriteria(
+        request.inclusionCriteria ?? [],
+        request.exclusionCriteria ?? [],
+        rankedTrials
+    );
+
+    const comparisonMetrics = buildComparisonMetrics(rankedTrials);
+
     return {
         ...rankingResult,
         outliers,
         explanation,
+        eligibilityComparison,
+        comparisonMetrics,
         pipelineSteps: {
             synopsesGenerated: candidateSynopses.length,
             embeddingsGenerated: freshEmbeddings.length,
