@@ -459,7 +459,6 @@ export class Analysis implements OnInit {
             return;
         }
         
-        // Trigger processing if it hasn't been done yet or we want to re-process
         this.workflowService.processResultsV2();
     }
 

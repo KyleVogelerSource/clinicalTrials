@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
-import { LoadingService } from '../../services/loading.service';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 @Component({
     selector: 'app-loading-indicator',
@@ -9,16 +8,6 @@ import { LoadingService } from '../../services/loading.service';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoadingIndicator {
-    loadingService = inject(LoadingService);
-    
-    // Allows manual control for local spinners (e.g. inside a div)
-    visible = input<boolean | undefined>(undefined);
-    
-    // If true, doesn't use the fixed full-screen overlay
-    local = input<boolean>(false);
-
-    isLoading() {
-        return this.visible() !== undefined ? this.visible() : this.loadingService.isLoading();
-    }
+    visible = input(false);
+    message = input<string | null>(null);
 }
-
