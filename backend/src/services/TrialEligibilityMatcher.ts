@@ -2,7 +2,7 @@ import { NormalizedTrial } from "../models/NormalizedTrial";
 import { EligibilityCriterion } from "../dto/TrialResultsRequest";
 import { CriterionMatch, EligibilityCriteriaComparison } from "../dto/TrialResultsResponse";
 
-const NORMALIZE_RE = /[\s\-_\/]+/g;
+const NORMALIZE_RE = /[\s\-_/]+/g;
 
 function normalizeText(text: string): string {
     return text.toLowerCase().replace(NORMALIZE_RE, " ").trim();
