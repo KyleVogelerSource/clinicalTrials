@@ -1,10 +1,14 @@
 export interface NormalizedTrial {
     nctId: string;
     briefTitle: string;
+    officialTitle: string | null;
+    acronym: string | null;
 
     phase: string;
     studyType: string;
     overallStatus: string;
+    whyStopped: string | null;
+    hasResults: boolean;
 
     enrollmentCount: number;
     enrollmentType: "ACTUAL" | "ESTIMATED";
@@ -12,17 +16,35 @@ export interface NormalizedTrial {
     startDate: string | null;
     completionDate: string | null;
 
+    allocation: string | null;
+    interventionModel: string | null;
+    primaryPurpose: string | null;
+    masking: string | null;
+    whoMasked: string[];
+
     conditions: string[];
     interventions: string[];
+    interventionTypes: string[];
+    armCount: number;
 
     eligibilityCriteria: string;
     sex: string;
     minimumAge: string | null;
     maximumAge: string | null;
+    healthyVolunteers: boolean | null;
+    stdAges: string[];
 
     primaryOutcomes: string[];
+    secondaryOutcomes: string[];
 
     sponsor: string | null;
+    sponsorClass: string | null;
+    collaboratorCount: number;
+    locationCount: number;
+    countries: string[];
+
+    hasDmc: boolean | null;
+    meshTerms: string[];
 }
 
 export interface ReferenceTrial {
