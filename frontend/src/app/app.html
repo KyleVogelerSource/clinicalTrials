@@ -35,7 +35,11 @@
 
 <router-outlet />
 
-<app-loading-indicator />
+@if (loadingService.isLoading()) {
+  <div class="loading-overlay" role="status" aria-live="polite">
+    <app-loading-indicator [visible]="loadingService.isLoading()" [message]="loadingService.message()" />
+  </div>
+}
 
 @if (debugEnabled()) {
   <div class="debug-bar" role="status" aria-live="polite">

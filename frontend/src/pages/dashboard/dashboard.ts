@@ -351,12 +351,7 @@ export class Dashboard implements OnInit {
         });
 
         this.loadingService.show('Analyzing clinical trials data...');
-        
-        // Small delay to ensure loader renders before we start heavy processing or routing
-        setTimeout(() => {
-            this.workflowService.processResultsV2();
-            this.router.navigate(['/analysis']);
-        }, 50);
+        this.router.navigate(['/analysis']);
     }
 
     onDocumentClick(event: MouseEvent) {
