@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { generateAIResults } from "./AIResultsService";
 import { TrialResultsRequest } from "../dto/TrialResultsRequest";
-import { NormalizedTrial } from "../models/NormalizedTrial";
+import { makeTrial } from "./TestHelpers";
 
 describe("generateAIResults", () => {
   const fetchMock = vi.fn();
@@ -18,28 +18,27 @@ describe("generateAIResults", () => {
     requiredConditions: [],
     ineligibleConditions: [],
     selectedTrialIds: ["NCT0001"],
+    inclusionCriteria: [],
+    exclusionCriteria: [],
   };
 
-  const trials: NormalizedTrial[] = [
-    {
+  const trials = [
+    makeTrial({
       nctId: "NCT0001",
       briefTitle: "Study 1",
-      phase: "Phase 2",
-      studyType: "Interventional",
-      overallStatus: "Completed",
+      phase: "PHASE2",
+      studyType: "INTERVENTIONAL",
+      overallStatus: "COMPLETED",
       enrollmentCount: 120,
-      enrollmentType: "ACTUAL",
-      startDate: "2024-01-01",
-      completionDate: "2024-12-31",
       conditions: ["Type 2 Diabetes"],
       interventions: ["Drug A"],
       eligibilityCriteria: "Adults with Type 2 Diabetes",
-      sex: "All",
+      sex: "ALL",
       minimumAge: "18 Years",
       maximumAge: "65 Years",
       primaryOutcomes: ["A1C change"],
       sponsor: "NIH",
-    },
+    }),
   ];
 
   afterEach(() => {

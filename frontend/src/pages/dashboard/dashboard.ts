@@ -443,6 +443,8 @@ export class Dashboard implements OnInit {
             userExclusions: values.userExclusions ?? null,
             userOutcomes: values.userOutcomes ?? null,
             userArms: values.userArms ?? null,
+            inclusionCriteria: [],
+            exclusionCriteria: [],
 
             // Current selections
             selectedTrialIds: this.selectedTrialIds()

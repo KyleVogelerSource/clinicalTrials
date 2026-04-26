@@ -1,28 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { cosineSimilarity, rankBySimiliarity } from "./TrialSimilarityService";
-import { NormalizedTrial } from "../models/NormalizedTrial";
-
-function makeTrial(nctId: string): NormalizedTrial {
-    return {
-        nctId,
-        briefTitle: `Trial ${nctId}`,
-        phase: "PHASE2",
-        studyType: "INTERVENTIONAL",
-        overallStatus: "COMPLETED",
-        enrollmentCount: 100,
-        enrollmentType: "ACTUAL",
-        startDate: "2020-01",
-        completionDate: "2022-06",
-        conditions: ["Test Condition"],
-        interventions: ["Drug X"],
-        eligibilityCriteria: "Inclusion criteria.",
-        sex: "ALL",
-        minimumAge: "18 Years",
-        maximumAge: null,
-        primaryOutcomes: [],
-        sponsor: null,
-    };
-}
+import { makeTrial } from "./TestHelpers";
 
 describe("cosineSimilarity — BE-9", () => {
     it("returns 1.0 for identical vectors", () => {
@@ -69,7 +47,7 @@ describe("rankBySimiliarity — BE-9", () => {
             ["NCT002", [0, 1, 0]],
             ["NCT003", [0.8, 0.2, 0]],
         ]);
-        const trials = ["NCT001", "NCT002", "NCT003"].map(makeTrial);
+        const trials = ["NCT001", "NCT002", "NCT003"].map((id) => makeTrial({ nctId: id }));
 
         const result = rankBySimiliarity(proposed, candidateEmbeddings, trials, 3);
 
@@ -84,7 +62,7 @@ describe("rankBySimiliarity — BE-9", () => {
             ["NCT001", [1, 0]],
             ["NCT002", [0, 1]],
         ]);
-        const trials = ["NCT001", "NCT002"].map(makeTrial);
+        const trials = ["NCT001", "NCT002"].map((id) => makeTrial({ nctId: id }));
 
         const result = rankBySimiliarity(proposed, candidateEmbeddings, trials, 10);
 
@@ -100,7 +78,7 @@ describe("rankBySimiliarity — BE-9", () => {
             ["NCT003", [0.8, 0.2]],
             ["NCT004", [0.7, 0.3]],
         ]);
-        const trials = ["NCT001", "NCT002", "NCT003", "NCT004"].map(makeTrial);
+        const trials = ["NCT001", "NCT002", "NCT003", "NCT004"].map((id) => makeTrial({ nctId: id }));
 
         const result = rankBySimiliarity(proposed, candidateEmbeddings, trials, 2);
 
@@ -112,7 +90,7 @@ describe("rankBySimiliarity — BE-9", () => {
     it("returns all candidates when topK exceeds pool size", () => {
         const proposed = [1, 0];
         const candidateEmbeddings = new Map([["NCT001", [1, 0]], ["NCT002", [0, 1]]]);
-        const trials = ["NCT001", "NCT002"].map(makeTrial);
+        const trials = ["NCT001", "NCT002"].map((id) => makeTrial({ nctId: id }));
 
         const result = rankBySimiliarity(proposed, candidateEmbeddings, trials, 100);
 
@@ -129,7 +107,7 @@ describe("rankBySimiliarity — BE-9", () => {
     it("rounds similarity scores to 4 decimal places", () => {
         const proposed = [1, 1, 1];
         const candidateEmbeddings = new Map([["NCT001", [1, 2, 3]]]);
-        const trials = [makeTrial("NCT001")];
+        const trials = [makeTrial({ nctId: "NCT001" })];
 
         const result = rankBySimiliarity(proposed, candidateEmbeddings, trials, 1);
         const score = result.rankedTrials[0].similarityScore;

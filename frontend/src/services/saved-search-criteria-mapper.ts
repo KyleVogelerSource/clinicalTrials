@@ -125,6 +125,10 @@ export function mapSavedSearchCriteriaToDesignModel(
     userOutcomes: criteria.userOutcomes ?? null,
     userArms: criteria.userArms ?? null,
 
+    // Eligibility criteria for benchmark comparison
+    inclusionCriteria: [],
+    exclusionCriteria: [],
+
     // Refinement state
     selectedTrialIds: criteria.selectedTrialIds ?? [],
   };

@@ -8,7 +8,9 @@ export default defineConfig({
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
     baseURL: "http://127.0.0.1:4200",
-    trace: "on-first-retry",
+    screenshot: "on",
+    trace: "retain-on-failure",
+    video: "retain-on-failure",
   },
   webServer: {
     command: "npm run start -- --host 127.0.0.1 --port 4200 --prebundle=false",
