@@ -688,6 +688,18 @@
     background: #f6f8fa;
 }
 
+/* Tooltips */
+.label-with-tooltip {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.2rem;
+}
+
+.label-with-tooltip label {
+    margin-bottom: 0;
+}
+
 /* Save Search Modal */
 .modal-overlay {
     position: fixed;
