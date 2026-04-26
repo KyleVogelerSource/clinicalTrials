@@ -30,6 +30,8 @@ describe('designer-criteria-file.service', () => {
       sex: 'Female',
       required: ['Hypertension'],
       ineligible: ['Heart Failure'],
+      startDateFrom: '2020',
+      startDateTo: '2025',
       userPatients: null,
       userSites: null,
       userInclusions: null,
@@ -42,6 +44,8 @@ describe('designer-criteria-file.service', () => {
 
     expect(json.format).toBe('clinicaltrials-designer-criteria');
     expect(json.criteria.condition).toBe('Diabetes');
+    expect(json.criteria.startDateFrom).toBe('2020');
+    expect(json.criteria.startDateTo).toBe('2025');
   });
 
   it('parses a JSON import into designer criteria', () => {
@@ -53,6 +57,8 @@ describe('designer-criteria-file.service', () => {
         interventionModel: 'parallel assignment',
         blindingType: 'double',
         sex: 'female',
+        startDateFrom: ' 2020 ',
+        startDateTo: ' 2024 ',
       },
     }), 'criteria.json', defaults)).toEqual({
       condition: 'Diabetes',
@@ -65,6 +71,8 @@ describe('designer-criteria-file.service', () => {
       sex: 'Female',
       required: [],
       ineligible: [],
+      startDateFrom: '2020',
+      startDateTo: '2024',
       userPatients: null,
       userSites: null,
       userInclusions: null,
@@ -93,6 +101,8 @@ describe('designer-criteria-file.service', () => {
       sex: 'All',
       required: [],
       ineligible: [],
+      startDateFrom: null,
+      startDateTo: null,
       userPatients: null,
       userSites: null,
       userInclusions: null,

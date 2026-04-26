@@ -25,6 +25,8 @@ describe('TrialWorkflowService', () => {
     sex: 'All',
     required: ['Obesity'],
     ineligible: ['Pregnancy'],
+    startDateFrom: null,
+    startDateTo: null,
     userPatients: null,
     userSites: null,
     userInclusions: null,
