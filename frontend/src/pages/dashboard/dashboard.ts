@@ -391,12 +391,16 @@ export class Dashboard implements OnInit {
         const visibility = this.saveForm.value.visibility!;
 
         this.saveStatus.set('saving');
+        this.loadingService.show('Saving search criteria...');
+        
         this.savedSearchService.create({
             name,
             description,
             visibility,
             criteriaJson: criteria as any
-        }).subscribe({
+        }).pipe(
+            finalize(() => this.loadingService.hide())
+        ).subscribe({
             next: () => {
                 this.saveStatus.set('saved');
                 setTimeout(() => this.showSavePanel.set(false), 1500);
