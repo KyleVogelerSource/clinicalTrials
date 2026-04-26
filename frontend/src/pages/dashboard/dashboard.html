@@ -116,11 +116,11 @@
                     <div class="form-group">
                         <label>Year Range</label>
                         <div class="year-range-inputs">
-                            <input type="number" placeholder="From" min="1990" max="2030"
+                            <input id="startYear" type="number" placeholder="From" min="1990" max="2030"
                                 [value]="startDateFilter()"
                                 (change)="startDateFilter.set($any($event.target).value)">
                             <span class="year-separator">–</span>
-                            <input type="number" placeholder="To" min="1990" max="2030"
+                            <input id="endYear" type="number" placeholder="To" min="1990" max="2030"
                                 [value]="endDateFilter()"
                                 (change)="endDateFilter.set($any($event.target).value)">
                         </div>
