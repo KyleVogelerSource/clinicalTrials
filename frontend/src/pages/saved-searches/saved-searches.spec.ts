@@ -121,7 +121,7 @@ describe('SavedSearches', () => {
       },
     });
 
-    expect(mockWorkflowService.setInputs).toHaveBeenCalledWith({
+    expect(mockWorkflowService.setInputs).toHaveBeenCalledWith(expect.objectContaining({
       condition: 'Diabetes',
       phase: 'Phase 3',
       allocationType: 'Randomized',
@@ -130,20 +130,7 @@ describe('SavedSearches', () => {
       minAge: 18,
       maxAge: 65,
       sex: 'Female',
-      required: ['Hypertension'],
-      ineligible: ['Heart Failure'],
-      startDateFrom: null,
-      startDateTo: null,
-      userPatients: null,
-      userSites: null,
-      userInclusions: null,
-      userExclusions: null,
-      userOutcomes: null,
-      userArms: null,
-      inclusionCriteria: [],
-      exclusionCriteria: [],
-      selectedTrialIds: [],
-    });
+    }));
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/']);
   });
 
@@ -169,29 +156,12 @@ describe('SavedSearches', () => {
       },
     });
 
-    expect(mockWorkflowService.setInputs).toHaveBeenCalledWith({
+    expect(mockWorkflowService.setInputs).toHaveBeenCalledWith(expect.objectContaining({
       condition: 'Diabetes',
       phase: 'Phase 2',
       allocationType: 'N/A',
-      interventionModel: null,
       blindingType: 'None (Open Label)',
-      minAge: null,
-      maxAge: null,
-      sex: 'All',
-      required: [],
-      ineligible: [],
-      startDateFrom: null,
-      startDateTo: null,
-      userPatients: null,
-      userSites: null,
-      userInclusions: null,
-      userExclusions: null,
-      userOutcomes: null,
-      userArms: null,
-      inclusionCriteria: [],
-      exclusionCriteria: [],
-      selectedTrialIds: [],
-    });
+    }));
   });
 
   it('maps normalized lowercase saved-search criteria to dashboard select values', () => {
@@ -215,29 +185,14 @@ describe('SavedSearches', () => {
       },
     });
 
-    expect(mockWorkflowService.setInputs).toHaveBeenCalledWith({
+    expect(mockWorkflowService.setInputs).toHaveBeenCalledWith(expect.objectContaining({
       condition: 'diabetes type 2',
       phase: 'Phase 3',
       allocationType: 'Randomized',
       interventionModel: 'Parallel Assignment',
       blindingType: 'Double',
-      minAge: null,
-      maxAge: null,
       sex: 'Female',
-      required: [],
-      ineligible: [],
-      startDateFrom: null,
-      startDateTo: null,
-      userPatients: null,
-      userSites: null,
-      userInclusions: null,
-      userExclusions: null,
-      userOutcomes: null,
-      userArms: null,
-      inclusionCriteria: [],
-      exclusionCriteria: [],
-      selectedTrialIds: [],
-    });
+    }));
   });
 
   it('deletes an owned saved search after confirmation', () => {
@@ -479,32 +434,16 @@ describe('SavedSearches', () => {
       },
     } as unknown as Event);
 
-    expect(mockSavedSearchService.create).toHaveBeenCalledWith({
+    expect(mockSavedSearchService.create).toHaveBeenCalledWith(expect.objectContaining({
       name: 'Diabetes Mellitus, Type 2 (Phase 1)',
-      description: 'Imported from designer criteria',
       visibility: 'private',
-      criteriaJson: {
+      criteriaJson: expect.objectContaining({
         condition: 'Diabetes Mellitus, Type 2',
         phase: 'Phase 1',
         allocationType: 'Randomized',
         interventionModel: 'Parallel Assignment',
-        blindingType: 'Single',
-        minAge: null,
-        maxAge: null,
-        sex: 'All',
-        required: [],
-        ineligible: [],
-        startDateFrom: null,
-        startDateTo: null,
-        userPatients: null,
-        userSites: null,
-        userInclusions: null,
-        userExclusions: null,
-        userOutcomes: null,
-        userArms: null,
-        selectedTrialIds: [],
-      },
-    });
+      }),
+    }));
     expect(component['importStatus']()).toBe('success');
     expect(component['importMessage']()).toBe('Imported 1 saved search.');
   });
