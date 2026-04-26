@@ -240,11 +240,18 @@ async function searchForDiabetes(page: Page) {
   await page.locator("#userExclusions").fill("4");
   await page.locator("#userOutcomes").fill("3");
   await page.locator("#userArms").fill("2");
-  await page.locator("#phase").selectOption("Phase 3");
-  await page.locator("#intervention").selectOption("Parallel Assignment");
+  
+  await selectCustomOption(page, "#phase", "Phase 3");
+  await selectCustomOption(page, "#intervention", "Parallel Assignment");
+
   await page.locator("#condition").fill("Type 2 Diabetes");
   await page.locator("#condition").press("Enter");
   await expect(page.getByText("Showing 3 of 3 Matches")).toBeVisible();
+}
+
+async function selectCustomOption(page: Page, selector: string, optionText: string) {
+  await page.locator(`${selector} .select-trigger`).click();
+  await page.locator(`${selector} .option-item`, { hasText: optionText }).click();
 }
 
 function visibleTrialIds(page: Page) {
@@ -436,7 +443,7 @@ test.describe("Dashboard search workflow", () => {
     await mockSearch(page, requests, []);
 
     await page.goto("/");
-    await page.locator("#phase").selectOption("Phase 3");
+    await selectCustomOption(page, "#phase", "Phase 3");
     await page.locator("#condition").fill("Rare Diabetes Variant");
     await page.locator("#condition").press("Enter");
 
