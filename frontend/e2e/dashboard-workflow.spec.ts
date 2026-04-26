@@ -313,7 +313,7 @@ test.describe("Dashboard search workflow", () => {
     await mockSearch(page, requests);
 
     await searchForDiabetes(page);
-    await page.getByRole("button", { name: "Process" }).click();
+    await page.getByRole("button", { name: "Generate Report" }).click();
 
     await expect(page).toHaveURL(/\/analysis$/);
     await expect(page.getByRole("heading", { name: "Feasibility Report: Type 2 Diabetes" })).toBeVisible();
@@ -423,19 +423,19 @@ test.describe("Dashboard search workflow", () => {
     await mockSearch(page, requests);
 
     await page.goto("/");
-    await expect(page.getByRole("button", { name: "Process" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Generate Report" })).toBeDisabled();
 
     await searchForDiabetes(page);
-    await expect(page.getByRole("button", { name: "Process" })).toBeEnabled();
+    await expect(page.getByRole("button", { name: "Generate Report" })).toBeEnabled();
     await expect(page.getByText("3 Selected")).toBeVisible();
 
     await page.getByRole("checkbox", { name: "Select all trials" }).uncheck();
     await expect(page.getByText("Selected")).toBeHidden();
-    await expect(page.getByRole("button", { name: "Process" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Generate Report" })).toBeDisabled();
 
     await page.getByRole("checkbox", { name: "Select trial" }).first().check();
     await expect(page.getByText("1 Selected")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Process" })).toBeEnabled();
+    await expect(page.getByRole("button", { name: "Generate Report" })).toBeEnabled();
   });
 
   test("shows no-results state when the search API returns no studies", async ({ page }) => {
@@ -450,7 +450,7 @@ test.describe("Dashboard search workflow", () => {
     await expect(page.getByText("Showing 0 of 0 Matches")).toBeVisible();
     await expect(page.getByRole("heading", { name: "No Results" })).toBeVisible();
     await expect(page.getByText("Try adjusting your search criteria or filters to find matching trials.")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Process" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Generate Report" })).toBeDisabled();
   });
 
   test("processes only the selected subset into the comparison table", async ({ page }) => {
@@ -462,7 +462,7 @@ test.describe("Dashboard search workflow", () => {
     await page.getByRole("checkbox", { name: "Select trial" }).nth(1).check();
     await expect(page.getByText("1 Selected")).toBeVisible();
 
-    await page.getByRole("button", { name: "Process" }).click();
+    await page.getByRole("button", { name: "Generate Report" }).click();
 
     await expect(page).toHaveURL(/\/analysis$/);
     await expect(page.getByText("Benchmarked Trials Comparison")).toBeVisible();
