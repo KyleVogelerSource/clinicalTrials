@@ -98,6 +98,17 @@ export class AutoCompleteInput {
         this.highlightedIndex.set(-1);
     }
 
+    onBlur() {
+        const val = this.queryControl.value?.trim();
+        if (val) {
+            this.itemSelected.emit(val);
+            if (this.clearOnSelect()) {
+                this.queryControl.setValue('', { emitEvent: false });
+            }
+        }
+        this.isOpen.set(false);
+    }
+
     onDocumentClick(event: MouseEvent) {
         if (!this.elementRef.nativeElement.contains(event.target)) {
             this.isOpen.set(false);
