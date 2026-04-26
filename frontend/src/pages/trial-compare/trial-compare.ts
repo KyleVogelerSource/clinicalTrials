@@ -34,7 +34,7 @@ export class TrialCompare implements OnInit {
     const ids = this.selectedIds();
     if (ids.length < 2 || ids.length > 5) {
       this.loading.set(false);
-      this.errorMessage.set('Select 2 to 5 trials on the Selection page before running comparison.');
+      this.errorMessage.set('Select 2 to 5 trials on the Dashboard before running comparison.');
       this.debugMessageService.clear();
       return;
     }
@@ -58,8 +58,8 @@ export class TrialCompare implements OnInit {
     });
   }
 
-  protected backToSelection() {
-    this.router.navigate(['/selection']);
+  protected backToDashboard() {
+    this.router.navigate(['/']);
   }
 
   protected toPercent(score: number): number {
