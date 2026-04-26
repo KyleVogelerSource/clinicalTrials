@@ -156,7 +156,8 @@
                     <div class="table-header-left">
                         <h3>Matching Trials</h3>
                         <span class="results-meta">Showing {{ displayedTrials().length }} of {{ foundTrials().length }} Matches</span>
-                        <span class="results-meta" [hidden]="selectedTrialIds().length === 0">{{ selectedTrialIds().length }} Selected</span>
+                        <span class="results-meta" [hidden]="selectedInViewCount() === 0">{{ selectedInViewCount() }} Selected</span>
+
                     </div>
                     <div class="table-controls">
                         <button class="btn-link clear-filters-btn" (click)="clearFilters()"
