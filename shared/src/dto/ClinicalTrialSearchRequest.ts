@@ -36,4 +36,7 @@ export interface ClinicalTrialSearchRequest {
   userExclusions?: number | null;
   userOutcomes?: number | null;
   userArms?: number | null;
+
+  // Refinement state
+  selectedTrialIds?: string[];
 }
