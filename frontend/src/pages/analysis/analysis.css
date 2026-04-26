@@ -231,6 +231,17 @@
     background-color: #fff;
 }
 
+.trend-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.7rem;
+    color: #475569;
+    cursor: pointer;
+    margin-left: 0.25rem;
+    white-space: nowrap;
+}
+
 .suggestion-label {
     font-size: 0.65rem;
     color: #94a3b8;

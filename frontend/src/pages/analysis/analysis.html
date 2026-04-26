@@ -152,6 +152,10 @@
                         <span class="vs">vs</span>
                         <app-custom-select [ngModel]="dataPlotY()" (ngModelChange)="dataPlotY.set($event)"
                             [options]="metricNamesList" [descriptions]="descriptions" width="180px" />
+                        <label class="trend-toggle">
+                            <input type="checkbox" [checked]="showTrendLine()" (change)="showTrendLine.set($any($event.target).checked)">
+                            Trend line
+                        </label>
                     </div>
                 </div>
                 <div class="card-body">
@@ -169,7 +173,7 @@
                     </div>
                     @if (dataPlotData(); as plotData) {
                         <div class="chart-container" style="height: calc(100% - 80px);">
-                            <app-scatter-chart [chartData]="plotData" [xAxisLabel]="dataPlotX()" [yAxisLabel]="dataPlotY()" />
+                            <app-scatter-chart [chartData]="plotData" [xAxisLabel]="dataPlotX()" [yAxisLabel]="dataPlotY()" [showTrendLine]="showTrendLine()" />
                         </div>
                     }
                 </div>
