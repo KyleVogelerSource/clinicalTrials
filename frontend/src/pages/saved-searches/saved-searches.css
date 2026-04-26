@@ -146,23 +146,38 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   margin-top: auto;
   padding-top: 0.75rem;
+  border-top: 1px solid #f0f0f0;
 }
 
 .card-actions-main {
   display: flex;
-  gap: 0.75rem;
-  flex: 1;
+  gap: 0.4rem;
+  flex: 2;
+}
+
+.action-button,
+.btn-danger {
+  padding: 0.4rem 0.6rem;
+  font-size: 0.8rem;
+  min-width: 0;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .action-button {
-  min-width: 150px;
+  background-color: var(--app-blue);
+  flex: 1;
 }
 
 .btn-danger {
-  margin-left: auto;
+  background-color: var(--app-red);
+  max-width: 90px;
+  flex: 1;
 }
 
 .state-message {
