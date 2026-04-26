@@ -11,6 +11,7 @@ import { SavedSearchService } from "../../services/saved-search.service";
 import { mapDesignModelToSavedSearchCriteria } from "../../services/saved-search-criteria-mapper";
 import { LoadingIndicator } from "../../primitives/loading-indicator/loading-indicator";
 import { AutoCompleteInput } from "../../primitives/auto-complete-input/auto-complete-input";
+import { CustomSelect } from "../../primitives/custom-select/custom-select";
 import { KeywordSelector } from "../../primitives/keyword-selector/keyword-selector";
 import { Tooltip } from "../../primitives/tooltip/tooltip";
 import { StudyTrial } from "../../models/study-trial";
@@ -30,6 +31,7 @@ import { LoadingService } from "../../services/loading.service";
         ReactiveFormsModule,
         LoadingIndicator,
         AutoCompleteInput,
+        CustomSelect,
         KeywordSelector,
         Tooltip,
         DecimalPipe,
@@ -55,6 +57,40 @@ export class Dashboard implements OnInit {
     interventionOptions = this.clinicalStudiesService.getInterventionModels();
     blindingOptions = this.clinicalStudiesService.getMaskingTypes();
     sexOptions = this.clinicalStudiesService.getSexes();
+
+    // Tooltip Descriptions
+    phaseDescriptions: Record<string, string> = {
+        'Early Phase 1': 'Exploratory study involving very limited human exposure, no therapeutic or diagnostic intent.',
+        'Phase 1': 'Initial safety and dosage testing in a small group of healthy people or patients.',
+        'Phase 1/Phase 2': 'Combined trial testing safety, dosage, and initial efficacy.',
+        'Phase 2': 'Testing efficacy and safety in a larger group of patients.',
+        'Phase 2/Phase 3': 'Expanded testing of efficacy and safety, often the last step before large-scale testing.',
+        'Phase 3': 'Large scale testing against standard treatments to confirm efficacy and monitor side effects.',
+        'Phase 4': 'Post-marketing surveillance to gather more information on safety and long-term effects.',
+        'N/A': 'Phase not applicable for this study type (e.g., behavioral or device studies).'
+    };
+
+    allocationDescriptions: Record<string, string> = {
+        'Randomized': 'Participants are assigned to study groups by chance (like a coin flip).',
+        'Non-Randomized': 'Participants are assigned to study groups by the investigators.',
+        'N/A': 'No group assignment is used (e.g., single-arm studies).'
+    };
+
+    interventionDescriptions: Record<string, string> = {
+        'Single Group Assignment': 'All participants receive the same intervention.',
+        'Parallel Assignment': 'Participants are assigned to one of two or more groups for the duration of the study.',
+        'Crossover Assignment': 'Participants receive different interventions in a sequence.',
+        'Factorial Assignment': 'Two or more interventions are tested simultaneously in various combinations.',
+        'Sequential Assignment': 'Participants are assigned to groups in a specific order based on previous results.'
+    };
+
+    blindingDescriptions: Record<string, string> = {
+        'None (Open Label)': 'Both investigators and participants know which intervention is being given.',
+        'Single': 'Only the participants are unaware of which intervention they are receiving.',
+        'Double': 'Both participants and investigators are unaware of group assignments.',
+        'Triple': 'Participants, investigators, and outcome assessors are all unaware of assignments.',
+        'Quadruple': 'Adds further layers of blinding, often including data analysts.'
+    };
 
     // Local State
     isLoading = signal(false);
