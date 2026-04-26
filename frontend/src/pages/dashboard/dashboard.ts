@@ -230,7 +230,13 @@ export class Dashboard implements OnInit {
                 phase: savedParams.phase,
                 allocationType: savedParams.allocationType,
                 interventionModel: savedParams.interventionModel,
-                blindingType: savedParams.blindingType
+                blindingType: savedParams.blindingType,
+                userPatients: savedParams.userPatients,
+                userSites: savedParams.userSites,
+                userInclusions: savedParams.userInclusions,
+                userExclusions: savedParams.userExclusions,
+                userOutcomes: savedParams.userOutcomes,
+                userArms: savedParams.userArms
             }, { emitEvent: false });
             this.conditionValue.set(savedParams.condition || '');
         }
@@ -350,7 +356,13 @@ export class Dashboard implements OnInit {
             maxAge: null,
             sex: '',
             required: [],
-            ineligible: []
+            ineligible: [],
+            userPatients: formValues.userPatients ?? null,
+            userSites: formValues.userSites ?? null,
+            userInclusions: formValues.userInclusions ?? null,
+            userExclusions: formValues.userExclusions ?? null,
+            userOutcomes: formValues.userOutcomes ?? null,
+            userArms: formValues.userArms ?? null,
         });
 
         const name = this.saveForm.value.name!;
@@ -447,7 +459,13 @@ export class Dashboard implements OnInit {
                 phase: criteria.phase,
                 allocationType: criteria.allocationType,
                 interventionModel: criteria.interventionModel,
-                blindingType: criteria.blindingType
+                blindingType: criteria.blindingType,
+                userPatients: criteria.userPatients,
+                userSites: criteria.userSites,
+                userInclusions: criteria.userInclusions,
+                userExclusions: criteria.userExclusions,
+                userOutcomes: criteria.userOutcomes,
+                userArms: criteria.userArms
             });
             this.conditionValue.set(criteria.condition);
             this.workflowService.setInputs(criteria);

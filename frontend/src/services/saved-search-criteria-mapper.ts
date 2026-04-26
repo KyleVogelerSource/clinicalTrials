@@ -67,6 +67,14 @@ export function mapDesignModelToSavedSearchCriteria(
     ...(input.sex ? { sex: input.sex } : {}),
     ...(input.required?.length ? { requiredConditions: input.required } : {}),
     ...(input.ineligible?.length ? { ineligibleConditions: input.ineligible } : {}),
+
+    // User Trial Specifics
+    userPatients: input.userPatients ?? null,
+    userSites: input.userSites ?? null,
+    userInclusions: input.userInclusions ?? null,
+    userExclusions: input.userExclusions ?? null,
+    userOutcomes: input.userOutcomes ?? null,
+    userArms: input.userArms ?? null,
   };
 }
 
@@ -103,12 +111,12 @@ export function mapSavedSearchCriteriaToDesignModel(
     required: criteria.requiredConditions ?? [],
     ineligible: criteria.ineligibleConditions ?? [],
 
-    // User Trial Specifics (not typically saved in basic search criteria)
-    userPatients: null,
-    userSites: null,
-    userInclusions: null,
-    userExclusions: null,
-    userOutcomes: null,
-    userArms: null,
+    // User Trial Specifics
+    userPatients: criteria.userPatients ?? null,
+    userSites: criteria.userSites ?? null,
+    userInclusions: criteria.userInclusions ?? null,
+    userExclusions: criteria.userExclusions ?? null,
+    userOutcomes: criteria.userOutcomes ?? null,
+    userArms: criteria.userArms ?? null,
   };
 }
