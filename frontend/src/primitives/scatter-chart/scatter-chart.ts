@@ -31,6 +31,7 @@ export class ScatterChart implements OnDestroy {
     showLegend = input<boolean>(true);
     type = input<'scatter' | 'line'>('scatter');
     enableZoom = input<boolean>(true);
+    showTrendLine = input<boolean>(false);
 
     canvasRef = viewChild<ElementRef<HTMLCanvasElement>>('chartCanvas');
 
@@ -46,12 +47,63 @@ export class ScatterChart implements OnDestroy {
         });
     }
 
+    private computeTrendLine(points: { x: number; y: number }[]): { linePoints: { x: number; y: number }[]; r: number } {
+        const n = points.length;
+        const sumX = points.reduce((a, p) => a + p.x, 0);
+        const sumY = points.reduce((a, p) => a + p.y, 0);
+        const sumXY = points.reduce((a, p) => a + p.x * p.y, 0);
+        const sumX2 = points.reduce((a, p) => a + p.x * p.x, 0);
+        const sumY2 = points.reduce((a, p) => a + p.y * p.y, 0);
+
+        const denom = n * sumX2 - sumX * sumX;
+        const slope = denom === 0 ? 0 : (n * sumXY - sumX * sumY) / denom;
+        const intercept = (sumY - slope * sumX) / n;
+
+        const rDenom = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+        const r = rDenom === 0 ? 0 : (n * sumXY - sumX * sumY) / rDenom;
+
+        const minX = Math.min(...points.map(p => p.x));
+        const maxX = Math.max(...points.map(p => p.x));
+
+        return {
+            linePoints: [
+                { x: minX, y: slope * minX + intercept },
+                { x: maxX, y: slope * maxX + intercept },
+            ],
+            r,
+        };
+    }
+
     private renderChart(data: ScatterChartData, canvas: HTMLCanvasElement): void {
         this.isZoomed.set(false);
         this.chart?.destroy();
+
+        let chartData = data;
+        if (this.showTrendLine() && data.datasets.length > 0) {
+            const points = data.datasets[0].data.filter(p => p.x != null && p.y != null);
+            if (points.length >= 2) {
+                const { linePoints, r } = this.computeTrendLine(points);
+                chartData = {
+                    datasets: [
+                        ...data.datasets,
+                        {
+                            label: `Trend (r = ${r.toFixed(2)})`,
+                            type: 'line' as any,
+                            data: linePoints,
+                            borderColor: '#DC344D',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            borderDash: [5, 5],
+                        } as any,
+                    ],
+                };
+            }
+        }
+
         this.chart = new Chart(canvas, {
             type: this.type(),
-            data,
+            data: chartData,
             options: {
                 responsive: true,
                 maintainAspectRatio: false,

@@ -114,6 +114,7 @@ export class Analysis implements OnInit {
     // Charts Configuration
     dataPlotX = signal(metricNames[0]);
     dataPlotY = signal(metricNames[1]);
+    showTrendLine = signal(false);
     metricNamesList = metricNames;
 
     suggestedCorrelations = computed(() => {
