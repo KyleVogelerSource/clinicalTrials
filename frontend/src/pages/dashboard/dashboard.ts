@@ -12,6 +12,7 @@ import { mapDesignModelToSavedSearchCriteria } from "../../services/saved-search
 import { LoadingIndicator } from "../../primitives/loading-indicator/loading-indicator";
 import { AutoCompleteInput } from "../../primitives/auto-complete-input/auto-complete-input";
 import { KeywordSelector } from "../../primitives/keyword-selector/keyword-selector";
+import { Tooltip } from "../../primitives/tooltip/tooltip";
 import { StudyTrial } from "../../models/study-trial";
 import { ClinicalTrialSearchRequest } from "@shared/dto/ClinicalTrialSearchRequest";
 import { PermissionService } from "../../services/permission.service";
@@ -30,6 +31,7 @@ import { LoadingService } from "../../services/loading.service";
         LoadingIndicator,
         AutoCompleteInput,
         KeywordSelector,
+        Tooltip,
         DecimalPipe,
         DatePipe
     ],
