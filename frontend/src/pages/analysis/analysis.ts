@@ -20,44 +20,23 @@ interface IntersectionRow {
 interface ComparisonMetric {
     key: string;
     label: string;
-    fn: (trial: StudyTrial, phase: string) => boolean;
+    fn: (trial: StudyTrial) => string | number;
 }
 
 interface ComparisonRow {
     trial: StudyTrial;
-    metrics: Record<string, boolean>;
+    metrics: Record<string, string | number>;
 }
 
-const COMPARISON_METRICS: ComparisonMetric[] = [
-    {
-        key: 'phaseMatch',
-        label: 'Phase Match',
-        fn: (t, phase) => {
-            if (!phase) return false;
-            const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
-            return normalize(t.phase) === normalize(phase);
-        }
-    },
-    {
-        key: 'highEnrollment',
-        label: 'High Enrollment',
-        fn: (t) => t.enrollmentCount >= 200,
-    },
-    {
-        key: 'hasStartDate',
-        label: 'Has Start Date',
-        fn: (t) => !!t.startDate,
-    },
-    {
-        key: 'hasEndDate',
-        label: 'Completion Date',
-        fn: (t) => !!t.completionDate,
-    },
-    {
-        key: 'hasDescription',
-        label: 'Has Description',
-        fn: (t) => t.description.trim().length > 0,
-    },
+const ALL_COMPARISON_METRICS: ComparisonMetric[] = [
+    { key: 'phase',           label: 'Phase',           fn: (t) => t.phase || '—' },
+    { key: 'overallStatus',   label: 'Status',          fn: (t) => t.overallStatus || '—' },
+    { key: 'enrollmentCount', label: 'Enrollment',      fn: (t) => t.enrollmentCount ?? 0 },
+    { key: 'startDate',       label: 'Start Date',      fn: (t) => t.startDate || '—' },
+    { key: 'completionDate',  label: 'Completion Date', fn: (t) => t.completionDate || '—' },
+    { key: 'sponsor',         label: 'Sponsor',         fn: (t) => t.sponsor || '—' },
+    { key: 'siteCount',       label: 'Sites',           fn: (t) => t.sites?.length ?? 0 },
+    { key: 'conditions',      label: 'Conditions',      fn: (t) => t.conditions?.join(', ') || '—' },
 ];
 
 export const metricDescriptions: Record<string, string> = {
@@ -418,17 +397,19 @@ export class Analysis implements OnInit {
     });
 
     // Comparison table logic
-    readonly comparisonMetrics = COMPARISON_METRICS;
+    readonly allComparisonMetrics = ALL_COMPARISON_METRICS;
+    visibleColumnKeys = signal<string[]>(['phase', 'overallStatus', 'enrollmentCount', 'startDate', 'completionDate']);
+    showColumnSelector = signal(false);
+    comparisonMetrics = computed(() => ALL_COMPARISON_METRICS.filter(m => this.visibleColumnKeys().includes(m.key)));
     comparisonSearch = signal('');
     comparisonSortKey = signal('');
     comparisonSortAsc = signal(true);
 
     comparisonRows = computed<ComparisonRow[]>(() => {
         const search = this.comparisonSearch().toLowerCase();
-        const phase = this.workflowService.inputParams()?.phase ?? '';
         const sortKey = this.comparisonSortKey();
         const sortAsc = this.comparisonSortAsc();
-        
+
         const selectedIds = new Set(this.workflowService.selectedTrialIds());
         const allTrials = this.workflowService.foundTrials();
         const trials = allTrials.filter(t => selectedIds.has(t.nctId));
@@ -436,7 +417,7 @@ export class Analysis implements OnInit {
         let rows: ComparisonRow[] = trials.map(trial => ({
             trial,
             metrics: Object.fromEntries(
-                COMPARISON_METRICS.map(m => [m.key, m.fn(trial, phase)])
+                ALL_COMPARISON_METRICS.map(m => [m.key, m.fn(trial)])
             ),
         }));
 
@@ -446,9 +427,14 @@ export class Analysis implements OnInit {
 
         if (sortKey) {
             rows = [...rows].sort((a, b) => {
-                const av = a.metrics[sortKey] ? 1 : 0;
-                const bv = b.metrics[sortKey] ? 1 : 0;
-                return sortAsc ? bv - av : av - bv;
+                const av = a.metrics[sortKey];
+                const bv = b.metrics[sortKey];
+                if (typeof av === 'number' && typeof bv === 'number') {
+                    return sortAsc ? av - bv : bv - av;
+                }
+                return sortAsc
+                    ? String(av).localeCompare(String(bv))
+                    : String(bv).localeCompare(String(av));
             });
         }
 
@@ -494,6 +480,20 @@ export class Analysis implements OnInit {
             this.comparisonSortKey.set(key);
             this.comparisonSortAsc.set(true);
         }
+    }
+
+    toggleColumnSelector() {
+        this.showColumnSelector.update(v => !v);
+    }
+
+    toggleColumn(key: string) {
+        this.visibleColumnKeys.update(keys =>
+            keys.includes(key) ? keys.filter(k => k !== key) : [...keys, key]
+        );
+    }
+
+    isColumnVisible(key: string): boolean {
+        return this.visibleColumnKeys().includes(key);
     }
 
     onUpdateBenchmark(paramKey: string, value: string) {

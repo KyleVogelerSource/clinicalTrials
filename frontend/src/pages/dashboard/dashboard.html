@@ -123,6 +123,24 @@
                         <app-custom-select id="blinding" formControlName="blindingType" 
                             [options]="blindingOptions" [descriptions]="blindingDescriptions" />
                     </div>
+
+                    <div class="form-group">
+                        <label>Year Range</label>
+                        <div class="year-range-inputs">
+                            <input id="startYear" type="number" placeholder="From" min="1990" max="2030"
+                                [value]="startDateFilter()"
+                                (change)="startDateFilter.set($any($event.target).value)">
+                            <span class="year-separator">–</span>
+                            <input id="endYear" type="number" placeholder="To" min="1990" max="2030"
+                                [value]="endDateFilter()"
+                                (change)="endDateFilter.set($any($event.target).value)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-footer">
+                    <button class="btn btn-primary" (click)="onProcess()"
+                        [disabled]="selectedTrialIds().length === 0">Process</button>
                 </div>
             </div>
 
@@ -144,14 +162,6 @@
                     <span class="results-meta" [hidden]="selectedTrialIds().length === 0">{{ selectedTrialIds().length }} Selected</span>
                 </div>
                 <div class="table-controls">
-                    <div class="date-range-filter">
-                        <label for="startDate">From:</label>
-                        <input type="date" id="startDate" [value]="startDateFilter()"
-                            (change)="startDateFilter.set($any($event.target).value)">
-                        <label for="endDate">To:</label>
-                        <input type="date" id="endDate" [value]="endDateFilter()"
-                            (change)="endDateFilter.set($any($event.target).value)">
-                    </div>
                     <button class="btn-link clear-filters-btn" (click)="clearFilters()"
                         [hidden]="!nameFilter() && !statusFilter() && !participantsFilter() && !startDateFilter() && !endDateFilter() && keywordFilter().length === 0">
                         Clear Filters
