@@ -245,7 +245,7 @@ async function searchForDiabetes(page: Page) {
   await selectCustomOption(page, "#intervention", "Parallel Assignment");
 
   await page.locator("#condition").fill("Type 2 Diabetes");
-  await page.locator("#condition").press("Enter");
+  await page.locator(".suggestions-list .suggestion-item", { hasText: "Type 2 Diabetes" }).first().click();
   await expect(page.getByText("Showing 3 of 3 Matches")).toBeVisible();
 }
 

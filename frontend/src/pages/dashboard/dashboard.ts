@@ -384,6 +384,9 @@ export class Dashboard implements OnInit {
     }
 
     onConditionSearch(query: string) {
+        // Update the form control value as the user types to ensure validity and search triggering
+        this.searchForm.controls.condition.setValue(query, { emitEvent: true });
+        
         if (query && query.trim().length > 0) {
             const matches = this.clinicalStudiesService.getMatchingConditions(query.trim());
             this.conditionMatches.set(matches);
@@ -393,7 +396,7 @@ export class Dashboard implements OnInit {
     }
 
     onConditionSelected(condition: string) {
-        this.searchForm.controls.condition.setValue(condition);
+        this.searchForm.controls.condition.setValue(condition, { emitEvent: true });
         this.conditionValue.set(condition);
         this.conditionMatches.set([]);
     }
