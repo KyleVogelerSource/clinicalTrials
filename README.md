@@ -1,29 +1,662 @@
-# ClinicalTrials API
+# ClinicalTrials
 
-A simple TypeScript + Express API for local development of the Clinical Trials backend.
+ClinicalTrials is a full-stack application for designing, searching, filtering, selecting, and comparing clinical trial candidates. It combines an Angular frontend, an Express/TypeScript backend, shared DTOs, MeSH terminology data, and a PostgreSQL database.
 
-This project currently exposes a small set of local endpoints and includes a starter service that returns an empty `ClinicalTrialStudiesResponse` object.
+The app supports a multi-step clinical trial workflow:
 
-## Prerequisites
+- Build trial search criteria in the Designer.
+- Search ClinicalTrials.gov through the backend API.
+- Review and filter candidate trials.
+- Save, import, export, and share search criteria.
+- Compare selected trials using weighted benchmarking dimensions.
+- Manage users, roles, and permissions through the admin area.
 
-Before running this project, make sure the following are installed:
+## Deploy Locally With Docker Compose
 
-- [Node.js](https://nodejs.org/) (LTS recommended)
-- npm (included with Node.js)
+The recommended local setup uses Docker Compose. Docker will create and run everything the app needs, so you do not need to install the frontend, backend, or database separately.
 
-You can verify installation with:
+### What Docker Will Start
 
-```bash
-node -v
-npm -v
+```text
+Your browser
+    |
+    | http://localhost
+    v
++------------------+
+| Nginx gateway    |
+| port 80          |
++--------+---------+
+         |
+         +------------------------------+
+         |                              |
+         | page requests                | API requests
+         v                              v
++------------------+          +------------------+
+| Angular frontend |          | Express backend  |
+| container        |          | container        |
+| port 4200        |          | port 3000        |
++------------------+          +--------+---------+
+                                      |
+                                      | database connection
+                                      v
+                             +------------------+
+                             | PostgreSQL       |
+                             | container        |
+                             | port 5432        |
+                             +------------------+
 ```
 
+In plain English: open one website in your browser, and Docker runs the web app, API, and database behind the scenes.
 
-# Medical Subjecct Headings (MeSH)
+### 1. Install Docker Desktop
 
-Collection of biomedical terms which is used by ClinicalTrials.gov and other systems.
+Install Docker Desktop for your operating system:
 
-The data provided can be extract in order to feed our termonology refernces.
+- Mac: https://docs.docker.com/desktop/setup/install/mac-install/
+- Windows: https://docs.docker.com/desktop/setup/install/windows-install/
+- Linux: https://docs.docker.com/desktop/setup/install/linux/
+
+After installing it, open Docker Desktop and leave it running. On Windows, use the WSL 2 option if Docker asks which backend to use.
+
+### 2. Open a Terminal
+
+Use the terminal for your operating system:
+
+- Mac: open `Terminal`.
+- Windows: open `PowerShell`.
+- Linux: open your usual terminal app.
+
+### 3. Download the Project
+
+Run these commands:
+
+Mac or Linux:
+
+```bash
+git clone https://github.com/KyleVogelerSource/clinicalTrials.git
+cd clinicalTrials
+```
+
+Windows PowerShell:
+
+```powershell
+git clone https://github.com/KyleVogelerSource/clinicalTrials.git
+cd clinicalTrials
+```
+
+If `git clone` is not available, download the repository as a ZIP file from GitHub, unzip it, and open a terminal inside the unzipped `clinicalTrials` folder.
+
+### 4. Start the App
+
+Run this command from the main `clinicalTrials` folder, the same folder that contains `docker-compose.yml`.
+
+Mac or Linux:
+
+```bash
+docker compose up --build
+```
+
+Windows PowerShell:
+
+```powershell
+docker compose up --build
+```
+
+The first run can take several minutes because Docker has to download images and install app dependencies. Leave this terminal window open while using the app.
+
+If your computer says `docker compose` is not recognized, try the older Docker Compose command:
+
+```bash
+docker-compose up --build
+```
+
+### 5. Open the App in Your Browser
+
+When the terminal output slows down and the containers are running, open your browser and go to:
+
+```text
+http://localhost
+```
+
+That is the local version of the ClinicalTrials app.
+
+Optional backend checks:
+
+```text
+http://localhost/api/health
+http://localhost/api/debug/status
+```
+
+### 6. Stop the App
+
+Go back to the terminal where Docker is running and press:
+
+```text
+Ctrl + C
+```
+
+Then run:
+
+Mac or Linux:
+
+```bash
+docker compose down
+```
+
+Windows PowerShell:
+
+```powershell
+docker compose down
+```
+
+### 7. Reset the Local Database
+
+Only do this if you want to erase the local PostgreSQL data and start fresh:
+
+Mac or Linux:
+
+```bash
+docker compose down --volumes
+```
+
+Windows PowerShell:
+
+```powershell
+docker compose down --volumes
+```
+
+## Deploy to AWS With Terraform
+
+Terraform is the tool used by this repository to create the cloud infrastructure. In plain English, Terraform reads the files in the `terraform/` folder and creates the AWS services needed to run the app online.
+
+This deployment is more advanced than the local Docker setup. You do not need to be a cloud expert, but you do need:
+
+- An AWS account.
+- Permission to create AWS resources.
+- Terraform installed.
+- AWS CLI installed and logged in.
+- Docker installed and running.
+- Access to this GitHub repository's settings if you want automatic GitHub Actions deployment.
+
+Important: this can create paid AWS resources. The database, NAT gateway, App Runner service, CloudFront, S3, and other AWS resources may cost money while they exist. Destroy the Terraform environment when you are finished testing.
+
+### What Terraform Will Create
+
+```text
+GitHub Actions
+    |
+    | uploads frontend files
+    | pushes backend Docker image
+    v
++--------------------+        +--------------------+
+| S3 bucket          |        | ECR repository     |
+| frontend files     |        | backend image      |
++---------+----------+        +---------+----------+
+          |                             |
+          | served by                   | pulled by
+          v                             v
++--------------------+        +--------------------+
+| CloudFront         |        | App Runner         |
+| public website URL |        | backend API URL    |
++--------------------+        +---------+----------+
+                                        |
+                                        | private database connection
+                                        v
+                              +--------------------+
+                              | RDS PostgreSQL     |
+                              | private database   |
+                              +--------------------+
+
+Network pieces created around this:
+
++--------------------------------------------------+
+| AWS VPC                                          |
+| public subnets, private subnets, NAT gateway,    |
+| security groups, and App Runner VPC connector    |
++--------------------------------------------------+
+```
+
+In plain English: Terraform creates the online home for the frontend, backend, database, networking, container image storage, and GitHub deployment permissions.
+
+### 1. Install the Required Tools
+
+Install Terraform:
+
+- Official Terraform install guide: https://developer.hashicorp.com/terraform/install
+
+Install the AWS CLI:
+
+- Official AWS CLI setup guide: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-quickstart.html
+
+Install Docker Desktop if it is not already installed:
+
+- Mac: https://docs.docker.com/desktop/setup/install/mac-install/
+- Windows: https://docs.docker.com/desktop/setup/install/windows-install/
+- Linux: https://docs.docker.com/desktop/setup/install/linux/
+
+Check that the tools are installed:
+
+Mac or Linux:
+
+```bash
+terraform -version
+aws --version
+docker --version
+```
+
+Windows PowerShell:
+
+```powershell
+terraform -version
+aws --version
+docker --version
+```
+
+### 2. Log In to AWS From Your Computer
+
+Terraform needs permission to create resources in your AWS account.
+
+Run:
+
+Mac or Linux:
+
+```bash
+aws configure
+```
+
+Windows PowerShell:
+
+```powershell
+aws configure
+```
+
+AWS will ask for:
+
+- AWS Access Key ID
+- AWS Secret Access Key
+- Default region name
+- Default output format
+
+For this project, use:
+
+```text
+Default region name: us-east-1
+Default output format: json
+```
+
+Confirm AWS is connected:
+
+Mac or Linux:
+
+```bash
+aws sts get-caller-identity
+```
+
+Windows PowerShell:
+
+```powershell
+aws sts get-caller-identity
+```
+
+If this prints your AWS account information, your computer can talk to AWS.
+
+AWS CLI credential help: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html
+
+### 3. Go to the Terraform Folder
+
+From the main project folder, go to the dev Terraform environment:
+
+Mac or Linux:
+
+```bash
+cd terraform/environments/dev
+```
+
+Windows PowerShell:
+
+```powershell
+cd terraform\environments\dev
+```
+
+### 4. Create the Terraform Variables File
+
+Terraform needs a small settings file for this environment.
+
+Mac or Linux:
+
+```bash
+cp terraform.tfvars.example terraform.tfvars
+```
+
+Windows PowerShell:
+
+```powershell
+Copy-Item terraform.tfvars.example terraform.tfvars
+```
+
+Open `terraform.tfvars` in a text editor and update these values:
+
+```hcl
+aws_region    = "us-east-1"
+github_owner  = "YOUR_GITHUB_USERNAME_OR_ORG"
+github_repo   = "clinicalTrials"
+
+db_username   = "app_user"
+db_password   = "REPLACE_WITH_A_LONG_RANDOM_PASSWORD"
+db_ssl        = true
+db_ssl_reject_unauthorized = false
+```
+
+Do not commit `terraform.tfvars` to GitHub. It contains the database password.
+
+Also keep Terraform state private. Files such as `terraform.tfstate` can contain infrastructure details and secret values.
+
+### 5. Initialize Terraform
+
+This downloads the Terraform AWS provider.
+
+Mac or Linux:
+
+```bash
+terraform init
+```
+
+Windows PowerShell:
+
+```powershell
+terraform init
+```
+
+### 6. Create the ECR Image Repository First
+
+The backend runs as a Docker image. AWS App Runner needs that image to exist before the full Terraform deployment can succeed.
+
+Create only the ECR repository first:
+
+Mac or Linux:
+
+```bash
+terraform apply -target=module.ecr
+```
+
+Windows PowerShell:
+
+```powershell
+terraform apply -target=module.ecr
+```
+
+Terraform will show a plan. Type:
+
+```text
+yes
+```
+
+### 7. Push the First Backend Image to ECR
+
+Go back to the main project folder.
+
+Mac or Linux:
+
+```bash
+cd ../../..
+```
+
+Windows PowerShell:
+
+```powershell
+cd ..\..\..
+```
+
+Get your AWS account ID:
+
+Mac or Linux:
+
+```bash
+aws sts get-caller-identity --query Account --output text
+```
+
+Windows PowerShell:
+
+```powershell
+aws sts get-caller-identity --query Account --output text
+```
+
+Use that account ID to build your ECR URL:
+
+```text
+YOUR_AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/clinicaltrials-dev-backend
+```
+
+Example only:
+
+```text
+123456789012.dkr.ecr.us-east-1.amazonaws.com/clinicaltrials-dev-backend
+```
+
+Log Docker in to ECR.
+
+Mac or Linux:
+
+```bash
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin YOUR_AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com
+```
+
+Windows PowerShell:
+
+```powershell
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin YOUR_AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com
+```
+
+Build, tag, and push the backend image.
+
+Mac or Linux:
+
+```bash
+docker build -t clinicaltrials-dev-backend ./backend
+docker tag clinicaltrials-dev-backend:latest YOUR_AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/clinicaltrials-dev-backend:latest
+docker push YOUR_AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/clinicaltrials-dev-backend:latest
+```
+
+Windows PowerShell:
+
+```powershell
+docker build -t clinicaltrials-dev-backend ./backend
+docker tag clinicaltrials-dev-backend:latest YOUR_AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/clinicaltrials-dev-backend:latest
+docker push YOUR_AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/clinicaltrials-dev-backend:latest
+```
+
+Replace `YOUR_AWS_ACCOUNT_ID` with the account number printed by AWS.
+
+### 8. Create the Rest of the AWS Infrastructure
+
+Go back to the Terraform folder:
+
+Mac or Linux:
+
+```bash
+cd terraform/environments/dev
+```
+
+Windows PowerShell:
+
+```powershell
+cd terraform\environments\dev
+```
+
+Preview what Terraform will create:
+
+Mac or Linux:
+
+```bash
+terraform plan
+```
+
+Windows PowerShell:
+
+```powershell
+terraform plan
+```
+
+Apply the deployment:
+
+Mac or Linux:
+
+```bash
+terraform apply
+```
+
+Windows PowerShell:
+
+```powershell
+terraform apply
+```
+
+Terraform will show a plan. Type:
+
+```text
+yes
+```
+
+This step can take several minutes.
+
+### 9. Save the Terraform Outputs
+
+After Terraform finishes, print the output values:
+
+Mac or Linux:
+
+```bash
+terraform output
+```
+
+Windows PowerShell:
+
+```powershell
+terraform output
+```
+
+Save these values somewhere private:
+
+- `backend_service_url`
+- `backend_service_arn`
+- `frontend_bucket_name`
+- `cloudfront_distribution_id`
+- `cloudfront_domain_name`
+- `ecr_repository_url`
+- `github_actions_role_arn`
+- `db_address`
+
+The public frontend URL will be:
+
+```text
+https://CLOUDFRONT_DOMAIN_NAME
+```
+
+The backend API URL will be:
+
+```text
+BACKEND_SERVICE_URL
+```
+
+### 10. Add GitHub Secrets for Automatic Deployment
+
+Terraform creates the AWS infrastructure. GitHub Actions deploys the newest frontend and backend code into that infrastructure.
+
+In GitHub:
+
+1. Open the repository.
+2. Click `Settings`.
+3. Click `Secrets and variables`.
+4. Click `Actions`.
+5. Add these repository secrets:
+
+```text
+AWS_ROLE_ARN = value from github_actions_role_arn
+AWS_REGION = us-east-1
+ECR_REPOSITORY = clinicaltrials-dev-backend
+APP_RUNNER_SERVICE_ARN = value from backend_service_arn
+S3_BUCKET_NAME = value from frontend_bucket_name
+CLOUDFRONT_DISTRIBUTION_ID = value from cloudfront_distribution_id
+```
+
+GitHub secrets help: https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets
+
+### 11. Deploy the Application Code
+
+As written, the deployment workflows run from GitHub Actions:
+
+- Backend deployment: `.github/workflows/deploy-backend.yml`
+- Frontend deployment: `.github/workflows/deploy-frontend.yml`
+
+The backend workflow can be run manually from the GitHub Actions page. The frontend workflow currently runs when changes are pushed to the `main` branch.
+
+After the frontend workflow finishes, open the CloudFront URL in your browser:
+
+```text
+https://CLOUDFRONT_DOMAIN_NAME
+```
+
+That is the deployed AWS version of the ClinicalTrials app.
+
+### 12. Check That the Backend Is Healthy
+
+Open this URL in your browser:
+
+```text
+BACKEND_SERVICE_URL/api/health
+```
+
+For a deeper check, open:
+
+```text
+BACKEND_SERVICE_URL/api/debug/status
+```
+
+The debug status should show that the backend is running and that the database is connected.
+
+### 13. Destroy the AWS Deployment When Finished
+
+If this is only for a class demo or test, destroy the AWS resources when finished so they stop costing money.
+
+From `terraform/environments/dev`, run:
+
+Mac or Linux:
+
+```bash
+terraform destroy
+```
+
+Windows PowerShell:
+
+```powershell
+terraform destroy
+```
+
+Terraform will show what it will delete. Type:
+
+```text
+yes
+```
+
+Do not run `terraform destroy` if this AWS environment is being used by other people.
+
+## Project Layout
+
+```text
+clinicalTrials/
+├── backend/          # Express.js backend API
+├── frontend/         # Angular SPA
+├── shared/           # Shared DTOs and static terminology data
+├── docker/           # Nginx reverse proxy config
+├── terraform/        # AWS infrastructure
+└── docker-compose.yml
+```
+
+## Medical Subject Headings (MeSH)
+
+Collection of biomedical terms used by ClinicalTrials.gov and other systems.
+
+The data provided can be extracted to feed the app's terminology references.
 
 ## Source
 desc2026.xml - https://www.nlm.nih.gov/databases/download/mesh.html

@@ -31,6 +31,8 @@ describe('TrialWorkflowService', () => {
     userExclusions: null,
     userOutcomes: null,
     userArms: null,
+    inclusionCriteria: [],
+    exclusionCriteria: [],
   };
 
   const study = {
@@ -194,6 +196,8 @@ describe('TrialWorkflowService', () => {
       requiredConditions: ['Obesity'],
       ineligibleConditions: ['Pregnancy'],
       selectedTrialIds: ['NCT100', 'NCT200'],
+      inclusionCriteria: [],
+      exclusionCriteria: [],
     });
   });
 

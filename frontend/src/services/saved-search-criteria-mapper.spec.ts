@@ -78,6 +78,8 @@ describe('saved-search-criteria-mapper', () => {
       userExclusions: null,
       userOutcomes: null,
       userArms: null,
+      inclusionCriteria: [],
+      exclusionCriteria: [],
       selectedTrialIds: [],
     });
   });
@@ -122,6 +124,8 @@ describe('saved-search-criteria-mapper', () => {
       userExclusions: null,
       userOutcomes: null,
       userArms: null,
+      inclusionCriteria: [],
+      exclusionCriteria: [],
       selectedTrialIds: [],
     });
   });
