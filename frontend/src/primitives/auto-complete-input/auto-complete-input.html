@@ -1,18 +1,19 @@
 <div class="input-wrapper">
-    <input 
-        type="text" 
+    <input
+        type="text"
         [id]="inputId()"
-        [formControl]="queryControl" 
+        [formControl]="queryControl"
         [placeholder]="placeholderText()"
         (focus)="onFocus()"
+        (blur)="onBlur()"
         (keydown)="onKeyDown($event)"
         autocomplete="off"
     />
-    
+
     @if (isOpen() && suggestions().length > 0) {
-        <ul class="suggestions-list">
+        <ul class="suggestions-list" (mousedown)="$event.preventDefault()">
             @for (suggestion of suggestions(); track suggestion; let i = $index) {
-                <li 
+                <li
                     [class.highlighted]="highlightedIndex() === i"
                     (mouseover)="highlightedIndex.set(i)"
                     (click)="onSelectSuggestion(suggestion)"

@@ -104,11 +104,11 @@ export class Dashboard implements OnInit {
     displayedTrials = computed(() => {
         let trials = [...this.foundTrials()];
         
-        // Apply Date Range
+        // Apply Year Range
         const start = this.startDateFilter();
         const end = this.endDateFilter();
-        if (start) trials = trials.filter(t => t.startDate >= start);
-        if (end) trials = trials.filter(t => t.startDate <= end);
+        if (start) trials = trials.filter(t => t.startDate.substring(0, 4) >= start);
+        if (end) trials = trials.filter(t => t.startDate.substring(0, 4) <= end);
 
         // Apply Column Filters
         const nameF = this.nameFilter().toLowerCase();

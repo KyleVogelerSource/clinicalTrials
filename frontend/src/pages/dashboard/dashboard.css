@@ -224,27 +224,31 @@
     gap: 0.4rem;
 }
 
-.date-range-filter {
+.year-range-inputs {
     display: flex;
     align-items: center;
-    gap: 0.3rem;
-    margin-right: 0.75rem;
-    padding-right: 0.75rem;
-    border-right: 1px solid #e1e4e8;
+    gap: 0.4rem;
 }
 
-.date-range-filter label {
-    font-size: 0.7rem;
-    color: #586069;
-}
-
-.date-range-filter input[type="date"] {
-    padding: 0.15rem 0.3rem;
-    font-size: 0.7rem;
-    border-radius: 2px;
+.year-range-inputs input[type="number"] {
+    width: 80px;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.75rem;
     border: 1px solid #d1d5da;
-    background-color: #fff;
+    border-radius: 4px;
+    background: #fff;
     color: #24292e;
+}
+
+.year-separator {
+    color: #586069;
+    font-size: 0.85rem;
+}
+
+.form-footer {
+    padding: 0.6rem 0 0.1rem 0;
+    border-top: 1px solid #e1e4e8;
+    margin-top: 0.5rem;
 }
 
 .table-content {

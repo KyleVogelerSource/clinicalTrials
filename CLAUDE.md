@@ -80,7 +80,7 @@ The Express server (`backend/src/server.ts`) runs on port 3000. Current endpoint
 - `GET/POST /api/admin/*` — user/role management (requires `user_roles` permission)
 - `POST /api/clinical-trials/search` — calls ClinicalTrials.gov API with validation
 - `POST /api/clinical-trials/candidate-pool` — builds candidate pool
-- `POST /api/clinical-trials/results` — placeholder (returns 501, not yet implemented)
+- `POST /api/clinical-trials/results` — calls `AIResultsService` (Anthropic claude-sonnet-4-20250514), returns feasibility score, timeline buckets, recruitment impact breakdown, and termination reasons
 
 ### Page flow
 The app follows a multi-step workflow managed by `TrialWorkflowService`:
@@ -95,7 +95,8 @@ Designer (step 1) → Selection (step 2) → Results (step 3)
   - **Keywords**: must match ALL keywords against trial title + conditions (case-insensitive)
   - `filteredTrials = computed()` derives from the full `trials` signal — full collection is never mutated, so filters are instantly reversible
   - Counter shows "X of N Results" live
-- **Results** (`pages/results/`) — displays three Chart.js histograms using mock data from `frontend/src/services/mock-trial-results.ts` via `ResultsApiService`. To wire real backend: swap `of(mockTrialResultsResponse)` → `this.http.post(API_URL, request)` in that service.
+- **Results** (`pages/results/`) — displays charts and a comparison table for selected trials. Sections: Overview (score + termination reasons bar chart), Recruitment Velocity, Expected Timeline, Heatmap, Data Plot (scatter), Benchmarks (placeholder), and Comparison Table.
+  - **Comparison Table**: shows selected trials with selectable columns. Columns are defined in `ALL_COMPARISON_METRICS` (`results.ts`) and each returns an actual value (`string | number`) — no checkmarks. Available columns: Phase, Status, Enrollment, Start Date, Completion Date, Sponsor, Sites, Conditions. Default visible: Phase, Status, Enrollment, Start Date, Completion Date. A "Columns ▾" dropdown lets users toggle which columns are shown. Columns are sortable (numeric sort for numbers, `localeCompare` for strings).
 - **Admin** (`pages/admin/`) — lazy-loaded, visible only to users with `user_roles` permission
 
 ### Authentication
