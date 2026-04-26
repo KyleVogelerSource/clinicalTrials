@@ -28,4 +28,12 @@ export interface ClinicalTrialSearchRequest {
   countTotal?: boolean;
   requiredConditions?: string[];
   ineligibleConditions?: string[];
+
+  // User Trial Specifics
+  userPatients?: number | null;
+  userSites?: number | null;
+  userInclusions?: number | null;
+  userExclusions?: number | null;
+  userOutcomes?: number | null;
+  userArms?: number | null;
 }
