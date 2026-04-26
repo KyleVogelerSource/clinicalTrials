@@ -9,14 +9,20 @@
                     from among the candidate trials to compare against from the table on the right. Once ready, click
                     <b>Process</b> to create your feasibility report.</p>
             </div>
-            <div class="info-bar-buttons">
-                <button class="btn btn-primary btn-prominent" (click)="onProcess()"
+            <div class="info-bar-buttons" [class.is-logged-in]="authService.isLoggedIn()">
+                <button class="btn btn-primary btn-prominent process-btn" (click)="onProcess()"
                     [disabled]="selectedTrialIds().length === 0">Process</button>
-                @if (canImportCriteria()) {
-                    <label class="btn btn-thin import-label" for="criteriaImport" title="Import search criteria JSON">
-                        Import
-                    </label>
-                    <input id="criteriaImport" type="file" class="visually-hidden" accept=".json,application/json" (change)="onImportFile($event)">
+                
+                @if (authService.isLoggedIn()) {
+                    <div class="secondary-actions">
+                        <button class="btn btn-secondary btn-thin" (click)="onToggleSavePanel()" [disabled]="!searchForm.valid">Save</button>
+                        @if (canImportCriteria()) {
+                            <label class="btn btn-thin import-label" for="criteriaImport" title="Import search criteria JSON">
+                                Import
+                            </label>
+                            <input id="criteriaImport" type="file" class="visually-hidden" accept=".json,application/json" (change)="onImportFile($event)">
+                        }
+                    </div>
                 }
             </div>
         </div>
@@ -362,9 +368,62 @@
                         </tbody>
                     }
                 </table>
-            </div>
-        </div>
+                </div>
+                </div>
 
-    </div>
+                </div>
 
-</div>
+                @if (showSavePanel()) {
+                <div class="modal-overlay">
+                <div class="modal-content save-search-panel">
+                <div class="modal-header">
+                    <h3>Save This Search</h3>
+                    <button class="close-btn" (click)="onToggleSavePanel()">&times;</button>
+                </div>
+
+                <div class="modal-body">
+                    <form [formGroup]="saveForm" (ngSubmit)="onSaveSearch()">
+                        <div class="form-group">
+                            <label for="saveName">Search Name</label>
+                            <input id="saveName" type="text" formControlName="name" placeholder="e.g., Phase 3 Diabetes Trials" />
+                            @if (saveForm.get('name')?.invalid && saveForm.get('name')?.touched) {
+                                <span class="error-text">Name is required (max 200 chars).</span>
+                            }
+                        </div>
+
+                        <div class="form-group">
+                            <label for="saveDesc">Description (Optional)</label>
+                            <textarea id="saveDesc" formControlName="description" rows="3" placeholder="Notes about this search..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Visibility</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" formControlName="visibility" value="private" /> Private
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" formControlName="visibility" value="shared" /> Shared (Public)
+                                </label>
+                            </div>
+                        </div>
+
+                        @if (saveStatus() === 'error') {
+                            <div class="alert-box error">
+                                {{ saveErrorMessage() }}
+                            </div>
+                        }
+
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" (click)="onToggleSavePanel()">Cancel</button>
+                            <button type="submit" class="btn btn-primary" [disabled]="saveForm.invalid || saveStatus() === 'saving'">
+                                {{ saveStatus() === 'saving' ? 'Saving...' : (saveStatus() === 'saved' ? 'Saved!' : 'Save Search') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                </div>
+                </div>
+                }
+
+                </div>

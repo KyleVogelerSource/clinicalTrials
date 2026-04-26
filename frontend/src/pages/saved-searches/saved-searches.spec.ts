@@ -96,8 +96,8 @@ describe('SavedSearches', () => {
     fixture.detectChanges();
   });
 
-  it('opens a saved search in designer with the full saved criteria', () => {
-    component['openInDesigner']({
+  it('opens a saved search in dashboard with the full saved criteria', () => {
+    component['openInDashboard']({
       id: 1,
       ownerUserId: 1,
       ownerUsername: 'alice',
@@ -139,7 +139,7 @@ describe('SavedSearches', () => {
       userOutcomes: null,
       userArms: null,
     });
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/designer']);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/']);
   });
 
   it('checks import and export permissions on init', () => {
@@ -147,8 +147,8 @@ describe('SavedSearches', () => {
     expect(mockPermissionService.watch).toHaveBeenCalledWith('search_criteria_export');
   });
 
-  it('falls back to designer defaults when older saved searches lack newer fields', () => {
-    component['openInDesigner']({
+  it('falls back to dashboard defaults when older saved searches lack newer fields', () => {
+    component['openInDashboard']({
       id: 2,
       ownerUserId: 1,
       ownerUsername: 'alice',
@@ -184,8 +184,8 @@ describe('SavedSearches', () => {
     });
   });
 
-  it('maps normalized lowercase saved-search criteria to designer select values', () => {
-    component['openInDesigner']({
+  it('maps normalized lowercase saved-search criteria to dashboard select values', () => {
+    component['openInDashboard']({
       id: 6,
       ownerUserId: 1,
       ownerUsername: 'alice',

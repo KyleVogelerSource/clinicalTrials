@@ -8,6 +8,7 @@ import { ClinicalStudyService } from "../../services/clinical-study.service";
 import { TrialWorkflowService } from "../../services/trial-workflow-service";
 import { AuthService } from "../../services/auth.service";
 import { SavedSearchService } from "../../services/saved-search.service";
+import { mapDesignModelToSavedSearchCriteria } from "../../services/saved-search-criteria-mapper";
 import { LoadingIndicator } from "../../primitives/loading-indicator/loading-indicator";
 import { AutoCompleteInput } from "../../primitives/auto-complete-input/auto-complete-input";
 import { KeywordSelector } from "../../primitives/keyword-selector/keyword-selector";
@@ -39,8 +40,8 @@ import { LoadingService } from "../../services/loading.service";
 })
 export class Dashboard implements OnInit {
     private clinicalStudiesService = inject(ClinicalStudyService);
-    private workflowService = inject(TrialWorkflowService);
-    private authService = inject(AuthService);
+    protected workflowService = inject(TrialWorkflowService);
+    protected authService = inject(AuthService);
     private savedSearchService = inject(SavedSearchService);
     private router = inject(Router);
     private permissionService = inject(PermissionService);
@@ -63,6 +64,11 @@ export class Dashboard implements OnInit {
     startDateFilter = signal<string>('');
     endDateFilter = signal<string>('');
     
+    // Save Search State
+    showSavePanel = signal(false);
+    saveStatus = signal<'idle' | 'saving' | 'saved' | 'error'>('idle');
+    saveErrorMessage = signal('');
+
     // Column Filters
     nameFilter = signal<string>('');
     statusFilter = signal<string>('');
@@ -99,6 +105,12 @@ export class Dashboard implements OnInit {
         userOutcomes: new FormControl<number | null>(null),
         userSites: new FormControl<number | null>(null),
         userArms: new FormControl<number | null>(null),
+    });
+
+    saveForm = new FormGroup({
+        name: new FormControl<string>('', [Validators.required, Validators.maxLength(200)]),
+        description: new FormControl<string>('', [Validators.maxLength(1000)]),
+        visibility: new FormControl<'private' | 'shared'>('private', [Validators.required]),
     });
 
     displayedTrials = computed(() => {
@@ -317,6 +329,54 @@ export class Dashboard implements OnInit {
 
     toggleTrialExpansion(id: string) {
         this.expandedTrialId.update(curr => curr === id ? null : id);
+    }
+
+    onToggleSavePanel() {
+        this.showSavePanel.update(v => !v);
+        this.saveStatus.set('idle');
+    }
+
+    onSaveSearch() {
+        if (this.saveForm.invalid || !this.searchForm.valid) return;
+
+        const formValues = this.searchForm.getRawValue();
+        const criteria = mapDesignModelToSavedSearchCriteria({
+            condition: formValues.condition ?? '',
+            phase: formValues.phase ?? '',
+            allocationType: formValues.allocationType ?? '',
+            interventionModel: formValues.interventionModel ?? null,
+            blindingType: formValues.blindingType ?? '',
+            minAge: null,
+            maxAge: null,
+            sex: '',
+            required: [],
+            ineligible: []
+        });
+
+        const name = this.saveForm.value.name!;
+        const description = this.saveForm.value.description ?? null;
+        const visibility = this.saveForm.value.visibility!;
+
+        this.saveStatus.set('saving');
+        this.savedSearchService.create({
+            name,
+            description,
+            visibility,
+            criteriaJson: criteria as any
+        }).subscribe({
+            next: () => {
+                this.saveStatus.set('saved');
+                setTimeout(() => this.showSavePanel.set(false), 1500);
+            },
+            error: (err: any) => {
+                this.saveStatus.set('error');
+                this.saveErrorMessage.set(
+                    err.status === 409
+                        ? 'An equivalent search is already saved.'
+                        : 'Could not save search. Please try again.'
+                );
+            },
+        });
     }
 
     setSortOrder(order: any) {
