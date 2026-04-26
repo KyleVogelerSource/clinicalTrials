@@ -92,11 +92,8 @@
                             <label for="phase">Current Phase</label>
                             <app-tooltip text="Trial development stage, from early safety (Phase 1) to post-market (Phase 4)." />
                         </div>
-                        <select id="phase" formControlName="phase">
-                            @for (option of phaseOptions; track option) {
-                                <option [value]="option">{{ option }}</option>
-                            }
-                        </select>
+                        <app-custom-select id="phase" formControlName="phase" 
+                            [options]="phaseOptions" [descriptions]="phaseDescriptions" />
                     </div>
 
                     <div class="form-group">
@@ -104,11 +101,8 @@
                             <label for="allocationType">Patient Allocation Type</label>
                             <app-tooltip text="Method used to assign participants to study groups (e.g., Randomized)." />
                         </div>
-                        <select id="allocationType" formControlName="allocationType">
-                            @for (option of allocationOptions; track option) {
-                                <option [value]="option">{{ option }}</option>
-                            }
-                        </select>
+                        <app-custom-select id="allocationType" formControlName="allocationType" 
+                            [options]="allocationOptions" [descriptions]="allocationDescriptions" />
                     </div>
 
                     <div class="form-group">
@@ -116,12 +110,9 @@
                             <label for="intervention">Intervention Model</label>
                             <app-tooltip text="The strategy for assigning interventions (e.g., Parallel, Crossover)." />
                         </div>
-                        <select id="intervention" formControlName="interventionModel">
-                            <option [ngValue]="null">Any</option>
-                            @for (option of interventionOptions; track option) {
-                                <option [value]="option">{{ option }}</option>
-                            }
-                        </select>
+                        <app-custom-select id="intervention" formControlName="interventionModel" 
+                            [options]="interventionOptions" [descriptions]="interventionDescriptions"
+                            placeholder="Any" />
                     </div>
 
                     <div class="form-group">
@@ -129,11 +120,8 @@
                             <label for="blinding">Blinding/Masking Type</label>
                             <app-tooltip text="Who is unaware of group assignments (Single, Double, etc.)." />
                         </div>
-                        <select id="blinding" formControlName="blindingType">
-                            @for (option of blindingOptions; track option) {
-                                <option [value]="option">{{ option }}</option>
-                            }
-                        </select>
+                        <app-custom-select id="blinding" formControlName="blindingType" 
+                            [options]="blindingOptions" [descriptions]="blindingDescriptions" />
                     </div>
                 </div>
             </div>
