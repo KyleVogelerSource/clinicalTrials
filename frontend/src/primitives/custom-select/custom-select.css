@@ -39,7 +39,7 @@
     position: absolute;
     top: 100%;
     left: 0;
-    right: 0;
+    width: 250px; /* Consistent wider width for better labels */
     background: white;
     border: 1px solid #ddd;
     border-top: none;
@@ -51,6 +51,11 @@
     border-radius: 2px;
     max-height: 250px;
     overflow-y: auto;
+}
+
+.dropdown-panel.align-right {
+    left: auto;
+    right: 0;
 }
 
 .options-list {
@@ -94,7 +99,7 @@
     padding: 0.5rem 0.75rem;
     border-radius: 4px;
     font-size: 0.7rem;
-    width: 220px;
+    max-width: 220px;
     white-space: normal;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     line-height: 1.4;
@@ -102,4 +107,27 @@
     z-index: 1200;
     pointer-events: none;
     transition: top 0.1s ease-out, left 0.1s ease-out;
+}
+
+.item-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 5px;
+    border-style: solid;
+}
+
+.item-tooltip.pos-right::after {
+    right: 100%;
+    border-color: transparent #24292e transparent transparent;
+}
+
+.item-tooltip.pos-left {
+    transform: translate(-100%, -50%); /* Fully offset to the left of the anchor point */
+}
+
+.item-tooltip.pos-left::after {
+    left: 100%;
+    border-color: transparent transparent transparent #24292e;
 }

@@ -147,17 +147,11 @@
                         <span class="info-icon" title="Explore correlations between different trial metrics. High correlation (r close to 1 or -1) indicates a strong design pattern.">ⓘ</span>
                     </div>
                     <div class="plot-selectors">
-                        <select [ngModel]="dataPlotX()" (ngModelChange)="dataPlotX.set($event)">
-                            @for (name of metricNamesList; track $index) {
-                                <option [value]="name">{{ name }}</option>
-                            }
-                        </select>
+                        <app-custom-select [ngModel]="dataPlotX()" (ngModelChange)="dataPlotX.set($event)"
+                            [options]="metricNamesList" [descriptions]="descriptions" width="180px" />
                         <span class="vs">vs</span>
-                        <select [ngModel]="dataPlotY()" (ngModelChange)="dataPlotY.set($event)">
-                            @for (name of metricNamesList; track $index) {
-                                <option [value]="name">{{ name }}</option>
-                            }
-                        </select>
+                        <app-custom-select [ngModel]="dataPlotY()" (ngModelChange)="dataPlotY.set($event)"
+                            [options]="metricNamesList" [descriptions]="descriptions" width="180px" />
                     </div>
                 </div>
                 <div class="card-body">

@@ -1,11 +1,11 @@
-<div class="custom-select-container" [id]="inputId()">
+<div class="custom-select-container" [id]="inputId()" [style.width]="width()">
     <div class="select-trigger" (click)="toggleDropdown()" [class.is-open]="isOpen()">
         <span class="selected-text">{{ selectedValue() || placeholder() }}</span>
         <span class="chevron">▼</span>
     </div>
 
     @if (isOpen()) {
-        <div class="dropdown-panel" (scroll)="onPanelScroll($event)">
+        <div class="dropdown-panel" [class.align-right]="dropdownAlignment() === 'right'" (scroll)="onPanelScroll($event)">
             <ul class="options-list">
                 @for (option of options(); track option) {
                     <li 
@@ -22,7 +22,11 @@
         </div>
 
         @if (hoveredOption() && descriptions()[hoveredOption()!]) {
-            <div class="item-tooltip" [style.top.px]="tooltipTop()" [style.left.px]="tooltipLeft()">
+            <div class="item-tooltip" 
+                [class.pos-left]="tooltipPosition() === 'left'"
+                [class.pos-right]="tooltipPosition() === 'right'"
+                [style.top.px]="tooltipTop()" 
+                [style.left.px]="tooltipLeft()">
                 {{ descriptions()[hoveredOption()!] }}
             </div>
         }
