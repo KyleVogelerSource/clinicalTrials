@@ -12,6 +12,10 @@ export interface DesignModel {
     required: string[],
     ineligible: string[],
 
+    // Year range filters
+    startDateFrom?: string | null,
+    startDateTo?: string | null,
+
     // User Trial Specifics
     userPatients: number | null,
     userSites: number | null,

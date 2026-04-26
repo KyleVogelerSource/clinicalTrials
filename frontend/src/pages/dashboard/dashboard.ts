@@ -122,6 +122,11 @@ export class Dashboard implements OnInit {
     // Service State Proxies
     selectedTrialIds = this.workflowService.selectedTrialIds;
 
+    selectedInViewCount = computed(() => {
+        const displayedIds = new Set(this.displayedTrials().map(t => t.nctId));
+        return this.selectedTrialIds().filter(id => displayedIds.has(id)).length;
+    });
+
     DISPLAY_THRESHOLD = 1000;
 
     uniqueStatuses = computed(() => {
@@ -243,13 +248,15 @@ export class Dashboard implements OnInit {
         this.keywordFilter.update(k => k.filter(v => v !== keyword));
     }
 
-    clearFilters() {
+    clearFilters(includeYearRange: boolean = true) {
         this.nameFilter.set('');
         this.statusFilter.set('');
         this.participantsFilter.set(null);
         this.keywordFilter.set([]);
-        this.startDateFilter.set('');
-        this.endDateFilter.set('');
+        if (includeYearRange) {
+            this.startDateFilter.set('');
+            this.endDateFilter.set('');
+        }
     }
 
     isAllSelected = computed(() => {
@@ -277,40 +284,58 @@ export class Dashboard implements OnInit {
                 userArms: savedParams.userArms
             }, { emitEvent: false });
             this.conditionValue.set(savedParams.condition || '');
+            this.startDateFilter.set(savedParams.startDateFrom || '');
+            this.endDateFilter.set(savedParams.startDateTo || '');
         }
 
         // Setup live search
         this.searchForm.valueChanges.pipe(
             debounceTime(300),
+            // Map form values and include the year range signals
+            switchMap(values => {
+                const condition = values.condition;
+                const phase = values.phase;
+                const allocationType = values.allocationType;
+                const interventionModel = values.interventionModel;
+                const blindingType = values.blindingType;
+                const startYear = this.startDateFilter();
+                const endYear = this.endDateFilter();
+
+                return of({ condition, phase, allocationType, interventionModel, blindingType, startYear, endYear });
+            }),
             distinctUntilChanged((prev, curr) => 
                 prev.condition === curr.condition &&
                 prev.phase === curr.phase &&
                 prev.allocationType === curr.allocationType &&
                 prev.interventionModel === curr.interventionModel &&
-                prev.blindingType === curr.blindingType
+                prev.blindingType === curr.blindingType &&
+                prev.startYear === curr.startYear &&
+                prev.endYear === curr.endYear
             ),
-            switchMap(values => {
-                if (!values.condition || values.condition.trim() === '') {
+            switchMap(params => {
+                if (!params.condition || params.condition.trim() === '') {
                     this.foundTrials.set([]);
                     return of(null);
                 }
 
                 this.isLoading.set(true);
-                this.clearFilters();
+                this.clearFilters(false); // Don't clear the year range while searching
                 
                 // Only clear selections if this is a fresh search (no existing state in workflow service)
                 const currentSelections = this.workflowService.selectedTrialIds();
                 const existingParams = this.workflowService.inputParams();
-                const isReturning = existingParams?.condition === values.condition;
+                const isReturning = existingParams?.condition === params.condition;
 
                 if (!isReturning) {
                     this.selectedTrialIds.set([]);
                 }
 
                 const request: ClinicalTrialSearchRequest = {
-                    condition: values.condition,
-                    phase: this.mapPhase(values.phase!),
-                    interventionModel: this.mapIntervention(values.interventionModel!),
+                    condition: params.condition,
+                    phase: this.mapPhase(params.phase!),
+                    interventionModel: this.mapIntervention(params.interventionModel!),
+                    startDateFrom: params.startYear || undefined,
+                    startDateTo: params.endYear || undefined,
                     pageSize: 100
                 };
 
@@ -324,19 +349,25 @@ export class Dashboard implements OnInit {
                     this.foundTrials.set(trials);
                     this.workflowService.foundTrials.set(trials);
                     
+                    const foundIds = new Set(trials.map(t => t.nctId));
+
                     // Smart Selection: 
-                    // 1. If we have explicit saved selections (from a loaded search), use those.
-                    // 2. If we are returning and already have selections, keep them.
+                    // 1. If we have explicit saved selections (from a loaded search), use those (pruned).
+                    // 2. If we are returning and already have selections, keep them (pruned).
                     // 3. Otherwise (fresh search), auto-select all results.
                     
                     const savedParams = this.workflowService.inputParams();
                     if (savedParams?.selectedTrialIds && savedParams.selectedTrialIds.length > 0) {
-                        this.selectedTrialIds.set(savedParams.selectedTrialIds);
+                        const pruned = savedParams.selectedTrialIds.filter(id => foundIds.has(id));
+                        this.selectedTrialIds.set(pruned);
                         // Clear them from workflow service input params once applied so they don't persist across fresh searches
                         this.workflowService.setInputs({ ...savedParams, selectedTrialIds: [] });
                     } else if (this.selectedTrialIds().length === 0) {
                         const allIds = trials.map(t => t.nctId);
                         this.selectedTrialIds.set(allIds);
+                    } else {
+                        // Regular filter update while on the page
+                        this.selectedTrialIds.update(current => current.filter(id => foundIds.has(id)));
                     }
                 }
             },
@@ -415,6 +446,8 @@ export class Dashboard implements OnInit {
             sex: '',
             required: [],
             ineligible: [],
+            startDateFrom: this.startDateFilter() || null,
+            startDateTo: this.endDateFilter() || null,
             userPatients: formValues.userPatients ?? null,
             userSites: formValues.userSites ?? null,
             userInclusions: formValues.userInclusions ?? null,
@@ -473,6 +506,9 @@ export class Dashboard implements OnInit {
             sex: '',
             required: [],
             ineligible: [],
+
+            startDateFrom: this.startDateFilter() || null,
+            startDateTo: this.endDateFilter() || null,
 
             // User Trial Specifics
             userPatients: values.userPatients ?? null,

@@ -25,6 +25,10 @@ export interface DesignerFormValue {
   required?: string[] | null;
   ineligible?: string[] | null;
 
+  // Year range filters
+  startDateFrom?: string | null;
+  startDateTo?: string | null;
+
   // User Trial Specifics
   userPatients?: number | null;
   userSites?: number | null;
@@ -70,6 +74,9 @@ export function mapDesignModelToSavedSearchCriteria(
     ...(input.sex ? { sex: input.sex } : {}),
     ...(input.required?.length ? { requiredConditions: input.required } : {}),
     ...(input.ineligible?.length ? { ineligibleConditions: input.ineligible } : {}),
+    
+    ...(input.startDateFrom ? { startDateFrom: input.startDateFrom } : {}),
+    ...(input.startDateTo ? { startDateTo: input.startDateTo } : {}),
 
     // User Trial Specifics
     userPatients: input.userPatients ?? null,
@@ -116,6 +123,9 @@ export function mapSavedSearchCriteriaToDesignModel(
     sex: resolveOptionValue(criteria.sex, defaults.sexes, defaults.sex),
     required: criteria.requiredConditions ?? [],
     ineligible: criteria.ineligibleConditions ?? [],
+
+    startDateFrom: criteria.startDateFrom ?? null,
+    startDateTo: criteria.startDateTo ?? null,
 
     // User Trial Specifics
     userPatients: criteria.userPatients ?? null,
