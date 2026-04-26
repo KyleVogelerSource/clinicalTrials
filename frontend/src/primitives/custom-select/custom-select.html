@@ -5,7 +5,14 @@
     </div>
 
     @if (isOpen()) {
-        <div class="dropdown-panel" [class.align-right]="dropdownAlignment() === 'right'" (scroll)="onPanelScroll($event)">
+        <div class="dropdown-panel" 
+            [class.align-right]="dropdownAlignment() === 'right'"
+            [class.open-up]="openDirection() === 'up'"
+            [class.open-down]="openDirection() === 'down'"
+            [style.top.px]="panelTop()" 
+            [style.left.px]="panelLeft()"
+            [style.width.px]="panelWidth()"
+            (scroll)="onPanelScroll($event)">
             <ul class="options-list">
                 @for (option of options(); track option) {
                     <li 

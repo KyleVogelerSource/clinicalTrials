@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, ElementRef, inject, signal, forwardRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, ElementRef, inject, signal, forwardRef, DestroyRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
@@ -26,6 +26,7 @@ export class CustomSelect implements ControlValueAccessor {
     width = input<string>('100%');
 
     elementRef = inject(ElementRef);
+    private destroyRef = inject(DestroyRef);
     
     selectedValue = signal<string | null>(null);
     isOpen = signal(false);
@@ -34,6 +35,12 @@ export class CustomSelect implements ControlValueAccessor {
     tooltipLeft = signal<number>(0);
     tooltipPosition = signal<'left' | 'right'>('right');
     dropdownAlignment = signal<'left' | 'right'>('left');
+
+    // Panel Fixed Positioning
+    panelTop = signal<number>(0);
+    panelLeft = signal<number>(0);
+    panelWidth = signal<number>(0);
+    openDirection = signal<'up' | 'down'>('down');
 
     // ControlValueAccessor methods
     onChange: any = () => {};
@@ -57,20 +64,49 @@ export class CustomSelect implements ControlValueAccessor {
 
     toggleDropdown() {
         if (!this.isOpen()) {
-            this.calculateDropdownAlignment();
+            this.calculatePanelPosition();
+            window.addEventListener('scroll', this.closeOnScroll, true);
+        } else {
+            window.removeEventListener('scroll', this.closeOnScroll, true);
         }
         this.isOpen.update(v => !v);
     }
 
-    private calculateDropdownAlignment() {
+    private closeOnScroll = () => {
+        if (this.isOpen()) {
+            this.isOpen.set(false);
+            window.removeEventListener('scroll', this.closeOnScroll, true);
+        }
+    };
+
+    private calculatePanelPosition() {
         const rect = this.elementRef.nativeElement.getBoundingClientRect();
         const screenWidth = window.innerWidth;
-        // If less than 300px available to the right of component start, align dropdown to right (expand left)
+        const screenHeight = window.innerHeight;
+        const panelMaxHeight = 250;
+        
+        // Alignment (Left/Right)
         if (screenWidth - rect.left < 300) {
             this.dropdownAlignment.set('right');
+            this.panelLeft.set(rect.right);
         } else {
             this.dropdownAlignment.set('left');
+            this.panelLeft.set(rect.left);
         }
+
+        // Direction (Up/Down)
+        const spaceBelow = screenHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        
+        if (spaceBelow < panelMaxHeight && spaceAbove > spaceBelow) {
+            this.openDirection.set('up');
+            this.panelTop.set(rect.top - 2);
+        } else {
+            this.openDirection.set('down');
+            this.panelTop.set(rect.bottom + 2);
+        }
+
+        this.panelWidth.set(Math.max(rect.width, 250));
     }
 
     selectOption(option: string) {
@@ -78,6 +114,7 @@ export class CustomSelect implements ControlValueAccessor {
         this.onChange(option);
         this.onTouched();
         this.isOpen.set(false);
+        window.removeEventListener('scroll', this.closeOnScroll, true);
     }
 
     onDocumentClick(event: MouseEvent) {
