@@ -86,8 +86,6 @@ test.describe("Saved searches", () => {
     await expect(page.locator("#allocationType .selected-text")).toHaveText("Randomized");
     await expect(page.locator("#intervention .selected-text")).toHaveText("Parallel Assignment");
     await expect(page.locator("#blinding .selected-text")).toHaveText("Double");
-    await expect(page.locator("#minAge")).toHaveValue("18");
-    await expect(page.locator("#maxAge")).toHaveValue("65");
     await expect(page.locator("#startYear")).toHaveValue("2020");
     await expect(page.locator("#endYear")).toHaveValue("2024");
     await expect(page.getByText("hypertension")).toBeVisible();

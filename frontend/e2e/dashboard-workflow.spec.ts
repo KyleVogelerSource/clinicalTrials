@@ -251,7 +251,7 @@ async function searchForDiabetes(page: Page) {
 
 async function selectCustomOption(page: Page, selector: string, optionText: string) {
   await page.locator(`${selector} .select-trigger`).click();
-  await page.locator(`${selector} .option-item`, { hasText: optionText }).click();
+  await page.locator(`${selector} .option-item`, { hasText: new RegExp(`^${optionText}$`) }).click();
 }
 
 function visibleTrialIds(page: Page) {
