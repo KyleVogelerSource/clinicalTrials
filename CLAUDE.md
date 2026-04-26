@@ -106,7 +106,7 @@ JWT-based auth. `AuthInterceptor` attaches Bearer tokens to all HTTP requests. `
 Each chart primitive has built-in export buttons (top-right corner):
 
 - **BarChart** (`primitives/bar-chart/`) — PNG via `chart.toBase64Image()`, CSV serialized from `chartData` input
-- **ScatterChart** (`primitives/scatter-chart/`) — PNG via `chart.toBase64Image()`, CSV with columns `Dataset,X,Y`
+- **ScatterChart** (`primitives/scatter-chart/`) — PNG via `chart.toBase64Image()`, CSV with columns `Dataset,X,Y`. Supports an optional `[showTrendLine]` input (default `false`) that overlays a dashed red least-squares regression line with Pearson r value in the legend.
 - **Heatmap** (`primitives/heatmap/`) — PNG via `leaflet-image` library; button shows `Exporting…` while rasterizing; `leaflet-image` is allowlisted in `angular.json` under `allowedCommonJsDependencies`
 
 ### Scatter chart zoom
@@ -121,6 +121,9 @@ Each chart primitive has built-in export buttons (top-right corner):
 | Reset button | Returns to full view (only shown when zoomed/panned) |
 
 `hammerjs` is allowlisted in `angular.json` under `allowedCommonJsDependencies`. `isZoomed` signal drives the Reset button visibility.
+
+### Scatter chart trend line
+The Analysis page Metric Correlation Plot exposes a **"Trend line"** checkbox (next to the axis selectors) that toggles `showTrendLine` signal → passed as `[showTrendLine]` to `ScatterChart`. When enabled, `ScatterChart` computes a least-squares regression line over the first dataset and injects it as a dashed red `line` dataset labelled `"Trend (r = X.XX)"`. All other scatter chart usages leave `showTrendLine` at its default `false`.
 
 ### Debug mode
 Add `?debug=true` to the URL to show a debug bar polling `/api/debug/status` every 10s.
