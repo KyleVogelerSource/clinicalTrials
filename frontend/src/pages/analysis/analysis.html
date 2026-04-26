@@ -213,17 +213,38 @@
                 </div>
             </div>
 
-            <!-- Comparison Table - RESTORED CHECKMARK STYLE -->
+            <!-- Comparison Table -->
             <div class="card card-full">
                 <div class="card-header">
                     <h4>Benchmarked Trials Comparison</h4>
-                    <div class="comparison-search">
-                        <input
-                            type="text"
-                            placeholder="Search trials..."
-                            [value]="comparisonSearch()"
-                            (input)="onComparisonSearch($event)"
-                        >
+                    <div class="comparison-controls">
+                        <div class="column-selector-wrapper">
+                            <button class="btn-columns" (click)="toggleColumnSelector()">
+                                Columns ▾
+                            </button>
+                            @if (showColumnSelector()) {
+                                <div class="column-dropdown">
+                                    @for (metric of allComparisonMetrics; track metric.key) {
+                                        <label class="column-option">
+                                            <input
+                                                type="checkbox"
+                                                [checked]="isColumnVisible(metric.key)"
+                                                (change)="toggleColumn(metric.key)"
+                                            >
+                                            {{ metric.label }}
+                                        </label>
+                                    }
+                                </div>
+                            }
+                        </div>
+                        <div class="comparison-search">
+                            <input
+                                type="text"
+                                placeholder="Search trials..."
+                                [value]="comparisonSearch()"
+                                (input)="onComparisonSearch($event)"
+                            >
+                        </div>
                     </div>
                 </div>
                 <div class="card-body">
@@ -232,7 +253,7 @@
                             <thead>
                                 <tr>
                                     <th class="trial-col">Trial</th>
-                                    @for (metric of comparisonMetrics; track metric.key) {
+                                    @for (metric of comparisonMetrics(); track metric.key) {
                                         <th
                                             class="metric-col"
                                             (click)="onComparisonSort(metric.key)"
@@ -261,19 +282,13 @@
                                             >{{ row.trial.briefTitle }}</a>
                                             <div class="trial-meta-sub">{{ row.trial.nctId }}</div>
                                         </td>
-                                        @for (metric of comparisonMetrics; track metric.key) {
-                                            <td class="metric-cell">
-                                                @if (row.metrics[metric.key]) {
-                                                    <span class="check">✓</span>
-                                                } @else {
-                                                    <span class="cross">✗</span>
-                                                }
-                                            </td>
+                                        @for (metric of comparisonMetrics(); track metric.key) {
+                                            <td class="metric-cell">{{ row.metrics[metric.key] }}</td>
                                         }
                                     </tr>
                                 } @empty {
                                     <tr>
-                                        <td [attr.colspan]="comparisonMetrics.length + 1" class="no-results">
+                                        <td [attr.colspan]="comparisonMetrics().length + 1" class="no-results">
                                             No trials match your search.
                                         </td>
                                     </tr>

@@ -289,8 +289,8 @@ test.describe("Dashboard search workflow", () => {
     await page.getByRole("button", { name: "Clear Filters" }).click();
     await expect(page.getByText("Showing 3 of 3 Matches")).toBeVisible();
 
-    await page.locator("#startDate").fill("2022-01-01");
-    await page.locator("#endDate").fill("2023-12-31");
+    await page.locator("#startYear").fill("2022");
+    await page.locator("#endYear").fill("2023");
     await expect(page.getByText("Showing 2 of 3 Matches")).toBeVisible();
     await expect(page.getByText("Metformin Optimization in Type 2 Diabetes")).toHaveCount(0);
 
