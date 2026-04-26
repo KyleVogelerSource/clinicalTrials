@@ -31,6 +31,13 @@ describe('saved-search-criteria-mapper', () => {
       sex: 'Female',
       requiredConditions: ['Hypertension'],
       ineligibleConditions: ['Heart Failure'],
+      userPatients: null,
+      userSites: null,
+      userInclusions: null,
+      userExclusions: null,
+      userOutcomes: null,
+      userArms: null,
+      selectedTrialIds: [],
     });
   });
 
@@ -71,6 +78,7 @@ describe('saved-search-criteria-mapper', () => {
       userExclusions: null,
       userOutcomes: null,
       userArms: null,
+      selectedTrialIds: [],
     });
   });
 
@@ -114,6 +122,7 @@ describe('saved-search-criteria-mapper', () => {
       userExclusions: null,
       userOutcomes: null,
       userArms: null,
+      selectedTrialIds: [],
     });
   });
 
@@ -144,6 +153,13 @@ describe('saved-search-criteria-mapper', () => {
       sex: 'Female',
       requiredConditions: ['Hypertension'],
       ineligibleConditions: ['Heart Failure'],
+      userPatients: null,
+      userSites: null,
+      userInclusions: null,
+      userExclusions: null,
+      userOutcomes: null,
+      userArms: null,
+      selectedTrialIds: [],
     });
   });
 });

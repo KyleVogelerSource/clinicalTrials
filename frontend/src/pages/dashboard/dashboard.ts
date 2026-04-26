@@ -259,7 +259,16 @@ export class Dashboard implements OnInit {
 
                 this.isLoading.set(true);
                 this.clearFilters();
-                this.selectedTrialIds.set([]);
+                
+                // Only clear selections if this is a fresh search (no existing state in workflow service)
+                const currentSelections = this.workflowService.selectedTrialIds();
+                const existingParams = this.workflowService.inputParams();
+                const isReturning = existingParams?.condition === values.condition;
+
+                if (!isReturning) {
+                    this.selectedTrialIds.set([]);
+                }
+
                 const request: ClinicalTrialSearchRequest = {
                     condition: values.condition,
                     phase: this.mapPhase(values.phase!),
@@ -277,9 +286,20 @@ export class Dashboard implements OnInit {
                     this.foundTrials.set(trials);
                     this.workflowService.foundTrials.set(trials);
                     
-                    // Auto-select all results
-                    const allIds = trials.map(t => t.nctId);
-                    this.selectedTrialIds.set(allIds);
+                    // Smart Selection: 
+                    // 1. If we have explicit saved selections (from a loaded search), use those.
+                    // 2. If we are returning and already have selections, keep them.
+                    // 3. Otherwise (fresh search), auto-select all results.
+                    
+                    const savedParams = this.workflowService.inputParams();
+                    if (savedParams?.selectedTrialIds && savedParams.selectedTrialIds.length > 0) {
+                        this.selectedTrialIds.set(savedParams.selectedTrialIds);
+                        // Clear them from workflow service input params once applied so they don't persist across fresh searches
+                        this.workflowService.setInputs({ ...savedParams, selectedTrialIds: [] });
+                    } else if (this.selectedTrialIds().length === 0) {
+                        const allIds = trials.map(t => t.nctId);
+                        this.selectedTrialIds.set(allIds);
+                    }
                 }
             },
             error: (err) => {
@@ -363,6 +383,7 @@ export class Dashboard implements OnInit {
             userExclusions: formValues.userExclusions ?? null,
             userOutcomes: formValues.userOutcomes ?? null,
             userArms: formValues.userArms ?? null,
+            selectedTrialIds: this.selectedTrialIds()
         });
 
         const name = this.saveForm.value.name!;
@@ -418,6 +439,9 @@ export class Dashboard implements OnInit {
             userExclusions: values.userExclusions ?? null,
             userOutcomes: values.userOutcomes ?? null,
             userArms: values.userArms ?? null,
+
+            // Current selections
+            selectedTrialIds: this.selectedTrialIds()
         });
 
         this.loadingService.show('Analyzing clinical trials data...');

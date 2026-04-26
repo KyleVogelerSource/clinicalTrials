@@ -32,6 +32,9 @@ export interface DesignerFormValue {
   userExclusions?: number | null;
   userOutcomes?: number | null;
   userArms?: number | null;
+
+  // Refinement state
+  selectedTrialIds?: string[];
 }
 
 export interface SearchExecutionMappings {
@@ -75,6 +78,9 @@ export function mapDesignModelToSavedSearchCriteria(
     userExclusions: input.userExclusions ?? null,
     userOutcomes: input.userOutcomes ?? null,
     userArms: input.userArms ?? null,
+
+    // Refinement state
+    selectedTrialIds: input.selectedTrialIds ?? [],
   };
 }
 
@@ -118,5 +124,8 @@ export function mapSavedSearchCriteriaToDesignModel(
     userExclusions: criteria.userExclusions ?? null,
     userOutcomes: criteria.userOutcomes ?? null,
     userArms: criteria.userArms ?? null,
+
+    // Refinement state
+    selectedTrialIds: criteria.selectedTrialIds ?? [],
   };
 }
