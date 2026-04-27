@@ -391,7 +391,7 @@ export class Dashboard implements OnInit {
                 JSON.stringify(prev.ineligible) === JSON.stringify(curr.ineligible)
             ),
             switchMap(params => {
-                if (!params.condition || params.condition.trim() === '') {
+                if (!params.condition || params.condition.trim().length < 2) {
                     this.foundTrials.set([]);
                     return of(null);
                 }
