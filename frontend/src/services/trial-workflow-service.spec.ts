@@ -157,13 +157,16 @@ describe('TrialWorkflowService', () => {
 
     service.processResults();
 
-    expect(resultsApiService.getResults).toHaveBeenCalledWith(expect.objectContaining({
-      condition: 'Type 2 Diabetes',
-      phase: 'Phase 2',
-      allocationType: 'Randomized',
-      interventionModel: 'Parallel Assignment',
-      selectedTrialIds: ['NCT100'],
-    }));
+    expect(resultsApiService.getResults).toHaveBeenCalledWith(
+      expect.objectContaining({
+        condition: 'Type 2 Diabetes',
+        phase: 'Phase 2',
+        allocationType: 'Randomized',
+        interventionModel: 'Parallel Assignment',
+        selectedTrialIds: ['NCT100'],
+      }),
+      expect.any(Array)
+    );
     expect(service.results().terminationReasons).toEqual([{ reason: 'Completed', count: 1 }]);
     expect(service.results().siteLocations).toEqual([{ latitude: 42.36, longitude: -71.05, label: "Boston Medical Center", subLabel: "Boston, USA" }]);
     expect(service.results().metricRows[0]).toEqual(expect.objectContaining({

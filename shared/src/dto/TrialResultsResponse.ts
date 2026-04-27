@@ -27,6 +27,11 @@ export interface TrialResultsResponse {
     timelineRange?: string;
     siblingCount?: number;
 
+    explanation?: {
+        explanation: string;
+        generatedAt: string;
+    };
+
     // OBSOLETE
     terminationReasons: TerminationReasonBar[];
     generatedAt: string;

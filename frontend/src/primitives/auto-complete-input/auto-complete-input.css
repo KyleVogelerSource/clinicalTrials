@@ -30,6 +30,14 @@ input {
     overflow-y: auto;
 }
 
+.suggestions-list.right-aligned {
+    left: auto;
+    right: 0;
+    width: max-content;
+    min-width: 100%;
+    max-width: 400px;
+}
+
 .suggestions-list li {
     padding: 0.5rem;
     cursor: pointer;
