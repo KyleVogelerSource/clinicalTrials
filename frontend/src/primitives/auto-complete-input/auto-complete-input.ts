@@ -19,6 +19,7 @@ export class AutoCompleteInput implements OnDestroy {
     suggestions = input.required<string[]>();
     clearOnSelect = input<boolean>(true);
     value = input<string>('');
+    rightAlign = input<boolean>(false);
 
     searchQueryChange = output<string>();
     itemSelected = output<string>();

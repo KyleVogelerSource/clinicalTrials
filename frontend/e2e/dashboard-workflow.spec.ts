@@ -281,13 +281,12 @@ test.describe("Dashboard search workflow", () => {
     await expect(page.getByText("Lifestyle Coaching for Diabetes Prevention")).toBeVisible();
     await expect(page.getByText("Cardiometabolic Outcomes in Diabetes")).toBeVisible();
 
-    await page.locator("th").filter({ hasText: "Name" }).locator(".filter-trigger").click();
-    await page.getByPlaceholder("Search titles...").fill("Metformin");
+    await page.getByPlaceholder("Filter name...").fill("Metformin");
     await expect(page.getByText("Showing 1 of 3 Matches")).toBeVisible();
     await expect(page.getByText("Metformin Optimization in Type 2 Diabetes")).toBeVisible();
     await expect(page.getByText("Lifestyle Coaching for Diabetes Prevention")).toHaveCount(0);
 
-    await page.getByRole("button", { name: "Clear Filters" }).click();
+    await page.getByRole("button", { name: "Clear All Filters" }).click();
     await expect(page.getByText("Showing 3 of 3 Matches")).toBeVisible();
 
     await page.locator("#startYear").fill("2022");
@@ -295,14 +294,12 @@ test.describe("Dashboard search workflow", () => {
     await expect(page.getByText("Showing 2 of 3 Matches")).toBeVisible();
     await expect(page.getByText("Metformin Optimization in Type 2 Diabetes")).toHaveCount(0);
 
-    await page.getByRole("button", { name: "Clear Filters" }).click();
-    await page.locator("th").filter({ hasText: "Participants" }).locator(".filter-trigger").click();
-    await page.locator(".filter-popover input[type='number']").fill("200");
+    await page.getByRole("button", { name: "Clear All Filters" }).click();
+    await page.getByPlaceholder("Min...").fill("200");
     await expect(page.getByText("Showing 2 of 3 Matches")).toBeVisible();
     await expect(page.getByText("Lifestyle Coaching for Diabetes Prevention")).toHaveCount(0);
 
-    await page.getByRole("button", { name: "Clear Filters" }).click();
-    await page.locator("th").filter({ hasText: "Details" }).locator(".filter-trigger").click();
+    await page.getByRole("button", { name: "Clear All Filters" }).click();
     await page.getByPlaceholder("Add keyword...").fill("cardiovascular");
     await page.getByPlaceholder("Add keyword...").press("Enter");
     await expect(page.getByText("Showing 1 of 3 Matches")).toBeVisible();
@@ -380,15 +377,14 @@ test.describe("Dashboard search workflow", () => {
 
     await searchForDiabetes(page);
 
-    await page.locator("th").filter({ hasText: "Status" }).locator(".filter-trigger").click();
-    await page.locator(".filter-popover select").selectOption("RECRUITING");
+    await page.locator(".filter-row select").selectOption("RECRUITING");
 
     await expect(page.getByText("Showing 1 of 3 Matches")).toBeVisible();
     await expect(page.getByText("Lifestyle Coaching for Diabetes Prevention")).toBeVisible();
     await expect(page.getByText("Metformin Optimization in Type 2 Diabetes")).toHaveCount(0);
     await expect(page.getByText("Cardiometabolic Outcomes in Diabetes")).toHaveCount(0);
 
-    await page.getByRole("button", { name: "Clear Filters" }).click();
+    await page.getByRole("button", { name: "Clear All Filters" }).click();
     await expect(page.getByText("Showing 3 of 3 Matches")).toBeVisible();
     await expect(page.getByText("Metformin Optimization in Type 2 Diabetes")).toBeVisible();
     await expect(page.getByText("Cardiometabolic Outcomes in Diabetes")).toBeVisible();

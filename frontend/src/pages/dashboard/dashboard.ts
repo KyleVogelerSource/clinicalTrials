@@ -110,11 +110,22 @@ export class Dashboard implements OnInit {
     saveErrorMessage = signal('');
 
     // Column Filters
+    nctIdFilter = signal<string>('');
     nameFilter = signal<string>('');
     statusFilter = signal<string>('');
     participantsFilter = signal<number | null>(null);
+    participantsMaxFilter = signal<number | null>(null);
     keywordFilter = signal<string[]>([]);
-    activeFilter = signal<string | null>(null);
+
+    nctIdMatches = computed(() => {
+        const query = this.nctIdFilter().toLowerCase();
+        if (!query) return [];
+        return Array.from(new Set(this.foundTrials().map(t => t.nctId)))
+            .filter(id => id.toLowerCase().includes(query))
+            .slice(0, 10);
+    });
+
+    keywordMatches = signal<string[]>([]);
 
     // Import State
     importStatus = signal<'idle' | 'success' | 'error'>('idle');
@@ -168,6 +179,9 @@ export class Dashboard implements OnInit {
         if (end) trials = trials.filter(t => t.startDate.substring(0, 4) <= end);
 
         // Apply Column Filters
+        const nctF = this.nctIdFilter().toLowerCase();
+        if (nctF) trials = trials.filter(t => t.nctId.toLowerCase().includes(nctF));
+
         const nameF = this.nameFilter().toLowerCase();
         if (nameF) trials = trials.filter(t => t.briefTitle.toLowerCase().includes(nameF));
 
@@ -176,6 +190,9 @@ export class Dashboard implements OnInit {
 
         const partF = this.participantsFilter();
         if (partF !== null) trials = trials.filter(t => t.enrollmentCount >= partF);
+
+        const partMaxF = this.participantsMaxFilter();
+        if (partMaxF !== null) trials = trials.filter(t => t.enrollmentCount <= partMaxF);
 
         // Apply Keyword Filter
         const keywords = this.keywordFilter();
@@ -233,12 +250,40 @@ export class Dashboard implements OnInit {
         this.sortOrder.set(next);
     }
 
-    toggleFilter(column: string, event: Event) {
-        event.stopPropagation();
-        if (this.activeFilter() === column) {
-            this.activeFilter.set(null);
-        } else {
-            this.activeFilter.set(column);
+    onNctIdSearch(query: string) {
+        this.nctIdFilter.set(query);
+    }
+
+    onNctIdSelected(nctId: string) {
+        this.nctIdFilter.set(nctId);
+    }
+
+    onKeywordSearch(query: string) {
+        if (!query) {
+            this.keywordMatches.set([]);
+            return;
+        }
+        // Basic suggestion logic: find words from displayed trials that start with query
+        const words = new Set<string>();
+        const queryLower = query.toLowerCase();
+        this.displayedTrials().forEach(t => {
+            const text = `${t.briefTitle} ${t.description} ${t.sponsor}`.toLowerCase();
+            text.split(/\s+/).forEach(word => {
+                const clean = word.replace(/[^a-z0-9]/g, '');
+                if (clean.startsWith(queryLower) && clean.length > 3) {
+                    words.add(clean);
+                }
+            });
+        });
+        this.keywordMatches.set(Array.from(words).sort().slice(0, 10));
+    }
+
+    onAddKeywordFromInput(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const val = input.value.trim();
+        if (val) {
+            this.onAddKeyword(val);
+            input.value = '';
         }
     }
 
@@ -271,9 +316,11 @@ export class Dashboard implements OnInit {
     }
 
     clearFilters(includeYearRange: boolean = true) {
+        this.nctIdFilter.set('');
         this.nameFilter.set('');
         this.statusFilter.set('');
         this.participantsFilter.set(null);
+        this.participantsMaxFilter.set(null);
         this.keywordFilter.set([]);
         if (includeYearRange) {
             this.startDateFilter.set('');
@@ -565,10 +612,7 @@ export class Dashboard implements OnInit {
     }
 
     onDocumentClick(event: MouseEvent) {
-        const target = event.target as HTMLElement;
-        if (this.activeFilter() && !target.closest('.filter-popover')) {
-            this.activeFilter.set(null);
-        }
+        // Unused now since popovers are removed
     }
 
     async onImportFile(event: Event) {
