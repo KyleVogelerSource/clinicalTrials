@@ -95,6 +95,7 @@ export class Dashboard implements OnInit {
     // Local State
     isLoading = signal(false);
     foundTrials = signal<StudyTrial[]>([]);
+    isThresholdWarningDismissed = signal(false);
     expandedTrialId = signal<string | null>(null);
     conditionMatches = signal<string[]>([]);
     conditionValue = signal('');
@@ -397,6 +398,7 @@ export class Dashboard implements OnInit {
                 }
 
                 this.isLoading.set(true);
+                this.isThresholdWarningDismissed.set(false); // Reset dismissal on new search
                 this.clearFilters(false); // Don't clear the year range while searching
                 
                 // Only clear selections if this is a fresh search (no existing state in workflow service)

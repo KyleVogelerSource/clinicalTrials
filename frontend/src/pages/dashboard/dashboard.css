@@ -787,6 +787,10 @@
     border: 1px solid #d4a72c;
 }
 
+.alert-box.warning .close-status {
+    margin-left: auto;
+}
+
 .alert-icon {
     font-size: 1.1rem;
 }
