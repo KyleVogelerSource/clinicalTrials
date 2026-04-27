@@ -108,13 +108,16 @@
 }
 
 /* Card Sizing */
+.card-small {
+    grid-column: span 2;
+}
+
 .card-half {
     grid-column: span 3;
 }
 
 .card-large {
     grid-column: span 4;
-    height: 350px;
 }
 
 .card-full {
