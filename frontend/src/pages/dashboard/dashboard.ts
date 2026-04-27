@@ -8,9 +8,12 @@ import { ClinicalStudyService } from "../../services/clinical-study.service";
 import { TrialWorkflowService } from "../../services/trial-workflow-service";
 import { AuthService } from "../../services/auth.service";
 import { SavedSearchService } from "../../services/saved-search.service";
+import { mapDesignModelToSavedSearchCriteria } from "../../services/saved-search-criteria-mapper";
 import { LoadingIndicator } from "../../primitives/loading-indicator/loading-indicator";
 import { AutoCompleteInput } from "../../primitives/auto-complete-input/auto-complete-input";
+import { CustomSelect } from "../../primitives/custom-select/custom-select";
 import { KeywordSelector } from "../../primitives/keyword-selector/keyword-selector";
+import { Tooltip } from "../../primitives/tooltip/tooltip";
 import { StudyTrial } from "../../models/study-trial";
 import { ClinicalTrialSearchRequest } from "@shared/dto/ClinicalTrialSearchRequest";
 import { PermissionService } from "../../services/permission.service";
@@ -28,7 +31,9 @@ import { LoadingService } from "../../services/loading.service";
         ReactiveFormsModule,
         LoadingIndicator,
         AutoCompleteInput,
+        CustomSelect,
         KeywordSelector,
+        Tooltip,
         DecimalPipe,
         DatePipe
     ],
@@ -39,8 +44,8 @@ import { LoadingService } from "../../services/loading.service";
 })
 export class Dashboard implements OnInit {
     private clinicalStudiesService = inject(ClinicalStudyService);
-    private workflowService = inject(TrialWorkflowService);
-    private authService = inject(AuthService);
+    protected workflowService = inject(TrialWorkflowService);
+    protected authService = inject(AuthService);
     private savedSearchService = inject(SavedSearchService);
     private router = inject(Router);
     private permissionService = inject(PermissionService);
@@ -53,6 +58,40 @@ export class Dashboard implements OnInit {
     blindingOptions = this.clinicalStudiesService.getMaskingTypes();
     sexOptions = this.clinicalStudiesService.getSexes();
 
+    // Tooltip Descriptions
+    phaseDescriptions: Record<string, string> = {
+        'Early Phase 1': 'Exploratory study involving very limited human exposure, no therapeutic or diagnostic intent.',
+        'Phase 1': 'Initial safety and dosage testing in a small group of healthy people or patients.',
+        'Phase 1/Phase 2': 'Combined trial testing safety, dosage, and initial efficacy.',
+        'Phase 2': 'Testing efficacy and safety in a larger group of patients.',
+        'Phase 2/Phase 3': 'Expanded testing of efficacy and safety, often the last step before large-scale testing.',
+        'Phase 3': 'Large scale testing against standard treatments to confirm efficacy and monitor side effects.',
+        'Phase 4': 'Post-marketing surveillance to gather more information on safety and long-term effects.',
+        'N/A': 'Phase not applicable for this study type (e.g., behavioral or device studies).'
+    };
+
+    allocationDescriptions: Record<string, string> = {
+        'Randomized': 'Participants are assigned to study groups by chance (like a coin flip).',
+        'Non-Randomized': 'Participants are assigned to study groups by the investigators.',
+        'N/A': 'No group assignment is used (e.g., single-arm studies).'
+    };
+
+    interventionDescriptions: Record<string, string> = {
+        'Single Group Assignment': 'All participants receive the same intervention.',
+        'Parallel Assignment': 'Participants are assigned to one of two or more groups for the duration of the study.',
+        'Crossover Assignment': 'Participants receive different interventions in a sequence.',
+        'Factorial Assignment': 'Two or more interventions are tested simultaneously in various combinations.',
+        'Sequential Assignment': 'Participants are assigned to groups in a specific order based on previous results.'
+    };
+
+    blindingDescriptions: Record<string, string> = {
+        'None (Open Label)': 'Both investigators and participants know which intervention is being given.',
+        'Single': 'Only the participants are unaware of which intervention they are receiving.',
+        'Double': 'Both participants and investigators are unaware of group assignments.',
+        'Triple': 'Participants, investigators, and outcome assessors are all unaware of assignments.',
+        'Quadruple': 'Adds further layers of blinding, often including data analysts.'
+    };
+
     // Local State
     isLoading = signal(false);
     foundTrials = signal<StudyTrial[]>([]);
@@ -62,7 +101,14 @@ export class Dashboard implements OnInit {
     sortOrder = signal<'date_desc' | 'date_asc' | 'enrollment_desc' | 'enrollment_asc' | 'name_asc' | 'name_desc' | 'status_asc' | 'status_desc'>('date_desc');
     startDateFilter = signal<string>('');
     endDateFilter = signal<string>('');
+    requiredConditions = signal<string[]>([]);
+    ineligibleConditions = signal<string[]>([]);
     
+    // Save Search State
+    showSavePanel = signal(false);
+    saveStatus = signal<'idle' | 'saving' | 'saved' | 'error'>('idle');
+    saveErrorMessage = signal('');
+
     // Column Filters
     nameFilter = signal<string>('');
     statusFilter = signal<string>('');
@@ -77,6 +123,11 @@ export class Dashboard implements OnInit {
 
     // Service State Proxies
     selectedTrialIds = this.workflowService.selectedTrialIds;
+
+    selectedInViewCount = computed(() => {
+        const displayedIds = new Set(this.displayedTrials().map(t => t.nctId));
+        return this.selectedTrialIds().filter(id => displayedIds.has(id)).length;
+    });
 
     DISPLAY_THRESHOLD = 1000;
 
@@ -99,6 +150,12 @@ export class Dashboard implements OnInit {
         userOutcomes: new FormControl<number | null>(null),
         userSites: new FormControl<number | null>(null),
         userArms: new FormControl<number | null>(null),
+    });
+
+    saveForm = new FormGroup({
+        name: new FormControl<string>('', [Validators.required, Validators.maxLength(200)]),
+        description: new FormControl<string>('', [Validators.maxLength(1000)]),
+        visibility: new FormControl<'private' | 'shared'>('private', [Validators.required]),
     });
 
     displayedTrials = computed(() => {
@@ -193,13 +250,35 @@ export class Dashboard implements OnInit {
         this.keywordFilter.update(k => k.filter(v => v !== keyword));
     }
 
-    clearFilters() {
+    onAddRequired(keyword: string) {
+        this.requiredConditions.update(k => [...new Set([...k, keyword])]);
+        this.searchForm.updateValueAndValidity();
+    }
+
+    onRemoveRequired(keyword: string) {
+        this.requiredConditions.update(k => k.filter(v => v !== keyword));
+        this.searchForm.updateValueAndValidity();
+    }
+
+    onAddIneligible(keyword: string) {
+        this.ineligibleConditions.update(k => [...new Set([...k, keyword])]);
+        this.searchForm.updateValueAndValidity();
+    }
+
+    onRemoveIneligible(keyword: string) {
+        this.ineligibleConditions.update(k => k.filter(v => v !== keyword));
+        this.searchForm.updateValueAndValidity();
+    }
+
+    clearFilters(includeYearRange: boolean = true) {
         this.nameFilter.set('');
         this.statusFilter.set('');
         this.participantsFilter.set(null);
         this.keywordFilter.set([]);
-        this.startDateFilter.set('');
-        this.endDateFilter.set('');
+        if (includeYearRange) {
+            this.startDateFilter.set('');
+            this.endDateFilter.set('');
+        }
     }
 
     isAllSelected = computed(() => {
@@ -218,34 +297,78 @@ export class Dashboard implements OnInit {
                 phase: savedParams.phase,
                 allocationType: savedParams.allocationType,
                 interventionModel: savedParams.interventionModel,
-                blindingType: savedParams.blindingType
+                blindingType: savedParams.blindingType,
+                userPatients: savedParams.userPatients,
+                userSites: savedParams.userSites,
+                userInclusions: savedParams.userInclusions,
+                userExclusions: savedParams.userExclusions,
+                userOutcomes: savedParams.userOutcomes,
+                userArms: savedParams.userArms
             }, { emitEvent: false });
             this.conditionValue.set(savedParams.condition || '');
+            this.startDateFilter.set(savedParams.startDateFrom || '');
+            this.endDateFilter.set(savedParams.startDateTo || '');
+            this.requiredConditions.set(savedParams.required || []);
+            this.ineligibleConditions.set(savedParams.ineligible || []);
         }
 
         // Setup live search
         this.searchForm.valueChanges.pipe(
             debounceTime(300),
+            // Map form values and include the year range and condition signals
+            switchMap(values => {
+                const condition = values.condition;
+                const phase = values.phase;
+                const allocationType = values.allocationType;
+                const interventionModel = values.interventionModel;
+                const blindingType = values.blindingType;
+                const startYear = this.startDateFilter();
+                const endYear = this.endDateFilter();
+                const required = this.requiredConditions();
+                const ineligible = this.ineligibleConditions();
+
+                return of({ 
+                    condition, phase, allocationType, interventionModel, blindingType, 
+                    startYear, endYear, required, ineligible 
+                });
+            }),
             distinctUntilChanged((prev, curr) => 
                 prev.condition === curr.condition &&
                 prev.phase === curr.phase &&
                 prev.allocationType === curr.allocationType &&
                 prev.interventionModel === curr.interventionModel &&
-                prev.blindingType === curr.blindingType
+                prev.blindingType === curr.blindingType &&
+                prev.startYear === curr.startYear &&
+                prev.endYear === curr.endYear &&
+                JSON.stringify(prev.required) === JSON.stringify(curr.required) &&
+                JSON.stringify(prev.ineligible) === JSON.stringify(curr.ineligible)
             ),
-            switchMap(values => {
-                if (!values.condition || values.condition.trim() === '') {
+            switchMap(params => {
+                if (!params.condition || params.condition.trim() === '') {
                     this.foundTrials.set([]);
                     return of(null);
                 }
 
                 this.isLoading.set(true);
-                this.clearFilters();
-                this.selectedTrialIds.set([]);
+                this.clearFilters(false); // Don't clear the year range while searching
+                
+                // Only clear selections if this is a fresh search (no existing state in workflow service)
+                const currentSelections = this.workflowService.selectedTrialIds();
+                const existingParams = this.workflowService.inputParams();
+                const isReturning = existingParams?.condition === params.condition;
+
+                if (!isReturning) {
+                    this.selectedTrialIds.set([]);
+                }
+
                 const request: ClinicalTrialSearchRequest = {
-                    condition: values.condition,
-                    phase: this.mapPhase(values.phase!),
-                    interventionModel: this.mapIntervention(values.interventionModel!),
+                    condition: params.condition,
+                    phase: this.mapPhase(params.phase!),
+                    interventionModel: this.mapIntervention(params.interventionModel!),
+                    startDateFrom: params.startYear || undefined,
+                    startDateTo: params.endYear || undefined,
+                    requiredConditions: params.required.length > 0 ? params.required : undefined,
+                    ineligibleConditions: params.ineligible.length > 0 ? params.ineligible : undefined,
                     pageSize: 100
                 };
 
@@ -259,9 +382,26 @@ export class Dashboard implements OnInit {
                     this.foundTrials.set(trials);
                     this.workflowService.foundTrials.set(trials);
                     
-                    // Auto-select all results
-                    const allIds = trials.map(t => t.nctId);
-                    this.selectedTrialIds.set(allIds);
+                    const foundIds = new Set(trials.map(t => t.nctId));
+
+                    // Smart Selection: 
+                    // 1. If we have explicit saved selections (from a loaded search), use those (pruned).
+                    // 2. If we are returning and already have selections, keep them (pruned).
+                    // 3. Otherwise (fresh search), auto-select all results.
+                    
+                    const savedParams = this.workflowService.inputParams();
+                    if (savedParams?.selectedTrialIds && savedParams.selectedTrialIds.length > 0) {
+                        const pruned = savedParams.selectedTrialIds.filter(id => foundIds.has(id));
+                        this.selectedTrialIds.set(pruned);
+                        // Clear them from workflow service input params once applied so they don't persist across fresh searches
+                        this.workflowService.setInputs({ ...savedParams, selectedTrialIds: [] });
+                    } else if (this.selectedTrialIds().length === 0) {
+                        const allIds = trials.map(t => t.nctId);
+                        this.selectedTrialIds.set(allIds);
+                    } else {
+                        // Regular filter update while on the page
+                        this.selectedTrialIds.update(current => current.filter(id => foundIds.has(id)));
+                    }
                 }
             },
             error: (err) => {
@@ -277,6 +417,9 @@ export class Dashboard implements OnInit {
     }
 
     onConditionSearch(query: string) {
+        // Update the form control value as the user types to ensure validity and search triggering
+        this.searchForm.controls.condition.setValue(query, { emitEvent: true });
+        
         if (query && query.trim().length > 0) {
             const matches = this.clinicalStudiesService.getMatchingConditions(query.trim());
             this.conditionMatches.set(matches);
@@ -286,7 +429,7 @@ export class Dashboard implements OnInit {
     }
 
     onConditionSelected(condition: string) {
-        this.searchForm.controls.condition.setValue(condition);
+        this.searchForm.controls.condition.setValue(condition, { emitEvent: true });
         this.conditionValue.set(condition);
         this.conditionMatches.set([]);
     }
@@ -319,6 +462,67 @@ export class Dashboard implements OnInit {
         this.expandedTrialId.update(curr => curr === id ? null : id);
     }
 
+    onToggleSavePanel() {
+        this.showSavePanel.update(v => !v);
+        this.saveStatus.set('idle');
+    }
+
+    onSaveSearch() {
+        if (this.saveForm.invalid || !this.searchForm.valid) return;
+
+        const formValues = this.searchForm.getRawValue();
+        const criteria = mapDesignModelToSavedSearchCriteria({
+            condition: formValues.condition ?? '',
+            phase: formValues.phase ?? '',
+            allocationType: formValues.allocationType ?? '',
+            interventionModel: formValues.interventionModel ?? null,
+            blindingType: formValues.blindingType ?? '',
+            minAge: null,
+            maxAge: null,
+            sex: '',
+            required: this.requiredConditions(),
+            ineligible: this.ineligibleConditions(),
+            startDateFrom: this.startDateFilter() || null,
+            startDateTo: this.endDateFilter() || null,
+            userPatients: formValues.userPatients ?? null,
+            userSites: formValues.userSites ?? null,
+            userInclusions: formValues.userInclusions ?? null,
+            userExclusions: formValues.userExclusions ?? null,
+            userOutcomes: formValues.userOutcomes ?? null,
+            userArms: formValues.userArms ?? null,
+            selectedTrialIds: this.selectedTrialIds()
+        });
+
+        const name = this.saveForm.value.name!;
+        const description = this.saveForm.value.description ?? null;
+        const visibility = this.saveForm.value.visibility!;
+
+        this.saveStatus.set('saving');
+        this.loadingService.show('Saving search criteria...');
+        
+        this.savedSearchService.create({
+            name,
+            description,
+            visibility,
+            criteriaJson: criteria as any
+        }).pipe(
+            finalize(() => this.loadingService.hide())
+        ).subscribe({
+            next: () => {
+                this.saveStatus.set('saved');
+                setTimeout(() => this.showSavePanel.set(false), 1500);
+            },
+            error: (err: any) => {
+                this.saveStatus.set('error');
+                this.saveErrorMessage.set(
+                    err.status === 409
+                        ? 'An equivalent search is already saved.'
+                        : 'Could not save search. Please try again.'
+                );
+            },
+        });
+    }
+
     setSortOrder(order: any) {
         this.sortOrder.set(order);
     }
@@ -336,8 +540,11 @@ export class Dashboard implements OnInit {
             minAge: null,
             maxAge: null,
             sex: '',
-            required: [],
-            ineligible: [],
+            required: this.requiredConditions(),
+            ineligible: this.ineligibleConditions(),
+
+            startDateFrom: this.startDateFilter() || null,
+            startDateTo: this.endDateFilter() || null,
 
             // User Trial Specifics
             userPatients: values.userPatients ?? null,
@@ -348,6 +555,9 @@ export class Dashboard implements OnInit {
             userArms: values.userArms ?? null,
             inclusionCriteria: [],
             exclusionCriteria: [],
+
+            // Current selections
+            selectedTrialIds: this.selectedTrialIds()
         });
 
         this.loadingService.show('Analyzing clinical trials data...');
@@ -389,7 +599,13 @@ export class Dashboard implements OnInit {
                 phase: criteria.phase,
                 allocationType: criteria.allocationType,
                 interventionModel: criteria.interventionModel,
-                blindingType: criteria.blindingType
+                blindingType: criteria.blindingType,
+                userPatients: criteria.userPatients,
+                userSites: criteria.userSites,
+                userInclusions: criteria.userInclusions,
+                userExclusions: criteria.userExclusions,
+                userOutcomes: criteria.userOutcomes,
+                userArms: criteria.userArms
             });
             this.conditionValue.set(criteria.condition);
             this.workflowService.setInputs(criteria);

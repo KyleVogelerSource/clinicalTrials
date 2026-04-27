@@ -6,6 +6,7 @@ import { FormsModule } from "@angular/forms";
 import { TrialWorkflowService } from "../../services/trial-workflow-service";
 import { BarChart, BarChartData, BarChartDataset } from "../../primitives/bar-chart/bar-chart";
 import { ScatterChart, ScatterChartData } from "../../primitives/scatter-chart/scatter-chart";
+import { CustomSelect } from "../../primitives/custom-select/custom-select";
 import { Heatmap } from "../../primitives/heatmap/heatmap";
 import { metricNames, MetricRow } from "../../models/results-model";
 import { StudyTrial } from "../../models/study-trial";
@@ -66,6 +67,7 @@ export const metricDescriptions: Record<string, string> = {
         FormsModule,
         BarChart,
         ScatterChart,
+        CustomSelect,
         Heatmap,
         DatePipe
     ],

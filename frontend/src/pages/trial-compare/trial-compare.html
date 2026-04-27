@@ -5,7 +5,7 @@
     <p class="state-message">Comparing selected trials...</p>
   } @else if (errorMessage()) {
     <p class="error-message">{{ errorMessage() }}</p>
-    <button class="btn" (click)="backToSelection()">Back to Selection</button>
+    <button class="btn" (click)="backToDashboard()">Back to Dashboard</button>
   } @else if (compareData(); as data) {
     <section class="scoreboard">
       <h3>Benchmark Ranking</h3>
@@ -47,7 +47,7 @@
     </section>
 
     <div class="actions">
-      <button class="btn" (click)="backToSelection()">Back to Selection</button>
+      <button class="btn" (click)="backToDashboard()">Back to Dashboard</button>
     </div>
   }
 </div>

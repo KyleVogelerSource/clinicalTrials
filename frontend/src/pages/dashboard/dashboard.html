@@ -1,41 +1,15 @@
 <div class="container">
 
-    <!-- Top Info Bar -->
-    <div class="section">
-        <div class="info-bar-layout">
-            <div class="info-bar-text">
-                <h2>Design & Match</h2>
-                <p>Welcome to Cardinal Trials. To begin, input your trial parameters in the form below. Then select
-                    from among the candidate trials to compare against from the table on the right. Once ready, click
-                    <b>Process</b> to create your feasibility report.</p>
-            </div>
-            <div class="info-bar-buttons">
-                @if (canImportCriteria()) {
-                    <label class="btn btn-thin import-label" for="criteriaImport" title="Import search criteria JSON">
-                        Import
-                    </label>
-                    <input id="criteriaImport" type="file" class="visually-hidden" accept=".json,application/json" (change)="onImportFile($event)">
-                }
-            </div>
-        </div>
-        @if (importStatus() !== 'idle') {
-            <div class="import-status-bar" [class.is-error]="importStatus() === 'error'">
-                {{ importMessage() }}
-                <button class="close-status" (click)="importStatus.set('idle')">&times;</button>
-            </div>
-        }
-    </div>
-
     <!-- Container for Metadata and Search Table -->
     <div class="workbench-layout">
 
-        <!-- User's Input Form -->
-        <div class="metadata-layout" [formGroup]="searchForm">
-            <div class="section form-card">
+        <!-- Left Column: User Input & Search Criteria -->
+        <div class="metadata-layout">
+            <div class="section form-card trial-specifics-card">
                 <div class="form-section user-trial-section">
                     <h3>Your Trial Specifics</h3>
 
-                    <div class="form-grid">
+                    <div [formGroup]="searchForm" class="form-grid">
                         <div class="form-group">
                             <label for="userPatients">Patients</label>
                             <input id="userPatients" type="number" formControlName="userPatients" placeholder="-" min="0" />
@@ -64,12 +38,15 @@
                 </div>
             </div>
             
-            <div class="section form-card">
-                <div class="form-section">
+            <div class="section form-card search-criteria-card">
+                <div class="form-section" [formGroup]="searchForm">
                     <h3>Search Criteria</h3>
 
                     <div class="form-group">
-                        <label for="condition">Disease/Condition</label>
+                        <div class="label-with-tooltip">
+                            <label for="condition">Disease/Condition</label>
+                            <app-tooltip text="Search for clinical trials by disease name, symptom, or MeSH condition term." />
+                        </div>
                         <app-auto-complete-input inputId="condition" placeholderText="e.g., Type 2 Diabetes"
                             [suggestions]="conditionMatches()" [value]="conditionValue()" [clearOnSelect]="false"
                             (searchQueryChange)="onConditionSearch($event)"
@@ -77,40 +54,60 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="phase">Current Phase</label>
-                        <select id="phase" formControlName="phase">
-                            @for (option of phaseOptions; track option) {
-                                <option [value]="option">{{ option }}</option>
-                            }
-                        </select>
+                        <div class="label-with-tooltip">
+                            <label for="phase">Current Phase</label>
+                            <app-tooltip text="Trial development stage, from early safety (Phase 1) to post-market (Phase 4)." />
+                        </div>
+                        <app-custom-select id="phase" formControlName="phase" 
+                            [options]="phaseOptions" [descriptions]="phaseDescriptions" />
                     </div>
 
                     <div class="form-group">
-                        <label for="allocationType">Patient Allocation Type</label>
-                        <select id="allocationType" formControlName="allocationType">
-                            @for (option of allocationOptions; track option) {
-                                <option [value]="option">{{ option }}</option>
-                            }
-                        </select>
+                        <div class="label-with-tooltip">
+                            <label for="allocationType">Patient Allocation Type</label>
+                            <app-tooltip text="Method used to assign participants to study groups (e.g., Randomized)." />
+                        </div>
+                        <app-custom-select id="allocationType" formControlName="allocationType" 
+                            [options]="allocationOptions" [descriptions]="allocationDescriptions" />
                     </div>
 
                     <div class="form-group">
-                        <label for="intervention">Intervention Model</label>
-                        <select id="intervention" formControlName="interventionModel">
-                            <option [ngValue]="null">Any</option>
-                            @for (option of interventionOptions; track option) {
-                                <option [value]="option">{{ option }}</option>
-                            }
-                        </select>
+                        <div class="label-with-tooltip">
+                            <label for="intervention">Intervention Model</label>
+                            <app-tooltip text="The strategy for assigning interventions (e.g., Parallel, Crossover)." />
+                        </div>
+                        <app-custom-select id="intervention" formControlName="interventionModel" 
+                            [options]="interventionOptions" [descriptions]="interventionDescriptions"
+                            placeholder="Any" />
                     </div>
 
                     <div class="form-group">
-                        <label for="blinding">Blinding/Masking Type</label>
-                        <select id="blinding" formControlName="blindingType">
-                            @for (option of blindingOptions; track option) {
-                                <option [value]="option">{{ option }}</option>
-                            }
-                        </select>
+                        <div class="label-with-tooltip">
+                            <label for="blinding">Blinding/Masking Type</label>
+                            <app-tooltip text="Who is unaware of group assignments (Single, Double, etc.)." />
+                        </div>
+                        <app-custom-select id="blinding" formControlName="blindingType" 
+                            [options]="blindingOptions" [descriptions]="blindingDescriptions" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Required Conditions</label>
+                        <app-keyword-selector
+                            [selectedKeywords]="requiredConditions()"
+                            placeholderText="e.g., Hypertension"
+                            (addKeyword)="onAddRequired($event)"
+                            (removeKeyword)="onRemoveRequired($event)"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ineligible Conditions</label>
+                        <app-keyword-selector
+                            [selectedKeywords]="ineligibleConditions()"
+                            placeholderText="e.g., Heart Failure"
+                            (addKeyword)="onAddIneligible($event)"
+                            (removeKeyword)="onRemoveIneligible($event)"
+                        />
                     </div>
 
                     <div class="form-group">
@@ -118,261 +115,346 @@
                         <div class="year-range-inputs">
                             <input id="startYear" type="number" placeholder="From" min="1990" max="2030"
                                 [value]="startDateFilter()"
-                                (change)="startDateFilter.set($any($event.target).value)">
+                                (input)="startDateFilter.set($any($event.target).value)">
                             <span class="year-separator">–</span>
                             <input id="endYear" type="number" placeholder="To" min="1990" max="2030"
                                 [value]="endDateFilter()"
-                                (change)="endDateFilter.set($any($event.target).value)">
+                                (input)="endDateFilter.set($any($event.target).value)">
                         </div>
                     </div>
                 </div>
-
-                <div class="form-footer">
-                    <button class="btn btn-primary" (click)="onProcess()"
-                        [disabled]="selectedTrialIds().length === 0">Process</button>
-                </div>
             </div>
 
+            <!-- Action Buttons -->
+            <div class="left-column-actions">
+                <button class="btn btn-primary btn-prominent process-btn" (click)="onProcess()"
+                    [disabled]="selectedTrialIds().length === 0">Generate Report</button>
+                
+                <div class="secondary-actions-row">
+                    @if (authService.isLoggedIn()) {
+                        <button class="btn btn-secondary action-btn" (click)="onToggleSavePanel()" [disabled]="!searchForm.valid">Save Search</button>
+                    }
+                    
+                    @if (canImportCriteria()) {
+                        <label class="btn btn-secondary action-btn import-label" for="criteriaImport" title="Import search criteria JSON">
+                            Import JSON
+                        </label>
+                        <input id="criteriaImport" type="file" class="visually-hidden" accept=".json,application/json" (change)="onImportFile($event)">
+                    }
+                </div>
+            </div>
         </div>
 
-        <!-- Matching Trials Display -->
-        <div class="section table-layout">
-            @if (isLoading()) {
-                <div class="table-loading-overlay">
-                    <app-loading-indicator [visible]="true" />
+        <!-- Right Column: Info Bar & Table -->
+        <div class="right-column-layout">
+            
+            <div class="section info-bar-section">
+                <div class="info-bar-layout">
+                    <div class="info-bar-text">
+                        <h2>Design & Match</h2>
+                        <p>Welcome to Cardinal Trials. To begin, input your trial parameters in the form below. Then select
+                            from among the candidate trials to compare against from the table on the right. Once ready, click
+                            <b>Generate Report</b> to create your feasibility report.</p>
+                    </div>
                 </div>
-            }
-
-            <!-- Table Info -->
-            <div class="table-header">
-                <div class="table-header-left">
-                    <h3>Matching Trials</h3>
-                    <span class="results-meta">Showing {{ displayedTrials().length }} of {{ foundTrials().length }} Matches</span>
-                    <span class="results-meta" [hidden]="selectedTrialIds().length === 0">{{ selectedTrialIds().length }} Selected</span>
-                </div>
-                <div class="table-controls">
-                    <button class="btn-link clear-filters-btn" (click)="clearFilters()"
-                        [hidden]="!nameFilter() && !statusFilter() && !participantsFilter() && !startDateFilter() && !endDateFilter() && keywordFilter().length === 0">
-                        Clear Filters
-                    </button>
-                </div>
+                @if (importStatus() !== 'idle') {
+                    <div class="import-status-bar" [class.is-error]="importStatus() === 'error'">
+                        {{ importMessage() }}
+                        <button class="close-status" (click)="importStatus.set('idle')">&times;</button>
+                    </div>
+                }
             </div>
 
+            <div class="section table-layout">
+                @if (isLoading()) {
+                    <div class="table-loading-overlay">
+                        <app-loading-indicator [visible]="true" />
+                    </div>
+                }
 
-            <!-- Table of Trials-->
-            <div class="table-content">
-                <table class="trials-table">
-                    <thead>
-                        <tr>
-                            <th class="selection-cell" style="text-align:center;">
-                                <input type="checkbox" class="custom-checkbox" [checked]="isAllSelected()"
-                                    (change)="toggleAllSelection()" aria-label="Select all trials"
-                                    [disabled]="displayedTrials().length === 0">
-                            </th>
-                            <th class="sortable-header" (click)="toggleSort('date')">
-                                Trial ID
-                                <span class="sort-indicator" [class.active]="sortOrder().startsWith('date')">
-                                    {{ sortOrder() === 'date_asc' ? '↑' : '↓' }}
-                                </span>
-                            </th>
-                            <th class="sortable-header" (click)="toggleSort('name')">
-                                <div class="header-content">
-                                    Name
-                                    <span class="sort-indicator" [class.active]="sortOrder().startsWith('name')">
-                                        {{ sortOrder() === 'name_asc' ? '↑' : '↓' }}
-                                    </span>
-                                    <button class="filter-trigger" [class.filter-active]="nameFilter()" (click)="toggleFilter('name', $event)">🔍</button>
-                                </div>
-                                @if (activeFilter() === 'name') {
-                                    <div class="filter-popover" (click)="$event.stopPropagation()">
-                                        <div class="filter-input-wrapper">
-                                            <input type="text" placeholder="Search titles..." 
-                                                [value]="nameFilter()" 
-                                                (input)="nameFilter.set($any($event.target).value)"
-                                                (keyup.enter)="activeFilter.set(null)"
-                                                autofocus>
-                                            @if (nameFilter()) {
-                                                <button class="clear-input-btn" (click)="nameFilter.set('')">&times;</button>
-                                            }
-                                        </div>
-                                    </div>
-                                }
-                            </th>
-                            <th class="sortable-header" (click)="toggleSort('enrollment')">
-                                <div class="header-content">
-                                    Participants
-                                    <span class="sort-indicator" [class.active]="sortOrder().startsWith('enrollment')">
-                                        {{ sortOrder() === 'enrollment_asc' ? '↑' : '↓' }}
-                                    </span>
-                                    <button class="filter-trigger" [class.filter-active]="participantsFilter() !== null" (click)="toggleFilter('participants', $event)">🔍</button>
-                                </div>
-                                @if (activeFilter() === 'participants') {
-                                    <div class="filter-popover" (click)="$event.stopPropagation()">
-                                        <label>Min Participants:</label>
-                                        <input type="number" 
-                                            [value]="participantsFilter()" 
-                                            (input)="participantsFilter.set($any($event.target).value ? +$any($event.target).value : null)"
-                                            (keyup.enter)="activeFilter.set(null)"
-                                            min="0"
-                                            autofocus>
-                                    </div>
-                                }
-                            </th>
-                            <th class="sortable-header" (click)="toggleSort('status')">
-                                <div class="header-content">
-                                    Status
-                                    <span class="sort-indicator" [class.active]="sortOrder().startsWith('status')">
-                                        {{ sortOrder() === 'status_asc' ? '↑' : '↓' }}
-                                    </span>
-                                    <button class="filter-trigger" [class.filter-active]="statusFilter()" (click)="toggleFilter('status', $event)">🔍</button>
-                                </div>
-                                @if (activeFilter() === 'status') {
-                                    <div class="filter-popover" (click)="$event.stopPropagation()">
-                                        <select [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value); activeFilter.set(null)">
-                                            <option value="" [selected]="statusFilter() === ''">All Statuses</option>
-                                            @for (status of uniqueStatuses(); track status) {
-                                                <option [value]="status" [selected]="statusFilter() === status">{{ status.split('_').join(' ') }}</option>
-                                            }
-                                        </select>
-                                    </div>
-                                }                            </th>
-                            <th>
-                                <div class="header-content">
-                                    Details
-                                    <button class="filter-trigger" [class.filter-active]="keywordFilter().length > 0" (click)="toggleFilter('keywords', $event)">🔍</button>
-                                </div>
-                                @if (activeFilter() === 'keywords') {
-                                    <div class="filter-popover keyword-popover" (click)="$event.stopPropagation()">
-                                        <label>Filter by keywords:</label>
-                                        <app-keyword-selector
-                                            [selectedKeywords]="keywordFilter()"
-                                            placeholderText="Add keyword..."
-                                            (addKeyword)="onAddKeyword($event)"
-                                            (removeKeyword)="onRemoveKeyword($event)"
-                                        />
-                                    </div>
-                                }
-                            </th>
-                            </tr>
-                    </thead>
-                    @if (displayedTrials().length === 0 && !isLoading()) {
-                        <tbody>
-                            <tr>
-                                <td colspan="6">
-                                    <div class="alert-container">
-                                        <div class="alert-box no-results">
-                                            <span class="alert-icon">ℹ️</span>
-                                            <div class="alert-text">
-                                                <h3>No Results</h3>
-                                                <p>Try adjusting your search criteria or filters to find matching trials.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    }
-                    @else if (displayedTrials().length >= DISPLAY_THRESHOLD) {
-                        <tbody>
-                            <tr>
-                                <td colspan="6">
-                                    <div class="alert-container">
-                                        <div class="alert-box warning">
-                                            <span class="alert-icon">⚠️</span>
-                                            <div class="alert-text">
-                                                <h3>Too many results to display</h3>
-                                                <p>Please apply more specific criteria to reduce results below {{
-                                                    DISPLAY_THRESHOLD | number }}.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    }
-                    @else {
-                        <tbody>
-                            @for (trial of displayedTrials(); track trial.nctId) {
-                                <tr [class.expanded-row-active]="expandedTrialId() === trial.nctId"
-                                    [class.selected-row]="isTrialSelected(trial.nctId)">
-                                    <td class="selection-cell">
-                                        <input type="checkbox" class="custom-checkbox" [checked]="isTrialSelected(trial.nctId)"
-                                            (change)="toggleTrialSelection(trial.nctId)" aria-label="Select trial">
-                                    </td>
-                                    <td class="nct-id-cell">{{ trial.nctId }}</td>
-                                    <td class="trial-title-cell">
-                                        <a [href]="'https://clinicaltrials.gov/study/' + trial.nctId" target="_blank"
-                                            class="trial-link">
-                                            {{ trial.briefTitle }}
-                                        </a>
-                                    </td>
-                                    <td>{{ trial.enrollmentCount | number }}</td>
-                                    <td>
-                                        <span class="status-badge"
-                                            [class.status-completed]="trial.overallStatus === 'COMPLETED'"
-                                            [class.status-terminated]="trial.overallStatus.toLowerCase().includes('terminated') || trial.overallStatus.toLowerCase().includes('withdrawn')"
-                                            [class.status-unknown]="trial.overallStatus.toLowerCase() === 'unknown'"
-                                            [class.status-active]="trial.overallStatus !== 'COMPLETED' && !trial.overallStatus.toLowerCase().includes('terminated') && !trial.overallStatus.toLowerCase().includes('withdrawn') && trial.overallStatus.toLowerCase() !== 'unknown'">
-                                            {{ trial.overallStatus.split('_').join(' ') }}
+                <div class="table-header">
+                    <div class="table-header-left">
+                        <h3>Matching Trials</h3>
+                        <span class="results-meta">Showing {{ displayedTrials().length }} of {{ foundTrials().length }} Matches</span>
+                        <span class="results-meta" [hidden]="selectedInViewCount() === 0">{{ selectedInViewCount() }} Selected</span>
+                    </div>
+                    <div class="table-controls">
+                        <button class="btn-link clear-filters-btn" (click)="clearFilters()"
+                            [hidden]="!nameFilter() && !statusFilter() && !participantsFilter() && !startDateFilter() && !endDateFilter() && keywordFilter().length === 0">
+                            Clear Filters
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-content-container">
+                    <div class="table-content">
+                        <table class="trials-table">
+                            <thead>
+                                <tr>
+                                    <th class="selection-cell" style="text-align:center;">
+                                        <input type="checkbox" class="custom-checkbox" [checked]="isAllSelected()"
+                                            (change)="toggleAllSelection()" aria-label="Select all trials"
+                                            [disabled]="displayedTrials().length === 0">
+                                    </th>
+                                    <th class="sortable-header" (click)="toggleSort('date')">
+                                        Trial ID
+                                        <span class="sort-indicator" [class.active]="sortOrder().startsWith('date')">
+                                            {{ sortOrder() === 'date_asc' ? '↑' : '↓' }}
                                         </span>
-                                    </td>
-                                    <td>
-                                        <button class="btn-link" (click)="toggleTrialExpansion(trial.nctId)">
-                                            {{ expandedTrialId() === trial.nctId ? 'Hide' : 'Details' }}
-                                            <span class="triangle" [class.rotated]="expandedTrialId() === trial.nctId">▶</span>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr class="detail-row" [class.expanded]="expandedTrialId() === trial.nctId">
-                                    <td colspan="6">
-                                        <div class="detail-wrapper">
-                                            <div class="detail-content">
-                                                <div class="detail-grid">
-                                                    <div class="detail-item">
-                                                        <span class="detail-label">Date:</span>
-                                                        {{ trial.startDate | date:'MM/dd/yyyy' }} - {{ trial.completionDate |
-                                                        date:'MM/dd/yyyy' }}
-                                                    </div>
-                                                    <div class="detail-item">
-                                                        <span class="detail-label">Phase:</span> {{ trial.phase }}
-                                                    </div>
-                                                    <div class="detail-item">
-                                                        <span class="detail-label">Company:</span> {{ trial.sponsor }}
-                                                    </div>
-                                                </div>
-
-                                                <div class="detail-section">
-                                                    <span class="detail-label">Clinical Sites:</span>
-                                                    <div class="sites-list-container">
-                                                        <ul class="sites-list">
-                                                            @for (site of trial.sites.slice(0, 10); track $index) {
-                                                                <li>{{ site }}</li>
-                                                            }
-                                                            @if (trial.sites.length > 10) {
-                                                                <li class="more-sites">+ {{ trial.sites.length - 10 }} more sites
-                                                                </li>
-                                                            }
-                                                        </ul>
-                                                    </div>
-                                                </div>
-
-                                                <div class="detail-section">
-                                                    <span class="detail-label">Description:</span>
-                                                    <p class="description-text">{{ trial.description }}</p>
+                                    </th>
+                                    <th class="sortable-header" (click)="toggleSort('name')">
+                                        <div class="header-content">
+                                            Name
+                                            <span class="sort-indicator" [class.active]="sortOrder().startsWith('name')">
+                                                {{ sortOrder() === 'name_asc' ? '↑' : '↓' }}
+                                            </span>
+                                            <button class="filter-trigger" [class.filter-active]="nameFilter()" (click)="toggleFilter('name', $event)">🔍</button>
+                                        </div>
+                                        @if (activeFilter() === 'name') {
+                                            <div class="filter-popover" (click)="$event.stopPropagation()">
+                                                <div class="filter-input-wrapper">
+                                                    <input type="text" placeholder="Search titles..." 
+                                                        [value]="nameFilter()" 
+                                                        (input)="nameFilter.set($any($event.target).value)"
+                                                        (keyup.enter)="activeFilter.set(null)"
+                                                        autofocus>
+                                                    @if (nameFilter()) {
+                                                        <button class="clear-input-btn" (click)="nameFilter.set('')">&times;</button>
+                                                    }
                                                 </div>
                                             </div>
+                                        }
+                                    </th>
+                                    <th class="sortable-header" (click)="toggleSort('enrollment')">
+                                        <div class="header-content">
+                                            Participants
+                                            <span class="sort-indicator" [class.active]="sortOrder().startsWith('enrollment')">
+                                                {{ sortOrder() === 'enrollment_asc' ? '↑' : '↓' }}
+                                            </span>
+                                            <button class="filter-trigger" [class.filter-active]="participantsFilter() !== null" (click)="toggleFilter('participants', $event)">🔍</button>
                                         </div>
-                                    </td>
-                                </tr>
+                                        @if (activeFilter() === 'participants') {
+                                            <div class="filter-popover" (click)="$event.stopPropagation()">
+                                                <label>Min Participants:</label>
+                                                <input type="number" 
+                                                    [value]="participantsFilter()" 
+                                                    (input)="participantsFilter.set($any($event.target).value ? +$any($event.target).value : null)"
+                                                    (keyup.enter)="activeFilter.set(null)"
+                                                    min="0"
+                                                    autofocus>
+                                            </div>
+                                        }
+                                    </th>
+                                    <th class="sortable-header" (click)="toggleSort('status')">
+                                        <div class="header-content">
+                                            Status
+                                            <span class="sort-indicator" [class.active]="sortOrder().startsWith('status')">
+                                                {{ sortOrder() === 'status_asc' ? '↑' : '↓' }}
+                                            </span>
+                                            <button class="filter-trigger" [class.filter-active]="statusFilter()" (click)="toggleFilter('status', $event)">🔍</button>
+                                        </div>
+                                        @if (activeFilter() === 'status') {
+                                            <div class="filter-popover" (click)="$event.stopPropagation()">
+                                                <select [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value); activeFilter.set(null)">
+                                                    <option value="" [selected]="statusFilter() === ''">All Statuses</option>
+                                                    @for (status of uniqueStatuses(); track status) {
+                                                        <option [value]="status" [selected]="statusFilter() === status">{{ status.split('_').join(' ') }}</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                        }                            </th>
+                                    <th>
+                                        <div class="header-content">
+                                            Details
+                                            <button class="filter-trigger" [class.filter-active]="keywordFilter().length > 0" (click)="toggleFilter('keywords', $event)">🔍</button>
+                                        </div>
+                                        @if (activeFilter() === 'keywords') {
+                                            <div class="filter-popover keyword-popover" (click)="$event.stopPropagation()">
+                                                <label>Filter by keywords:</label>
+                                                <app-keyword-selector
+                                                    [selectedKeywords]="keywordFilter()"
+                                                    placeholderText="Add keyword..."
+                                                    (addKeyword)="onAddKeyword($event)"
+                                                    (removeKeyword)="onRemoveKeyword($event)"
+                                                />
+                                            </div>
+                                        }
+                                    </th>
+                                    </tr>
+                            </thead>
+                            @if (displayedTrials().length === 0 && !isLoading()) {
+                                <tbody>
+                                    <tr>
+                                        <td colspan="6">
+                                            <div class="alert-container">
+                                                <div class="alert-box no-results">
+                                                    <span class="alert-icon">ℹ️</span>
+                                                    <div class="alert-text">
+                                                        <h3>No Results</h3>
+                                                        <p>Try adjusting your search criteria or filters to find matching trials.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
                             }
-                        </tbody>
-                    }
-                </table>
+                            @else if (displayedTrials().length >= DISPLAY_THRESHOLD) {
+                                <tbody>
+                                    <tr>
+                                        <td colspan="6">
+                                            <div class="alert-container">
+                                                <div class="alert-box warning">
+                                                    <span class="alert-icon">⚠️</span>
+                                                    <div class="alert-text">
+                                                        <h3>Too many results to display</h3>
+                                                        <p>Please apply more specific criteria to reduce results below {{
+                                                            DISPLAY_THRESHOLD | number }}.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            }
+                            @else {
+                                <tbody>
+                                    @for (trial of displayedTrials(); track trial.nctId) {
+                                        <tr [class.expanded-row-active]="expandedTrialId() === trial.nctId"
+                                            [class.selected-row]="isTrialSelected(trial.nctId)">
+                                            <td class="selection-cell">
+                                                <input type="checkbox" class="custom-checkbox" [checked]="isTrialSelected(trial.nctId)"
+                                                    (change)="toggleTrialSelection(trial.nctId)" aria-label="Select trial">
+                                            </td>
+                                            <td class="nct-id-cell">{{ trial.nctId }}</td>
+                                            <td class="trial-title-cell">
+                                                <a [href]="'https://clinicaltrials.gov/study/' + trial.nctId" target="_blank"
+                                                    class="trial-link">
+                                                    {{ trial.briefTitle }}
+                                                </a>
+                                            </td>
+                                            <td>{{ trial.enrollmentCount | number }}</td>
+                                            <td>
+                                                <span class="status-badge"
+                                                    [class.status-completed]="trial.overallStatus === 'COMPLETED'"
+                                                    [class.status-terminated]="trial.overallStatus.toLowerCase().includes('terminated') || trial.overallStatus.toLowerCase().includes('withdrawn')"
+                                                    [class.status-unknown]="trial.overallStatus.toLowerCase() === 'unknown'"
+                                                    [class.status-active]="trial.overallStatus !== 'COMPLETED' && !trial.overallStatus.toLowerCase().includes('terminated') && !trial.overallStatus.toLowerCase().includes('withdrawn') && trial.overallStatus.toLowerCase() !== 'unknown'">
+                                                    {{ trial.overallStatus.split('_').join(' ') }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button class="btn-link" (click)="toggleTrialExpansion(trial.nctId)">
+                                                    {{ expandedTrialId() === trial.nctId ? 'Hide' : 'Details' }}
+                                                    <span class="triangle" [class.rotated]="expandedTrialId() === trial.nctId">▶</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+
+                                        <tr class="detail-row" [class.expanded]="expandedTrialId() === trial.nctId">
+                                            <td colspan="6">
+                                                <div class="detail-wrapper">
+                                                    <div class="detail-content">
+                                                        <div class="detail-grid">
+                                                            <div class="detail-item">
+                                                                <span class="detail-label">Date:</span>
+                                                                {{ trial.startDate | date:'MM/dd/yyyy' }} - {{ trial.completionDate |
+                                                                date:'MM/dd/yyyy' }}
+                                                            </div>
+                                                            <div class="detail-item">
+                                                                <span class="detail-label">Phase:</span> {{ trial.phase }}
+                                                            </div>
+                                                            <div class="detail-item">
+                                                                <span class="detail-label">Company:</span> {{ trial.sponsor }}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="detail-section">
+                                                            <span class="detail-label">Clinical Sites:</span>
+                                                            <div class="sites-list-container">
+                                                                <ul class="sites-list">
+                                                                    @for (site of trial.sites.slice(0, 10); track $index) {
+                                                                        <li>{{ site }}</li>
+                                                                    }
+                                                                    @if (trial.sites.length > 10) {
+                                                                        <li class="more-sites">+ {{ trial.sites.length - 10 }} more sites
+                                                                        </li>
+                                                                    }
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="detail-section">
+                                                            <span class="detail-label">Description:</span>
+                                                            <p class="description-text">{{ trial.description }}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            }
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
     </div>
+
+    @if (showSavePanel()) {
+        <div class="modal-overlay">
+            <div class="modal-content save-search-panel">
+                <div class="modal-header">
+                    <h3>Save This Search</h3>
+                    <button class="close-btn" (click)="onToggleSavePanel()">&times;</button>
+                </div>
+
+                <div class="modal-body">
+                    <form [formGroup]="saveForm" (ngSubmit)="onSaveSearch()">
+                        <div class="form-group">
+                            <label for="saveName">Search Name</label>
+                            <input id="saveName" type="text" formControlName="name" placeholder="e.g., Phase 3 Diabetes Trials" />
+                            @if (saveForm.get('name')?.invalid && saveForm.get('name')?.touched) {
+                                <span class="error-text">Name is required (max 200 chars).</span>
+                            }
+                        </div>
+
+                        <div class="form-group">
+                            <label for="saveDesc">Description (Optional)</label>
+                            <textarea id="saveDesc" formControlName="description" rows="3" placeholder="Notes about this search..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Visibility</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" formControlName="visibility" value="private" /> Private
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" formControlName="visibility" value="shared" /> Shared (Public)
+                                </label>
+                            </div>
+                        </div>
+
+                        @if (saveStatus() === 'error') {
+                            <div class="alert-box error">
+                                {{ saveErrorMessage() }}
+                            </div>
+                        }
+
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" (click)="onToggleSavePanel()">Cancel</button>
+                            <button type="submit" class="btn btn-primary" [disabled]="saveForm.invalid || saveStatus() === 'saving'">
+                                {{ saveStatus() === 'saving' ? 'Saving...' : (saveStatus() === 'saved' ? 'Saved!' : 'Save Search') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
 
 </div>

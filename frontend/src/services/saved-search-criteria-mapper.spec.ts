@@ -19,6 +19,8 @@ describe('saved-search-criteria-mapper', () => {
         sex: 'Female',
         required: ['Hypertension'],
         ineligible: ['Heart Failure'],
+        startDateFrom: '2022',
+        startDateTo: '2025',
       })
     ).toEqual({
       condition: 'Diabetes',
@@ -31,6 +33,15 @@ describe('saved-search-criteria-mapper', () => {
       sex: 'Female',
       requiredConditions: ['Hypertension'],
       ineligibleConditions: ['Heart Failure'],
+      startDateFrom: '2022',
+      startDateTo: '2025',
+      userPatients: null,
+      userSites: null,
+      userInclusions: null,
+      userExclusions: null,
+      userOutcomes: null,
+      userArms: null,
+      selectedTrialIds: [],
     });
   });
 
@@ -41,6 +52,8 @@ describe('saved-search-criteria-mapper', () => {
           condition: 'Diabetes',
           phase: 'Phase 2',
           requiredConditions: ['Hypertension'],
+          startDateFrom: '2020',
+          startDateTo: '2024',
         },
         {
           phase: 'Phase 1',
@@ -65,6 +78,8 @@ describe('saved-search-criteria-mapper', () => {
       sex: 'All',
       required: ['Hypertension'],
       ineligible: [],
+      startDateFrom: '2020',
+      startDateTo: '2024',
       userPatients: null,
       userSites: null,
       userInclusions: null,
@@ -73,6 +88,7 @@ describe('saved-search-criteria-mapper', () => {
       userArms: null,
       inclusionCriteria: [],
       exclusionCriteria: [],
+      selectedTrialIds: [],
     });
   });
 
@@ -110,6 +126,8 @@ describe('saved-search-criteria-mapper', () => {
       sex: 'Female',
       required: [],
       ineligible: [],
+      startDateFrom: null,
+      startDateTo: null,
       userPatients: null,
       userSites: null,
       userInclusions: null,
@@ -118,6 +136,7 @@ describe('saved-search-criteria-mapper', () => {
       userArms: null,
       inclusionCriteria: [],
       exclusionCriteria: [],
+      selectedTrialIds: [],
     });
   });
 
@@ -133,6 +152,8 @@ describe('saved-search-criteria-mapper', () => {
           sex: 'Female',
           required: ['Hypertension'],
           ineligible: ['Heart Failure'],
+          startDateFrom: '2022',
+          startDateTo: '2025',
         },
         {
           phaseByLabel: { 'Phase 3': 'PHASE3' },
@@ -148,6 +169,15 @@ describe('saved-search-criteria-mapper', () => {
       sex: 'Female',
       requiredConditions: ['Hypertension'],
       ineligibleConditions: ['Heart Failure'],
+      startDateFrom: '2022',
+      startDateTo: '2025',
+      userPatients: null,
+      userSites: null,
+      userInclusions: null,
+      userExclusions: null,
+      userOutcomes: null,
+      userArms: null,
+      selectedTrialIds: [],
     });
   });
 });
