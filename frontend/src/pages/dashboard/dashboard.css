@@ -767,6 +767,16 @@
     max-width: 400px;
 }
 
+.alert-box.full-width {
+    max-width: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.threshold-warning-container {
+    margin: 0.5rem 0.75rem 0.75rem 0.75rem;
+}
+
 .alert-box.no-results {
     background: #f6f8fa;
     border: 1px solid #d1d5da;
