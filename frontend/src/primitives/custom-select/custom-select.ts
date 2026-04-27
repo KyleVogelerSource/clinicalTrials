@@ -72,8 +72,13 @@ export class CustomSelect implements ControlValueAccessor {
         this.isOpen.update(v => !v);
     }
 
-    private closeOnScroll = () => {
+    private closeOnScroll = (event: Event) => {
         if (this.isOpen()) {
+            // Only close if scrolling something other than our own dropdown panel
+            const panel = this.elementRef.nativeElement.querySelector('.dropdown-panel');
+            if (panel && panel.contains(event.target as Node)) {
+                return;
+            }
             this.isOpen.set(false);
             window.removeEventListener('scroll', this.closeOnScroll, true);
         }

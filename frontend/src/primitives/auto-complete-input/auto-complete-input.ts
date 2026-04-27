@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, ElementRef, inject, linkedSignal, signal, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, ElementRef, inject, linkedSignal, signal, effect, OnDestroy } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 
@@ -13,7 +13,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
         '(document:click)': 'onDocumentClick($event)'
     }
 })
-export class AutoCompleteInput {
+export class AutoCompleteInput implements OnDestroy {
     inputId = input<string>('');
     placeholderText = input<string>('');
     suggestions = input.required<string[]>();
@@ -27,11 +27,34 @@ export class AutoCompleteInput {
     queryControl = new FormControl('');
     isOpen = signal(false);
 
+    ngOnDestroy() {
+        window.removeEventListener('scroll', this.closeOnScroll, true);
+    }
+
+    private closeOnScroll = (event: Event) => {
+        if (this.isOpen()) {
+            const panel = this.elementRef.nativeElement.querySelector('.suggestions-list');
+            if (panel && panel.contains(event.target as Node)) {
+                return;
+            }
+            this.isOpen.set(false);
+            window.removeEventListener('scroll', this.closeOnScroll, true);
+        }
+    };
+
     // Sync input value to control
     private valueSync = effect(() => {
         const val = this.value();
         if (val !== this.queryControl.value) {
             this.queryControl.setValue(val, { emitEvent: false });
+        }
+    });
+
+    private openStateSync = effect(() => {
+        if (this.isOpen()) {
+            window.addEventListener('scroll', this.closeOnScroll, true);
+        } else {
+            window.removeEventListener('scroll', this.closeOnScroll, true);
         }
     });
 
