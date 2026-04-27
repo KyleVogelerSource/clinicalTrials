@@ -100,6 +100,9 @@ export function normalizeImportedCriteria(
       ? input.ineligible.map(item => String(item).trim()).filter(Boolean)
       : [],
 
+    startDateFrom: typeof input.startDateFrom === "string" ? input.startDateFrom.trim() : null,
+    startDateTo: typeof input.startDateTo === "string" ? input.startDateTo.trim() : null,
+
     // User Trial Specifics
     userPatients: toNullableNumber(input.userPatients),
     userSites: toNullableNumber(input.userSites),

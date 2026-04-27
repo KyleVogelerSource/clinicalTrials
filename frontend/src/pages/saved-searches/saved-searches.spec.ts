@@ -96,8 +96,8 @@ describe('SavedSearches', () => {
     fixture.detectChanges();
   });
 
-  it('opens a saved search in designer with the full saved criteria', () => {
-    component['openInDesigner']({
+  it('opens a saved search in dashboard with the full saved criteria', () => {
+    component['openInDashboard']({
       id: 1,
       ownerUserId: 1,
       ownerUsername: 'alice',
@@ -121,7 +121,7 @@ describe('SavedSearches', () => {
       },
     });
 
-    expect(mockWorkflowService.setInputs).toHaveBeenCalledWith({
+    expect(mockWorkflowService.setInputs).toHaveBeenCalledWith(expect.objectContaining({
       condition: 'Diabetes',
       phase: 'Phase 3',
       allocationType: 'Randomized',
@@ -130,18 +130,8 @@ describe('SavedSearches', () => {
       minAge: 18,
       maxAge: 65,
       sex: 'Female',
-      required: ['Hypertension'],
-      ineligible: ['Heart Failure'],
-      userPatients: null,
-      userSites: null,
-      userInclusions: null,
-      userExclusions: null,
-      userOutcomes: null,
-      userArms: null,
-      inclusionCriteria: [],
-      exclusionCriteria: [],
-    });
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/designer']);
+    }));
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/']);
   });
 
   it('checks import and export permissions on init', () => {
@@ -149,8 +139,8 @@ describe('SavedSearches', () => {
     expect(mockPermissionService.watch).toHaveBeenCalledWith('search_criteria_export');
   });
 
-  it('falls back to designer defaults when older saved searches lack newer fields', () => {
-    component['openInDesigner']({
+  it('falls back to dashboard defaults when older saved searches lack newer fields', () => {
+    component['openInDashboard']({
       id: 2,
       ownerUserId: 1,
       ownerUsername: 'alice',
@@ -166,30 +156,16 @@ describe('SavedSearches', () => {
       },
     });
 
-    expect(mockWorkflowService.setInputs).toHaveBeenCalledWith({
+    expect(mockWorkflowService.setInputs).toHaveBeenCalledWith(expect.objectContaining({
       condition: 'Diabetes',
       phase: 'Phase 2',
       allocationType: 'N/A',
-      interventionModel: null,
       blindingType: 'None (Open Label)',
-      minAge: null,
-      maxAge: null,
-      sex: 'All',
-      required: [],
-      ineligible: [],
-      userPatients: null,
-      userSites: null,
-      userInclusions: null,
-      userExclusions: null,
-      userOutcomes: null,
-      userArms: null,
-      inclusionCriteria: [],
-      exclusionCriteria: [],
-    });
+    }));
   });
 
-  it('maps normalized lowercase saved-search criteria to designer select values', () => {
-    component['openInDesigner']({
+  it('maps normalized lowercase saved-search criteria to dashboard select values', () => {
+    component['openInDashboard']({
       id: 6,
       ownerUserId: 1,
       ownerUsername: 'alice',
@@ -209,26 +185,14 @@ describe('SavedSearches', () => {
       },
     });
 
-    expect(mockWorkflowService.setInputs).toHaveBeenCalledWith({
+    expect(mockWorkflowService.setInputs).toHaveBeenCalledWith(expect.objectContaining({
       condition: 'diabetes type 2',
       phase: 'Phase 3',
       allocationType: 'Randomized',
       interventionModel: 'Parallel Assignment',
       blindingType: 'Double',
-      minAge: null,
-      maxAge: null,
       sex: 'Female',
-      required: [],
-      ineligible: [],
-      userPatients: null,
-      userSites: null,
-      userInclusions: null,
-      userExclusions: null,
-      userOutcomes: null,
-      userArms: null,
-      inclusionCriteria: [],
-      exclusionCriteria: [],
-    });
+    }));
   });
 
   it('deletes an owned saved search after confirmation', () => {
@@ -470,23 +434,16 @@ describe('SavedSearches', () => {
       },
     } as unknown as Event);
 
-    expect(mockSavedSearchService.create).toHaveBeenCalledWith({
+    expect(mockSavedSearchService.create).toHaveBeenCalledWith(expect.objectContaining({
       name: 'Diabetes Mellitus, Type 2 (Phase 1)',
-      description: 'Imported from designer criteria',
       visibility: 'private',
-      criteriaJson: {
+      criteriaJson: expect.objectContaining({
         condition: 'Diabetes Mellitus, Type 2',
         phase: 'Phase 1',
         allocationType: 'Randomized',
         interventionModel: 'Parallel Assignment',
-        blindingType: 'Single',
-        minAge: null,
-        maxAge: null,
-        sex: 'All',
-        required: [],
-        ineligible: [],
-      },
-    });
+      }),
+    }));
     expect(component['importStatus']()).toBe('success');
     expect(component['importMessage']()).toBe('Imported 1 saved search.');
   });

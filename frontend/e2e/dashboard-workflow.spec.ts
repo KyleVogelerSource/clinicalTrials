@@ -240,11 +240,19 @@ async function searchForDiabetes(page: Page) {
   await page.locator("#userExclusions").fill("4");
   await page.locator("#userOutcomes").fill("3");
   await page.locator("#userArms").fill("2");
-  await page.locator("#phase").selectOption("Phase 3");
-  await page.locator("#intervention").selectOption("Parallel Assignment");
+  
+  await selectCustomOption(page, "#phase", "Phase 3");
+  await selectCustomOption(page, "#intervention", "Parallel Assignment");
+
   await page.locator("#condition").fill("Type 2 Diabetes");
   await page.locator("#condition").press("Enter");
   await expect(page.getByText("Showing 3 of 3 Matches")).toBeVisible();
+}
+
+async function selectCustomOption(page: Page, selector: string, optionText: string) {
+  await page.locator(`${selector} .select-trigger`).click();
+  // Use a more robust exact match that handles potential whitespace
+  await page.locator(`${selector} .option-item`).filter({ hasText: new RegExp(`^\\s*${optionText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`) }).click();
 }
 
 function visibleTrialIds(page: Page) {
@@ -306,7 +314,7 @@ test.describe("Dashboard search workflow", () => {
     await mockSearch(page, requests);
 
     await searchForDiabetes(page);
-    await page.getByRole("button", { name: "Process" }).click();
+    await page.getByRole("button", { name: "Generate Report" }).click();
 
     await expect(page).toHaveURL(/\/analysis$/);
     await expect(page.getByRole("heading", { name: "Feasibility Report: Type 2 Diabetes" })).toBeVisible();
@@ -416,19 +424,19 @@ test.describe("Dashboard search workflow", () => {
     await mockSearch(page, requests);
 
     await page.goto("/");
-    await expect(page.getByRole("button", { name: "Process" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Generate Report" })).toBeDisabled();
 
     await searchForDiabetes(page);
-    await expect(page.getByRole("button", { name: "Process" })).toBeEnabled();
+    await expect(page.getByRole("button", { name: "Generate Report" })).toBeEnabled();
     await expect(page.getByText("3 Selected")).toBeVisible();
 
     await page.getByRole("checkbox", { name: "Select all trials" }).uncheck();
     await expect(page.getByText("Selected")).toBeHidden();
-    await expect(page.getByRole("button", { name: "Process" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Generate Report" })).toBeDisabled();
 
     await page.getByRole("checkbox", { name: "Select trial" }).first().check();
     await expect(page.getByText("1 Selected")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Process" })).toBeEnabled();
+    await expect(page.getByRole("button", { name: "Generate Report" })).toBeEnabled();
   });
 
   test("shows no-results state when the search API returns no studies", async ({ page }) => {
@@ -436,14 +444,14 @@ test.describe("Dashboard search workflow", () => {
     await mockSearch(page, requests, []);
 
     await page.goto("/");
-    await page.locator("#phase").selectOption("Phase 3");
+    await selectCustomOption(page, "#phase", "Phase 3");
     await page.locator("#condition").fill("Rare Diabetes Variant");
     await page.locator("#condition").press("Enter");
 
     await expect(page.getByText("Showing 0 of 0 Matches")).toBeVisible();
     await expect(page.getByRole("heading", { name: "No Results" })).toBeVisible();
     await expect(page.getByText("Try adjusting your search criteria or filters to find matching trials.")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Process" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Generate Report" })).toBeDisabled();
   });
 
   test("processes only the selected subset into the comparison table", async ({ page }) => {
@@ -455,7 +463,7 @@ test.describe("Dashboard search workflow", () => {
     await page.getByRole("checkbox", { name: "Select trial" }).nth(1).check();
     await expect(page.getByText("1 Selected")).toBeVisible();
 
-    await page.getByRole("button", { name: "Process" }).click();
+    await page.getByRole("button", { name: "Generate Report" }).click();
 
     await expect(page).toHaveURL(/\/analysis$/);
     await expect(page.getByText("Benchmarked Trials Comparison")).toBeVisible();

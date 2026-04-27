@@ -79,7 +79,7 @@ export class SavedSearches implements OnInit {
     });
   }
 
-  protected openInDesigner(record: SavedSearchRecord) {
+  protected openInDashboard(record: SavedSearchRecord) {
     this.workflowService.setInputs(mapSavedSearchCriteriaToDesignModel(record.criteriaJson, {
       phase: this.clinicalStudyService.getDefaultPhase(),
       allocationType: this.clinicalStudyService.getDefaultAllocation(),
@@ -91,7 +91,7 @@ export class SavedSearches implements OnInit {
       allocations: this.clinicalStudyService.getAllocations(),
       sexes: this.clinicalStudyService.getSexes(),
     }));
-    this.router.navigate(['/designer']);
+    this.router.navigate(['/']);
   }
 
   protected formatDate(iso: string): string {

@@ -25,6 +25,20 @@ describe("SavedSearchCriteriaNormalizer", () => {
     });
   });
 
+  it("normalizes year range strings to lowercase", () => {
+    const normalized = normalizeSavedSearchCriteria({
+      condition: "Diabetes",
+      startDateFrom: "2020",
+      startDateTo: "2025",
+    });
+
+    expect(normalized).toEqual({
+      condition: "diabetes",
+      startDateFrom: "2020",
+      startDateTo: "2025",
+    });
+  });
+
   it("produces the same canonical key for equivalent criteria", () => {
     const left = {
       condition: "Diabetes",

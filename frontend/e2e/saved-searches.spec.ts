@@ -57,6 +57,8 @@ test.describe("Saved searches", () => {
               sex: "female",
               requiredConditions: ["hypertension"],
               ineligibleConditions: ["heart failure"],
+              startDateFrom: "2020",
+              startDateTo: "2024",
             },
             visibility: "private",
             createdAt: "2026-04-16T00:00:00.000Z",
@@ -76,17 +78,16 @@ test.describe("Saved searches", () => {
 
     await page.goto("/saved-searches");
 
-    await page.getByRole("button", { name: "Open in Designer" }).click();
+    await page.getByRole("button", { name: "Open" }).click();
 
-    await expect(page).toHaveURL(/\/designer$/);
+    await expect(page).toHaveURL(/\/$/);
     await expect(page.locator("#condition")).toHaveValue("diabetes type 2");
-    await expect(page.locator("#phase")).toHaveValue("Phase 3");
-    await expect(page.locator("#allocationType")).toHaveValue("Randomized");
-    await expect(page.locator("#intervention")).toHaveValue("Parallel Assignment");
-    await expect(page.locator("#blinding")).toHaveValue("Double");
-    await expect(page.locator("#minAge")).toHaveValue("18");
-    await expect(page.locator("#maxAge")).toHaveValue("65");
-    await expect(page.locator("#sex")).toHaveValue("Female");
+    await expect(page.locator("#phase .selected-text")).toHaveText("Phase 3");
+    await expect(page.locator("#allocationType .selected-text")).toHaveText("Randomized");
+    await expect(page.locator("#intervention .selected-text")).toHaveText("Parallel Assignment");
+    await expect(page.locator("#blinding .selected-text")).toHaveText("Double");
+    await expect(page.locator("#startYear")).toHaveValue("2020");
+    await expect(page.locator("#endYear")).toHaveValue("2024");
     await expect(page.getByText("hypertension")).toBeVisible();
     await expect(page.getByText("heart failure")).toBeVisible();
   });

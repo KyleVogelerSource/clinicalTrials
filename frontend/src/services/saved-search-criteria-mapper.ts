@@ -25,6 +25,10 @@ export interface DesignerFormValue {
   required?: string[] | null;
   ineligible?: string[] | null;
 
+  // Year range filters
+  startDateFrom?: string | null;
+  startDateTo?: string | null;
+
   // User Trial Specifics
   userPatients?: number | null;
   userSites?: number | null;
@@ -32,6 +36,9 @@ export interface DesignerFormValue {
   userExclusions?: number | null;
   userOutcomes?: number | null;
   userArms?: number | null;
+
+  // Refinement state
+  selectedTrialIds?: string[];
 }
 
 export interface SearchExecutionMappings {
@@ -67,6 +74,20 @@ export function mapDesignModelToSavedSearchCriteria(
     ...(input.sex ? { sex: input.sex } : {}),
     ...(input.required?.length ? { requiredConditions: input.required } : {}),
     ...(input.ineligible?.length ? { ineligibleConditions: input.ineligible } : {}),
+    
+    ...(input.startDateFrom ? { startDateFrom: input.startDateFrom } : {}),
+    ...(input.startDateTo ? { startDateTo: input.startDateTo } : {}),
+
+    // User Trial Specifics
+    userPatients: input.userPatients ?? null,
+    userSites: input.userSites ?? null,
+    userInclusions: input.userInclusions ?? null,
+    userExclusions: input.userExclusions ?? null,
+    userOutcomes: input.userOutcomes ?? null,
+    userArms: input.userArms ?? null,
+
+    // Refinement state
+    selectedTrialIds: input.selectedTrialIds ?? [],
   };
 }
 
@@ -103,16 +124,22 @@ export function mapSavedSearchCriteriaToDesignModel(
     required: criteria.requiredConditions ?? [],
     ineligible: criteria.ineligibleConditions ?? [],
 
-    // User Trial Specifics (not typically saved in basic search criteria)
-    userPatients: null,
-    userSites: null,
-    userInclusions: null,
-    userExclusions: null,
-    userOutcomes: null,
-    userArms: null,
+    startDateFrom: criteria.startDateFrom ?? null,
+    startDateTo: criteria.startDateTo ?? null,
+
+    // User Trial Specifics
+    userPatients: criteria.userPatients ?? null,
+    userSites: criteria.userSites ?? null,
+    userInclusions: criteria.userInclusions ?? null,
+    userExclusions: criteria.userExclusions ?? null,
+    userOutcomes: criteria.userOutcomes ?? null,
+    userArms: criteria.userArms ?? null,
 
     // Eligibility criteria for benchmark comparison
     inclusionCriteria: [],
     exclusionCriteria: [],
+
+    // Refinement state
+    selectedTrialIds: criteria.selectedTrialIds ?? [],
   };
 }
