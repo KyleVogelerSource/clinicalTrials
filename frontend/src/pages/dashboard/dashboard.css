@@ -189,6 +189,7 @@
     margin: 0;
     font-size: 0.95rem;
     font-weight: 600;
+    display: inline-block;
 }
 
 .clear-filters-btn {
@@ -224,11 +225,12 @@
     left: 0;
     right: 0;
     bottom: 0;
-    overflow-y: auto;
+    overflow: auto;
 }
 
 .table-content::-webkit-scrollbar {
     width: 6px;
+    height: 6px;
 }
 
 .table-content::-webkit-scrollbar-thumb {
@@ -238,20 +240,58 @@
 
 .trials-table {
     width: 100%;
+    min-width: 900px; /* Force horizontal scroll if container is narrower */
     border-collapse: collapse;
     font-size: 0.8rem;
+    table-layout: fixed;
+}
+
+.trials-table th, .trials-table td {
+    text-align: left;
+    padding: 0.4rem 0.75rem;
+    border-bottom: 1px solid #e1e4e8;
+    vertical-align: middle;
 }
 
 .trials-table th {
-    text-align: left;
-    padding: 0.4rem 0.75rem;
     background: #f6f8fa;
     color: #444;
     font-weight: 600;
     position: sticky;
     top: 0;
     z-index: 10;
-    border-bottom: 1px solid #e1e4e8;
+}
+
+/* Column Widths */
+.col-selection {
+    width: 40px;
+    min-width: 40px;
+    text-align: center !important;
+}
+
+.col-id {
+    width: 130px;
+    min-width: 130px;
+}
+
+.col-name {
+    width: auto;
+    min-width: 300px;
+}
+
+.col-participants {
+    width: 150px;
+    min-width: 150px;
+}
+
+.col-status {
+    width: 180px;
+    min-width: 180px;
+}
+
+.col-details {
+    width: 140px;
+    min-width: 140px;
 }
 
 .sortable-header {
@@ -297,70 +337,93 @@
     margin-left: auto;
 }
 
-.filter-trigger:hover,
-.filter-trigger.filter-active {
-    opacity: 1;
-    color: var(--app-blue);
+/* Inline Filters Row */
+.filter-row th {
+    padding: 0.2rem 0.5rem 0.5rem 0.5rem;
+    background: #f6f8fa;
+    border-bottom: 1px solid #e1e4e8;
+    position: sticky;
+    top: 31px; /* Height of the first header row */
+    z-index: 10;
 }
 
-.filter-popover {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background: white;
+.filter-row input,
+.filter-row select {
+    width: 100%;
+    padding: 0.25rem 0.4rem;
+    font-size: 0.75rem;
     border: 1px solid #d1d5da;
-    border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    padding: 0.5rem;
-    z-index: 1000;
-    min-width: 180px;
-    margin-top: 4px;
-    font-weight: normal;
+    border-radius: 2px;
+    box-sizing: border-box;
+    background-color: #fff;
 }
 
-.keyword-popover {
-    min-width: 280px;
+.filter-row input:focus,
+.filter-row select:focus {
+    border-color: #0366d6;
+    outline: none;
+    box-shadow: inset 0 1px 2px rgba(27,31,35,0.075), 0 0 0 0.2em rgba(3,102,214,0.3);
 }
 
-.filter-input-wrapper {
-    position: relative;
+.keyword-chips {
     display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-right: 0.5rem;
+    justify-content: flex-end;
+}
+
+.keyword-chip {
+    background-color: var(--app-blue);
+    color: white;
+    font-size: 0.7rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    white-space: nowrap;
+}
+
+.remove-chip {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 0.85rem;
+    line-height: 1;
+    color: rgba(255,255,255,0.8);
+    display: inline-flex;
     align-items: center;
 }
 
-.clear-input-btn {
-    position: absolute;
-    right: 5px;
-    background: none;
-    border: none;
-    color: #888;
-    font-size: 1.1rem;
-    cursor: pointer;
-    padding: 0 5px;
-    line-height: 1;
+.remove-chip:hover {
+    color: white;
 }
 
-.clear-input-btn:hover {
-    color: var(--app-red);
+.participants-range {
+    display: flex;
+    gap: 0.25rem;
 }
 
-.filter-popover label {
-    display: block;
-    font-size: 0.7rem;
-    margin-bottom: 0.2rem;
-    text-transform: none;
-    color: #555;
+.participants-range input {
+    width: 50%;
 }
 
-.filter-popover input,
-.filter-popover select {
-    width: 100%;
-    padding: 0.3rem;
-    font-size: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 2px;
-    background-color: #fff;
-    box-sizing: border-box;
+/* Table Controls Layout */
+.table-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+/* Header Content UI */
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
 }
 
 /* Form Groups & Inputs */

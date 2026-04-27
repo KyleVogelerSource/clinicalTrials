@@ -179,9 +179,17 @@
                         <span class="results-meta" [hidden]="selectedInViewCount() === 0">{{ selectedInViewCount() }} Selected</span>
                     </div>
                     <div class="table-controls">
+                        <div class="keyword-chips">
+                            @for (keyword of keywordFilter(); track keyword) {
+                                <span class="keyword-chip">
+                                    {{ keyword }} 
+                                    <button class="remove-chip" (click)="onRemoveKeyword(keyword)">&times;</button>
+                                </span>
+                            }
+                        </div>
                         <button class="btn-link clear-filters-btn" (click)="clearFilters()"
                             [hidden]="!nameFilter() && !statusFilter() && !participantsFilter() && !startDateFilter() && !endDateFilter() && keywordFilter().length === 0">
-                            Clear Filters
+                            Clear All Filters
                         </button>
                     </div>
                 </div>
@@ -191,96 +199,92 @@
                         <table class="trials-table">
                             <thead>
                                 <tr>
-                                    <th class="selection-cell" style="text-align:center;">
+                                    <th class="selection-cell col-selection" style="text-align:center;">
                                         <input type="checkbox" class="custom-checkbox" [checked]="isAllSelected()"
                                             (change)="toggleAllSelection()" aria-label="Select all trials"
                                             [disabled]="displayedTrials().length === 0">
                                     </th>
-                                    <th class="sortable-header" (click)="toggleSort('date')">
+                                    <th class="sortable-header col-id" (click)="toggleSort('date')">
                                         Trial ID
                                         <span class="sort-indicator" [class.active]="sortOrder().startsWith('date')">
                                             {{ sortOrder() === 'date_asc' ? '↑' : '↓' }}
                                         </span>
                                     </th>
-                                    <th class="sortable-header" (click)="toggleSort('name')">
+                                    <th class="sortable-header col-name" (click)="toggleSort('name')">
                                         <div class="header-content">
                                             Name
                                             <span class="sort-indicator" [class.active]="sortOrder().startsWith('name')">
                                                 {{ sortOrder() === 'name_asc' ? '↑' : '↓' }}
                                             </span>
-                                            <button class="filter-trigger" [class.filter-active]="nameFilter()" (click)="toggleFilter('name', $event)">🔍</button>
                                         </div>
-                                        @if (activeFilter() === 'name') {
-                                            <div class="filter-popover" (click)="$event.stopPropagation()">
-                                                <div class="filter-input-wrapper">
-                                                    <input type="text" placeholder="Search titles..." 
-                                                        [value]="nameFilter()" 
-                                                        (input)="nameFilter.set($any($event.target).value)"
-                                                        (keyup.enter)="activeFilter.set(null)"
-                                                        autofocus>
-                                                    @if (nameFilter()) {
-                                                        <button class="clear-input-btn" (click)="nameFilter.set('')">&times;</button>
-                                                    }
-                                                </div>
-                                            </div>
-                                        }
                                     </th>
-                                    <th class="sortable-header" (click)="toggleSort('enrollment')">
+                                    <th class="sortable-header col-participants" (click)="toggleSort('enrollment')">
                                         <div class="header-content">
                                             Participants
                                             <span class="sort-indicator" [class.active]="sortOrder().startsWith('enrollment')">
                                                 {{ sortOrder() === 'enrollment_asc' ? '↑' : '↓' }}
                                             </span>
-                                            <button class="filter-trigger" [class.filter-active]="participantsFilter() !== null" (click)="toggleFilter('participants', $event)">🔍</button>
                                         </div>
-                                        @if (activeFilter() === 'participants') {
-                                            <div class="filter-popover" (click)="$event.stopPropagation()">
-                                                <label>Min Participants:</label>
-                                                <input type="number" 
-                                                    [value]="participantsFilter()" 
-                                                    (input)="participantsFilter.set($any($event.target).value ? +$any($event.target).value : null)"
-                                                    (keyup.enter)="activeFilter.set(null)"
-                                                    min="0"
-                                                    autofocus>
-                                            </div>
-                                        }
                                     </th>
-                                    <th class="sortable-header" (click)="toggleSort('status')">
+                                    <th class="sortable-header col-status" (click)="toggleSort('status')">
                                         <div class="header-content">
                                             Status
                                             <span class="sort-indicator" [class.active]="sortOrder().startsWith('status')">
                                                 {{ sortOrder() === 'status_asc' ? '↑' : '↓' }}
                                             </span>
-                                            <button class="filter-trigger" [class.filter-active]="statusFilter()" (click)="toggleFilter('status', $event)">🔍</button>
                                         </div>
-                                        @if (activeFilter() === 'status') {
-                                            <div class="filter-popover" (click)="$event.stopPropagation()">
-                                                <select [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value); activeFilter.set(null)">
-                                                    <option value="" [selected]="statusFilter() === ''">All Statuses</option>
-                                                    @for (status of uniqueStatuses(); track status) {
-                                                        <option [value]="status" [selected]="statusFilter() === status">{{ status.split('_').join(' ') }}</option>
-                                                    }
-                                                </select>
-                                            </div>
-                                        }                            </th>
-                                    <th>
+                                    </th>
+                                    <th class="col-details">
                                         <div class="header-content">
                                             Details
-                                            <button class="filter-trigger" [class.filter-active]="keywordFilter().length > 0" (click)="toggleFilter('keywords', $event)">🔍</button>
                                         </div>
-                                        @if (activeFilter() === 'keywords') {
-                                            <div class="filter-popover keyword-popover" (click)="$event.stopPropagation()">
-                                                <label>Filter by keywords:</label>
-                                                <app-keyword-selector
-                                                    [selectedKeywords]="keywordFilter()"
-                                                    placeholderText="Add keyword..."
-                                                    (addKeyword)="onAddKeyword($event)"
-                                                    (removeKeyword)="onRemoveKeyword($event)"
-                                                />
-                                            </div>
-                                        }
                                     </th>
-                                    </tr>
+                                </tr>
+                                <tr class="filter-row">
+                                    <th class="col-selection"></th>
+                                    <th class="col-id">
+                                        <app-auto-complete-input 
+                                            placeholderText="Search ID..."
+                                            [suggestions]="nctIdMatches()"
+                                            [value]="nctIdFilter()"
+                                            [clearOnSelect]="false"
+                                            (searchQueryChange)="onNctIdSearch($event)"
+                                            (itemSelected)="onNctIdSelected($event)"
+                                        />
+                                    </th>
+                                    <th class="col-name">
+                                        <input type="text" placeholder="Filter name..." 
+                                            [value]="nameFilter()" 
+                                            (input)="nameFilter.set($any($event.target).value)">
+                                    </th>
+                                    <th class="col-participants">
+                                        <div class="participants-range">
+                                            <input type="number" placeholder="Min..." 
+                                                [value]="participantsFilter() === null ? '' : participantsFilter()" 
+                                                (input)="participantsFilter.set($any($event.target).value ? +$any($event.target).value : null)" min="0">
+                                            <input type="number" placeholder="Max..." 
+                                                [value]="participantsMaxFilter() === null ? '' : participantsMaxFilter()" 
+                                                (input)="participantsMaxFilter.set($any($event.target).value ? +$any($event.target).value : null)" min="0">
+                                        </div>
+                                    </th>
+                                    <th class="col-status">
+                                        <select [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value)">
+                                            <option value="">All Statuses</option>
+                                            @for (status of uniqueStatuses(); track status) {
+                                                <option [value]="status">{{ status.split('_').join(' ') }}</option>
+                                            }
+                                        </select>
+                                    </th>
+                                    <th class="col-details">
+                                        <app-auto-complete-input 
+                                            placeholderText="Add keyword..."
+                                            [suggestions]="keywordMatches()"
+                                            [rightAlign]="true"
+                                            (searchQueryChange)="onKeywordSearch($event)"
+                                            (itemSelected)="onAddKeyword($event)"
+                                        />
+                                    </th>
+                                </tr>
                             </thead>
                             @if (displayedTrials().length === 0 && !isLoading()) {
                                 <tbody>
@@ -323,7 +327,7 @@
                                     @for (trial of displayedTrials(); track trial.nctId) {
                                         <tr [class.expanded-row-active]="expandedTrialId() === trial.nctId"
                                             [class.selected-row]="isTrialSelected(trial.nctId)">
-                                            <td class="selection-cell">
+                                            <td class="selection-cell" style="text-align: center;">
                                                 <input type="checkbox" class="custom-checkbox" [checked]="isTrialSelected(trial.nctId)"
                                                     (change)="toggleTrialSelection(trial.nctId)" aria-label="Select trial">
                                             </td>
