@@ -232,6 +232,23 @@ async function mockSearch(page: Page, requests: SearchRequest[], responseStudies
   });
 }
 
+async function mockBenchmark(page: Page) {
+  await page.route("**/api/clinical-trials/benchmark", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        explanation: {
+          explanation: "AI summary for Type 2 Diabetes trials benchmarking.",
+          generatedAt: new Date().toISOString()
+        },
+        rankedTrials: [],
+        comparisonMetrics: []
+      }),
+    });
+  });
+}
+
 async function searchForDiabetes(page: Page) {
   await page.goto("/");
   await page.locator("#userPatients").fill("240");
@@ -309,6 +326,7 @@ test.describe("Dashboard search workflow", () => {
   test("processes selected trials into the analysis report view", async ({ page }) => {
     const requests: SearchRequest[] = [];
     await mockSearch(page, requests);
+    await mockBenchmark(page);
 
     await searchForDiabetes(page);
     await page.getByRole("button", { name: "Generate Report" }).click();
@@ -453,6 +471,7 @@ test.describe("Dashboard search workflow", () => {
   test("processes only the selected subset into the comparison table", async ({ page }) => {
     const requests: SearchRequest[] = [];
     await mockSearch(page, requests);
+    await mockBenchmark(page);
 
     await searchForDiabetes(page);
     await page.getByRole("checkbox", { name: "Select all trials" }).uncheck();
