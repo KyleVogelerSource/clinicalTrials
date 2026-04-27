@@ -245,13 +245,14 @@ async function searchForDiabetes(page: Page) {
   await selectCustomOption(page, "#intervention", "Parallel Assignment");
 
   await page.locator("#condition").fill("Type 2 Diabetes");
-  await page.locator(".suggestions-list .suggestion-item", { hasText: "Type 2 Diabetes" }).first().click();
+  await page.locator("#condition").press("Enter");
   await expect(page.getByText("Showing 3 of 3 Matches")).toBeVisible();
 }
 
 async function selectCustomOption(page: Page, selector: string, optionText: string) {
   await page.locator(`${selector} .select-trigger`).click();
-  await page.locator(`${selector} .option-item`, { hasText: new RegExp(`^${optionText}$`) }).click();
+  // Use a more robust exact match that handles potential whitespace
+  await page.locator(`${selector} .option-item`).filter({ hasText: new RegExp(`^\\s*${optionText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`) }).click();
 }
 
 function visibleTrialIds(page: Page) {
