@@ -311,11 +311,20 @@ export class Analysis implements OnInit {
             });
         });
 
-        return Array.from(siteData.entries())
+        const top12 = Array.from(siteData.entries())
             .filter(([_, data]) => data.count > 1)
             .sort((a, b) => b[1].count - a[1].count)
             .slice(0, 12)
             .map(([name, data]) => ({ name, count: data.count, coords: data.coords }));
+
+        if (top12.length < 12) {
+            return [...top12, ...Array.from(siteData.entries())
+                .filter(([_, data]) => data.count <= 1)
+                .slice(0, 12 - top12.length)
+                .map(([name, data]) => ({ name, count: data.count, coords: data.coords }))];
+        }
+
+        return top12;
     });
 
     benchmarks = computed(() => {
