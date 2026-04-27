@@ -194,6 +194,18 @@
                     </div>
                 </div>
 
+                @if (foundTrials().length >= DISPLAY_THRESHOLD) {
+                    <div class="threshold-warning-container">
+                        <div class="alert-box warning full-width">
+                            <span class="alert-icon">⚠️</span>
+                            <div class="alert-text">
+                                <h3>Your search returned more than {{ DISPLAY_THRESHOLD | number }} results. Showing the first {{ DISPLAY_THRESHOLD | number }}.</h3>
+                                <p>You can still select trials and generate a report, or refine your search to narrow down results.</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+
                 <div class="table-content-container">
                     <div class="table-content">
                         <table class="trials-table">
@@ -297,24 +309,6 @@
                                                         <h3>No Results</h3>
                                                         <p>Try adjusting your search criteria or filters to find matching trials.
                                                         </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            }
-                            @else if (displayedTrials().length >= DISPLAY_THRESHOLD) {
-                                <tbody>
-                                    <tr>
-                                        <td colspan="6">
-                                            <div class="alert-container">
-                                                <div class="alert-box warning">
-                                                    <span class="alert-icon">⚠️</span>
-                                                    <div class="alert-text">
-                                                        <h3>Too many results to display</h3>
-                                                        <p>Please apply more specific criteria to reduce results below {{
-                                                            DISPLAY_THRESHOLD | number }}.</p>
                                                     </div>
                                                 </div>
                                             </div>
