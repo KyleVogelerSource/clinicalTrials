@@ -393,11 +393,12 @@ export class Analysis implements OnInit {
                             fill: true
                         },
                         {
-                            label: 'User',
+                            label: 'Proposed',
                             data: userLinePoints,
                             borderColor: '#088989',
-                            borderWidth: 2,
-                            pointRadius: 0,
+                            borderWidth: 3,
+                            pointRadius: (context: any) => context.dataIndex === 1 ? 4 : 0,
+                            pointBackgroundColor: '#088989',
                             showLine: true
                         }
                     ]
