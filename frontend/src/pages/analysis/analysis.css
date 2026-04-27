@@ -108,13 +108,16 @@
 }
 
 /* Card Sizing */
+.card-small {
+    grid-column: span 2;
+}
+
 .card-half {
     grid-column: span 3;
 }
 
 .card-large {
     grid-column: span 4;
-    height: 350px;
 }
 
 .card-full {
@@ -607,7 +610,7 @@
 /* Benchmarks */
 .benchmarks-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
     gap: 1.5rem;
 }
 
@@ -624,9 +627,9 @@
 }
 
 .benchmark-label {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #475569;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e293b;
 }
 
 .benchmark-val-editor {
@@ -635,17 +638,25 @@
     gap: 0.4rem;
 }
 
+.input-label {
+    font-size: 0.75rem;
+    color: #475569;
+    font-weight: 600;
+}
+
 .benchmark-input {
-    width: 40px;
-    padding: 0.15rem 0.3rem !important;
-    font-size: 0.8rem !important;
-    border: 1px solid #d1d5da !important;
-    border-radius: 2px !important;
+    width: 50px;
+    padding: 0.2rem 0.4rem !important;
+    font-size: 0.85rem !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 3px !important;
+    color: #088989 !important;
+    font-weight: 700 !important;
 }
 
 .benchmark-z {
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: 700;
     color: #193F6A;
 }
 
@@ -654,14 +665,16 @@
 }
 
 .benchmark-chart {
-    height: 120px;
+    height: 180px;
     position: relative;
     border-bottom: 2px solid #e2e8f0;
 }
 
 .benchmark-stats {
-    font-size: 0.7rem;
-    color: #94a3b8;
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: #475569;
+    font-weight: 500;
     text-align: center;
 }
 

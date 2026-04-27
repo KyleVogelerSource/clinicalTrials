@@ -11,7 +11,7 @@
     />
 
     @if (isOpen() && suggestions().length > 0) {
-        <ul class="suggestions-list" (mousedown)="$event.preventDefault()">
+        <ul class="suggestions-list" [class.right-aligned]="rightAlign()" (mousedown)="$event.preventDefault()">
             @for (suggestion of suggestions(); track suggestion; let i = $index) {
                 <li
                     [class.highlighted]="highlightedIndex() === i"

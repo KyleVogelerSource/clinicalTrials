@@ -158,37 +158,37 @@ export class TrialWorkflowService {
             return criteriaLines.length > 0 ? criteriaLines.length : lines.filter(l => l.trim().length > 5).length;
         };
 
-        const trials = this.selectedTrialIds().map(id => this.trialCache.get(id));
+        const trials = this.selectedTrialIds().map(id => this.trialCache.get(id)).filter((t): t is ClinicalTrialStudy => !!t);
         const plotData = trials.map(trial => {
-            const criteria = trial?.protocolSection.eligibilityModule?.eligibilityCriteria ?? '';
+            const criteria = trial.protocolSection.eligibilityModule?.eligibilityCriteria ?? '';
             const parts = criteria.split(/exclusion criteria/i);
             const inclusionText = parts[0];
             const exclusionText = parts.length > 1 ? parts[1] : '';
 
             return {
-                id: trial?.protocolSection.identificationModule.nctId,
-                terminationCause: trial?.protocolSection.statusModule?.whyStopped ?? null,
-                geoLocations: trial?.protocolSection.contactsLocationsModule?.locations?.map(loc => ({
+                id: trial.protocolSection.identificationModule.nctId,
+                terminationCause: trial.protocolSection.statusModule?.whyStopped ?? null,
+                geoLocations: trial.protocolSection.contactsLocationsModule?.locations?.map(loc => ({
                     geoPoint: loc.geoPoint,
                     city: loc.city,
                     country: loc.country,
                     facility: loc.facility
                 })) ?? [],
-                startDate: trial?.protocolSection.statusModule?.startDateStruct,
-                completionDate: trial?.protocolSection.statusModule?.completionDateStruct,
-                totalEnrollment: trial?.protocolSection.designModule?.enrollmentInfo?.count ?? 0,
-                siteCount: trial?.protocolSection.contactsLocationsModule?.locations?.length ?? 0,
+                startDate: trial.protocolSection.statusModule?.startDateStruct,
+                completionDate: trial.protocolSection.statusModule?.completionDateStruct,
+                totalEnrollment: trial.protocolSection.designModule?.enrollmentInfo?.count ?? 0,
+                siteCount: trial.protocolSection.contactsLocationsModule?.locations?.length ?? 0,
                 inclusionStrictness: countCriteriaItems(inclusionText),
                 exclusionStrictness: countCriteriaItems(exclusionText),
-                outcomeDensity: (trial?.protocolSection.outcomesModule?.primaryOutcomes?.length ?? 0) + (trial?.protocolSection.outcomesModule?.secondaryOutcomes?.length ?? 0),
-                minAge: trial?.protocolSection.eligibilityModule?.minimumAge,
-                maxAge: trial?.protocolSection.eligibilityModule?.maximumAge,
-                interventionCount: trial?.protocolSection.armsInterventionsModule?.interventions?.length ?? 0,
-                collaboratorCount: trial?.protocolSection.sponsorCollaboratorsModule?.collaborators?.length ?? 0,
-                completedDate: trial?.protocolSection.statusModule?.primaryCompletionDateStruct,
-                maskingInfo: trial?.protocolSection.designModule?.designInfo?.maskingInfo?.whoMasked ?? [],
-                conditionCount: trial?.protocolSection.conditionsModule?.conditions?.length ?? 0,
-                status: trial?.protocolSection.statusModule?.overallStatus ?? 'UNKNOWN',
+                outcomeDensity: (trial.protocolSection.outcomesModule?.primaryOutcomes?.length ?? 0) + (trial.protocolSection.outcomesModule?.secondaryOutcomes?.length ?? 0),
+                minAge: trial.protocolSection.eligibilityModule?.minimumAge,
+                maxAge: trial.protocolSection.eligibilityModule?.maximumAge,
+                interventionCount: trial.protocolSection.armsInterventionsModule?.interventions?.length ?? 0,
+                collaboratorCount: trial.protocolSection.sponsorCollaboratorsModule?.collaborators?.length ?? 0,
+                completedDate: trial.protocolSection.statusModule?.primaryCompletionDateStruct,
+                maskingInfo: trial.protocolSection.designModule?.designInfo?.maskingInfo?.whoMasked ?? [],
+                conditionCount: trial.protocolSection.conditionsModule?.conditions?.length ?? 0,
+                status: trial.protocolSection.statusModule?.overallStatus ?? 'UNKNOWN',
                 eligibilityCriteria: criteria
             };
         });
@@ -395,11 +395,18 @@ export class TrialWorkflowService {
 
         const request = this.createResultsRequest();
         if (request) {
-            this.apiService.getResults(request).pipe(
+            this.apiService.getResults(request, trials).pipe(
                 finalize(() => this.loadingService.hide())
             ).subscribe({
                 next: (aiResults) => {
                     this.results.update(current => {
+                        // Map the new AI explanation to the overallSummary field
+                        if (aiResults.explanation?.explanation) {
+                            aiResults.overallSummary = aiResults.explanation.explanation;
+                        } else if (!aiResults.overallSummary) {
+                            aiResults.overallSummary = "Analysis completed, but no detailed summary was provided by the AI.";
+                        }
+
                         // Preserve locally calculated data
                         if (current.trialResults) {
                             aiResults.timelineBuckets = current.trialResults.timelineBuckets;

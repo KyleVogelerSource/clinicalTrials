@@ -1,17 +1,20 @@
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { Observable } from 'rxjs';
 import { TrialResultsRequest } from '@shared/dto/TrialResultsRequest';
 import { TrialResultsResponse } from '@shared/dto/TrialResultsResponse';
-import { mockTrialResultsResponse } from './mock-trial-results';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../environments/environment';
+import { StudyTrial } from '../models/study-trial';
 
 @Injectable({ providedIn: 'root' })
 export class ResultsApiService {
-    constructor(private http: HttpClient) {
-
-    }
+    private http = inject(HttpClient);
+    private readonly apiUrl = `${environment.apiBaseUrl}/api/clinical-trials/benchmark`;
     
-    getResults(_request: TrialResultsRequest): Observable<TrialResultsResponse> {
-        return of(mockTrialResultsResponse);
+    getResults(request: TrialResultsRequest, trials: any[]): Observable<TrialResultsResponse> {
+        return this.http.post<TrialResultsResponse>(this.apiUrl, {
+            ...request,
+            trials: trials
+        });
     }
 }

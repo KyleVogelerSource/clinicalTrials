@@ -9,8 +9,13 @@ export interface ScatterChartDataset {
     data: { x: number; y: number }[];
     backgroundColor?: string;
     borderColor?: string;
-    pointRadius?: number;
+    borderWidth?: number;
+    pointRadius?: number | ((context: any) => number);
     pointHoverRadius?: number;
+    pointBackgroundColor?: string;
+    showLine?: boolean;
+    tension?: number;
+    fill?: boolean;
 }
 
 export interface ScatterChartData {
