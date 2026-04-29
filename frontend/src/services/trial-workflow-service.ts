@@ -11,6 +11,7 @@ import { ClinicalTrialStudy } from "@shared/dto/ClinicalTrialStudiesResponse";
 import { MetricRow, ResultsModel } from "../models/results-model";
 import { mapDesignModelToExecutionSearchRequest } from "./saved-search-criteria-mapper";
 import { HeatPoint } from "../primitives/heatmap/heatmap";
+import { TrialNormalizer } from "./trial-normalizer.service";
 
 const PHASE_MAP: Record<string, string> = {
     'Early Phase 1': 'EARLY_PHASE1',
@@ -42,6 +43,7 @@ export class TrialWorkflowService {
     private clinicalStudyService = inject(ClinicalStudyService);
     private apiService = inject(ResultsApiService);
     private loadingService = inject(LoadingService);
+    private normalizer = inject(TrialNormalizer);
     private trialCache: Map<string, ClinicalTrialStudy> = new Map();
 
     // Designer state
@@ -395,7 +397,9 @@ export class TrialWorkflowService {
 
         const request = this.createResultsRequest();
         if (request) {
-            this.apiService.getResults(request, trials).pipe(
+            const normalizedTrials = trials.map(t => this.normalizer.normalizeForBenchmark(t));
+
+            this.apiService.getResults(request, normalizedTrials).pipe(
                 finalize(() => this.loadingService.hide())
             ).subscribe({
                 next: (aiResults) => {
