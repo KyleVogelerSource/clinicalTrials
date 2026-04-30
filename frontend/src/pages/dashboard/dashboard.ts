@@ -12,6 +12,7 @@ import { mapDesignModelToSavedSearchCriteria } from "../../services/saved-search
 import { LoadingIndicator } from "../../primitives/loading-indicator/loading-indicator";
 import { AutoCompleteInput } from "../../primitives/auto-complete-input/auto-complete-input";
 import { CustomSelect } from "../../primitives/custom-select/custom-select";
+import { MultiSelect, MultiSelectOption } from "../../primitives/multi-select/multi-select";
 import { KeywordSelector } from "../../primitives/keyword-selector/keyword-selector";
 import { Tooltip } from "../../primitives/tooltip/tooltip";
 import { StudyTrial } from "../../models/study-trial";
@@ -32,6 +33,7 @@ import { LoadingService } from "../../services/loading.service";
         LoadingIndicator,
         AutoCompleteInput,
         CustomSelect,
+        MultiSelect,
         KeywordSelector,
         Tooltip,
         DecimalPipe,
@@ -52,7 +54,7 @@ export class Dashboard implements OnInit {
     private loadingService = inject(LoadingService);
 
     // Form Options
-    phaseOptions = this.clinicalStudiesService.getPhases();
+    phaseOptions: MultiSelectOption[] = this.clinicalStudiesService.getPhases().map(p => ({ label: p, value: p }));
     allocationOptions = this.clinicalStudiesService.getAllocations();
     interventionOptions = this.clinicalStudiesService.getInterventionModels();
     blindingOptions = this.clinicalStudiesService.getMaskingTypes();
@@ -62,9 +64,7 @@ export class Dashboard implements OnInit {
     phaseDescriptions: Record<string, string> = {
         'Early Phase 1': 'Exploratory study involving very limited human exposure, no therapeutic or diagnostic intent.',
         'Phase 1': 'Initial safety and dosage testing in a small group of healthy people or patients.',
-        'Phase 1/Phase 2': 'Combined trial testing safety, dosage, and initial efficacy.',
         'Phase 2': 'Testing efficacy and safety in a larger group of patients.',
-        'Phase 2/Phase 3': 'Expanded testing of efficacy and safety, often the last step before large-scale testing.',
         'Phase 3': 'Large scale testing against standard treatments to confirm efficacy and monitor side effects.',
         'Phase 4': 'Post-marketing surveillance to gather more information on safety and long-term effects.',
         'N/A': 'Phase not applicable for this study type (e.g., behavioral or device studies).'
@@ -150,7 +150,7 @@ export class Dashboard implements OnInit {
 
     searchForm = new FormGroup({
         condition: new FormControl<string>('', [Validators.required]),
-        phase: new FormControl<string>(this.clinicalStudiesService.getDefaultPhase(), [Validators.required]),
+        phase: new FormControl<string[]>([this.clinicalStudiesService.getDefaultPhase()], [Validators.required]),
         allocationType: new FormControl<string>(this.clinicalStudiesService.getDefaultAllocation(), [Validators.required]),
         interventionModel: new FormControl<string | null>(null),
         blindingType: new FormControl<string>(this.clinicalStudiesService.getDefaultMaskingType(), [Validators.required]),
@@ -340,9 +340,10 @@ export class Dashboard implements OnInit {
         // Sync with existing state if any
         const savedParams = this.workflowService.inputParams();
         if (savedParams) {
+            const phases = savedParams.phase ? savedParams.phase.split(' OR ') : [this.clinicalStudiesService.getDefaultPhase()];
             this.searchForm.patchValue({
                 condition: savedParams.condition,
-                phase: savedParams.phase,
+                phase: phases,
                 allocationType: savedParams.allocationType,
                 interventionModel: savedParams.interventionModel,
                 blindingType: savedParams.blindingType,
@@ -382,7 +383,7 @@ export class Dashboard implements OnInit {
             }),
             distinctUntilChanged((prev, curr) => 
                 prev.condition === curr.condition &&
-                prev.phase === curr.phase &&
+                JSON.stringify(prev.phase) === JSON.stringify(curr.phase) &&
                 prev.allocationType === curr.allocationType &&
                 prev.interventionModel === curr.interventionModel &&
                 prev.blindingType === curr.blindingType &&
@@ -520,9 +521,10 @@ export class Dashboard implements OnInit {
         if (this.saveForm.invalid || !this.searchForm.valid) return;
 
         const formValues = this.searchForm.getRawValue();
+        const phaseValue = Array.isArray(formValues.phase) ? formValues.phase.join(' OR ') : (formValues.phase ?? '');
         const criteria = mapDesignModelToSavedSearchCriteria({
             condition: formValues.condition ?? '',
-            phase: formValues.phase ?? '',
+            phase: phaseValue,
             allocationType: formValues.allocationType ?? '',
             interventionModel: formValues.interventionModel ?? null,
             blindingType: formValues.blindingType ?? '',
@@ -579,9 +581,10 @@ export class Dashboard implements OnInit {
     onProcess() {
         // Map form to DesignModel for existing results page compatibility
         const values = this.searchForm.value;
+        const phaseValue = Array.isArray(values.phase) ? values.phase.join(' OR ') : (values.phase ?? '');
         this.workflowService.setInputs({
             condition: values.condition ?? '',
-            phase: values.phase ?? '',
+            phase: phaseValue,
             allocationType: values.allocationType ?? '',
             interventionModel: values.interventionModel ?? null,
             blindingType: values.blindingType ?? '',
@@ -630,7 +633,7 @@ export class Dashboard implements OnInit {
             const content = await file.text();
             const criteria = parseDesignerCriteriaFile(content, file.name, {
                 phase: this.clinicalStudiesService.getDefaultPhase(),
-                phases: this.phaseOptions,
+                phases: this.clinicalStudiesService.getPhases(), // Re-use raw phases for import parsing
                 allocationType: this.clinicalStudiesService.getDefaultAllocation(),
                 allocations: this.allocationOptions,
                 interventionModels: this.interventionOptions,
@@ -640,9 +643,11 @@ export class Dashboard implements OnInit {
                 sexes: this.sexOptions,
             });
 
+            const phaseArr = criteria.phase ? criteria.phase.split(' OR ') : [this.clinicalStudiesService.getDefaultPhase()];
+
             this.searchForm.patchValue({
                 condition: criteria.condition,
-                phase: criteria.phase,
+                phase: phaseArr,
                 allocationType: criteria.allocationType,
                 interventionModel: criteria.interventionModel,
                 blindingType: criteria.blindingType,
@@ -671,18 +676,21 @@ export class Dashboard implements OnInit {
         }
     }
 
-    private mapPhase(phase: string): string | undefined {
+    private mapPhase(phases: string[] | string): string | undefined {
         const map: Record<string, string> = {
             'Early Phase 1': 'EARLY_PHASE1',
             'Phase 1': 'PHASE1',
-            'Phase 1/Phase 2': 'PHASE1 OR PHASE2',
             'Phase 2': 'PHASE2',
-            'Phase 2/Phase 3': 'PHASE2 OR PHASE3',
             'Phase 3': 'PHASE3',
             'Phase 4': 'PHASE4',
             'N/A': 'NA'
         };
-        return map[phase];
+
+        if (Array.isArray(phases)) {
+            return phases.map(p => map[p]).filter(Boolean).join(' OR ') || undefined;
+        }
+
+        return map[phases] || phases;
     }
 
     private mapIntervention(model: string): string | undefined {
