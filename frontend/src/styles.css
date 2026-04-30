@@ -117,3 +117,83 @@ select:focus {
     background-color: #fff;
     box-shadow: 0 0 0 3px rgba(8, 137, 137, 0.1);
 }
+
+/* Custom Checkboxes */
+input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border: 1px solid #d1d5da;
+    border-radius: 2px;
+    background-color: #fafbfc;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+
+input[type="checkbox"]:checked {
+    border-color: #0366d6;
+    background-color: white;
+}
+
+input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 3px;
+    border-left: 2px solid #0366d6;
+    border-bottom: 2px solid #0366d6;
+    transform: rotate(-45deg);
+    top: 3px;
+    left: 3px;
+}
+
+input[type="checkbox"]:hover {
+    border-color: #0366d6;
+}
+
+input[type="checkbox"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(3, 102, 214, 0.2);
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.status-badge.status-completed {
+    background: #dafbe1;
+    color: #1a7f37;
+}
+
+.status-badge.status-terminated {
+    background: #ffebe9;
+    color: #cf222e;
+}
+
+.status-badge.status-unknown {
+    background: #f6f8fa;
+    color: #6a737d;
+    border: 1px solid #d1d5da;
+}
+
+.status-badge.status-active {
+    background: #fff8c5;
+    color: #9a6700;
+}
+
+
+

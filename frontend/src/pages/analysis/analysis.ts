@@ -7,6 +7,7 @@ import { TrialWorkflowService } from "../../services/trial-workflow-service";
 import { BarChart, BarChartData, BarChartDataset } from "../../primitives/bar-chart/bar-chart";
 import { ScatterChart, ScatterChartData } from "../../primitives/scatter-chart/scatter-chart";
 import { CustomSelect } from "../../primitives/custom-select/custom-select";
+import { MultiSelect, MultiSelectOption } from "../../primitives/multi-select/multi-select";
 import { Heatmap } from "../../primitives/heatmap/heatmap";
 import { metricNames, MetricRow } from "../../models/results-model";
 import { StudyTrial } from "../../models/study-trial";
@@ -68,6 +69,7 @@ export const metricDescriptions: Record<string, string> = {
         BarChart,
         ScatterChart,
         CustomSelect,
+        MultiSelect,
         Heatmap,
         DatePipe
     ],
@@ -296,36 +298,7 @@ export class Analysis implements OnInit {
         "Wide Age Span (>40)"
     ];
 
-    topSites = computed(() => {
-        const trials = this.selectedTrialIds().map(id => (this.workflowService as any).trialCache.get(id));
-        const siteData = new Map<string, { count: number, coords: [number, number] | null }>();
-        
-        trials.forEach((trial: any) => {
-            trial?.protocolSection?.contactsLocationsModule?.locations?.forEach((loc: any) => {
-                if (loc.facility) {
-                    const existing = siteData.get(loc.facility);
-                    const count = (existing?.count || 0) + 1;
-                    const coords = existing?.coords || (loc.geoPoint?.lat ? [loc.geoPoint.lat, loc.geoPoint.lon] : null);
-                    siteData.set(loc.facility, { count, coords });
-                }
-            });
-        });
-
-        const top12 = Array.from(siteData.entries())
-            .filter(([_, data]) => data.count > 1)
-            .sort((a, b) => b[1].count - a[1].count)
-            .slice(0, 12)
-            .map(([name, data]) => ({ name, count: data.count, coords: data.coords }));
-
-        if (top12.length < 12) {
-            return [...top12, ...Array.from(siteData.entries())
-                .filter(([_, data]) => data.count <= 1)
-                .slice(0, 12 - top12.length)
-                .map(([name, data]) => ({ name, count: data.count, coords: data.coords }))];
-        }
-
-        return top12;
-    });
+    topSites = computed(() => this.results().topSites);
 
     benchmarks = computed(() => {
         const trials = this.results().metricRows;
@@ -409,8 +382,9 @@ export class Analysis implements OnInit {
 
     // Comparison table logic
     readonly allComparisonMetrics = ALL_COMPARISON_METRICS;
+    readonly columnOptions: MultiSelectOption[] = ALL_COMPARISON_METRICS.map(m => ({ label: m.label, value: m.key }));
+    
     visibleColumnKeys = signal<string[]>(['phase', 'overallStatus', 'enrollmentCount', 'startDate', 'completionDate']);
-    showColumnSelector = signal(false);
     comparisonMetrics = computed(() => ALL_COMPARISON_METRICS.filter(m => this.visibleColumnKeys().includes(m.key)));
     comparisonSearch = signal('');
     comparisonSortKey = signal('');
@@ -491,20 +465,6 @@ export class Analysis implements OnInit {
             this.comparisonSortKey.set(key);
             this.comparisonSortAsc.set(true);
         }
-    }
-
-    toggleColumnSelector() {
-        this.showColumnSelector.update(v => !v);
-    }
-
-    toggleColumn(key: string) {
-        this.visibleColumnKeys.update(keys =>
-            keys.includes(key) ? keys.filter(k => k !== key) : [...keys, key]
-        );
-    }
-
-    isColumnVisible(key: string): boolean {
-        return this.visibleColumnKeys().includes(key);
     }
 
     onUpdateBenchmark(paramKey: string, value: string) {

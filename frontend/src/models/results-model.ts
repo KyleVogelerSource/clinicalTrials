@@ -66,12 +66,19 @@ export interface BenchmarkInfo {
     appearances: number;
 }
 
+export interface TopSite {
+    name: string;
+    count: number;
+    coords: [number, number] | null;
+}
+
 // TODO: Geo locations
 
 export class ResultsModel {
     trialResults?: TrialResultsResponse;
     terminationReasons: LabelBar[] = [];
     siteLocations: HeatPoint[] = [];
+    topSites: TopSite[] = [];
     metricNames: string[] = metricNames;
     metricRows: MetricRow[] = [];
     complitionBenchmarks: BenchmarkInfo[] = [];

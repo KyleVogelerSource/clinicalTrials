@@ -555,47 +555,6 @@
     text-align: center;
 }
 
-.custom-checkbox {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 14px;
-    height: 14px;
-    border: 1px solid #d1d5da;
-    border-radius: 2px;
-    background-color: #fff;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    vertical-align: middle;
-    transition: all 0.15s ease-in-out;
-}
-
-.custom-checkbox:checked {
-    background-color: var(--app-teal);
-    border-color: var(--app-teal);
-}
-
-.custom-checkbox:checked::after {
-    content: '';
-    width: 6px;
-    height: 3px;
-    border-left: 1.5px solid white;
-    border-bottom: 1.5px solid white;
-    transform: rotate(-45deg);
-    margin-top: -1px;
-}
-
-.custom-checkbox:hover {
-    border-color: var(--app-teal);
-}
-
-.custom-checkbox:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(8, 137, 137, 0.2);
-}
-
 .trial-title-cell {
     max-width: 320px;
 }
@@ -608,36 +567,6 @@
 
 .trial-link:hover {
     text-decoration: underline;
-}
-
-.status-badge {
-    padding: 0.1rem 0.4rem;
-    border-radius: 2px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    white-space: nowrap;
-    text-transform: uppercase;
-}
-
-.status-badge.status-completed {
-    background: #dafbe1;
-    color: #1a7f37;
-}
-
-.status-badge.status-terminated {
-    background: #ffebe9;
-    color: #cf222e;
-}
-
-.status-badge.status-unknown {
-    background: #f6f8fa;
-    color: #6a737d;
-    border: 1px solid #d1d5da;
-}
-
-.status-badge.status-active {
-    background: #fff8c5;
-    color: #9a6700;
 }
 
 /* Loading Overlay */
