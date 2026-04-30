@@ -9,6 +9,7 @@ import { ScatterChart, ScatterChartData } from "../../primitives/scatter-chart/s
 import { CustomSelect } from "../../primitives/custom-select/custom-select";
 import { MultiSelect, MultiSelectOption } from "../../primitives/multi-select/multi-select";
 import { Heatmap } from "../../primitives/heatmap/heatmap";
+import { Tooltip } from "../../primitives/tooltip/tooltip";
 import { metricNames, MetricRow } from "../../models/results-model";
 import { StudyTrial } from "../../models/study-trial";
 import { LoadingService } from "../../services/loading.service";
@@ -71,6 +72,7 @@ export const metricDescriptions: Record<string, string> = {
         CustomSelect,
         MultiSelect,
         Heatmap,
+        Tooltip,
         DatePipe
     ],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -114,16 +116,38 @@ export class Analysis implements OnInit {
     });
 
     // Charts Configuration
-    dataPlotX = signal(metricNames[0]);
-    dataPlotY = signal(metricNames[1]);
-    showTrendLine = signal(false);
+    dataPlotX = signal("Site Count");
+    dataPlotY = signal("Recruitment Velocity");
+    showTrendLine = signal(true);
+    excludeOutliers = signal(false);
+    showAllCorrelations = signal(false);
     metricNamesList = metricNames;
+
+    readonly designInputs = [
+        "Site Count",
+        "Inclusion Strictness",
+        "Exclusion Strictness",
+        "Outcome Density",
+        "Age Span",
+        "Intervention Count",
+        "Collaborator Count",
+        "Masking Intensity",
+        "Condition Count",
+        "Min Age",
+        "Max Age"
+    ];
+
+    readonly performanceOutputs = [
+        "Recruitment Velocity",
+        "Site Efficiency",
+        "Timeline Slippage",
+        "Total Enrollment"
+    ];
 
     suggestedCorrelations = computed(() => {
         const trials = this.results().metricRows;
         if (!trials || trials.length < 2) return [];
 
-        const metrics = this.metricNamesList;
         const correlations: {x: string, y: string, r: number}[] = [];
 
         // Redundant metric pairs to ignore (mathematically dependent)
@@ -135,15 +159,14 @@ export class Analysis implements OnInit {
             "Site Count|Site Efficiency", "Site Efficiency|Site Count"
         ]);
 
-        for (let i = 0; i < metrics.length; i++) {
-            for (let j = i + 1; j < metrics.length; j++) {
-                const m1 = metrics[i];
-                const m2 = metrics[j];
+        // Only pair Design Inputs (X) with Performance Outputs (Y)
+        for (const inputMetric of this.designInputs) {
+            for (const outputMetric of this.performanceOutputs) {
                 
-                if (forbiddenPairs.has(`${m1}|${m2}`)) continue;
+                if (forbiddenPairs.has(`${inputMetric}|${outputMetric}`)) continue;
 
-                const extract1 = MetricRow.metricExtractors[m1];
-                const extract2 = MetricRow.metricExtractors[m2];
+                const extract1 = MetricRow.metricExtractors[inputMetric];
+                const extract2 = MetricRow.metricExtractors[outputMetric];
 
                 const values = trials.map(t => ({ x: extract1(t), y: extract2(t) }))
                     .filter((v): v is {x: number, y: number} => v.x !== null && v.y !== null);
@@ -160,11 +183,17 @@ export class Analysis implements OnInit {
                 const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
                 const r = denominator === 0 ? 0 : ((n * sumXY) - (sumX * sumY)) / denominator;
 
-                correlations.push({ x: m1, y: m2, r });
+                correlations.push({ x: inputMetric, y: outputMetric, r });
             }
         }
 
-        return correlations.sort((a, b) => Math.abs(b.r) - Math.abs(a.r)).slice(0, 3);
+        return correlations.sort((a, b) => Math.abs(b.r) - Math.abs(a.r));
+    });
+
+    visibleCorrelations = computed(() => {
+        const all = this.suggestedCorrelations();
+        if (this.showAllCorrelations()) return all;
+        return all.filter(c => Math.abs(c.r) >= 0.1);
     });
 
     viabilityColor = computed(() => {
