@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from "@angular/core";
 import { CommonModule, DecimalPipe, DatePipe } from "@angular/common";
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
+import { FormControl, FormGroup, ReactiveFormsModule, FormsModule, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { debounceTime, distinctUntilChanged, switchMap, of, finalize } from "rxjs";
 
@@ -30,6 +30,7 @@ import { LoadingService } from "../../services/loading.service";
     imports: [
         CommonModule,
         ReactiveFormsModule,
+        FormsModule,
         LoadingIndicator,
         AutoCompleteInput,
         CustomSelect,
@@ -113,10 +114,27 @@ export class Dashboard implements OnInit {
     // Column Filters
     nctIdFilter = signal<string>('');
     nameFilter = signal<string>('');
-    statusFilter = signal<string>('');
+    statusFilter = signal<string[]>([]);
     participantsFilter = signal<number | null>(null);
     participantsMaxFilter = signal<number | null>(null);
     keywordFilter = signal<string[]>([]);
+
+    statusOptions = computed<MultiSelectOption[]>(() => {
+        return this.uniqueStatuses().map(s => {
+            let className = 'status-badge ';
+            const lower = s.toLowerCase();
+            if (s === 'COMPLETED') className += 'status-completed';
+            else if (lower.includes('terminated') || lower.includes('withdrawn')) className += 'status-terminated';
+            else if (lower === 'unknown') className += 'status-unknown';
+            else className += 'status-active';
+
+            return {
+                label: s.split('_').join(' '),
+                value: s,
+                class: className
+            };
+        });
+    });
 
     nctIdMatches = computed(() => {
         const query = this.nctIdFilter().toLowerCase();
@@ -187,7 +205,7 @@ export class Dashboard implements OnInit {
         if (nameF) trials = trials.filter(t => t.briefTitle.toLowerCase().includes(nameF));
 
         const statusF = this.statusFilter();
-        if (statusF) trials = trials.filter(t => t.overallStatus === statusF);
+        if (statusF.length > 0) trials = trials.filter(t => statusF.includes(t.overallStatus));
 
         const partF = this.participantsFilter();
         if (partF !== null) trials = trials.filter(t => t.enrollmentCount >= partF);
@@ -319,7 +337,7 @@ export class Dashboard implements OnInit {
     clearFilters(includeYearRange: boolean = true) {
         this.nctIdFilter.set('');
         this.nameFilter.set('');
-        this.statusFilter.set('');
+        this.statusFilter.set([]);
         this.participantsFilter.set(null);
         this.participantsMaxFilter.set(null);
         this.keywordFilter.set([]);

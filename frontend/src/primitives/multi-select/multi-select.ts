@@ -1,14 +1,17 @@
 import { Component, ChangeDetectionStrategy, input, ElementRef, inject, signal, forwardRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export interface MultiSelectOption {
     label: string;
     value: string;
+    class?: string;
 }
 
 @Component({
     selector: 'app-multi-select',
     standalone: true,
+    imports: [CommonModule],
     templateUrl: './multi-select.html',
     styleUrl: './multi-select.css',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,7 +30,7 @@ export class MultiSelect implements ControlValueAccessor {
     inputId = input<string>('');
     options = input.required<MultiSelectOption[]>();
     placeholder = input<string>('Select options...');
-    width = input<string>('auto');
+    width = input<string>('100%');
 
     elementRef = inject(ElementRef);
     

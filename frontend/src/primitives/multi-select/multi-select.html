@@ -24,7 +24,7 @@
                             (click)="$event.stopPropagation()"
                             (change)="toggleOption(option.value, $event)"
                         >
-                        <span class="option-label">{{ option.label }}</span>
+                        <span class="option-label" [class]="option.class || ''">{{ option.label }}</span>
                     </li>
                 }
             </ul>
