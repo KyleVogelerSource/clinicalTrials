@@ -95,12 +95,8 @@
     color: white;
 }
 
-/* Ensure checkbox visibility on hover */
+/* Ensure checkbox remains visible on dark hover background */
 .option-item:hover input[type="checkbox"] {
-    border-color: rgba(255, 255, 255, 0.6);
-}
-
-.option-item:hover input[type="checkbox"]:checked {
     background-color: white;
     border-color: white;
 }
