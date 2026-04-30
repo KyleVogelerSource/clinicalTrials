@@ -214,23 +214,12 @@
                     <h4>Benchmarked Trials Comparison</h4>
                     <div class="comparison-controls">
                         <div class="column-selector-wrapper">
-                            <button class="btn-columns" (click)="toggleColumnSelector()">
-                                Columns ▾
-                            </button>
-                            @if (showColumnSelector()) {
-                                <div class="column-dropdown">
-                                    @for (metric of allComparisonMetrics; track metric.key) {
-                                        <label class="column-option">
-                                            <input
-                                                type="checkbox"
-                                                [checked]="isColumnVisible(metric.key)"
-                                                (change)="toggleColumn(metric.key)"
-                                            >
-                                            {{ metric.label }}
-                                        </label>
-                                    }
-                                </div>
-                            }
+                            <app-multi-select 
+                                [ngModel]="visibleColumnKeys()" 
+                                (ngModelChange)="visibleColumnKeys.set($event)"
+                                [options]="columnOptions"
+                                placeholder="Columns"
+                                width="140px" />
                         </div>
                         <div class="comparison-search">
                             <input

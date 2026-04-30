@@ -7,6 +7,7 @@ import { TrialWorkflowService } from "../../services/trial-workflow-service";
 import { BarChart, BarChartData, BarChartDataset } from "../../primitives/bar-chart/bar-chart";
 import { ScatterChart, ScatterChartData } from "../../primitives/scatter-chart/scatter-chart";
 import { CustomSelect } from "../../primitives/custom-select/custom-select";
+import { MultiSelect, MultiSelectOption } from "../../primitives/multi-select/multi-select";
 import { Heatmap } from "../../primitives/heatmap/heatmap";
 import { metricNames, MetricRow } from "../../models/results-model";
 import { StudyTrial } from "../../models/study-trial";
@@ -68,6 +69,7 @@ export const metricDescriptions: Record<string, string> = {
         BarChart,
         ScatterChart,
         CustomSelect,
+        MultiSelect,
         Heatmap,
         DatePipe
     ],
@@ -409,8 +411,9 @@ export class Analysis implements OnInit {
 
     // Comparison table logic
     readonly allComparisonMetrics = ALL_COMPARISON_METRICS;
+    readonly columnOptions: MultiSelectOption[] = ALL_COMPARISON_METRICS.map(m => ({ label: m.label, value: m.key }));
+    
     visibleColumnKeys = signal<string[]>(['phase', 'overallStatus', 'enrollmentCount', 'startDate', 'completionDate']);
-    showColumnSelector = signal(false);
     comparisonMetrics = computed(() => ALL_COMPARISON_METRICS.filter(m => this.visibleColumnKeys().includes(m.key)));
     comparisonSearch = signal('');
     comparisonSortKey = signal('');
@@ -491,20 +494,6 @@ export class Analysis implements OnInit {
             this.comparisonSortKey.set(key);
             this.comparisonSortAsc.set(true);
         }
-    }
-
-    toggleColumnSelector() {
-        this.showColumnSelector.update(v => !v);
-    }
-
-    toggleColumn(key: string) {
-        this.visibleColumnKeys.update(keys =>
-            keys.includes(key) ? keys.filter(k => k !== key) : [...keys, key]
-        );
-    }
-
-    isColumnVisible(key: string): boolean {
-        return this.visibleColumnKeys().includes(key);
     }
 
     onUpdateBenchmark(paramKey: string, value: string) {
