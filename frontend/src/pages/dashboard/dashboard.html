@@ -55,11 +55,11 @@
 
                     <div class="form-group">
                         <div class="label-with-tooltip">
-                            <label for="phase">Current Phase</label>
+                            <label for="phase">Current Phase<span style="color:var(--app-red); font-weight:bold;"> *</span></label>
                             <app-tooltip text="Trial development stage, from early safety (Phase 1) to post-market (Phase 4)." />
                         </div>
-                        <app-custom-select id="phase" formControlName="phase" 
-                            [options]="phaseOptions" [descriptions]="phaseDescriptions" />
+                        <app-multi-select id="phase" formControlName="phase" 
+                            [options]="phaseOptions" placeholder="Phase" />
                     </div>
 
                     <div class="form-group">
@@ -281,12 +281,12 @@
                                         </div>
                                     </th>
                                     <th class="col-status">
-                                        <select [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value)">
-                                            <option value="">All Statuses</option>
-                                            @for (status of uniqueStatuses(); track status) {
-                                                <option [value]="status">{{ status.split('_').join(' ') }}</option>
-                                            }
-                                        </select>
+                                        <app-multi-select 
+                                            placeholder="All Statuses"
+                                            [options]="statusOptions()"
+                                            [ngModel]="statusFilter()"
+                                            (ngModelChange)="statusFilter.set($event)"
+                                        />
                                     </th>
                                     <th class="col-details">
                                         <app-auto-complete-input 
