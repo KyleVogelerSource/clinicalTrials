@@ -168,7 +168,7 @@ export class Dashboard implements OnInit {
 
     searchForm = new FormGroup({
         condition: new FormControl<string>('', [Validators.required]),
-        phase: new FormControl<string[]>([this.clinicalStudiesService.getDefaultPhase()], [Validators.required]),
+        phase: new FormControl<string[]>([], [Validators.required, Validators.minLength(1)]),
         allocationType: new FormControl<string>(this.clinicalStudiesService.getDefaultAllocation(), [Validators.required]),
         interventionModel: new FormControl<string | null>(null),
         blindingType: new FormControl<string>(this.clinicalStudiesService.getDefaultMaskingType(), [Validators.required]),
@@ -411,7 +411,10 @@ export class Dashboard implements OnInit {
                 JSON.stringify(prev.ineligible) === JSON.stringify(curr.ineligible)
             ),
             switchMap(params => {
-                if (!params.condition || params.condition.trim().length < 2) {
+                const conditionValid = params.condition && params.condition.trim().length >= 2;
+                const phaseValid = params.phase && params.phase.length > 0;
+
+                if (!conditionValid || !phaseValid) {
                     this.foundTrials.set([]);
                     return of(null);
                 }
@@ -430,7 +433,7 @@ export class Dashboard implements OnInit {
                 }
 
                 const request: ClinicalTrialSearchRequest = {
-                    condition: params.condition,
+                    condition: params.condition as string,
                     phase: this.mapPhase(params.phase!),
                     interventionModel: this.mapIntervention(params.interventionModel!),
                     startDateFrom: params.startYear || undefined,
