@@ -47,8 +47,18 @@
                             <label for="condition">Disease/Condition<span style="color:var(--app-red); font-weight:bold;"> *</span></label>
                             <app-tooltip text="Search for clinical trials by disease name, symptom, or MeSH condition term." />
                         </div>
+                        @if (conditions().length > 0) {
+                            <div class="condition-chips">
+                                @for (cond of conditions(); track cond) {
+                                    <span class="condition-chip">
+                                        {{ cond }}
+                                        <button type="button" class="remove-chip" (click)="onRemoveCondition(cond)">&times;</button>
+                                    </span>
+                                }
+                            </div>
+                        }
                         <app-auto-complete-input inputId="condition" placeholderText="e.g., Type 2 Diabetes"
-                            [suggestions]="conditionMatches()" [value]="conditionValue()" [clearOnSelect]="false"
+                            [suggestions]="conditionMatches()" [value]="conditionValue()" [clearOnSelect]="true"
                             (searchQueryChange)="onConditionSearch($event)"
                             (itemSelected)="onConditionSelected($event)" />
                     </div>
@@ -67,8 +77,8 @@
                             <label for="allocationType">Patient Allocation Type</label>
                             <app-tooltip text="Method used to assign participants to study groups (e.g., Randomized)." />
                         </div>
-                        <app-custom-select id="allocationType" formControlName="allocationType" 
-                            [options]="allocationOptions" [descriptions]="allocationDescriptions" />
+                        <app-multi-select id="allocationType" formControlName="allocationType"
+                            [options]="allocationOptions" placeholder="Any" />
                     </div>
 
                     <div class="form-group">
@@ -76,9 +86,8 @@
                             <label for="intervention">Intervention Model</label>
                             <app-tooltip text="The strategy for assigning interventions (e.g., Parallel, Crossover)." />
                         </div>
-                        <app-custom-select id="intervention" formControlName="interventionModel" 
-                            [options]="interventionOptions" [descriptions]="interventionDescriptions"
-                            placeholder="Any" />
+                        <app-multi-select id="intervention" formControlName="interventionModel"
+                            [options]="interventionOptions" placeholder="Any" />
                     </div>
 
                     <div class="form-group">
@@ -86,8 +95,8 @@
                             <label for="blinding">Blinding/Masking Type</label>
                             <app-tooltip text="Who is unaware of group assignments (Single, Double, etc.)." />
                         </div>
-                        <app-custom-select id="blinding" formControlName="blindingType" 
-                            [options]="blindingOptions" [descriptions]="blindingDescriptions" />
+                        <app-multi-select id="blinding" formControlName="blindingType"
+                            [options]="blindingOptions" placeholder="Any" />
                     </div>
 
                     <div class="form-group">
