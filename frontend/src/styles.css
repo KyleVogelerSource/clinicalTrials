@@ -163,4 +163,37 @@ input[type="checkbox"]:focus {
     box-shadow: 0 0 0 2px rgba(3, 102, 214, 0.2);
 }
 
+/* Status Badges */
+.status-badge {
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.status-badge.status-completed {
+    background: #dafbe1;
+    color: #1a7f37;
+}
+
+.status-badge.status-terminated {
+    background: #ffebe9;
+    color: #cf222e;
+}
+
+.status-badge.status-unknown {
+    background: #f6f8fa;
+    color: #6a737d;
+    border: 1px solid #d1d5da;
+}
+
+.status-badge.status-active {
+    background: #fff8c5;
+    color: #9a6700;
+}
+
+
 
