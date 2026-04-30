@@ -81,7 +81,7 @@ test.describe("Saved searches", () => {
     await page.getByRole("button", { name: "Open" }).click();
 
     await expect(page).toHaveURL(/\/$/);
-    await expect(page.locator("#condition")).toHaveValue("diabetes type 2");
+    await expect(page.locator(".condition-chip").first()).toContainText("diabetes type 2");
     await expect(page.locator("#phase .selected-text")).toHaveText("Phase 3");
     await expect(page.locator("#allocationType .selected-text")).toHaveText("Randomized");
     await expect(page.locator("#intervention .selected-text")).toHaveText("Parallel Assignment");
