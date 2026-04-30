@@ -58,8 +58,8 @@
                             <label for="phase">Current Phase</label>
                             <app-tooltip text="Trial development stage, from early safety (Phase 1) to post-market (Phase 4)." />
                         </div>
-                        <app-custom-select id="phase" formControlName="phase" 
-                            [options]="phaseOptions" [descriptions]="phaseDescriptions" />
+                        <app-multi-select id="phase" formControlName="phase" 
+                            [options]="phaseOptions" placeholder="Phase" />
                     </div>
 
                     <div class="form-group">
