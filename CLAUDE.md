@@ -123,7 +123,7 @@ Each chart primitive has built-in export buttons (top-right corner):
 `hammerjs` is allowlisted in `angular.json` under `allowedCommonJsDependencies`. `isZoomed` signal drives the Reset button visibility.
 
 ### Scatter chart trend line
-The Analysis page Metric Correlation Plot exposes a **"Trend line"** checkbox (next to the axis selectors) that toggles `showTrendLine` signal → passed as `[showTrendLine]` to `ScatterChart`. When enabled, `ScatterChart` computes a least-squares regression line over the first dataset and injects it as a dashed red `line` dataset labelled `"Trend (r = X.XX)"`. All other scatter chart usages leave `showTrendLine` at its default `false`.
+The Analysis page Metric Correlation Analysis exposes a **"Trend line"** checkbox (next to the axis selectors) that toggles `showTrendLine` signal → passed as `[showTrendLine]` to `ScatterChart`. When enabled, `ScatterChart` computes a least-squares regression line over the first dataset and injects it as a dashed red `line` dataset labelled `"Trend (r = X.XX)"`. All other scatter chart usages leave `showTrendLine` at its default `false`.
 
 ### Debug mode
 Add `?debug=true` to the URL to show a debug bar polling `/api/debug/status` every 10s.

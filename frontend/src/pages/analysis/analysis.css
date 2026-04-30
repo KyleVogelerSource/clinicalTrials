@@ -486,6 +486,211 @@
     color: white;
 }
 
+/* Correlation Layout Refactor */
+.correlation-info-banner {
+    background-color: #f0f9ff;
+    border: 1px solid #bae6fd;
+    color: #0369a1;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.4;
+}
+
+.correlation-layout {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+.correlation-table-pane h5 {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 0.05em;
+}
+
+.correlation-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.correlation-table th {
+    text-align: left;
+    padding: 0.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.correlation-table td {
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    vertical-align: middle;
+}
+
+.correlation-table tr {
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.correlation-table tr:hover {
+    background-color: #f8fafc;
+}
+
+.correlation-table tr.active {
+    background-color: #e0f2f1;
+}
+
+.correlation-table tr.active td {
+    color: #065f46;
+    font-weight: 500;
+}
+
+.metric-with-tooltip {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.r-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    color: #088989;
+    white-space: nowrap;
+}
+
+.btn-show-more {
+    margin: 1rem auto;
+    display: block;
+    background: white;
+    border: 1px solid #e2e8f0;
+    padding: 0.4rem 1rem;
+    font-size: 0.75rem;
+    color: #475569;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-show-more:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.correlation-chart-pane {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.chart-controls-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.axis-selectors {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.axis-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+.selector-group {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.toggle-group {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+/* Custom Switch Toggle */
+.switch-control {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+}
+
+.switch-control .label-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+.switch-control .status-text {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #1e293b;
+    min-width: 25px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: .3s;
+    border-radius: 20px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #088989;
+}
+
+input:checked + .slider:before {
+    transform: translateX(16px);
+}
+
 /* Comparison Table */
 .comparison-controls {
     display: flex;
