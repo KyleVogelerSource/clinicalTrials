@@ -130,43 +130,106 @@
                 </div>
             </div>
 
-            <!-- Data Plot -->
-            <div class="card card-half card-tall">
+            <!-- Metric Correlation Analysis -->
+            <div class="card card-full">
                 <div class="card-header">
                     <div class="header-with-info">
-                        <h4>Metric Correlation Plot</h4>
-                        <span class="info-icon" title="Explore correlations between different trial metrics. High correlation (r close to 1 or -1) indicates a strong design pattern.">ⓘ</span>
-                    </div>
-                    <div class="plot-selectors">
-                        <app-custom-select [ngModel]="dataPlotX()" (ngModelChange)="dataPlotX.set($event)"
-                            [options]="metricNamesList" [descriptions]="descriptions" width="180px" />
-                        <span class="vs">vs</span>
-                        <app-custom-select [ngModel]="dataPlotY()" (ngModelChange)="dataPlotY.set($event)"
-                            [options]="metricNamesList" [descriptions]="descriptions" width="180px" />
-                        <label class="trend-toggle">
-                            <input type="checkbox" [checked]="showTrendLine()" (change)="showTrendLine.set($any($event.target).checked)">
-                            Trend line
-                        </label>
+                        <h4>Metric Correlation Analysis</h4>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="plot-suggestions">
-                        <span class="suggestion-label">Suggested:</span>
-                        @for (sugg of suggestedCorrelations(); track $index) {
-                            <button class="btn-link suggestion-btn" (click)="dataPlotX.set(sugg.x); dataPlotY.set(sugg.y)">
-                                {{ sugg.x }} vs {{ sugg.y }}
+                    <div class="correlation-info-banner">
+                        Explore relationships between key clinical trial metrics. Select a pair to visualize the data distribution and trend.
+                    </div>
+
+                    <div class="correlation-layout">
+                        <!-- Left Pane: Top Correlated Pairs -->
+                        <div class="correlation-table-pane">
+                            <h5>Top Correlated Pairs</h5>
+                            <div class="table-wrapper">
+                                <table class="correlation-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Metric 1</th>
+                                            <th>Metric 2</th>
+                                            <th>Correlation (r)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (c of visibleCorrelations(); track $index) {
+                                            <tr (click)="dataPlotX.set(c.x); dataPlotY.set(c.y)" 
+                                                [class.active]="dataPlotX() === c.x && dataPlotY() === c.y">
+                                                <td>
+                                                    <div class="metric-with-tooltip">
+                                                        {{ c.x }}
+                                                        <app-tooltip [text]="descriptions[c.x] || 'No description available'" />
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="metric-with-tooltip">
+                                                        {{ c.y }}
+                                                        <app-tooltip [text]="descriptions[c.y] || 'No description available'" />
+                                                    </div>
+                                                </td>
+                                                <td class="r-value">r = {{ c.r.toFixed(2) }}</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button class="btn-show-more" (click)="showAllCorrelations.set(!showAllCorrelations())">
+                                {{ showAllCorrelations() ? 'Show Less' : 'Show More' }} 
+                                <span class="arrow">{{ showAllCorrelations() ? '▲' : '▼' }}</span>
                             </button>
-                        }
-                    </div>
-                    <div class="metric-descriptions">
-                        <div class="desc-item"><strong>{{ dataPlotX() }}:</strong> {{ descriptions[dataPlotX()] }}</div>
-                        <div class="desc-item"><strong>{{ dataPlotY() }}:</strong> {{ descriptions[dataPlotY()] }}</div>
-                    </div>
-                    @if (dataPlotData(); as plotData) {
-                        <div class="chart-container" style="height: calc(100% - 80px);">
-                            <app-scatter-chart [chartData]="plotData" [xAxisLabel]="dataPlotX()" [yAxisLabel]="dataPlotY()" [showTrendLine]="showTrendLine()" />
                         </div>
-                    }
+
+                        <!-- Right Pane: Chart & Controls -->
+                        <div class="correlation-chart-pane">
+                            <div class="chart-controls-row">
+                                <div class="axis-selectors">
+                                    <div class="selector-group">
+                                        <label class="axis-label">X:</label>
+                                        <app-custom-select [ngModel]="dataPlotX()" (ngModelChange)="dataPlotX.set($event)"
+                                            [options]="designInputs" [descriptions]="descriptions" width="160px" />
+                                        <app-tooltip [text]="descriptions[dataPlotX()] || ''" />
+                                    </div>
+                                    <span class="vs">vs</span>
+                                    <div class="selector-group">
+                                        <label class="axis-label">Y:</label>
+                                        <app-custom-select [ngModel]="dataPlotY()" (ngModelChange)="dataPlotY.set($event)"
+                                            [options]="performanceOutputs" [descriptions]="descriptions" width="160px" />
+                                        <app-tooltip [text]="descriptions[dataPlotY()] || ''" />
+                                    </div>
+                                </div>
+
+                                <div class="toggle-group">
+                                    <label class="switch-control">
+                                        <span class="label-text">Trend Line</span>
+                                        <div class="switch">
+                                            <input type="checkbox" [checked]="showTrendLine()" (change)="showTrendLine.set($any($event.target).checked)">
+                                            <span class="slider"></span>
+                                        </div>
+                                        <span class="status-text">{{ showTrendLine() ? 'On' : 'Off' }}</span>
+                                    </label>
+
+                                    <label class="switch-control">
+                                        <span class="label-text">Exclude Outliers</span>
+                                        <div class="switch">
+                                            <input type="checkbox" [checked]="excludeOutliers()" (change)="excludeOutliers.set($any($event.target).checked)">
+                                            <span class="slider"></span>
+                                        </div>
+                                        <span class="status-text">{{ excludeOutliers() ? 'On' : 'Off' }}</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            @if (dataPlotData(); as plotData) {
+                                <div class="chart-container" style="height: 450px;">
+                                    <app-scatter-chart [chartData]="plotData" [xAxisLabel]="dataPlotX()" [yAxisLabel]="dataPlotY()" [showTrendLine]="showTrendLine()" />
+                                </div>
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
 
