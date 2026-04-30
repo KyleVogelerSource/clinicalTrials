@@ -1,0 +1,122 @@
+.multi-select-container {
+    position: relative;
+    width: 100%;
+    font-family: inherit;
+}
+
+.select-trigger {
+    width: 100%;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid #d1d5da;
+    border-radius: 2px;
+    font-size: 0.8rem;
+    box-sizing: border-box;
+    background-color: #fafbfc;
+    color: #24292e;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    user-select: none;
+}
+
+.select-trigger:hover {
+    border-color: #0366d6;
+}
+
+.select-trigger.is-open {
+    border-color: #0366d6;
+    box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.1);
+}
+
+.chevron {
+    font-size: 0.6rem;
+    color: #586069;
+    margin-left: 0.5rem;
+}
+
+.dropdown-panel {
+    position: fixed;
+    background: white;
+    border: 1px solid #ddd;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    z-index: 1100;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-radius: 2px;
+    max-height: 250px;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.dropdown-panel.open-down {
+    border-top: none;
+}
+
+.dropdown-panel.open-up {
+    transform: translateY(-100%);
+    border-bottom: none;
+}
+
+.dropdown-panel.align-right {
+    transform: translateX(-100%);
+}
+
+.dropdown-panel.align-right.open-up {
+    transform: translate(-100%, -100%);
+}
+
+.options-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.option-item {
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    color: #24292e;
+}
+
+.option-item:hover {
+    background-color: var(--app-blue, #193F6A);
+    color: white !important;
+}
+
+.option-item:hover .option-label {
+    color: white;
+}
+
+/* Ensure checkbox visibility on hover */
+.option-item:hover input[type="checkbox"] {
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.option-item:hover input[type="checkbox"]:checked {
+    background-color: white;
+    border-color: white;
+}
+
+.option-item.selected {
+    background-color: #f1f8ff;
+    color: #0366d6;
+    font-weight: 600;
+}
+
+.option-item.selected:hover {
+    background-color: var(--app-blue, #193F6A);
+    color: white !important;
+}
+
+.option-label {
+    flex: 1;
+    user-select: none;
+}

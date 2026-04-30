@@ -117,3 +117,38 @@ select:focus {
     background-color: #fff;
     box-shadow: 0 0 0 3px rgba(8, 137, 137, 0.1);
 }
+
+/* Custom Checkboxes */
+input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border: 1px solid #d1d5da;
+    border-radius: 2px;
+    background-color: #fafbfc;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+input[type="checkbox"]:checked {
+    border-color: #0366d6;
+    background-color: white;
+}
+
+input[type="checkbox"]:checked::after {
+    content: '✔';
+    font-size: 10px;
+    color: #0366d6;
+    font-weight: bold;
+}
+
+input[type="checkbox"]:hover {
+    border-color: #0366d6;
+}
+
