@@ -111,25 +111,6 @@
                 </div>
             </div>
 
-            <!-- Expected Timeline -->
-            <div class="card card-half card-tall">
-                <div class="card-header">
-                    <h4>Expected Timeline</h4>
-                    <span class="status-badge status-active">
-                        Target: {{ inputParams()?.userPatients || 0 }} Patients
-                    </span>
-                </div>
-                <div class="card-body">
-                    @if (timelineChartData(); as chartData) {
-                        <div class="chart-container" style="height: 100%;">
-                            <app-bar-chart [chartData]="chartData" xAxisLabel="Patient Ranges" yAxisLabel="Timeline (Days)" [grouped]="true" />
-                        </div>
-                    } @else {
-                        <p class="no-data">Insufficient data to generate timeline projections.</p>
-                    }
-                </div>
-            </div>
-
             <!-- Metric Correlation Analysis -->
             <div class="card card-full">
                 <div class="card-header">
@@ -233,8 +214,27 @@
                 </div>
             </div>
 
+            <!-- Expected Timeline -->
+            <div class="card card-half card-tall">
+                <div class="card-header">
+                    <h4>Expected Timeline</h4>
+                    <span class="status-badge status-active">
+                        Target: {{ inputParams()?.userPatients || 0 }} Patients
+                    </span>
+                </div>
+                <div class="card-body">
+                    @if (timelineChartData(); as chartData) {
+                        <div class="chart-container" style="height: 100%;">
+                            <app-bar-chart [chartData]="chartData" xAxisLabel="Patient Ranges" yAxisLabel="Timeline (Days)" [grouped]="true" />
+                        </div>
+                    } @else {
+                        <p class="no-data">Insufficient data to generate timeline projections.</p>
+                    }
+                </div>
+            </div>
+
             <!-- Metric Intersection Matrix -->
-            <div class="card card-full">
+            <div class="card card-half">
                 <div class="card-header">
                     <div class="header-with-info">
                         <h4>Metric Intersection Matrix (Co-occurrence %)</h4>
