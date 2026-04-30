@@ -395,7 +395,7 @@ test.describe("Dashboard search workflow", () => {
 
     await searchForDiabetes(page);
 
-    await page.locator(".filter-row select").selectOption("RECRUITING");
+    await selectCustomOption(page, ".col-status app-multi-select", "RECRUITING");
 
     await expect(page.getByText("Showing 1 of 3 Matches")).toBeVisible();
     await expect(page.getByText("Lifestyle Coaching for Diabetes Prevention")).toBeVisible();
