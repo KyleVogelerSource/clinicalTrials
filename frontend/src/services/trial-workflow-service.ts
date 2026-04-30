@@ -196,19 +196,96 @@ export class TrialWorkflowService {
         this.results.update(current => {
             current = new ResultsModel();
             
-            // Site Locations & Top Sites
+            // --- Improved Site Naming & Aggregation Logic ---
+            const GENERIC_NAMES = new Set(['research site', 'clinical site', 'clinical research site', 'investigative site', 'study site', 'phase 1 unit', 'medical center', 'hospital', 'university', 'unknown', 'na', 'n/a']);
+            
+            const isGeneric = (name: string): boolean => {
+                const lower = name.toLowerCase().trim();
+                if (GENERIC_NAMES.has(lower)) return true;
+                if ((lower.endsWith('investigative site') || lower.endsWith('research site')) && lower.split(' ').length <= 2) return true;
+                return false;
+            };
+
+            const getBestName = (names: Set<string>): string => {
+                const list = Array.from(names);
+                if (list.length === 0) return 'Clinical Site';
+                return list.sort((a, b) => {
+                    const aG = isGeneric(a);
+                    const bG = isGeneric(b);
+                    if (aG && !bG) return 1;
+                    if (!aG && bG) return -1;
+                    return b.length - a.length;
+                })[0];
+            };
+
+            // Map: key (geo-coords or lowercase name) -> { names: Set, count: number, coords: [lat, lon], locationStr: string }
+            const siteGroups = new Map<string, { names: Set<string>, count: number, coords: [number, number] | null, locationStr: string }>();
+
+            plotData.forEach(trial => {
+                trial.geoLocations.forEach(loc => {
+                    if (!loc.facility) return;
+                    
+                    const lat = loc.geoPoint?.lat;
+                    const lon = loc.geoPoint?.lon;
+                    // Use a slightly rounded geo-key to group nearby entries that might be slightly offset
+                    const geoKey = (lat && lon) ? `${lat.toFixed(4)},${lon.toFixed(4)}` : null;
+                    const key = geoKey || loc.facility.toLowerCase().trim();
+
+                    const group = siteGroups.get(key) || { 
+                        names: new Set<string>(), 
+                        count: 0, 
+                        coords: (lat && lon) ? [lat, lon] : null,
+                        locationStr: `${loc.city || ''}${loc.city && loc.country ? ', ' : ''}${loc.country || ''}`
+                    };
+                    
+                    group.names.add(loc.facility);
+                    group.count++;
+                    siteGroups.set(key, group);
+                });
+            });
+
+            // Pre-calculate best names for each key to use in heatmap and topSites
+            const bestNames = new Map<string, string>();
+            siteGroups.forEach((group, key) => {
+                bestNames.set(key, getBestName(group.names));
+            });
+
+            // 1. Heatmap Points
             current.siteLocations = plotData.flatMap(trial => 
                 trial.geoLocations.map(loc => {
-                    if (!loc.geoPoint || !loc.geoPoint.lat || !loc.geoPoint.lon) return null;
+                    if (!loc.geoPoint || !loc.geoPoint.lat || !loc.geoPoint.lon || !loc.facility) return null;
+                    const key = `${loc.geoPoint.lat.toFixed(4)},${loc.geoPoint.lon.toFixed(4)}`;
                     const point: HeatPoint = { 
                         longitude: loc.geoPoint.lon, 
                         latitude: loc.geoPoint.lat,
-                        label: loc.facility || 'Clinical Site',
+                        label: bestNames.get(key) || loc.facility,
                         subLabel: `${loc.city || ''}${loc.city && loc.country ? ', ' : ''}${loc.country || ''}`
                     };
                     return point;
                 }).filter((loc): loc is HeatPoint => !!loc)
             );
+
+            // 2. Top Sites (Table)
+            const siteEntries = Array.from(siteGroups.entries()).map(([key, group]) => ({
+                name: bestNames.get(key)!,
+                count: group.count,
+                coords: group.coords
+            }));
+
+            const top12 = siteEntries
+                .filter(s => s.count > 1)
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 12);
+
+            if (top12.length < 12) {
+                const remainder = siteEntries
+                    .filter(s => s.count <= 1)
+                    .sort((a, b) => b.count - a.count)
+                    .slice(0, 12 - top12.length);
+                current.topSites = [...top12, ...remainder];
+            } else {
+                current.topSites = top12;
+            }
 
             // Metric Rows
             current.metricRows = plotData.map(trial => {

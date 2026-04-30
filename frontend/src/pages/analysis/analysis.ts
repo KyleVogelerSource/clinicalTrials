@@ -298,36 +298,7 @@ export class Analysis implements OnInit {
         "Wide Age Span (>40)"
     ];
 
-    topSites = computed(() => {
-        const trials = this.selectedTrialIds().map(id => (this.workflowService as any).trialCache.get(id));
-        const siteData = new Map<string, { count: number, coords: [number, number] | null }>();
-        
-        trials.forEach((trial: any) => {
-            trial?.protocolSection?.contactsLocationsModule?.locations?.forEach((loc: any) => {
-                if (loc.facility) {
-                    const existing = siteData.get(loc.facility);
-                    const count = (existing?.count || 0) + 1;
-                    const coords = existing?.coords || (loc.geoPoint?.lat ? [loc.geoPoint.lat, loc.geoPoint.lon] : null);
-                    siteData.set(loc.facility, { count, coords });
-                }
-            });
-        });
-
-        const top12 = Array.from(siteData.entries())
-            .filter(([_, data]) => data.count > 1)
-            .sort((a, b) => b[1].count - a[1].count)
-            .slice(0, 12)
-            .map(([name, data]) => ({ name, count: data.count, coords: data.coords }));
-
-        if (top12.length < 12) {
-            return [...top12, ...Array.from(siteData.entries())
-                .filter(([_, data]) => data.count <= 1)
-                .slice(0, 12 - top12.length)
-                .map(([name, data]) => ({ name, count: data.count, coords: data.coords }))];
-        }
-
-        return top12;
-    });
+    topSites = computed(() => this.results().topSites);
 
     benchmarks = computed(() => {
         const trials = this.results().metricRows;
