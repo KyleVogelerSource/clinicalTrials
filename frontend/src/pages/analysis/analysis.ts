@@ -28,6 +28,8 @@ interface ComparisonMetric {
 interface ComparisonRow {
     trial: StudyTrial;
     metrics: Record<string, string | number>;
+    isRanked?: boolean;
+    rank?: number;
 }
 
 const ALL_COMPARISON_METRICS: ComparisonMetric[] = [
@@ -418,11 +420,16 @@ export class Analysis implements OnInit {
     comparisonSearch = signal('');
     comparisonSortKey = signal('');
     comparisonSortAsc = signal(true);
+    showOnlySimilarTrials = signal(false);
 
     comparisonRows = computed<ComparisonRow[]>(() => {
         const search = this.comparisonSearch().toLowerCase();
         const sortKey = this.comparisonSortKey();
         const sortAsc = this.comparisonSortAsc();
+        const onlySimilar = this.showOnlySimilarTrials();
+        
+        const rankedTrials = this.data()?.rankedTrials || [];
+        const rankMap = new Map<string, number>(rankedTrials.map(rt => [rt.trial.nctId, rt.rank]));
 
         const selectedIds = new Set(this.workflowService.selectedTrialIds());
         const allTrials = this.workflowService.foundTrials();
@@ -433,7 +440,13 @@ export class Analysis implements OnInit {
             metrics: Object.fromEntries(
                 ALL_COMPARISON_METRICS.map(m => [m.key, m.fn(trial)])
             ),
+            isRanked: rankMap.has(trial.nctId),
+            rank: rankMap.get(trial.nctId)
         }));
+
+        if (onlySimilar) {
+            rows = rows.filter(r => r.isRanked);
+        }
 
         if (search) {
             rows = rows.filter(r => r.trial.briefTitle.toLowerCase().includes(search));
@@ -449,6 +462,14 @@ export class Analysis implements OnInit {
                 return sortAsc
                     ? String(av).localeCompare(String(bv))
                     : String(bv).localeCompare(String(av));
+            });
+        } else {
+            // Default sort: Ranked trials first, then by rank, then unranked
+            rows = [...rows].sort((a, b) => {
+                if (a.isRanked && !b.isRanked) return -1;
+                if (!a.isRanked && b.isRanked) return 1;
+                if (a.isRanked && b.isRanked) return (a.rank || 0) - (b.rank || 0);
+                return a.trial.briefTitle.localeCompare(b.trial.briefTitle);
             });
         }
 

@@ -276,6 +276,17 @@
                 <div class="card-header">
                     <h4>Benchmarked Trials Comparison</h4>
                     <div class="comparison-controls">
+                        <label class="switch-control" [class.disabled]="!(data()?.rankedTrials?.length)">
+                            <span class="label-text">Show Only Similar Trials</span>
+                            <div class="switch">
+                                <input type="checkbox" 
+                                       [checked]="showOnlySimilarTrials()" 
+                                       (change)="showOnlySimilarTrials.set($any($event.target).checked)"
+                                       [disabled]="!(data()?.rankedTrials?.length)">
+                                <span class="slider"></span>
+                            </div>
+                            <span class="status-text">{{ showOnlySimilarTrials() ? 'On' : 'Off' }}</span>
+                        </label>
                         <div class="column-selector-wrapper">
                             <app-multi-select 
                                 [ngModel]="visibleColumnKeys()" 
@@ -320,7 +331,7 @@
                             </thead>
                             <tbody>
                                 @for (row of comparisonRows(); track row.trial.nctId) {
-                                    <tr>
+                                    <tr [class.ranked-trial]="row.isRanked">
                                         <td class="trial-name-cell">
                                             <a
                                                 [href]="'https://clinicaltrials.gov/study/' + row.trial.nctId"
