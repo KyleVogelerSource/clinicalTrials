@@ -74,21 +74,24 @@ module "apprunner_backend" {
 module "static_frontend" {
   source = "../../modules/static_frontend"
 
-  project_name = var.project_name
-  env_name     = var.env_name
-  tags         = local.tags
+  project_name                     = var.project_name
+  env_name                         = var.env_name
+  cloudfront_aliases               = var.cloudfront_aliases
+  cloudfront_acm_certificate_arn   = var.cloudfront_acm_certificate_arn
+  tags                             = local.tags
 }
 
 module "iam_github_oidc" {
   source = "../../modules/iam_github_oidc"
 
-  project_name          = var.project_name
-  env_name              = var.env_name
-  github_owner          = var.github_owner
-  github_repo           = var.github_repo
-  ecr_repository_arn    = module.ecr.repository_arn
-  apprunner_service_arn = module.apprunner_backend.service_arn
-  s3_bucket_arn         = module.static_frontend.bucket_arn
-  cloudfront_dist_arn   = module.static_frontend.distribution_arn
-  tags                  = local.tags
+  project_name                  = var.project_name
+  env_name                      = var.env_name
+  github_owner                  = var.github_owner
+  github_repo                   = var.github_repo
+  ecr_repository_arn            = module.ecr.repository_arn
+  apprunner_service_arn         = module.apprunner_backend.service_arn
+  apprunner_ecr_access_role_arn = module.apprunner_backend.ecr_access_role_arn
+  s3_bucket_arn                 = module.static_frontend.bucket_arn
+  cloudfront_dist_arn           = module.static_frontend.distribution_arn
+  tags                          = local.tags
 }

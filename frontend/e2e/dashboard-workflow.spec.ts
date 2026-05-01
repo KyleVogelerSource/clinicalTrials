@@ -267,9 +267,38 @@ async function searchForDiabetes(page: Page) {
 }
 
 async function selectCustomOption(page: Page, selector: string, optionText: string) {
-  await page.locator(`${selector} .select-trigger`).click();
-  // Use a more robust exact match that handles potential whitespace
-  await page.locator(`${selector} .option-item`).filter({ hasText: new RegExp(`^\\s*${optionText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`) }).click();
+  const container = page.locator(selector).first();
+  const trigger = container.locator(".select-trigger");
+  
+  // Ensure the trigger is visible and stable
+  await trigger.scrollIntoViewIfNeeded();
+  await expect(trigger).toBeVisible();
+  
+  // Click to open
+  await trigger.click();
+  
+  const dropdown = container.locator(".dropdown-panel");
+  // Wait for the dropdown to be visible with a decent timeout
+  await expect(dropdown).toBeVisible({ timeout: 10000 });
+  
+  const option = dropdown.locator(".option-item").filter({ 
+    hasText: new RegExp(`^\\s*${optionText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`) 
+  }).first();
+  
+  await option.scrollIntoViewIfNeeded();
+  await option.click();
+
+  // If it's a multi-select, it might stay open. We close it to avoid covering other elements.
+  // We check visibility with a small timeout to avoid long waits for elements that already closed.
+  try {
+    const isOpen = await dropdown.isVisible();
+    if (isOpen) {
+      await trigger.click();
+      await expect(dropdown).toBeHidden();
+    }
+  } catch (e) {
+    // If it's already gone or hidden, that's fine
+  }
 }
 
 function visibleTrialIds(page: Page) {

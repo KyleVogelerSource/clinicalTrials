@@ -1,0 +1,4136 @@
+{
+    "rankedTrials": [
+        {
+            "trial": {
+                "nctId": "NCT06012929",
+                "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+                "officialTitle": null,
+                "acronym": null,
+                "phase": "PHASE2",
+                "studyType": "INTERVENTIONAL",
+                "overallStatus": "WITHDRAWN",
+                "whyStopped": null,
+                "hasResults": false,
+                "enrollmentCount": 0,
+                "enrollmentType": "ACTUAL",
+                "startDate": "2026-12",
+                "completionDate": "2027-04",
+                "allocation": null,
+                "interventionModel": null,
+                "primaryPurpose": null,
+                "masking": null,
+                "whoMasked": [],
+                "armCount": 0,
+                "conditions": [
+                    "Meningioma",
+                    "Refractory Meningioma",
+                    "Relapsed Meningioma"
+                ],
+                "interventions": [
+                    "ONC201"
+                ],
+                "interventionTypes": [],
+                "eligibilityCriteria": "",
+                "sex": "ALL",
+                "minimumAge": "19 Years",
+                "maximumAge": null,
+                "healthyVolunteers": null,
+                "stdAges": [],
+                "primaryOutcomes": [],
+                "secondaryOutcomes": [],
+                "sponsor": "University of Nebraska",
+                "sponsorClass": null,
+                "collaboratorCount": 0,
+                "locationCount": 0,
+                "countries": [],
+                "hasDmc": null,
+                "meshTerms": []
+            },
+            "similarityScore": 0.7751,
+            "rank": 1
+        },
+        {
+            "trial": {
+                "nctId": "NCT05023018",
+                "briefTitle": "NEO100 and High-Grade Meningioma",
+                "officialTitle": null,
+                "acronym": null,
+                "phase": "PHASE2",
+                "studyType": "INTERVENTIONAL",
+                "overallStatus": "RECRUITING",
+                "whyStopped": null,
+                "hasResults": false,
+                "enrollmentCount": 30,
+                "enrollmentType": "ESTIMATED",
+                "startDate": "2022-07-01",
+                "completionDate": "2027-06-30",
+                "allocation": null,
+                "interventionModel": null,
+                "primaryPurpose": null,
+                "masking": null,
+                "whoMasked": [],
+                "armCount": 0,
+                "conditions": [
+                    "Residual, Progressive or Recurrent Grade II or III Meningioma"
+                ],
+                "interventions": [
+                    "NEO100"
+                ],
+                "interventionTypes": [],
+                "eligibilityCriteria": "",
+                "sex": "ALL",
+                "minimumAge": "12 Years",
+                "maximumAge": null,
+                "healthyVolunteers": null,
+                "stdAges": [],
+                "primaryOutcomes": [],
+                "secondaryOutcomes": [],
+                "sponsor": "Neonc Technologies, Inc.",
+                "sponsorClass": null,
+                "collaboratorCount": 0,
+                "locationCount": 0,
+                "countries": [],
+                "hasDmc": null,
+                "meshTerms": []
+            },
+            "similarityScore": 0.7627,
+            "rank": 2
+        },
+        {
+            "trial": {
+                "nctId": "NCT03015701",
+                "briefTitle": "S9005 Mifepristone in Meningioma",
+                "officialTitle": null,
+                "acronym": null,
+                "phase": "PHASE3",
+                "studyType": "INTERVENTIONAL",
+                "overallStatus": "COMPLETED",
+                "whyStopped": null,
+                "hasResults": false,
+                "enrollmentCount": 193,
+                "enrollmentType": "ACTUAL",
+                "startDate": "1992-08",
+                "completionDate": "2012-11",
+                "allocation": null,
+                "interventionModel": null,
+                "primaryPurpose": null,
+                "masking": null,
+                "whoMasked": [],
+                "armCount": 0,
+                "conditions": [
+                    "Meningioma"
+                ],
+                "interventions": [
+                    "Mifepristone",
+                    "Placebo"
+                ],
+                "interventionTypes": [],
+                "eligibilityCriteria": "",
+                "sex": "ALL",
+                "minimumAge": "18 Years",
+                "maximumAge": "120 Years",
+                "healthyVolunteers": null,
+                "stdAges": [],
+                "primaryOutcomes": [],
+                "secondaryOutcomes": [],
+                "sponsor": "SWOG Cancer Research Network",
+                "sponsorClass": null,
+                "collaboratorCount": 0,
+                "locationCount": 0,
+                "countries": [],
+                "hasDmc": null,
+                "meshTerms": []
+            },
+            "similarityScore": 0.7604,
+            "rank": 3
+        },
+        {
+            "trial": {
+                "nctId": "NCT00003483",
+                "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+                "officialTitle": null,
+                "acronym": null,
+                "phase": "PHASE2",
+                "studyType": "INTERVENTIONAL",
+                "overallStatus": "TERMINATED",
+                "whyStopped": null,
+                "hasResults": false,
+                "enrollmentCount": 3,
+                "enrollmentType": "ACTUAL",
+                "startDate": "1998-06",
+                "completionDate": "2004-03",
+                "allocation": null,
+                "interventionModel": null,
+                "primaryPurpose": null,
+                "masking": null,
+                "whoMasked": [],
+                "armCount": 0,
+                "conditions": [
+                    "Meningioma"
+                ],
+                "interventions": [
+                    "Antineoplaston therapy (Atengenal + Astugenal)"
+                ],
+                "interventionTypes": [],
+                "eligibilityCriteria": "",
+                "sex": "ALL",
+                "minimumAge": "18 Years",
+                "maximumAge": "99 Years",
+                "healthyVolunteers": null,
+                "stdAges": [],
+                "primaryOutcomes": [],
+                "secondaryOutcomes": [],
+                "sponsor": "Burzynski Research Institute",
+                "sponsorClass": null,
+                "collaboratorCount": 0,
+                "locationCount": 0,
+                "countries": [],
+                "hasDmc": null,
+                "meshTerms": []
+            },
+            "similarityScore": 0.76,
+            "rank": 4
+        },
+        {
+            "trial": {
+                "nctId": "NCT04298541",
+                "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+                "officialTitle": null,
+                "acronym": null,
+                "phase": "PHASE2",
+                "studyType": "INTERVENTIONAL",
+                "overallStatus": "NOT_YET_RECRUITING",
+                "whyStopped": null,
+                "hasResults": false,
+                "enrollmentCount": 6,
+                "enrollmentType": "ESTIMATED",
+                "startDate": "2026-06",
+                "completionDate": "2027-06",
+                "allocation": null,
+                "interventionModel": null,
+                "primaryPurpose": null,
+                "masking": null,
+                "whoMasked": [],
+                "armCount": 0,
+                "conditions": [
+                    "Meningioma"
+                ],
+                "interventions": [
+                    "Ga-68- DOTATATE",
+                    "Ga-68-DOTATOC"
+                ],
+                "interventionTypes": [],
+                "eligibilityCriteria": "",
+                "sex": "ALL",
+                "minimumAge": "18 Years",
+                "maximumAge": "89 Years",
+                "healthyVolunteers": null,
+                "stdAges": [],
+                "primaryOutcomes": [],
+                "secondaryOutcomes": [],
+                "sponsor": "Weill Medical College of Cornell University",
+                "sponsorClass": null,
+                "collaboratorCount": 0,
+                "locationCount": 0,
+                "countries": [],
+                "hasDmc": null,
+                "meshTerms": []
+            },
+            "similarityScore": 0.756,
+            "rank": 5
+        },
+        {
+            "trial": {
+                "nctId": "NCT01117844",
+                "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+                "officialTitle": null,
+                "acronym": null,
+                "phase": "PHASE2",
+                "studyType": "INTERVENTIONAL",
+                "overallStatus": "COMPLETED",
+                "whyStopped": null,
+                "hasResults": false,
+                "enrollmentCount": 53,
+                "enrollmentType": "ACTUAL",
+                "startDate": "2010-02-04",
+                "completionDate": "2023-03-31",
+                "allocation": null,
+                "interventionModel": null,
+                "primaryPurpose": null,
+                "masking": null,
+                "whoMasked": [],
+                "armCount": 0,
+                "conditions": [
+                    "Meningioma",
+                    "Hemangiopericytoma"
+                ],
+                "interventions": [
+                    "Proton Radiation"
+                ],
+                "interventionTypes": [],
+                "eligibilityCriteria": "",
+                "sex": "ALL",
+                "minimumAge": "18 Years",
+                "maximumAge": null,
+                "healthyVolunteers": null,
+                "stdAges": [],
+                "primaryOutcomes": [],
+                "secondaryOutcomes": [],
+                "sponsor": "Abramson Cancer Center at Penn Medicine",
+                "sponsorClass": null,
+                "collaboratorCount": 0,
+                "locationCount": 0,
+                "countries": [],
+                "hasDmc": null,
+                "meshTerms": []
+            },
+            "similarityScore": 0.7538,
+            "rank": 6
+        },
+        {
+            "trial": {
+                "nctId": "NCT06326190",
+                "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+                "officialTitle": null,
+                "acronym": null,
+                "phase": "PHASE2",
+                "studyType": "INTERVENTIONAL",
+                "overallStatus": "RECRUITING",
+                "whyStopped": null,
+                "hasResults": false,
+                "enrollmentCount": 136,
+                "enrollmentType": "ESTIMATED",
+                "startDate": "2025-03-10",
+                "completionDate": "2028-12-22",
+                "allocation": null,
+                "interventionModel": null,
+                "primaryPurpose": null,
+                "masking": null,
+                "whoMasked": [],
+                "armCount": 0,
+                "conditions": [
+                    "Recurrent Meningioma"
+                ],
+                "interventions": [
+                    "Local standard of Care",
+                    "177Lu-DOTATATE"
+                ],
+                "interventionTypes": [],
+                "eligibilityCriteria": "",
+                "sex": "ALL",
+                "minimumAge": "18 Years",
+                "maximumAge": null,
+                "healthyVolunteers": null,
+                "stdAges": [],
+                "primaryOutcomes": [],
+                "secondaryOutcomes": [],
+                "sponsor": "European Organisation for Research and Treatment of Cancer - EORTC",
+                "sponsorClass": null,
+                "collaboratorCount": 0,
+                "locationCount": 0,
+                "countries": [],
+                "hasDmc": null,
+                "meshTerms": []
+            },
+            "similarityScore": 0.7534,
+            "rank": 7
+        },
+        {
+            "trial": {
+                "nctId": "NCT02234050",
+                "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+                "officialTitle": null,
+                "acronym": null,
+                "phase": "PHASE2",
+                "studyType": "INTERVENTIONAL",
+                "overallStatus": "COMPLETED",
+                "whyStopped": null,
+                "hasResults": false,
+                "enrollmentCount": 90,
+                "enrollmentType": "ACTUAL",
+                "startDate": "2015-07",
+                "completionDate": "2019-01-16",
+                "allocation": null,
+                "interventionModel": null,
+                "primaryPurpose": null,
+                "masking": null,
+                "whoMasked": [],
+                "armCount": 0,
+                "conditions": [
+                    "Recurrent High Grade Meningioma"
+                ],
+                "interventions": [
+                    "Trabectedin",
+                    "Local standard of care"
+                ],
+                "interventionTypes": [],
+                "eligibilityCriteria": "",
+                "sex": "ALL",
+                "minimumAge": "18 Years",
+                "maximumAge": null,
+                "healthyVolunteers": null,
+                "stdAges": [],
+                "primaryOutcomes": [],
+                "secondaryOutcomes": [],
+                "sponsor": "European Organisation for Research and Treatment of Cancer - EORTC",
+                "sponsorClass": null,
+                "collaboratorCount": 0,
+                "locationCount": 0,
+                "countries": [],
+                "hasDmc": null,
+                "meshTerms": []
+            },
+            "similarityScore": 0.7525,
+            "rank": 8
+        },
+        {
+            "trial": {
+                "nctId": "NCT00859040",
+                "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+                "officialTitle": null,
+                "acronym": null,
+                "phase": "PHASE2",
+                "studyType": "INTERVENTIONAL",
+                "overallStatus": "COMPLETED",
+                "whyStopped": null,
+                "hasResults": false,
+                "enrollmentCount": 34,
+                "enrollmentType": "ACTUAL",
+                "startDate": "2009-03",
+                "completionDate": "2016-01",
+                "allocation": null,
+                "interventionModel": null,
+                "primaryPurpose": null,
+                "masking": null,
+                "whoMasked": [],
+                "armCount": 0,
+                "conditions": [
+                    "Meningioma"
+                ],
+                "interventions": [
+                    "SOM230C"
+                ],
+                "interventionTypes": [],
+                "eligibilityCriteria": "",
+                "sex": "ALL",
+                "minimumAge": "18 Years",
+                "maximumAge": null,
+                "healthyVolunteers": null,
+                "stdAges": [],
+                "primaryOutcomes": [],
+                "secondaryOutcomes": [],
+                "sponsor": "Patrick Y. Wen, MD",
+                "sponsorClass": null,
+                "collaboratorCount": 0,
+                "locationCount": 0,
+                "countries": [],
+                "hasDmc": null,
+                "meshTerms": []
+            },
+            "similarityScore": 0.7509,
+            "rank": 9
+        },
+        {
+            "trial": {
+                "nctId": "NCT05940493",
+                "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+                "officialTitle": null,
+                "acronym": null,
+                "phase": "PHASE2",
+                "studyType": "INTERVENTIONAL",
+                "overallStatus": "RECRUITING",
+                "whyStopped": null,
+                "hasResults": false,
+                "enrollmentCount": 72,
+                "enrollmentType": "ESTIMATED",
+                "startDate": "2025-03-24",
+                "completionDate": "2030-09",
+                "allocation": null,
+                "interventionModel": null,
+                "primaryPurpose": null,
+                "masking": null,
+                "whoMasked": [],
+                "armCount": 0,
+                "conditions": [
+                    "Meningioma"
+                ],
+                "interventions": [
+                    "Abemaciclib",
+                    "Placebo"
+                ],
+                "interventionTypes": [],
+                "eligibilityCriteria": "",
+                "sex": "ALL",
+                "minimumAge": "18 Years",
+                "maximumAge": null,
+                "healthyVolunteers": null,
+                "stdAges": [],
+                "primaryOutcomes": [],
+                "secondaryOutcomes": [],
+                "sponsor": "Nader Sanai",
+                "sponsorClass": null,
+                "collaboratorCount": 0,
+                "locationCount": 0,
+                "countries": [],
+                "hasDmc": null,
+                "meshTerms": []
+            },
+            "similarityScore": 0.75,
+            "rank": 10
+        },
+        {
+            "trial": {
+                "nctId": "NCT03279692",
+                "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+                "officialTitle": null,
+                "acronym": null,
+                "phase": "PHASE2",
+                "studyType": "INTERVENTIONAL",
+                "overallStatus": "ACTIVE_NOT_RECRUITING",
+                "whyStopped": null,
+                "hasResults": false,
+                "enrollmentCount": 26,
+                "enrollmentType": "ACTUAL",
+                "startDate": "2017-11-07",
+                "completionDate": "2026-12-31",
+                "allocation": null,
+                "interventionModel": null,
+                "primaryPurpose": null,
+                "masking": null,
+                "whoMasked": [],
+                "armCount": 0,
+                "conditions": [
+                    "High Grade Meningioma"
+                ],
+                "interventions": [
+                    "Pembrolizumab"
+                ],
+                "interventionTypes": [],
+                "eligibilityCriteria": "",
+                "sex": "ALL",
+                "minimumAge": "18 Years",
+                "maximumAge": null,
+                "healthyVolunteers": null,
+                "stdAges": [],
+                "primaryOutcomes": [],
+                "secondaryOutcomes": [],
+                "sponsor": "Massachusetts General Hospital",
+                "sponsorClass": null,
+                "collaboratorCount": 0,
+                "locationCount": 0,
+                "countries": [],
+                "hasDmc": null,
+                "meshTerms": []
+            },
+            "similarityScore": 0.7487,
+            "rank": 11
+        },
+        {
+            "trial": {
+                "nctId": "NCT03071874",
+                "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+                "officialTitle": null,
+                "acronym": null,
+                "phase": "PHASE2",
+                "studyType": "INTERVENTIONAL",
+                "overallStatus": "UNKNOWN",
+                "whyStopped": null,
+                "hasResults": false,
+                "enrollmentCount": 28,
+                "enrollmentType": "ACTUAL",
+                "startDate": "2017-10-17",
+                "completionDate": "2024-07-25",
+                "allocation": null,
+                "interventionModel": null,
+                "primaryPurpose": null,
+                "masking": null,
+                "whoMasked": [],
+                "armCount": 0,
+                "conditions": [
+                    "Meningioma"
+                ],
+                "interventions": [
+                    "AZD2014"
+                ],
+                "interventionTypes": [],
+                "eligibilityCriteria": "",
+                "sex": "ALL",
+                "minimumAge": "18 Years",
+                "maximumAge": null,
+                "healthyVolunteers": null,
+                "stdAges": [],
+                "primaryOutcomes": [],
+                "secondaryOutcomes": [],
+                "sponsor": "Massachusetts General Hospital",
+                "sponsorClass": null,
+                "collaboratorCount": 0,
+                "locationCount": 0,
+                "countries": [],
+                "hasDmc": null,
+                "meshTerms": []
+            },
+            "similarityScore": 0.7448,
+            "rank": 12
+        },
+        {
+            "trial": {
+                "nctId": "NCT06126588",
+                "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+                "officialTitle": null,
+                "acronym": null,
+                "phase": "PHASE2",
+                "studyType": "INTERVENTIONAL",
+                "overallStatus": "RECRUITING",
+                "whyStopped": null,
+                "hasResults": false,
+                "enrollmentCount": 28,
+                "enrollmentType": "ESTIMATED",
+                "startDate": "2024-11-29",
+                "completionDate": "2028-05-01",
+                "allocation": null,
+                "interventionModel": null,
+                "primaryPurpose": null,
+                "masking": null,
+                "whoMasked": [],
+                "armCount": 0,
+                "conditions": [
+                    "Meningioma"
+                ],
+                "interventions": [
+                    "Everolimus"
+                ],
+                "interventionTypes": [],
+                "eligibilityCriteria": "",
+                "sex": "ALL",
+                "minimumAge": "18 Years",
+                "maximumAge": "80 Years",
+                "healthyVolunteers": null,
+                "stdAges": [],
+                "primaryOutcomes": [],
+                "secondaryOutcomes": [],
+                "sponsor": "Central Hospital, Nancy, France",
+                "sponsorClass": null,
+                "collaboratorCount": 0,
+                "locationCount": 0,
+                "countries": [],
+                "hasDmc": null,
+                "meshTerms": []
+            },
+            "similarityScore": 0.744,
+            "rank": 13
+        },
+        {
+            "trial": {
+                "nctId": "NCT06739213",
+                "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+                "officialTitle": null,
+                "acronym": null,
+                "phase": "PHASE2",
+                "studyType": "INTERVENTIONAL",
+                "overallStatus": "NOT_YET_RECRUITING",
+                "whyStopped": null,
+                "hasResults": false,
+                "enrollmentCount": 56,
+                "enrollmentType": "ESTIMATED",
+                "startDate": "2025-01-31",
+                "completionDate": "2028-01-13",
+                "allocation": null,
+                "interventionModel": null,
+                "primaryPurpose": null,
+                "masking": null,
+                "whoMasked": [],
+                "armCount": 0,
+                "conditions": [
+                    "Recurrent or Progressive High Grade Meningioma"
+                ],
+                "interventions": [
+                    "SYHA1813",
+                    "Investigator's Choice Treatment"
+                ],
+                "interventionTypes": [],
+                "eligibilityCriteria": "",
+                "sex": "ALL",
+                "minimumAge": "18 Years",
+                "maximumAge": null,
+                "healthyVolunteers": null,
+                "stdAges": [],
+                "primaryOutcomes": [],
+                "secondaryOutcomes": [],
+                "sponsor": "Shanghai Runshi Pharmaceutical Technology Co., Ltd",
+                "sponsorClass": null,
+                "collaboratorCount": 0,
+                "locationCount": 0,
+                "countries": [],
+                "hasDmc": null,
+                "meshTerms": []
+            },
+            "similarityScore": 0.7424,
+            "rank": 14
+        },
+        {
+            "trial": {
+                "nctId": "NCT00813592",
+                "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+                "officialTitle": null,
+                "acronym": null,
+                "phase": "PHASE2",
+                "studyType": "INTERVENTIONAL",
+                "overallStatus": "TERMINATED",
+                "whyStopped": null,
+                "hasResults": false,
+                "enrollmentCount": 2,
+                "enrollmentType": "ACTUAL",
+                "startDate": "2008-11",
+                "completionDate": "2013-03",
+                "allocation": null,
+                "interventionModel": null,
+                "primaryPurpose": null,
+                "masking": null,
+                "whoMasked": [],
+                "armCount": 0,
+                "conditions": [
+                    "Cancer"
+                ],
+                "interventions": [
+                    "SOM230B"
+                ],
+                "interventionTypes": [],
+                "eligibilityCriteria": "",
+                "sex": "ALL",
+                "minimumAge": "18 Years",
+                "maximumAge": null,
+                "healthyVolunteers": null,
+                "stdAges": [],
+                "primaryOutcomes": [],
+                "secondaryOutcomes": [],
+                "sponsor": "University of Utah",
+                "sponsorClass": null,
+                "collaboratorCount": 0,
+                "locationCount": 0,
+                "countries": [],
+                "hasDmc": null,
+                "meshTerms": []
+            },
+            "similarityScore": 0.7422,
+            "rank": 15
+        }
+    ],
+    "proposedNctId": null,
+    "topK": 15,
+    "totalCandidates": 98,
+    "outliers": {
+        "numeric": [
+            {
+                "attribute": "enrollmentCount",
+                "proposedValue": null,
+                "poolMin": 2,
+                "poolMax": 193,
+                "poolMedian": 32,
+                "poolMean": 54,
+                "poolP25": 26.5,
+                "poolP75": 68,
+                "proposedPercentile": null,
+                "outlier": "NORMAL",
+                "insufficientData": false
+            },
+            {
+                "attribute": "durationDays",
+                "proposedValue": null,
+                "poolMin": 121,
+                "poolMax": 7397,
+                "poolMedian": 1840.5,
+                "poolMean": 2344,
+                "poolP25": 669,
+                "poolP75": 2397.75,
+                "proposedPercentile": null,
+                "outlier": "NORMAL",
+                "insufficientData": true
+            }
+        ],
+        "categorical": [
+            {
+                "attribute": "phase",
+                "proposedValue": "Phase 2 OR Phase 3",
+                "poolFrequency": {
+                    "PHASE2": 14,
+                    "PHASE3": 1
+                },
+                "proposedFrequencyPct": 0,
+                "uncommon": true,
+                "insufficientData": false
+            },
+            {
+                "attribute": "studyType",
+                "proposedValue": "UNKNOWN",
+                "poolFrequency": {
+                    "INTERVENTIONAL": 15
+                },
+                "proposedFrequencyPct": 0,
+                "uncommon": true,
+                "insufficientData": false
+            },
+            {
+                "attribute": "sex",
+                "proposedValue": "",
+                "poolFrequency": {
+                    "ALL": 15
+                },
+                "proposedFrequencyPct": 0,
+                "uncommon": true,
+                "insufficientData": false
+            }
+        ],
+        "thresholds": {
+            "lowerPercentile": 10,
+            "upperPercentile": 90,
+            "minPoolSize": 10
+        },
+        "poolSize": 15
+    },
+    "explanation": {
+        "explanation": "Based on the benchmarking analysis, similar meningioma trials show a mixed landscape of study outcomes and enrollment patterns. The top matching trials include studies of various investigational treatments like ONC201, NEO100, and mifepristone, with enrollment ranging from very small studies (3-6 participants) to larger efforts like the completed mifepristone study with 193 participants. Notably, several of these similar trials faced challenges, with one withdrawn before enrollment and another terminated early.\n\nRegarding enrollment expectations, the proposed trial does not specify a target enrollment number, making direct comparison difficult. However, historical meningioma trials in this analysis typically enrolled a median of 32 participants, with 25% enrolling 26 or fewer participants and 75% enrolling 68 or fewer. The mean enrollment across similar trials was 54 participants, suggesting that while some studies aim higher, most meningioma trials remain relatively modest in size compared to other therapeutic areas.\n\nThe proposed trial design shows several attributes that are uncommon compared to historical similar trials. The phase designation of \"Phase 2 OR Phase 3\" does not appear in any of the 15 similar trials analyzed, where 14 were Phase 2 studies and only 1 was Phase 3. Additionally, the unspecified study type is flagged as uncommon, as all 15 similar trials were interventional studies. The missing sex specification is also unusual, as all similar trials included participants of all sexes.\n\nThese categorical outliers suggest the proposed trial may need more specific design parameters to align with standard practices in meningioma research. The ambiguous phase designation and missing key attributes like study type and sex eligibility could create operational challenges and may not reflect typical approaches in this therapeutic area.",
+        "generatedAt": "2026-05-01T05:00:38.598Z"
+    },
+    "eligibilityComparison": {
+        "inclusion": [],
+        "exclusion": []
+    },
+    "comparisonMetrics": [
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "phase",
+            "value": "PHASE2"
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "studyType",
+            "value": "INTERVENTIONAL"
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "overallStatus",
+            "value": "WITHDRAWN"
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "hasResults",
+            "value": "No"
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "whyStopped",
+            "value": null
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "acronym",
+            "value": null
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "enrollmentCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "enrollmentType",
+            "value": "ACTUAL"
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "startDate",
+            "value": "2026-12"
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "completionDate",
+            "value": "2027-04"
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "durationDays",
+            "value": 121
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "allocation",
+            "value": null
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "interventionModel",
+            "value": null
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "primaryPurpose",
+            "value": null
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "masking",
+            "value": null
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "whoMasked",
+            "value": null
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "armCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "interventionCount",
+            "value": 1
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "interventionTypes",
+            "value": null
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "interventions",
+            "value": "ONC201"
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "sex",
+            "value": "ALL"
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "minimumAge",
+            "value": "19 Years"
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "maximumAge",
+            "value": null
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "healthyVolunteers",
+            "value": null
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "stdAges",
+            "value": null
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "primaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "primaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "secondaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "secondaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "conditions",
+            "value": "Meningioma; Refractory Meningioma; Relapsed Meningioma"
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "meshTerms",
+            "value": null
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "sponsor",
+            "value": "University of Nebraska"
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "sponsorClass",
+            "value": null
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "collaboratorCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "locationCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "countries",
+            "value": null
+        },
+        {
+            "nctId": "NCT06012929",
+            "briefTitle": "A Study of ONC201 for Refractory Meningioma",
+            "metric": "hasDmc",
+            "value": null
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "phase",
+            "value": "PHASE2"
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "studyType",
+            "value": "INTERVENTIONAL"
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "overallStatus",
+            "value": "RECRUITING"
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "hasResults",
+            "value": "No"
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "whyStopped",
+            "value": null
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "acronym",
+            "value": null
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "enrollmentCount",
+            "value": 30
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "enrollmentType",
+            "value": "ESTIMATED"
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "startDate",
+            "value": "2022-07-01"
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "completionDate",
+            "value": "2027-06-30"
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "durationDays",
+            "value": null
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "allocation",
+            "value": null
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "interventionModel",
+            "value": null
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "primaryPurpose",
+            "value": null
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "masking",
+            "value": null
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "whoMasked",
+            "value": null
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "armCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "interventionCount",
+            "value": 1
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "interventionTypes",
+            "value": null
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "interventions",
+            "value": "NEO100"
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "sex",
+            "value": "ALL"
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "minimumAge",
+            "value": "12 Years"
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "maximumAge",
+            "value": null
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "healthyVolunteers",
+            "value": null
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "stdAges",
+            "value": null
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "primaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "primaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "secondaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "secondaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "conditions",
+            "value": "Residual, Progressive or Recurrent Grade II or III Meningioma"
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "meshTerms",
+            "value": null
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "sponsor",
+            "value": "Neonc Technologies, Inc."
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "sponsorClass",
+            "value": null
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "collaboratorCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "locationCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "countries",
+            "value": null
+        },
+        {
+            "nctId": "NCT05023018",
+            "briefTitle": "NEO100 and High-Grade Meningioma",
+            "metric": "hasDmc",
+            "value": null
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "phase",
+            "value": "PHASE3"
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "studyType",
+            "value": "INTERVENTIONAL"
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "overallStatus",
+            "value": "COMPLETED"
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "hasResults",
+            "value": "No"
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "whyStopped",
+            "value": null
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "acronym",
+            "value": null
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "enrollmentCount",
+            "value": 193
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "enrollmentType",
+            "value": "ACTUAL"
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "startDate",
+            "value": "1992-08"
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "completionDate",
+            "value": "2012-11"
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "durationDays",
+            "value": 7397
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "allocation",
+            "value": null
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "interventionModel",
+            "value": null
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "primaryPurpose",
+            "value": null
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "masking",
+            "value": null
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "whoMasked",
+            "value": null
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "armCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "interventionCount",
+            "value": 2
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "interventionTypes",
+            "value": null
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "interventions",
+            "value": "Mifepristone; Placebo"
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "sex",
+            "value": "ALL"
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "minimumAge",
+            "value": "18 Years"
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "maximumAge",
+            "value": "120 Years"
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "healthyVolunteers",
+            "value": null
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "stdAges",
+            "value": null
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "primaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "primaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "secondaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "secondaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "conditions",
+            "value": "Meningioma"
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "meshTerms",
+            "value": null
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "sponsor",
+            "value": "SWOG Cancer Research Network"
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "sponsorClass",
+            "value": null
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "collaboratorCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "locationCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "countries",
+            "value": null
+        },
+        {
+            "nctId": "NCT03015701",
+            "briefTitle": "S9005 Mifepristone in Meningioma",
+            "metric": "hasDmc",
+            "value": null
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "phase",
+            "value": "PHASE2"
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "studyType",
+            "value": "INTERVENTIONAL"
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "overallStatus",
+            "value": "TERMINATED"
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "hasResults",
+            "value": "No"
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "whyStopped",
+            "value": null
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "acronym",
+            "value": null
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "enrollmentCount",
+            "value": 3
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "enrollmentType",
+            "value": "ACTUAL"
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "startDate",
+            "value": "1998-06"
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "completionDate",
+            "value": "2004-03"
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "durationDays",
+            "value": 2100
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "allocation",
+            "value": null
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "interventionModel",
+            "value": null
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "primaryPurpose",
+            "value": null
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "masking",
+            "value": null
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "whoMasked",
+            "value": null
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "armCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "interventionCount",
+            "value": 1
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "interventionTypes",
+            "value": null
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "interventions",
+            "value": "Antineoplaston therapy (Atengenal + Astugenal)"
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "sex",
+            "value": "ALL"
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "minimumAge",
+            "value": "18 Years"
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "maximumAge",
+            "value": "99 Years"
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "healthyVolunteers",
+            "value": null
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "stdAges",
+            "value": null
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "primaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "primaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "secondaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "secondaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "conditions",
+            "value": "Meningioma"
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "meshTerms",
+            "value": null
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "sponsor",
+            "value": "Burzynski Research Institute"
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "sponsorClass",
+            "value": null
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "collaboratorCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "locationCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "countries",
+            "value": null
+        },
+        {
+            "nctId": "NCT00003483",
+            "briefTitle": "Antineoplaston Therapy in Treating Patients With Meningioma",
+            "metric": "hasDmc",
+            "value": null
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "phase",
+            "value": "PHASE2"
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "studyType",
+            "value": "INTERVENTIONAL"
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "overallStatus",
+            "value": "NOT_YET_RECRUITING"
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "hasResults",
+            "value": "No"
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "whyStopped",
+            "value": null
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "acronym",
+            "value": null
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "enrollmentCount",
+            "value": 6
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "enrollmentType",
+            "value": "ESTIMATED"
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "startDate",
+            "value": "2026-06"
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "completionDate",
+            "value": "2027-06"
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "durationDays",
+            "value": 365
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "allocation",
+            "value": null
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "interventionModel",
+            "value": null
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "primaryPurpose",
+            "value": null
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "masking",
+            "value": null
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "whoMasked",
+            "value": null
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "armCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "interventionCount",
+            "value": 2
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "interventionTypes",
+            "value": null
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "interventions",
+            "value": "Ga-68- DOTATATE; Ga-68-DOTATOC"
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "sex",
+            "value": "ALL"
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "minimumAge",
+            "value": "18 Years"
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "maximumAge",
+            "value": "89 Years"
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "healthyVolunteers",
+            "value": null
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "stdAges",
+            "value": null
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "primaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "primaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "secondaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "secondaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "conditions",
+            "value": "Meningioma"
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "meshTerms",
+            "value": null
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "sponsor",
+            "value": "Weill Medical College of Cornell University"
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "sponsorClass",
+            "value": null
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "collaboratorCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "locationCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "countries",
+            "value": null
+        },
+        {
+            "nctId": "NCT04298541",
+            "briefTitle": "Direct Comparison of Ga-68-DOTATATE and Ga-68-DOTATOC",
+            "metric": "hasDmc",
+            "value": null
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "phase",
+            "value": "PHASE2"
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "studyType",
+            "value": "INTERVENTIONAL"
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "overallStatus",
+            "value": "COMPLETED"
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "hasResults",
+            "value": "No"
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "whyStopped",
+            "value": null
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "acronym",
+            "value": null
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "enrollmentCount",
+            "value": 53
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "enrollmentType",
+            "value": "ACTUAL"
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "startDate",
+            "value": "2010-02-04"
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "completionDate",
+            "value": "2023-03-31"
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "durationDays",
+            "value": null
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "allocation",
+            "value": null
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "interventionModel",
+            "value": null
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "primaryPurpose",
+            "value": null
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "masking",
+            "value": null
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "whoMasked",
+            "value": null
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "armCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "interventionCount",
+            "value": 1
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "interventionTypes",
+            "value": null
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "interventions",
+            "value": "Proton Radiation"
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "sex",
+            "value": "ALL"
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "minimumAge",
+            "value": "18 Years"
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "maximumAge",
+            "value": null
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "healthyVolunteers",
+            "value": null
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "stdAges",
+            "value": null
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "primaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "primaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "secondaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "secondaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "conditions",
+            "value": "Meningioma; Hemangiopericytoma"
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "meshTerms",
+            "value": null
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "sponsor",
+            "value": "Abramson Cancer Center at Penn Medicine"
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "sponsorClass",
+            "value": null
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "collaboratorCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "locationCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "countries",
+            "value": null
+        },
+        {
+            "nctId": "NCT01117844",
+            "briefTitle": "Proton Radiation For Meningiomas and Hemangiopericytomas",
+            "metric": "hasDmc",
+            "value": null
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "phase",
+            "value": "PHASE2"
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "studyType",
+            "value": "INTERVENTIONAL"
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "overallStatus",
+            "value": "RECRUITING"
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "hasResults",
+            "value": "No"
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "whyStopped",
+            "value": null
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "acronym",
+            "value": null
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "enrollmentCount",
+            "value": 136
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "enrollmentType",
+            "value": "ESTIMATED"
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "startDate",
+            "value": "2025-03-10"
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "completionDate",
+            "value": "2028-12-22"
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "durationDays",
+            "value": null
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "allocation",
+            "value": null
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "interventionModel",
+            "value": null
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "primaryPurpose",
+            "value": null
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "masking",
+            "value": null
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "whoMasked",
+            "value": null
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "armCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "interventionCount",
+            "value": 2
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "interventionTypes",
+            "value": null
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "interventions",
+            "value": "Local standard of Care; 177Lu-DOTATATE"
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "sex",
+            "value": "ALL"
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "minimumAge",
+            "value": "18 Years"
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "maximumAge",
+            "value": null
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "healthyVolunteers",
+            "value": null
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "stdAges",
+            "value": null
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "primaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "primaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "secondaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "secondaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "conditions",
+            "value": "Recurrent Meningioma"
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "meshTerms",
+            "value": null
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "sponsor",
+            "value": "European Organisation for Research and Treatment of Cancer - EORTC"
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "sponsorClass",
+            "value": null
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "collaboratorCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "locationCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "countries",
+            "value": null
+        },
+        {
+            "nctId": "NCT06326190",
+            "briefTitle": "177Lu-DOTATATE for Recurrent Meningioma",
+            "metric": "hasDmc",
+            "value": null
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "phase",
+            "value": "PHASE2"
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "studyType",
+            "value": "INTERVENTIONAL"
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "overallStatus",
+            "value": "COMPLETED"
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "hasResults",
+            "value": "No"
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "whyStopped",
+            "value": null
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "acronym",
+            "value": null
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "enrollmentCount",
+            "value": 90
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "enrollmentType",
+            "value": "ACTUAL"
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "startDate",
+            "value": "2015-07"
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "completionDate",
+            "value": "2019-01-16"
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "durationDays",
+            "value": null
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "allocation",
+            "value": null
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "interventionModel",
+            "value": null
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "primaryPurpose",
+            "value": null
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "masking",
+            "value": null
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "whoMasked",
+            "value": null
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "armCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "interventionCount",
+            "value": 2
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "interventionTypes",
+            "value": null
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "interventions",
+            "value": "Trabectedin; Local standard of care"
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "sex",
+            "value": "ALL"
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "minimumAge",
+            "value": "18 Years"
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "maximumAge",
+            "value": null
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "healthyVolunteers",
+            "value": null
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "stdAges",
+            "value": null
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "primaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "primaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "secondaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "secondaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "conditions",
+            "value": "Recurrent High Grade Meningioma"
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "meshTerms",
+            "value": null
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "sponsor",
+            "value": "European Organisation for Research and Treatment of Cancer - EORTC"
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "sponsorClass",
+            "value": null
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "collaboratorCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "locationCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "countries",
+            "value": null
+        },
+        {
+            "nctId": "NCT02234050",
+            "briefTitle": "Trabectedin for Recurrent Grade II/III Meningioma",
+            "metric": "hasDmc",
+            "value": null
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "phase",
+            "value": "PHASE2"
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "studyType",
+            "value": "INTERVENTIONAL"
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "overallStatus",
+            "value": "COMPLETED"
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "hasResults",
+            "value": "No"
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "whyStopped",
+            "value": null
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "acronym",
+            "value": null
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "enrollmentCount",
+            "value": 34
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "enrollmentType",
+            "value": "ACTUAL"
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "startDate",
+            "value": "2009-03"
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "completionDate",
+            "value": "2016-01"
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "durationDays",
+            "value": 2497
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "allocation",
+            "value": null
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "interventionModel",
+            "value": null
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "primaryPurpose",
+            "value": null
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "masking",
+            "value": null
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "whoMasked",
+            "value": null
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "armCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "interventionCount",
+            "value": 1
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "interventionTypes",
+            "value": null
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "interventions",
+            "value": "SOM230C"
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "sex",
+            "value": "ALL"
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "minimumAge",
+            "value": "18 Years"
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "maximumAge",
+            "value": null
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "healthyVolunteers",
+            "value": null
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "stdAges",
+            "value": null
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "primaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "primaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "secondaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "secondaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "conditions",
+            "value": "Meningioma"
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "meshTerms",
+            "value": null
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "sponsor",
+            "value": "Patrick Y. Wen, MD"
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "sponsorClass",
+            "value": null
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "collaboratorCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "locationCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "countries",
+            "value": null
+        },
+        {
+            "nctId": "NCT00859040",
+            "briefTitle": "Monthly SOM230C for Recurrent or Progressive Meningioma",
+            "metric": "hasDmc",
+            "value": null
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "phase",
+            "value": "PHASE2"
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "studyType",
+            "value": "INTERVENTIONAL"
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "overallStatus",
+            "value": "RECRUITING"
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "hasResults",
+            "value": "No"
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "whyStopped",
+            "value": null
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "acronym",
+            "value": null
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "enrollmentCount",
+            "value": 72
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "enrollmentType",
+            "value": "ESTIMATED"
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "startDate",
+            "value": "2025-03-24"
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "completionDate",
+            "value": "2030-09"
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "durationDays",
+            "value": null
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "allocation",
+            "value": null
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "interventionModel",
+            "value": null
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "primaryPurpose",
+            "value": null
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "masking",
+            "value": null
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "whoMasked",
+            "value": null
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "armCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "interventionCount",
+            "value": 2
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "interventionTypes",
+            "value": null
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "interventions",
+            "value": "Abemaciclib; Placebo"
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "sex",
+            "value": "ALL"
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "minimumAge",
+            "value": "18 Years"
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "maximumAge",
+            "value": null
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "healthyVolunteers",
+            "value": null
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "stdAges",
+            "value": null
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "primaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "primaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "secondaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "secondaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "conditions",
+            "value": "Meningioma"
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "meshTerms",
+            "value": null
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "sponsor",
+            "value": "Nader Sanai"
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "sponsorClass",
+            "value": null
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "collaboratorCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "locationCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "countries",
+            "value": null
+        },
+        {
+            "nctId": "NCT05940493",
+            "briefTitle": "Abemaciclib in Newly Diagnosed Meningioma Patients",
+            "metric": "hasDmc",
+            "value": null
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "phase",
+            "value": "PHASE2"
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "studyType",
+            "value": "INTERVENTIONAL"
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "overallStatus",
+            "value": "ACTIVE_NOT_RECRUITING"
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "hasResults",
+            "value": "No"
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "whyStopped",
+            "value": null
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "acronym",
+            "value": null
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "enrollmentCount",
+            "value": 26
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "enrollmentType",
+            "value": "ACTUAL"
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "startDate",
+            "value": "2017-11-07"
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "completionDate",
+            "value": "2026-12-31"
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "durationDays",
+            "value": null
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "allocation",
+            "value": null
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "interventionModel",
+            "value": null
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "primaryPurpose",
+            "value": null
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "masking",
+            "value": null
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "whoMasked",
+            "value": null
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "armCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "interventionCount",
+            "value": 1
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "interventionTypes",
+            "value": null
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "interventions",
+            "value": "Pembrolizumab"
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "sex",
+            "value": "ALL"
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "minimumAge",
+            "value": "18 Years"
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "maximumAge",
+            "value": null
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "healthyVolunteers",
+            "value": null
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "stdAges",
+            "value": null
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "primaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "primaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "secondaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "secondaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "conditions",
+            "value": "High Grade Meningioma"
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "meshTerms",
+            "value": null
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "sponsor",
+            "value": "Massachusetts General Hospital"
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "sponsorClass",
+            "value": null
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "collaboratorCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "locationCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "countries",
+            "value": null
+        },
+        {
+            "nctId": "NCT03279692",
+            "briefTitle": "Phase II Trial of Pembrolizumab in Recurrent or Residual High Grade Meningioma",
+            "metric": "hasDmc",
+            "value": null
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "phase",
+            "value": "PHASE2"
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "studyType",
+            "value": "INTERVENTIONAL"
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "overallStatus",
+            "value": "UNKNOWN"
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "hasResults",
+            "value": "No"
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "whyStopped",
+            "value": null
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "acronym",
+            "value": null
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "enrollmentCount",
+            "value": 28
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "enrollmentType",
+            "value": "ACTUAL"
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "startDate",
+            "value": "2017-10-17"
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "completionDate",
+            "value": "2024-07-25"
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "durationDays",
+            "value": null
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "allocation",
+            "value": null
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "interventionModel",
+            "value": null
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "primaryPurpose",
+            "value": null
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "masking",
+            "value": null
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "whoMasked",
+            "value": null
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "armCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "interventionCount",
+            "value": 1
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "interventionTypes",
+            "value": null
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "interventions",
+            "value": "AZD2014"
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "sex",
+            "value": "ALL"
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "minimumAge",
+            "value": "18 Years"
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "maximumAge",
+            "value": null
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "healthyVolunteers",
+            "value": null
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "stdAges",
+            "value": null
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "primaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "primaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "secondaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "secondaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "conditions",
+            "value": "Meningioma"
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "meshTerms",
+            "value": null
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "sponsor",
+            "value": "Massachusetts General Hospital"
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "sponsorClass",
+            "value": null
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "collaboratorCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "locationCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "countries",
+            "value": null
+        },
+        {
+            "nctId": "NCT03071874",
+            "briefTitle": "Vistusertib (AZD2014) For Recurrent Grade II-III Meningiomas",
+            "metric": "hasDmc",
+            "value": null
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "phase",
+            "value": "PHASE2"
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "studyType",
+            "value": "INTERVENTIONAL"
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "overallStatus",
+            "value": "RECRUITING"
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "hasResults",
+            "value": "No"
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "whyStopped",
+            "value": null
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "acronym",
+            "value": null
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "enrollmentCount",
+            "value": 28
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "enrollmentType",
+            "value": "ESTIMATED"
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "startDate",
+            "value": "2024-11-29"
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "completionDate",
+            "value": "2028-05-01"
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "durationDays",
+            "value": null
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "allocation",
+            "value": null
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "interventionModel",
+            "value": null
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "primaryPurpose",
+            "value": null
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "masking",
+            "value": null
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "whoMasked",
+            "value": null
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "armCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "interventionCount",
+            "value": 1
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "interventionTypes",
+            "value": null
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "interventions",
+            "value": "Everolimus"
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "sex",
+            "value": "ALL"
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "minimumAge",
+            "value": "18 Years"
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "maximumAge",
+            "value": "80 Years"
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "healthyVolunteers",
+            "value": null
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "stdAges",
+            "value": null
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "primaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "primaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "secondaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "secondaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "conditions",
+            "value": "Meningioma"
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "meshTerms",
+            "value": null
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "sponsor",
+            "value": "Central Hospital, Nancy, France"
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "sponsorClass",
+            "value": null
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "collaboratorCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "locationCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "countries",
+            "value": null
+        },
+        {
+            "nctId": "NCT06126588",
+            "briefTitle": "Combination of Everolimus and 177Lu-DOTATATE in the Treatment of Grades 2 and 3 Refractory Meningioma: a Phase IIb Clinical Trial",
+            "metric": "hasDmc",
+            "value": null
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "phase",
+            "value": "PHASE2"
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "studyType",
+            "value": "INTERVENTIONAL"
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "overallStatus",
+            "value": "NOT_YET_RECRUITING"
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "hasResults",
+            "value": "No"
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "whyStopped",
+            "value": null
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "acronym",
+            "value": null
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "enrollmentCount",
+            "value": 56
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "enrollmentType",
+            "value": "ESTIMATED"
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "startDate",
+            "value": "2025-01-31"
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "completionDate",
+            "value": "2028-01-13"
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "durationDays",
+            "value": null
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "allocation",
+            "value": null
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "interventionModel",
+            "value": null
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "primaryPurpose",
+            "value": null
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "masking",
+            "value": null
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "whoMasked",
+            "value": null
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "armCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "interventionCount",
+            "value": 2
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "interventionTypes",
+            "value": null
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "interventions",
+            "value": "SYHA1813; Investigator's Choice Treatment"
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "sex",
+            "value": "ALL"
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "minimumAge",
+            "value": "18 Years"
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "maximumAge",
+            "value": null
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "healthyVolunteers",
+            "value": null
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "stdAges",
+            "value": null
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "primaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "primaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "secondaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "secondaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "conditions",
+            "value": "Recurrent or Progressive High Grade Meningioma"
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "meshTerms",
+            "value": null
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "sponsor",
+            "value": "Shanghai Runshi Pharmaceutical Technology Co., Ltd"
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "sponsorClass",
+            "value": null
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "collaboratorCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "locationCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "countries",
+            "value": null
+        },
+        {
+            "nctId": "NCT06739213",
+            "briefTitle": "A Phase II Study of SYHA1813 for Recurrent or Progressive High-Grade Meningioma",
+            "metric": "hasDmc",
+            "value": null
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "phase",
+            "value": "PHASE2"
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "studyType",
+            "value": "INTERVENTIONAL"
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "overallStatus",
+            "value": "TERMINATED"
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "hasResults",
+            "value": "No"
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "whyStopped",
+            "value": null
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "acronym",
+            "value": null
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "enrollmentCount",
+            "value": 2
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "enrollmentType",
+            "value": "ACTUAL"
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "startDate",
+            "value": "2008-11"
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "completionDate",
+            "value": "2013-03"
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "durationDays",
+            "value": 1581
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "allocation",
+            "value": null
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "interventionModel",
+            "value": null
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "primaryPurpose",
+            "value": null
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "masking",
+            "value": null
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "whoMasked",
+            "value": null
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "armCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "interventionCount",
+            "value": 1
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "interventionTypes",
+            "value": null
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "interventions",
+            "value": "SOM230B"
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "sex",
+            "value": "ALL"
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "minimumAge",
+            "value": "18 Years"
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "maximumAge",
+            "value": null
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "healthyVolunteers",
+            "value": null
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "stdAges",
+            "value": null
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "primaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "primaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "secondaryOutcomeCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "secondaryOutcomes",
+            "value": null
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "conditions",
+            "value": "Cancer"
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "meshTerms",
+            "value": null
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "sponsor",
+            "value": "University of Utah"
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "sponsorClass",
+            "value": null
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "collaboratorCount",
+            "value": 0
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "locationCount",
+            "value": null
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "countries",
+            "value": null
+        },
+        {
+            "nctId": "NCT00813592",
+            "briefTitle": "Phase II Study of SOM230 in Patients With Recurrent or Progressive Meningioma",
+            "metric": "hasDmc",
+            "value": null
+        }
+    ],
+    "pipelineSteps": {
+        "synopsesGenerated": 98,
+        "embeddingsGenerated": 1,
+        "embeddingCacheHits": 98,
+        "totalInputTokens": 0
+    }
+}

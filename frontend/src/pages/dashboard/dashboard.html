@@ -15,23 +15,23 @@
                             <input id="userPatients" type="number" formControlName="userPatients" placeholder="-" min="0" />
                         </div>
                         <div class="form-group">
-                            <label for="userSites">Sites</label>
+                            <label for="userSites"># of Sites</label>
                             <input id="userSites" type="number" formControlName="userSites" placeholder="-" min="0" />
                         </div>
                         <div class="form-group">
-                            <label for="userInclusions">Inclusions</label>
+                            <label for="userInclusions"># of Inclusions</label>
                             <input id="userInclusions" type="number" formControlName="userInclusions" placeholder="-" min="0" />
                         </div>
                         <div class="form-group">
-                            <label for="userExclusions">Exclusions</label>
+                            <label for="userExclusions"># of Exclusions</label>
                             <input id="userExclusions" type="number" formControlName="userExclusions" placeholder="-" min="0" />
                         </div>
                         <div class="form-group">
-                            <label for="userOutcomes">Outcomes</label>
+                            <label for="userOutcomes"># of Outcomes</label>
                             <input id="userOutcomes" type="number" formControlName="userOutcomes" placeholder="-" min="0" />
                         </div>
                         <div class="form-group">
-                            <label for="userArms">Arms/Interventions</label>
+                            <label for="userArms"># of Arms/Interventions</label>
                             <input id="userArms" type="number" formControlName="userArms" placeholder="-" min="0" />
                         </div>
                     </div>
@@ -140,6 +140,7 @@
                     [disabled]="selectedTrialIds().length === 0">Generate Report</button>
                 
                 <div class="secondary-actions-row">
+                    <button class="btn btn-secondary action-btn" (click)="onClearWorkspace()">Clear Workspace</button>
                     @if (authService.isLoggedIn()) {
                         <button class="btn btn-secondary action-btn" (click)="onToggleSavePanel()" [disabled]="!searchForm.valid">Save Search</button>
                     }
