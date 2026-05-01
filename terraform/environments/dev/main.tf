@@ -74,9 +74,11 @@ module "apprunner_backend" {
 module "static_frontend" {
   source = "../../modules/static_frontend"
 
-  project_name = var.project_name
-  env_name     = var.env_name
-  tags         = local.tags
+  project_name                     = var.project_name
+  env_name                         = var.env_name
+  cloudfront_aliases               = var.cloudfront_aliases
+  cloudfront_acm_certificate_arn   = var.cloudfront_acm_certificate_arn
+  tags                             = local.tags
 }
 
 module "iam_github_oidc" {
