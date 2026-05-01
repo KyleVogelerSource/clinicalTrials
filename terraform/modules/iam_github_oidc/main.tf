@@ -67,9 +67,18 @@ data "aws_iam_policy_document" "github_actions" {
     effect = "Allow"
     actions = [
       "apprunner:StartDeployment",
-      "apprunner:DescribeService"
+      "apprunner:DescribeService",
+      "apprunner:UpdateService"
     ]
     resources = [var.apprunner_service_arn]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "iam:PassRole"
+    ]
+    resources = [var.apprunner_ecr_access_role_arn]
   }
 
   statement {

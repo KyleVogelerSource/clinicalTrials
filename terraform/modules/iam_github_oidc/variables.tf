@@ -4,6 +4,7 @@ variable "github_owner" { type = string }
 variable "github_repo" { type = string }
 variable "ecr_repository_arn" { type = string }
 variable "apprunner_service_arn" { type = string }
+variable "apprunner_ecr_access_role_arn" { type = string }
 variable "s3_bucket_arn" { type = string }
 variable "cloudfront_dist_arn" { type = string }
 variable "tags" { type = map(string) }

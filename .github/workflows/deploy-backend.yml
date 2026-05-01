@@ -39,6 +39,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate AI provider secrets
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
+          REQUIRE_AI_PROVIDER_SECRETS: "true"
+        run: node scripts/validate-ai-provider-secrets.mjs
+
       - name: Lint
         run: npm run lint
 
@@ -95,22 +102,43 @@ jobs:
           docker push ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:$IMAGE_SHA_TAG
           docker push ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest
 
-      - name: Describe current App Runner service
+      - name: Write App Runner source configuration
+        env:
+          APP_RUNNER_SERVICE_ARN: ${{ secrets.APP_RUNNER_SERVICE_ARN }}
+          IMAGE_IDENTIFIER: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_SHA_TAG }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
         run: |
           aws apprunner describe-service \
-            --service-arn "${{ secrets.APP_RUNNER_SERVICE_ARN }}" \
-            --query 'Service.{ServiceUrl:ServiceUrl,Status:Status,SourceConfiguration:SourceConfiguration}' \
-            --output json
+            --service-arn "$APP_RUNNER_SERVICE_ARN" \
+            --query 'Service.SourceConfiguration' \
+            --output json > /tmp/source-configuration.json
 
-      - name: Deploy latest image to App Runner
+          jq \
+            --arg imageIdentifier "$IMAGE_IDENTIFIER" \
+            --arg anthropicApiKey "$ANTHROPIC_API_KEY" \
+            --arg voyageApiKey "$VOYAGE_API_KEY" \
+            '
+              .ImageRepository.ImageIdentifier = $imageIdentifier
+              | .ImageRepository.ImageConfiguration.RuntimeEnvironmentVariables =
+                  ((.ImageRepository.ImageConfiguration.RuntimeEnvironmentVariables // {}) + {
+                    ANTHROPIC_API_KEY: $anthropicApiKey,
+                    VOYAGE_API_KEY: $voyageApiKey
+                  })
+            ' /tmp/source-configuration.json > /tmp/source-configuration-updated.json
+
+      - name: Deploy image and runtime secrets to App Runner
+        env:
+          APP_RUNNER_SERVICE_ARN: ${{ secrets.APP_RUNNER_SERVICE_ARN }}
         run: |
-          echo "Starting App Runner deployment for commit $IMAGE_SHA_TAG"
-          aws apprunner start-deployment \
-            --service-arn "${{ secrets.APP_RUNNER_SERVICE_ARN }}"
+          echo "Updating App Runner service for commit $IMAGE_SHA_TAG"
+          aws apprunner update-service \
+            --service-arn "$APP_RUNNER_SERVICE_ARN" \
+            --source-configuration file:///tmp/source-configuration-updated.json
 
       - name: Wait for backend readiness
         env:
-          STATUS_URL: https://ppjtwpmmjp.us-east-1.awsapprunner.com/api/debug/status
+          STATUS_URL: https://ppjtwpmmjp.us-east-1.awsapprunner.com/api/debug/status?refreshAiProviders=true
         run: |
           echo "Checking backend readiness at $STATUS_URL"
 
@@ -120,11 +148,13 @@ jobs:
             if [ "$HTTP_CODE" = "200" ]; then
               OK=$(jq -r '.ok // false' /tmp/status.json)
               DB=$(jq -r '.databaseConnected // false' /tmp/status.json)
+              ANTHROPIC=$(jq -r '.aiProviders.anthropic.reachable // false' /tmp/status.json)
+              VOYAGE=$(jq -r '.aiProviders.voyage.reachable // false' /tmp/status.json)
 
-              echo "Attempt $i: ok=$OK databaseConnected=$DB"
+              echo "Attempt $i: ok=$OK databaseConnected=$DB anthropicReachable=$ANTHROPIC voyageReachable=$VOYAGE"
 
-              if [ "$OK" = "true" ] && [ "$DB" = "true" ]; then
-                echo "Backend and DB are ready"
+              if [ "$OK" = "true" ] && [ "$DB" = "true" ] && [ "$ANTHROPIC" = "true" ] && [ "$VOYAGE" = "true" ]; then
+                echo "Backend, DB, and AI providers are ready"
                 cat /tmp/status.json
                 exit 0
               fi
@@ -137,7 +167,7 @@ jobs:
 
           echo "Final status payload:"
           cat /tmp/status.json || true
-          echo "::error title=Backend readiness failed::Backend did not become ready with DB connectivity."
+          echo "::error title=Backend readiness failed::Backend did not become ready with DB and AI provider connectivity."
           exit 1
 
       - name: Write deployment summary
