@@ -595,6 +595,8 @@ VOYAGE_API_KEY = Voyage AI API key used by backend trial similarity embeddings
 
 The backend deployment workflow validates `ANTHROPIC_API_KEY` and `VOYAGE_API_KEY` before deploying to App Runner. If either secret is missing or rejected by the provider API, the backend deployment fails.
 
+The backend deployment workflow also updates App Runner runtime environment variables with those two secrets. If this is the first deployment after adding AI provider secrets support, run `terraform apply` from `terraform/environments/dev` first so the GitHub Actions role has `apprunner:UpdateService` permission.
+
 GitHub secrets help: https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets
 
 ### 11. Deploy the Application Code
