@@ -12,6 +12,16 @@ export interface TimelineBar {
     actualDays: number;
 }
 
+export interface RankedTrial {
+    trial: {
+        nctId: string;
+        briefTitle: string;
+        [key: string]: any;
+    };
+    similarityScore: number;
+    rank: number;
+}
+
 export interface TrialResultsResponse {
     timestamp: Date;
     overallScore: number;
@@ -31,6 +41,8 @@ export interface TrialResultsResponse {
         explanation: string;
         generatedAt: string;
     };
+
+    rankedTrials?: RankedTrial[];
 
     // OBSOLETE
     terminationReasons: TerminationReasonBar[];

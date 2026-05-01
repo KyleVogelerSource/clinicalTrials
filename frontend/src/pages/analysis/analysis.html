@@ -111,25 +111,6 @@
                 </div>
             </div>
 
-            <!-- Expected Timeline -->
-            <div class="card card-half card-tall">
-                <div class="card-header">
-                    <h4>Expected Timeline</h4>
-                    <span class="status-badge status-active">
-                        Target: {{ inputParams()?.userPatients || 0 }} Patients
-                    </span>
-                </div>
-                <div class="card-body">
-                    @if (timelineChartData(); as chartData) {
-                        <div class="chart-container" style="height: 100%;">
-                            <app-bar-chart [chartData]="chartData" xAxisLabel="Patient Ranges" yAxisLabel="Timeline (Days)" [grouped]="true" />
-                        </div>
-                    } @else {
-                        <p class="no-data">Insufficient data to generate timeline projections.</p>
-                    }
-                </div>
-            </div>
-
             <!-- Metric Correlation Analysis -->
             <div class="card card-full">
                 <div class="card-header">
@@ -171,7 +152,12 @@
                                                         <app-tooltip [text]="descriptions[c.y] || 'No description available'" />
                                                     </div>
                                                 </td>
-                                                <td class="r-value">r = {{ c.r.toFixed(2) }}</td>
+                                                <td class="r-value">
+                                                    <div class="r-comparison">
+                                                        <span class="r-orig" [title]="'Original Correlation'">r = {{ c.r.toFixed(2) }}</span>
+                                                        <span class="r-hat" [title]="'Correlation with Outliers Excluded'">r̂ = {{ c.rHat.toFixed(2) }}</span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         }
                                     </tbody>
@@ -233,8 +219,27 @@
                 </div>
             </div>
 
+            <!-- Expected Timeline -->
+            <div class="card card-half card-tall">
+                <div class="card-header">
+                    <h4>Expected Timeline</h4>
+                    <span class="status-badge status-active">
+                        Target: {{ inputParams()?.userPatients || 0 }} Patients
+                    </span>
+                </div>
+                <div class="card-body">
+                    @if (timelineChartData(); as chartData) {
+                        <div class="chart-container" style="height: 100%;">
+                            <app-bar-chart [chartData]="chartData" xAxisLabel="Patient Ranges" yAxisLabel="Timeline (Days)" [grouped]="true" />
+                        </div>
+                    } @else {
+                        <p class="no-data">Insufficient data to generate timeline projections.</p>
+                    }
+                </div>
+            </div>
+
             <!-- Metric Intersection Matrix -->
-            <div class="card card-full">
+            <div class="card card-half">
                 <div class="card-header">
                     <div class="header-with-info">
                         <h4>Metric Intersection Matrix (Co-occurrence %)</h4>
@@ -276,6 +281,17 @@
                 <div class="card-header">
                     <h4>Benchmarked Trials Comparison</h4>
                     <div class="comparison-controls">
+                        <label class="switch-control" [class.disabled]="!(data()?.rankedTrials?.length)">
+                            <span class="label-text">Show Only Similar Trials</span>
+                            <div class="switch">
+                                <input type="checkbox" 
+                                       [checked]="showOnlySimilarTrials()" 
+                                       (change)="showOnlySimilarTrials.set($any($event.target).checked)"
+                                       [disabled]="!(data()?.rankedTrials?.length)">
+                                <span class="slider"></span>
+                            </div>
+                            <span class="status-text">{{ showOnlySimilarTrials() ? 'On' : 'Off' }}</span>
+                        </label>
                         <div class="column-selector-wrapper">
                             <app-multi-select 
                                 [ngModel]="visibleColumnKeys()" 
@@ -320,7 +336,7 @@
                             </thead>
                             <tbody>
                                 @for (row of comparisonRows(); track row.trial.nctId) {
-                                    <tr>
+                                    <tr [class.ranked-trial]="row.isRanked">
                                         <td class="trial-name-cell">
                                             <a
                                                 [href]="'https://clinicaltrials.gov/study/' + row.trial.nctId"

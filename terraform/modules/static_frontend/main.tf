@@ -27,6 +27,7 @@ resource "aws_cloudfront_origin_access_control" "this" {
 resource "aws_cloudfront_distribution" "this" {
   enabled             = true
   default_root_object = "index.html"
+  aliases             = var.cloudfront_aliases
 
   origin {
     domain_name              = aws_s3_bucket.this.bucket_regional_domain_name
@@ -55,7 +56,10 @@ resource "aws_cloudfront_distribution" "this" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    acm_certificate_arn            = var.cloudfront_acm_certificate_arn
+    cloudfront_default_certificate = var.cloudfront_acm_certificate_arn == null
+    minimum_protocol_version       = var.cloudfront_acm_certificate_arn == null ? "TLSv1" : "TLSv1.2_2021"
+    ssl_support_method             = var.cloudfront_acm_certificate_arn == null ? null : "sni-only"
   }
 
   custom_error_response {
