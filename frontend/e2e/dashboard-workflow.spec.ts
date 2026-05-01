@@ -267,9 +267,23 @@ async function searchForDiabetes(page: Page) {
 }
 
 async function selectCustomOption(page: Page, selector: string, optionText: string) {
-  await page.locator(`${selector} .select-trigger`).click();
-  // Use a more robust exact match that handles potential whitespace
-  await page.locator(`${selector} .option-item`).filter({ hasText: new RegExp(`^\\s*${optionText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`) }).click();
+  const container = page.locator(selector);
+  const trigger = container.locator(".select-trigger");
+  await trigger.click();
+  
+  const dropdown = container.locator(".dropdown-panel");
+  await expect(dropdown).toBeVisible();
+  
+  const option = dropdown.locator(".option-item").filter({ 
+    hasText: new RegExp(`^\\s*${optionText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`) 
+  });
+  await option.click();
+
+  // If the dropdown is still open (common in multi-select), close it to avoid covering other elements
+  if (await dropdown.isVisible()) {
+    await trigger.click();
+    await expect(dropdown).toBeHidden();
+  }
 }
 
 function visibleTrialIds(page: Page) {
