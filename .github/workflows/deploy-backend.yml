@@ -102,18 +102,39 @@ jobs:
           docker push ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:$IMAGE_SHA_TAG
           docker push ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest
 
-      - name: Describe current App Runner service
+      - name: Write App Runner source configuration
+        env:
+          APP_RUNNER_SERVICE_ARN: ${{ secrets.APP_RUNNER_SERVICE_ARN }}
+          IMAGE_IDENTIFIER: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_SHA_TAG }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
         run: |
           aws apprunner describe-service \
-            --service-arn "${{ secrets.APP_RUNNER_SERVICE_ARN }}" \
-            --query 'Service.{ServiceUrl:ServiceUrl,Status:Status,SourceConfiguration:SourceConfiguration}' \
-            --output json
+            --service-arn "$APP_RUNNER_SERVICE_ARN" \
+            --query 'Service.SourceConfiguration' \
+            --output json > /tmp/source-configuration.json
 
-      - name: Deploy latest image to App Runner
+          jq \
+            --arg imageIdentifier "$IMAGE_IDENTIFIER" \
+            --arg anthropicApiKey "$ANTHROPIC_API_KEY" \
+            --arg voyageApiKey "$VOYAGE_API_KEY" \
+            '
+              .ImageRepository.ImageIdentifier = $imageIdentifier
+              | .ImageRepository.ImageConfiguration.RuntimeEnvironmentVariables =
+                  ((.ImageRepository.ImageConfiguration.RuntimeEnvironmentVariables // {}) + {
+                    ANTHROPIC_API_KEY: $anthropicApiKey,
+                    VOYAGE_API_KEY: $voyageApiKey
+                  })
+            ' /tmp/source-configuration.json > /tmp/source-configuration-updated.json
+
+      - name: Deploy image and runtime secrets to App Runner
+        env:
+          APP_RUNNER_SERVICE_ARN: ${{ secrets.APP_RUNNER_SERVICE_ARN }}
         run: |
-          echo "Starting App Runner deployment for commit $IMAGE_SHA_TAG"
-          aws apprunner start-deployment \
-            --service-arn "${{ secrets.APP_RUNNER_SERVICE_ARN }}"
+          echo "Updating App Runner service for commit $IMAGE_SHA_TAG"
+          aws apprunner update-service \
+            --service-arn "$APP_RUNNER_SERVICE_ARN" \
+            --source-configuration file:///tmp/source-configuration-updated.json
 
       - name: Wait for backend readiness
         env:
