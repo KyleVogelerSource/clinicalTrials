@@ -61,7 +61,7 @@ To run a single frontend test file, use the Angular test runner and filter by fi
 
 ### Data flow
 The frontend `ClinicalStudyService` loads MeSH terminology from `shared/src/static/` JSON files at startup and exposes fuzzy-search (Fuse.js, threshold 0.3, max 10 results) via two methods:
-- `getMatchingConditions()` — used by the Designer's condition text input
+- `getMatchingConditions()` — used by the Dashboard's condition autocomplete input
 - `getSuggestedKeywords()` — used by the `KeywordSelector` primitive
 
 ### Frontend conventions
@@ -83,20 +83,24 @@ The Express server (`backend/src/server.ts`) runs on port 3000. Current endpoint
 - `POST /api/clinical-trials/results` — calls `AIResultsService` (Anthropic claude-sonnet-4-20250514), returns feasibility score, timeline buckets, recruitment impact breakdown, and termination reasons
 
 ### Page flow
-The app follows a multi-step workflow managed by `TrialWorkflowService`:
+The app follows a two-step workflow managed by `TrialWorkflowService`:
 
 ```
-Designer (step 1) → Selection (step 2) → Results (step 3)
+Dashboard (step 1) → Analysis (step 2)
 ```
 
-- **Designer** (`pages/designer/`) — collects search parameters, navigates to Selection
-- **Selection** (`pages/selection/`) — displays matched trials in a table with filter controls:
-  - **Date range**: filters by `startDate` (from/to, both optional)
-  - **Keywords**: must match ALL keywords against trial title + conditions (case-insensitive)
-  - `filteredTrials = computed()` derives from the full `trials` signal — full collection is never mutated, so filters are instantly reversible
-  - Counter shows "X of N Results" live
-- **Results** (`pages/results/`) — displays charts and a comparison table for selected trials. Sections: Overview (score + termination reasons bar chart), Recruitment Velocity, Expected Timeline, Heatmap, Data Plot (scatter), Benchmarks (placeholder), and Comparison Table.
-  - **Comparison Table**: shows selected trials with selectable columns. Columns are defined in `ALL_COMPARISON_METRICS` (`results.ts`) and each returns an actual value (`string | number`) — no checkmarks. Available columns: Phase, Status, Enrollment, Start Date, Completion Date, Sponsor, Sites, Conditions. Default visible: Phase, Status, Enrollment, Start Date, Completion Date. A "Columns ▾" dropdown lets users toggle which columns are shown. Columns are sortable (numeric sort for numbers, `localeCompare` for strings).
+- **Dashboard** (`pages/dashboard/`) — collects search parameters and displays matching trials. Key Search Criteria fields:
+  - **Disease/Condition**: chip-based multi-entry via `app-auto-complete-input` with MeSH autocomplete. Each selected condition appears as a removable chip; multiple conditions are joined with ` OR ` for the search API. Stored as `conditions = signal<string[]>([])`.
+  - **Current Phase**: multi-select via `app-multi-select` (`FormControl<string[]>`). Mapped to API codes via `mapPhase()`.
+  - **Patient Allocation Type**: multi-select via `app-multi-select` (`FormControl<string[]>`). Empty = "Any" (not sent to API).
+  - **Intervention Model**: multi-select via `app-multi-select` (`FormControl<string[]>`). Empty = "Any". Sent to live search mapped via `mapIntervention()`.
+  - **Blinding/Masking Type**: multi-select via `app-multi-select` (`FormControl<string[]>`). Empty = "Any".
+  - **Required/Ineligible Conditions**: chip-based via `app-keyword-selector`.
+  - **Year Range**: numeric year inputs (`startYear`/`endYear`), filters displayed trials client-side.
+  - Live search triggers on form value changes (debounced 300ms); results auto-select all when fresh.
+  - "Generate Report" button navigates to Analysis with selected trial IDs.
+- **Analysis** (`pages/analysis/`) — displays charts and a comparison table for selected trials. Sections: Overview (score + termination reasons bar chart), Recruitment Velocity, Expected Timeline, Heatmap, Data Plot (scatter), Benchmarks, and Comparison Table.
+  - **Comparison Table**: shows selected trials with selectable columns. Columns defined in `ALL_COMPARISON_METRICS` (`analysis.ts`), each returning an actual value (`string | number`). Available: Phase, Status, Enrollment, Start Date, Completion Date, Sponsor, Sites, Conditions. Default visible: Phase, Status, Enrollment, Start Date, Completion Date. A "Columns ▾" dropdown toggles visibility. Columns are sortable.
 - **Admin** (`pages/admin/`) — lazy-loaded, visible only to users with `user_roles` permission
 
 ### Authentication
@@ -151,4 +155,4 @@ DB credentials (local): host `localhost`, db/user/password all `clinicaltrials`.
 
 ## Repository
 **GitHub:** https://github.com/KyleVogelerSource/clinicalTrials
-**Active branch:** `FE-Scatter-Plot-Zoom`
+**Active branch:** `FE-Multi-Select-Under-"Search-Criteria"`

@@ -478,6 +478,24 @@
     gap: 0.4rem;
 }
 
+.condition-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.4rem;
+}
+
+.condition-chip {
+    background-color: var(--app-blue);
+    color: white;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
 .year-range-inputs {
     display: flex;
     align-items: center;
