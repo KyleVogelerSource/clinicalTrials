@@ -1,4 +1,4 @@
-import { Injectable, signal, inject } from "@angular/core";
+import { Injectable, signal, inject, effect } from "@angular/core";
 import { Observable, map, tap, finalize } from "rxjs";
 import { TrialResultsRequest } from "@shared/dto/TrialResultsRequest";
 import { ClinicalTrialSearchRequest } from "@shared/dto/ClinicalTrialSearchRequest";
@@ -58,7 +58,46 @@ export class TrialWorkflowService {
     selectedTrialIds = signal<string[]>([]);
     results = signal<ResultsModel>(new ResultsModel());
 
+    constructor() {
+        this.restoreSession();
+
+        // Save session state on changes
+        effect(() => {
+            const inputs = this.inputParams();
+            if (inputs) sessionStorage.setItem('tw_inputs', JSON.stringify(inputs));
+            else sessionStorage.removeItem('tw_inputs');
+        });
+
+        effect(() => {
+            const selections = this.selectedTrialIds();
+            if (selections.length > 0) sessionStorage.setItem('tw_selections', JSON.stringify(selections));
+            else sessionStorage.removeItem('tw_selections');
+        });
+    }
+
+    private restoreSession() {
+        const storedInputs = sessionStorage.getItem('tw_inputs');
+        const storedSelections = sessionStorage.getItem('tw_selections');
+
+        if (storedInputs) {
+            try {
+                this.inputParams.set(JSON.parse(storedInputs));
+                if (storedSelections) {
+                    this.selectedTrialIds.set(JSON.parse(storedSelections));
+                }
+                
+                // Re-fetch found trials to restore cache and list
+                this.searchTrials(false); 
+            } catch (e) {
+                console.error("Failed to parse session storage", e);
+                this.reset();
+            }
+        }
+    }
+
     reset() {
+        sessionStorage.removeItem('tw_inputs');
+        sessionStorage.removeItem('tw_selections');
         this.inputParams.set(null);
         this.foundTrials.set([]);
         this.filterWords.set([]);
@@ -77,7 +116,7 @@ export class TrialWorkflowService {
         this.importNotice.set(message);
     }
 
-    searchTrials() {
+    searchTrials(clearSelections = true) {
         const input = this.inputParams();
         if (!input) return;
 
@@ -104,7 +143,9 @@ export class TrialWorkflowService {
         });
 
         // Clear previous selections on new search
-        this.selectedTrialIds.set([]);
+        if (clearSelections) {
+            this.selectedTrialIds.set([]);
+        }
     }
 
     searchTrialsV2(request: ClinicalTrialSearchRequest): Observable<StudyTrial[]> {
