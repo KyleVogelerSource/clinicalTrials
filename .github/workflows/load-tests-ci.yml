@@ -1,0 +1,58 @@
+name: Load Test Validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'shared/**'
+      - 'load-tests/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/load-tests-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'shared/**'
+      - 'load-tests/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/load-tests-ci.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: load-tests-ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-load-tests:
+    name: validate-load-tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose configuration
+        run: docker compose --profile load-test config
+
+      - name: Validate k6 search script
+        run: docker run --rm -v "${{ github.workspace }}/load-tests:/scripts:ro" grafana/k6:0.53.0 inspect /scripts/search-api.js
+
+      - name: Validate k6 AI benchmark script
+        run: docker run --rm -v "${{ github.workspace }}/load-tests:/scripts:ro" grafana/k6:0.53.0 inspect /scripts/benchmark-ai.js
+
+      - name: Start local backend stack
+        run: docker compose up -d postgres backend
+
+      - name: Run local k6 smoke test
+        run: K6_VUS=1 K6_DURATION=10s docker compose --profile load-test run --rm k6
+
+      - name: Show backend logs on failure
+        if: failure()
+        run: docker compose logs postgres backend
+
+      - name: Stop local backend stack
+        if: always()
+        run: docker compose --profile load-test down -v

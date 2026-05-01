@@ -38,6 +38,11 @@ services:
       - DB_USER=clinicaltrials
       - DB_PASSWORD=clinicaltrials
       - DB_SSL=false
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
     depends_on:
       postgres:
         condition: service_healthy
@@ -66,6 +71,23 @@ services:
     depends_on:
       - frontend
       - backend
+
+  k6:
+    image: grafana/k6:0.53.0
+    profiles:
+      - load-test
+    working_dir: /scripts
+    command: ["run", "/scripts/${K6_SCRIPT:-smoke-local.js}"]
+    volumes:
+      - ./load-tests:/scripts:ro
+    environment:
+      - BASE_URL=http://backend:3000
+      - VUS=${K6_VUS:-10}
+      - DURATION=${K6_DURATION:-1m}
+      - ENABLE_AI_BENCHMARK=${ENABLE_AI_BENCHMARK:-false}
+    depends_on:
+      backend:
+        condition: service_healthy
 
 volumes:
   backend_node_modules:

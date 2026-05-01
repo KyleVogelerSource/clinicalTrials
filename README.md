@@ -127,6 +127,18 @@ http://localhost/api/health
 http://localhost/api/debug/status
 ```
 
+Optional load tests are available under `load-tests/`. Start with the safe local smoke test after Docker Compose is running:
+
+```bash
+k6 run load-tests/smoke-local.js
+```
+
+Or run the same smoke test through Docker Compose without installing k6 locally:
+
+```bash
+docker compose --profile load-test run --rm k6
+```
+
 ### 6. Stop the App
 
 Go back to the terminal where Docker is running and press:
