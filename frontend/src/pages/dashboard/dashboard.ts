@@ -659,9 +659,9 @@ export class Dashboard implements OnInit {
             this.searchForm.reset({
                 condition: '',
                 phase: [this.clinicalStudiesService.getDefaultPhase()],
-                allocationType: this.clinicalStudiesService.getDefaultAllocation(),
-                interventionModel: null,
-                blindingType: this.clinicalStudiesService.getDefaultMaskingType(),
+                allocationType: [],
+                interventionModel: [],
+                blindingType: [],
                 userPatients: null,
                 userInclusions: null,
                 userExclusions: null,
@@ -670,6 +670,7 @@ export class Dashboard implements OnInit {
                 userArms: null
             });
             this.conditionValue.set('');
+            this.conditions.set([]);
             this.startDateFilter.set('');
             this.endDateFilter.set('');
             this.requiredConditions.set([]);
@@ -679,7 +680,7 @@ export class Dashboard implements OnInit {
         }
     }
 
-    onDocumentClick(event: MouseEvent) {
+    onDocumentClick(_event: MouseEvent) {
         // Unused now since popovers are removed
     }
 
