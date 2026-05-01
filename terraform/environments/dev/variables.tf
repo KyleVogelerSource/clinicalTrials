@@ -55,3 +55,13 @@ variable "backend_image_tag" {
   type    = string
   default = "latest"
 }
+
+variable "cloudfront_aliases" {
+  type    = list(string)
+  default = []
+}
+
+variable "cloudfront_acm_certificate_arn" {
+  type    = string
+  default = null
+}
