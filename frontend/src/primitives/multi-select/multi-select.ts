@@ -63,7 +63,13 @@ export class MultiSelect implements ControlValueAccessor {
     toggleDropdown() {
         if (!this.isOpen()) {
             this.calculatePanelPosition();
-            window.addEventListener('scroll', this.closeOnScroll, true);
+            // Use setTimeout to avoid capturing the scroll event that might be triggered by 
+            // the click itself (e.g. if the browser or test tool auto-scrolls to the element)
+            setTimeout(() => {
+                if (this.isOpen()) {
+                    window.addEventListener('scroll', this.closeOnScroll, true);
+                }
+            }, 0);
         } else {
             window.removeEventListener('scroll', this.closeOnScroll, true);
         }

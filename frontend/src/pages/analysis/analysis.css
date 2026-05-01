@@ -145,7 +145,7 @@
 
 .viability-summary {
     overflow-y: auto;
-    max-height: 120px;
+    /* max-height: 120px; */
 }
 
 .viability-summary h5 {
@@ -565,6 +565,22 @@
     white-space: nowrap;
 }
 
+.r-comparison {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.r-orig, .r-hat {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #088989;
+}
+
+.r-orig {
+    color: #64748b; /* Using a neutral slate for baseline */
+}
+
 .btn-show-more {
     margin: 1rem auto;
     display: block;
@@ -783,6 +799,19 @@ input:checked + .slider:before {
     max-width: 200px;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.comparison-table tr.ranked-trial td {
+    background-color: #f0fdfa; /* Very light teal */
+}
+
+.comparison-table tr.ranked-trial {
+    border-left: 4px solid #088989;
+}
+
+.switch-control.disabled {
+    opacity: 0.5;
+    pointer-events: none;
 }
 
 /* Benchmarks */
