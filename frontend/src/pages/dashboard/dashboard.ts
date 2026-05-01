@@ -428,7 +428,6 @@ export class Dashboard implements OnInit {
                 this.clearFilters(false); // Don't clear the year range while searching
                 
                 // Only clear selections if this is a fresh search (no existing state in workflow service)
-                const currentSelections = this.workflowService.selectedTrialIds();
                 const existingParams = this.workflowService.inputParams();
                 const isReturning = existingParams?.condition === params.condition;
 
@@ -681,7 +680,7 @@ export class Dashboard implements OnInit {
         }
     }
 
-    onDocumentClick(event: MouseEvent) {
+    onDocumentClick(_event: MouseEvent) {
         // Unused now since popovers are removed
     }
 
