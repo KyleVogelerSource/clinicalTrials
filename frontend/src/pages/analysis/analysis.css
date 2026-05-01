@@ -565,6 +565,22 @@
     white-space: nowrap;
 }
 
+.r-comparison {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.r-orig, .r-hat {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #088989;
+}
+
+.r-orig {
+    color: #64748b; /* Using a neutral slate for baseline */
+}
+
 .btn-show-more {
     margin: 1rem auto;
     display: block;

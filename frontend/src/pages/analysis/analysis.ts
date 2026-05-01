@@ -150,7 +150,7 @@ export class Analysis implements OnInit {
         const trials = this.results().metricRows;
         if (!trials || trials.length < 2) return [];
 
-        const correlations: {x: string, y: string, r: number}[] = [];
+        const correlations: {x: string, y: string, r: number, rHat: number}[] = [];
 
         // Redundant metric pairs to ignore (mathematically dependent)
         const forbiddenPairs = new Set([
@@ -160,6 +160,31 @@ export class Analysis implements OnInit {
             "Total Enrollment|Site Efficiency", "Site Efficiency|Total Enrollment",
             "Site Count|Site Efficiency", "Site Efficiency|Site Count"
         ]);
+
+        const calculateR = (pts: {x: number, y: number}[]) => {
+            const n = pts.length;
+            if (n < 2) return 0;
+            const sumX = pts.reduce((a, b) => a + b.x, 0);
+            const sumY = pts.reduce((a, b) => a + b.y, 0);
+            const sumXY = pts.reduce((a, b) => a + (b.x * b.y), 0);
+            const sumX2 = pts.reduce((a, b) => a + (b.x * b.x), 0);
+            const sumY2 = pts.reduce((a, b) => a + (b.y * b.y), 0);
+
+            const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+            return denominator === 0 ? 0 : ((n * sumXY) - (sumX * sumY)) / denominator;
+        };
+
+        const calculateBounds = (values: number[]) => {
+            const sorted = [...values].sort((a, b) => a - b);
+            const n = sorted.length;
+            const q1 = sorted[Math.floor(n * 0.25)];
+            const q3 = sorted[Math.floor(n * 0.75)];
+            let iqr = q3 - q1;
+            const range = sorted[n - 1] - sorted[0];
+            const floor = range * 0.05; 
+            if (iqr < floor) iqr = floor;
+            return { min: q1 - 3 * iqr, max: q3 + 3 * iqr };
+        };
 
         // Only pair Design Inputs (X) with Performance Outputs (Y)
         for (const inputMetric of this.designInputs) {
@@ -175,21 +200,27 @@ export class Analysis implements OnInit {
                 
                 if (values.length < 2) continue;
 
-                const n = values.length;
-                const sumX = values.reduce((a, b) => a + b.x, 0);
-                const sumY = values.reduce((a, b) => a + b.y, 0);
-                const sumXY = values.reduce((a, b) => a + (b.x * b.y), 0);
-                const sumX2 = values.reduce((a, b) => a + (b.x * b.x), 0);
-                const sumY2 = values.reduce((a, b) => a + (b.y * b.y), 0);
+                const r = calculateR(values);
 
-                const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
-                const r = denominator === 0 ? 0 : ((n * sumXY) - (sumX * sumY)) / denominator;
+                // Calculate r-hat (outliers excluded)
+                let rHat = r;
+                if (values.length > 3) {
+                    const xBounds = calculateBounds(values.map(v => v.x));
+                    const yBounds = calculateBounds(values.map(v => v.y));
+                    const filtered = values.filter(v => 
+                        v.x >= xBounds.min && v.x <= xBounds.max && 
+                        v.y >= yBounds.min && v.y <= yBounds.max
+                    );
+                    if (filtered.length >= 2) {
+                        rHat = calculateR(filtered);
+                    }
+                }
 
-                correlations.push({ x: inputMetric, y: outputMetric, r });
+                correlations.push({ x: inputMetric, y: outputMetric, r, rHat });
             }
         }
 
-        return correlations.sort((a, b) => Math.abs(b.r) - Math.abs(a.r));
+        return correlations.sort((a, b) => Math.max(Math.abs(b.r), Math.abs(b.rHat)) - Math.max(Math.abs(a.r), Math.abs(a.rHat)));
     });
 
     visibleCorrelations = computed(() => {
@@ -276,12 +307,40 @@ export class Analysis implements OnInit {
         const getX = MetricRow.metricExtractors[this.dataPlotX()];
         const getY = MetricRow.metricExtractors[this.dataPlotY()];
 
-        const dataSet = metrics.map(r => {
+        let dataSet = metrics.map(r => {
            const x = getX(r);
            const y = getY(r);
            if (x === null || y === null) return null;
            return { x, y };
         }).filter((point): point is {x:number, y:number} => point !== null);
+
+        if (this.excludeOutliers() && dataSet.length > 3) {
+            const calculateBounds = (values: number[]) => {
+                const sorted = [...values].sort((a, b) => a - b);
+                const n = sorted.length;
+                const q1 = sorted[Math.floor(n * 0.25)];
+                const q3 = sorted[Math.floor(n * 0.75)];
+                let iqr = q3 - q1;
+
+                // Safety: If IQR is 0 (e.g. all points are 1), use a percentage of the total range
+                // to prevent the bounds from collapsing and removing all non-identical data.
+                const range = sorted[n - 1] - sorted[0];
+                const floor = range * 0.05; 
+                if (iqr < floor) iqr = floor;
+
+                // Use 3.0 (Outer Fences) for extreme outlier detection 
+                // which is less aggressive than the standard 1.5.
+                return { min: q1 - 3 * iqr, max: q3 + 3 * iqr };
+            };
+
+            const xBounds = calculateBounds(dataSet.map(d => d.x));
+            const yBounds = calculateBounds(dataSet.map(d => d.y));
+
+            dataSet = dataSet.filter(d => 
+                d.x >= xBounds.min && d.x <= xBounds.max && 
+                d.y >= yBounds.min && d.y <= yBounds.max
+            );
+        }
 
         return {
             datasets: [{
