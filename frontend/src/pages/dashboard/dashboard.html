@@ -131,6 +131,7 @@
                     [disabled]="selectedTrialIds().length === 0">Generate Report</button>
                 
                 <div class="secondary-actions-row">
+                    <button class="btn btn-secondary action-btn" (click)="onClearWorkspace()">Clear Workspace</button>
                     @if (authService.isLoggedIn()) {
                         <button class="btn btn-secondary action-btn" (click)="onToggleSavePanel()" [disabled]="!searchForm.valid">Save Search</button>
                     }
