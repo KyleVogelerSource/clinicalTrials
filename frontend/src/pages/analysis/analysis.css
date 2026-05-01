@@ -785,6 +785,19 @@ input:checked + .slider:before {
     text-overflow: ellipsis;
 }
 
+.comparison-table tr.ranked-trial td {
+    background-color: #f0fdfa; /* Very light teal */
+}
+
+.comparison-table tr.ranked-trial {
+    border-left: 4px solid #088989;
+}
+
+.switch-control.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
 /* Benchmarks */
 .benchmarks-grid {
     display: grid;
