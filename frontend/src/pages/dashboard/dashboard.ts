@@ -654,6 +654,33 @@ export class Dashboard implements OnInit {
         this.router.navigate(['/analysis']);
     }
 
+    onClearWorkspace() {
+        if (window.confirm("Are you sure you want to clear all inputs and selections? This action cannot be undone.")) {
+            this.workflowService.reset();
+            this.searchForm.reset({
+                condition: '',
+                phase: [this.clinicalStudiesService.getDefaultPhase()],
+                allocationType: [],
+                interventionModel: [],
+                blindingType: [],
+                userPatients: null,
+                userInclusions: null,
+                userExclusions: null,
+                userOutcomes: null,
+                userSites: null,
+                userArms: null
+            });
+            this.conditionValue.set('');
+            this.conditions.set([]);
+            this.startDateFilter.set('');
+            this.endDateFilter.set('');
+            this.requiredConditions.set([]);
+            this.ineligibleConditions.set([]);
+            this.foundTrials.set([]);
+            this.clearFilters();
+        }
+    }
+
     onDocumentClick(event: MouseEvent) {
         // Unused now since popovers are removed
     }
