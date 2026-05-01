@@ -76,6 +76,14 @@ data "aws_iam_policy_document" "github_actions" {
   statement {
     effect = "Allow"
     actions = [
+      "iam:PassRole"
+    ]
+    resources = [var.apprunner_ecr_access_role_arn]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
       "s3:PutObject",
       "s3:DeleteObject",
       "s3:GetObject",
