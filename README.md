@@ -127,6 +127,18 @@ http://localhost/api/health
 http://localhost/api/debug/status
 ```
 
+Optional load tests are available under `load-tests/`. Start with the safe local smoke test after Docker Compose is running:
+
+```bash
+k6 run load-tests/smoke-local.js
+```
+
+Or run the same smoke test through Docker Compose without installing k6 locally:
+
+```bash
+docker compose --profile load-test run --rm k6
+```
+
 ### 6. Stop the App
 
 Go back to the terminal where Docker is running and press:
@@ -577,7 +589,13 @@ ECR_REPOSITORY = clinicaltrials-dev-backend
 APP_RUNNER_SERVICE_ARN = value from backend_service_arn
 S3_BUCKET_NAME = value from frontend_bucket_name
 CLOUDFRONT_DISTRIBUTION_ID = value from cloudfront_distribution_id
+ANTHROPIC_API_KEY = Anthropic API key used by backend AI results and benchmark explanations
+VOYAGE_API_KEY = Voyage AI API key used by backend trial similarity embeddings
 ```
+
+The backend deployment workflow validates `ANTHROPIC_API_KEY` and `VOYAGE_API_KEY` before deploying to App Runner. If either secret is missing or rejected by the provider API, the backend deployment fails.
+
+The backend deployment workflow also updates App Runner runtime environment variables with those two secrets. If this is the first deployment after adding AI provider secrets support, run `terraform apply` from `terraform/environments/dev` first so the GitHub Actions role has `apprunner:UpdateService` permission.
 
 GitHub secrets help: https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets
 
@@ -612,7 +630,7 @@ For a deeper check, open:
 BACKEND_SERVICE_URL/api/debug/status
 ```
 
-The debug status should show that the backend is running and that the database is connected.
+The debug status should show that the backend is running, the database is connected, and both AI providers are configured and reachable. The endpoint reports only boolean provider status and redacted error metadata; it does not expose API key values.
 
 ### 13. Destroy the AWS Deployment When Finished
 

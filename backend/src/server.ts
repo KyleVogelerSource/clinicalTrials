@@ -21,6 +21,7 @@ import { createSavedSearch, deleteOwnedSavedSearch, getAccessibleSavedSearch, li
 import { compareTrials } from "./services/TrialCompareService";
 import { validateSavedSearchShareRequest, validateSavedSearchUpsertRequest } from "./validators/SavedSearchValidator";
 import { validateTrialCompareRequest } from "./validators/TrialCompareValidator";
+import { getAiProviderStatuses } from "./services/AiProviderStatusService";
 
 export const app = express();
 const port = Number(process.env.PORT ?? 3000);
@@ -65,8 +66,12 @@ app.get("/api/health", (_req: Request, res: Response) => {
   });
 });
 
-app.get("/api/debug/status", async (_req: Request, res: Response) => {
-  const databaseDiagnostics = await probeDatabaseConnection();
+app.get("/api/debug/status", async (req: Request, res: Response) => {
+  const forceAiProviderRefresh = req.query.refreshAiProviders === "true";
+  const [databaseDiagnostics, aiProviders] = await Promise.all([
+    probeDatabaseConnection(),
+    getAiProviderStatuses({ forceRefresh: forceAiProviderRefresh }),
+  ]);
   const databaseFailureMessage = !databaseDiagnostics.connected && databaseDiagnostics.failure
     ? [
       `Database connection probe failed at ${databaseDiagnostics.failure.capturedAt}.`,
@@ -90,6 +95,7 @@ app.get("/api/debug/status", async (_req: Request, res: Response) => {
     databaseConnected: isDatabaseConnected(),
     databaseDiagnostics,
     databaseFailureMessage,
+    aiProviders,
   });
 });
 
