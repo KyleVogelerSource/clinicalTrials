@@ -145,7 +145,7 @@
 
 .viability-summary {
     overflow-y: auto;
-    max-height: 120px;
+    /* max-height: 120px; */
 }
 
 .viability-summary h5 {
