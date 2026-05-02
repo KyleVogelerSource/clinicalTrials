@@ -132,6 +132,26 @@ export class Analysis implements OnInit {
         return date;
     });
 
+    estimatedSites = computed(() => {
+        const d = this.data();
+        const input = this.inputParams();
+        if (!d || !d.timelineBuckets || d.timelineBuckets.length === 0 || !input) return null;
+
+        const target = input.userPatients ?? 0;
+        // Find the bucket that contains our target enrollment
+        const bucket = d.timelineBuckets.find((b: any) => {
+            const label = b.patientBucket;
+            if (label.endsWith('+')) {
+                const min = parseInt(label.replace('+', ''));
+                return target >= min;
+            }
+            const [min, max] = label.split('-').map((v: string) => parseInt(v));
+            return target >= min && target < max;
+        });
+
+        return bucket ? (bucket as any).avgSites : (d.timelineBuckets[d.timelineBuckets.length - 1] as any).avgSites;
+    });
+
     // Charts Configuration
     dataPlotX = signal("Site Count");
     dataPlotY = signal("Recruitment Velocity");
@@ -161,6 +181,8 @@ export class Analysis implements OnInit {
         "Timeline Slippage",
         "Total Enrollment"
     ];
+
+    projectionMode = signal<'timeline' | 'sites'>('timeline');
 
     suggestedCorrelations = computed(() => {
         const trials = this.results().metricRows;
@@ -286,11 +308,14 @@ export class Analysis implements OnInit {
         if (!d || !d.timelineBuckets || d.timelineBuckets.length === 0) return null;
 
         const labels = d.timelineBuckets.map(b => b.patientBucket);
-        const userEstimate = d.avgRecruitmentDays;
+        const estValue = this.estimatedDuration() ?? 0;
+        const user = this.inputParams();
+        const userTarget = user?.userDuration ?? 0;
 
         const defaultEstColor = '#193F6A';
         const defaultActColor = '#35c0c0';
-        const userLineColor = '#DC344D';
+        const cardinalLineColor = '#DC344D';
+        const userLineColor = '#088989';
 
         const datasets: BarChartDataset[] = [
             {
@@ -305,14 +330,88 @@ export class Analysis implements OnInit {
             }
         ];
 
-        if (userEstimate > 0) {
+        if (estValue > 0) {
             datasets.push({
-                label: 'Your Estimate',
+                label: 'Cardinal Estimate',
                 type: 'line',
-                data: new Array(labels.length).fill(userEstimate),
-                borderColor: userLineColor,
+                data: new Array(labels.length).fill(estValue),
+                borderColor: cardinalLineColor,
                 backgroundColor: 'transparent',
                 borderWidth: 3,
+                pointRadius: 0,
+                tension: 0,
+                order: -1,
+                isTargetLine: true
+            } as any);
+        }
+
+        if (userTarget > 0) {
+            datasets.push({
+                label: 'User Target',
+                type: 'line',
+                data: new Array(labels.length).fill(userTarget),
+                borderColor: userLineColor,
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                pointRadius: 0,
+                tension: 0,
+                order: -1,
+                isTargetLine: true
+            } as any);
+        }
+
+        return {
+            labels,
+            datasets
+        };
+    });
+
+    siteChartData = computed<BarChartData | null>(() => {
+        const d = this.data();
+        if (!d || !d.timelineBuckets || d.timelineBuckets.length === 0) return null;
+
+        const labels = d.timelineBuckets.map(b => b.patientBucket);
+        const estValue = this.estimatedSites() ?? 0;
+        const user = this.inputParams();
+        const userTarget = user?.userSites ?? 0;
+
+        const defaultColor = '#193F6A';
+        const cardinalLineColor = '#DC344D';
+        const userLineColor = '#088989';
+
+        const datasets: BarChartDataset[] = [
+            {
+                label: 'Avg Sites',
+                data: d.timelineBuckets.map((b: any) => b.avgSites),
+                backgroundColor: defaultColor,
+            }
+        ];
+
+        if (estValue > 0) {
+            datasets.push({
+                label: 'Cardinal Estimate',
+                type: 'line',
+                data: new Array(labels.length).fill(estValue),
+                borderColor: cardinalLineColor,
+                backgroundColor: 'transparent',
+                borderWidth: 3,
+                pointRadius: 0,
+                tension: 0,
+                order: -1,
+                isTargetLine: true
+            } as any);
+        }
+
+        if (userTarget > 0) {
+            datasets.push({
+                label: 'User Target',
+                type: 'line',
+                data: new Array(labels.length).fill(userTarget),
+                borderColor: userLineColor,
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                borderDash: [5, 5],
                 pointRadius: 0,
                 tension: 0,
                 order: -1,
