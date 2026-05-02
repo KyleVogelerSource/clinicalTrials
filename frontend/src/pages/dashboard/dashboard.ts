@@ -385,7 +385,7 @@ export class Dashboard implements OnInit {
 
         // Setup live search
         this.searchForm.valueChanges.pipe(
-            debounceTime(300),
+            debounceTime(800),
             // Map form values and include the year range and condition signals
             switchMap(values => {
                 const condition = values.condition;
