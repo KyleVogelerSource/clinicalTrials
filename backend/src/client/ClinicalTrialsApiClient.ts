@@ -76,8 +76,17 @@ export class ClinicalTrialsApiClient {
   buildUrl(request: ClinicalTrialSearchRequest): string {
     const p = new URLSearchParams();
 
-    if (request.term)
-      p.set("query.term", request.term);
+    const advanced = this.buildAdvancedFilter(request);
+    let term = request.term || "";
+    
+    if (advanced) {
+      term = term ? `(${term}) AND (${advanced})` : advanced;
+    }
+
+    if (term) {
+      p.set("query.term", term);
+    }
+
     if (request.condition)
       p.set("query.cond", request.condition);
     if (request.intervention)
@@ -91,11 +100,6 @@ export class ClinicalTrialsApiClient {
 
     if (request.overallStatus) {
       p.set("filter.overallStatus", request.overallStatus);
-    }
-
-    const advanced = this.buildAdvancedFilter(request);
-    if (advanced) {
-      p.set("filter.advanced", advanced);
     }
 
     const pageSize = Math.min(request.pageSize ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
@@ -113,10 +117,12 @@ export class ClinicalTrialsApiClient {
   private buildAdvancedFilter(request: ClinicalTrialSearchRequest): string {
     const clauses: string[] = [];
 
-    if (request.phase) clauses.push(`AREA[Phase]${request.phase}`);
-    if (request.studyType) clauses.push(`AREA[StudyType]${request.studyType}`);
-    if (request.interventionModel) clauses.push(`AREA[DesignInterventionModel]${request.interventionModel}`);
-    if (request.primaryPurpose) clauses.push(`AREA[DesignPrimaryPurpose]${request.primaryPurpose}`);
+    if (request.phase) clauses.push(`AREA[Phase](${request.phase})`);
+    if (request.studyType) clauses.push(`AREA[StudyType](${request.studyType})`);
+    if (request.interventionModel) clauses.push(`AREA[DesignInterventionModel](${request.interventionModel})`);
+    if (request.allocationType) clauses.push(`AREA[DesignAllocation](${request.allocationType})`);
+    if (request.blindingType) clauses.push(`AREA[DesignMasking](${request.blindingType})`);
+    if (request.primaryPurpose) clauses.push(`AREA[DesignPrimaryPurpose](${request.primaryPurpose})`);
     if (request.sex) clauses.push(`AREA[Sex]${request.sex}`);
 
     if (request.healthyVolunteers !== undefined) {

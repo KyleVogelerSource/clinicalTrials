@@ -436,7 +436,9 @@ export class Dashboard implements OnInit {
                 const request: ClinicalTrialSearchRequest = {
                     condition: params.condition as string,
                     phase: this.mapPhase(params.phase!),
+                    allocationType: this.mapAllocation(params.allocationType as string[]),
                     interventionModel: this.mapIntervention(params.interventionModel as string[]),
+                    blindingType: this.mapBlinding(params.blindingType as string[]),
                     startDateFrom: params.startYear || undefined,
                     startDateTo: params.endYear || undefined,
                     requiredConditions: params.required.length > 0 ? params.required : undefined,
@@ -543,10 +545,10 @@ export class Dashboard implements OnInit {
         if (this.saveForm.invalid || !this.searchForm.valid) return;
 
         const formValues = this.searchForm.getRawValue();
-        const phaseValue = Array.isArray(formValues.phase) ? formValues.phase.join(' OR ') : (formValues.phase ?? '');
-        const allocationValue = Array.isArray(formValues.allocationType) ? formValues.allocationType.join(' OR ') : (formValues.allocationType ?? '');
-        const interventionValue = Array.isArray(formValues.interventionModel) && formValues.interventionModel.length > 0 ? formValues.interventionModel.join(' OR ') : null;
-        const blindingValue = Array.isArray(formValues.blindingType) ? formValues.blindingType.join(' OR ') : (formValues.blindingType ?? '');
+        const phaseValue = this.mapPhase(formValues.phase ?? []) || '';
+        const allocationValue = this.mapAllocation(formValues.allocationType ?? []) || '';
+        const interventionValue = this.mapIntervention(formValues.interventionModel ?? []) || null;
+        const blindingValue = this.mapBlinding(formValues.blindingType ?? []) || '';
         const criteria = mapDesignModelToSavedSearchCriteria({
             condition: formValues.condition ?? '',
             phase: phaseValue,
@@ -606,10 +608,10 @@ export class Dashboard implements OnInit {
     onProcess() {
         // Map form to DesignModel for existing results page compatibility
         const values = this.searchForm.value;
-        const phaseValue = Array.isArray(values.phase) ? values.phase.join(' OR ') : (values.phase ?? '');
-        const allocationValue = Array.isArray(values.allocationType) ? values.allocationType.join(' OR ') : (values.allocationType ?? '');
-        const interventionValue = Array.isArray(values.interventionModel) && values.interventionModel.length > 0 ? values.interventionModel.join(' OR ') : null;
-        const blindingValue = Array.isArray(values.blindingType) ? values.blindingType.join(' OR ') : (values.blindingType ?? '');
+        const phaseValue = this.mapPhase(values.phase ?? []) || '';
+        const allocationValue = this.mapAllocation(values.allocationType ?? []) || '';
+        const interventionValue = this.mapIntervention(values.interventionModel ?? []) || null;
+        const blindingValue = this.mapBlinding(values.blindingType ?? []) || '';
         this.workflowService.setInputs({
             condition: values.condition ?? '',
             phase: phaseValue,
@@ -750,6 +752,18 @@ export class Dashboard implements OnInit {
         return map[phases] || phases;
     }
 
+    private mapAllocation(allocations: string[] | string | null | undefined): string | undefined {
+        const map: Record<string, string> = {
+            'Randomized': 'RANDOMIZED',
+            'Non-Randomized': 'NON_RANDOMIZED',
+            'N/A': 'NA'
+        };
+        if (!allocations) return undefined;
+        const arr = Array.isArray(allocations) ? allocations : [allocations];
+        if (arr.length === 0) return undefined;
+        return arr.map(a => map[a]).filter(Boolean).join(' OR ') || undefined;
+    }
+
     private mapIntervention(models: string | string[] | null | undefined): string | undefined {
         const map: Record<string, string> = {
             'Single Group Assignment': 'SINGLE_GROUP',
@@ -762,5 +776,19 @@ export class Dashboard implements OnInit {
         const arr = Array.isArray(models) ? models : [models];
         if (arr.length === 0) return undefined;
         return arr.map(m => map[m]).filter(Boolean).join(' OR ') || undefined;
+    }
+
+    private mapBlinding(blindings: string[] | string | null | undefined): string | undefined {
+        const map: Record<string, string> = {
+            'None (Open Label)': 'NONE',
+            'Single': 'SINGLE',
+            'Double': 'DOUBLE',
+            'Triple': 'TRIPLE',
+            'Quadruple': 'QUADRUPLE'
+        };
+        if (!blindings) return undefined;
+        const arr = Array.isArray(blindings) ? blindings : [blindings];
+        if (arr.length === 0) return undefined;
+        return arr.map(b => map[b]).filter(Boolean).join(' OR ') || undefined;
     }
 }
