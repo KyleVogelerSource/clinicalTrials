@@ -20,6 +20,7 @@ export class AutoCompleteInput implements OnDestroy {
     clearOnSelect = input<boolean>(true);
     value = input<string>('');
     rightAlign = input<boolean>(false);
+    hintText = input<string>('');
 
     searchQueryChange = output<string>();
     itemSelected = output<string>();
@@ -27,6 +28,7 @@ export class AutoCompleteInput implements OnDestroy {
     elementRef = inject(ElementRef);
     queryControl = new FormControl('');
     isOpen = signal(false);
+    isFocused = signal(false);
 
     ngOnDestroy() {
         window.removeEventListener('scroll', this.closeOnScroll, true);
@@ -76,6 +78,7 @@ export class AutoCompleteInput implements OnDestroy {
 
     onFocus() {
         this.isOpen.set(true);
+        this.isFocused.set(true);
         this.searchQueryChange.emit(this.queryControl.value || '');
     }
 
@@ -131,6 +134,7 @@ export class AutoCompleteInput implements OnDestroy {
             }
         }
         this.isOpen.set(false);
+        this.isFocused.set(false);
     }
 
     onDocumentClick(event: MouseEvent) {
