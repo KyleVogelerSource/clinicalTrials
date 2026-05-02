@@ -37,6 +37,7 @@ export class ScatterChart implements OnDestroy {
     type = input<'scatter' | 'line'>('scatter');
     enableZoom = input<boolean>(true);
     showTrendLine = input<boolean>(false);
+    useRHatLabel = input<boolean>(false);
     exportPrefix = input<string>('');
 
     canvasRef = viewChild<ElementRef<HTMLCanvasElement>>('chartCanvas');
@@ -89,11 +90,12 @@ export class ScatterChart implements OnDestroy {
             const points = data.datasets[0].data.filter(p => p.x != null && p.y != null);
             if (points.length >= 2) {
                 const { linePoints, r } = this.computeTrendLine(points);
+                const rLabel = this.useRHatLabel() ? 'r̂' : 'r';
                 chartData = {
                     datasets: [
                         ...data.datasets,
                         {
-                            label: `Trend (r = ${r.toFixed(2)})`,
+                            label: `Trend (${rLabel} = ${r.toFixed(2)})`,
                             type: 'line' as any,
                             data: linePoints,
                             borderColor: '#DC344D',
