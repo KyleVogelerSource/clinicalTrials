@@ -98,7 +98,6 @@ export class Dashboard implements OnInit {
     expandedTrialId = signal<string | null>(null);
     conditionMatches = signal<string[]>([]);
     conditionValue = signal('');
-    conditions = signal<string[]>([]);
     sortOrder = signal<'date_desc' | 'date_asc' | 'enrollment_desc' | 'enrollment_asc' | 'name_asc' | 'name_desc' | 'status_asc' | 'status_desc'>('date_desc');
     startDateFilter = signal<string>('');
     endDateFilter = signal<string>('');
@@ -361,9 +360,7 @@ export class Dashboard implements OnInit {
             const allocationArr = savedParams.allocationType ? savedParams.allocationType.split(' OR ').map(s => s.trim()).filter(Boolean) : [];
             const interventionArr = savedParams.interventionModel ? savedParams.interventionModel.split(' OR ').map(s => s.trim()).filter(Boolean) : [];
             const blindingArr = savedParams.blindingType ? savedParams.blindingType.split(' OR ').map(s => s.trim()).filter(Boolean) : [];
-            const conditionList = savedParams.condition ? savedParams.condition.split(' OR ').map(s => s.trim()).filter(Boolean) : [];
-            this.conditions.set(conditionList);
-            this.conditionValue.set('');
+            
             this.searchForm.patchValue({
                 condition: savedParams.condition,
                 phase: phases,
@@ -377,6 +374,7 @@ export class Dashboard implements OnInit {
                 userOutcomes: savedParams.userOutcomes,
                 userArms: savedParams.userArms
             }, { emitEvent: false });
+            this.conditionValue.set(savedParams.condition || '');
             this.startDateFilter.set(savedParams.startDateFrom || '');
             this.endDateFilter.set(savedParams.startDateTo || '');
             this.requiredConditions.set(savedParams.required || []);
@@ -403,7 +401,7 @@ export class Dashboard implements OnInit {
                     startYear, endYear, required, ineligible 
                 });
             }),
-            distinctUntilChanged((prev, curr) =>
+            distinctUntilChanged((prev, curr) => 
                 prev.condition === curr.condition &&
                 JSON.stringify(prev.phase) === JSON.stringify(curr.phase) &&
                 JSON.stringify(prev.allocationType) === JSON.stringify(curr.allocationType) &&
@@ -438,7 +436,9 @@ export class Dashboard implements OnInit {
                 const request: ClinicalTrialSearchRequest = {
                     condition: params.condition as string,
                     phase: this.mapPhase(params.phase!),
+                    allocationType: this.mapAllocation(params.allocationType as string[]),
                     interventionModel: this.mapIntervention(params.interventionModel as string[]),
+                    blindingType: this.mapBlinding(params.blindingType as string[]),
                     startDateFrom: params.startYear || undefined,
                     startDateTo: params.endYear || undefined,
                     requiredConditions: params.required.length > 0 ? params.required : undefined,
@@ -491,6 +491,9 @@ export class Dashboard implements OnInit {
     }
 
     onConditionSearch(query: string) {
+        // Update the form control value as the user types to ensure validity and search triggering
+        this.searchForm.controls.condition.setValue(query, { emitEvent: true });
+        
         if (query && query.trim().length > 0) {
             const matches = this.clinicalStudiesService.getMatchingConditions(query.trim());
             this.conditionMatches.set(matches);
@@ -500,19 +503,9 @@ export class Dashboard implements OnInit {
     }
 
     onConditionSelected(condition: string) {
-        const trimmed = condition.trim();
-        if (!trimmed) return;
-        this.conditions.update(cs => cs.includes(trimmed) ? cs : [...cs, trimmed]);
-        this.conditionValue.set('');
+        this.searchForm.controls.condition.setValue(condition, { emitEvent: true });
+        this.conditionValue.set(condition);
         this.conditionMatches.set([]);
-        const joined = this.conditions().join(' OR ');
-        this.searchForm.controls.condition.setValue(joined, { emitEvent: true });
-    }
-
-    onRemoveCondition(condition: string) {
-        this.conditions.update(cs => cs.filter(c => c !== condition));
-        const joined = this.conditions().join(' OR ');
-        this.searchForm.controls.condition.setValue(joined, { emitEvent: true });
     }
 
     toggleTrialSelection(id: string) {
@@ -552,10 +545,10 @@ export class Dashboard implements OnInit {
         if (this.saveForm.invalid || !this.searchForm.valid) return;
 
         const formValues = this.searchForm.getRawValue();
-        const phaseValue = Array.isArray(formValues.phase) ? formValues.phase.join(' OR ') : (formValues.phase ?? '');
-        const allocationValue = Array.isArray(formValues.allocationType) ? formValues.allocationType.join(' OR ') : (formValues.allocationType ?? '');
-        const interventionValue = Array.isArray(formValues.interventionModel) && formValues.interventionModel.length > 0 ? formValues.interventionModel.join(' OR ') : null;
-        const blindingValue = Array.isArray(formValues.blindingType) ? formValues.blindingType.join(' OR ') : (formValues.blindingType ?? '');
+        const phaseValue = this.mapPhase(formValues.phase ?? []) || '';
+        const allocationValue = this.mapAllocation(formValues.allocationType ?? []) || '';
+        const interventionValue = this.mapIntervention(formValues.interventionModel ?? []) || null;
+        const blindingValue = this.mapBlinding(formValues.blindingType ?? []) || '';
         const criteria = mapDesignModelToSavedSearchCriteria({
             condition: formValues.condition ?? '',
             phase: phaseValue,
@@ -615,10 +608,10 @@ export class Dashboard implements OnInit {
     onProcess() {
         // Map form to DesignModel for existing results page compatibility
         const values = this.searchForm.value;
-        const phaseValue = Array.isArray(values.phase) ? values.phase.join(' OR ') : (values.phase ?? '');
-        const allocationValue = Array.isArray(values.allocationType) ? values.allocationType.join(' OR ') : (values.allocationType ?? '');
-        const interventionValue = Array.isArray(values.interventionModel) && values.interventionModel.length > 0 ? values.interventionModel.join(' OR ') : null;
-        const blindingValue = Array.isArray(values.blindingType) ? values.blindingType.join(' OR ') : (values.blindingType ?? '');
+        const phaseValue = this.mapPhase(values.phase ?? []) || '';
+        const allocationValue = this.mapAllocation(values.allocationType ?? []) || '';
+        const interventionValue = this.mapIntervention(values.interventionModel ?? []) || null;
+        const blindingValue = this.mapBlinding(values.blindingType ?? []) || '';
         this.workflowService.setInputs({
             condition: values.condition ?? '',
             phase: phaseValue,
@@ -670,7 +663,6 @@ export class Dashboard implements OnInit {
                 userArms: null
             });
             this.conditionValue.set('');
-            this.conditions.set([]);
             this.startDateFilter.set('');
             this.endDateFilter.set('');
             this.requiredConditions.set([]);
@@ -711,9 +703,6 @@ export class Dashboard implements OnInit {
             const allocationArr = criteria.allocationType ? criteria.allocationType.split(' OR ').map((s: string) => s.trim()).filter(Boolean) : [];
             const interventionArr = criteria.interventionModel ? criteria.interventionModel.split(' OR ').map((s: string) => s.trim()).filter(Boolean) : [];
             const blindingArr = criteria.blindingType ? criteria.blindingType.split(' OR ').map((s: string) => s.trim()).filter(Boolean) : [];
-            const conditionList = criteria.condition ? criteria.condition.split(' OR ').map((s: string) => s.trim()).filter(Boolean) : [];
-            this.conditions.set(conditionList);
-            this.conditionValue.set('');
 
             this.searchForm.patchValue({
                 condition: criteria.condition,
@@ -728,6 +717,7 @@ export class Dashboard implements OnInit {
                 userOutcomes: criteria.userOutcomes,
                 userArms: criteria.userArms
             });
+            this.conditionValue.set(criteria.condition);
             this.workflowService.setInputs(criteria);
             this.importStatus.set('success');
             this.importMessage.set(`Imported criteria from ${file.name}.`);
@@ -762,6 +752,18 @@ export class Dashboard implements OnInit {
         return map[phases] || phases;
     }
 
+    private mapAllocation(allocations: string[] | string | null | undefined): string | undefined {
+        const map: Record<string, string> = {
+            'Randomized': 'RANDOMIZED',
+            'Non-Randomized': 'NON_RANDOMIZED',
+            'N/A': 'NA'
+        };
+        if (!allocations) return undefined;
+        const arr = Array.isArray(allocations) ? allocations : [allocations];
+        if (arr.length === 0) return undefined;
+        return arr.map(a => map[a]).filter(Boolean).join(' OR ') || undefined;
+    }
+
     private mapIntervention(models: string | string[] | null | undefined): string | undefined {
         const map: Record<string, string> = {
             'Single Group Assignment': 'SINGLE_GROUP',
@@ -774,5 +776,19 @@ export class Dashboard implements OnInit {
         const arr = Array.isArray(models) ? models : [models];
         if (arr.length === 0) return undefined;
         return arr.map(m => map[m]).filter(Boolean).join(' OR ') || undefined;
+    }
+
+    private mapBlinding(blindings: string[] | string | null | undefined): string | undefined {
+        const map: Record<string, string> = {
+            'None (Open Label)': 'NONE',
+            'Single': 'SINGLE',
+            'Double': 'DOUBLE',
+            'Triple': 'TRIPLE',
+            'Quadruple': 'QUADRUPLE'
+        };
+        if (!blindings) return undefined;
+        const arr = Array.isArray(blindings) ? blindings : [blindings];
+        if (arr.length === 0) return undefined;
+        return arr.map(b => map[b]).filter(Boolean).join(' OR ') || undefined;
     }
 }
