@@ -14,6 +14,7 @@ export class KeywordSelector {
     inputId = input<string>('');
     placeholderText = input<string>('');
     selectedKeywords = input<string[]>([]);
+    hintText = input<string>('');
 
     addKeyword = output<string>();
     removeKeyword = output<string>();
