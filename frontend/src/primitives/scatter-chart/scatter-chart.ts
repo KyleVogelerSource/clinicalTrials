@@ -113,6 +113,11 @@ export class ScatterChart implements OnDestroy {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        top: 24
+                    }
+                },
                 elements: {
                     line: {
                         tension: 0.4
