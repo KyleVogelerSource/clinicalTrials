@@ -36,6 +36,7 @@ export interface DesignerFormValue {
   userExclusions?: number | null;
   userOutcomes?: number | null;
   userArms?: number | null;
+  userDuration?: number | null;
 
   // Refinement state
   selectedTrialIds?: string[];
@@ -85,6 +86,7 @@ export function mapDesignModelToSavedSearchCriteria(
     userExclusions: input.userExclusions ?? null,
     userOutcomes: input.userOutcomes ?? null,
     userArms: input.userArms ?? null,
+    userDuration: input.userDuration ?? null,
 
     // Refinement state
     selectedTrialIds: input.selectedTrialIds ?? [],
@@ -134,6 +136,7 @@ export function mapSavedSearchCriteriaToDesignModel(
     userExclusions: criteria.userExclusions ?? null,
     userOutcomes: criteria.userOutcomes ?? null,
     userArms: criteria.userArms ?? null,
+    userDuration: (criteria as any).userDuration ?? null,
 
     // Eligibility criteria for benchmark comparison
     inclusionCriteria: [],

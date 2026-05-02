@@ -34,7 +34,7 @@
                 <div class="card-body">
                     <p class="stat-subtitle">Projected Days to Target Enrollment</p>
                     <div class="recruitment-velocity">
-                        {{ data()?.avgRecruitmentDays }}<span class="unit"> days</span>
+                        {{ data()?.avgRecruitmentDays | number }}<span class="unit"> days</span>
                     </div>
                     
                     <div class="drivers-list">
@@ -223,9 +223,10 @@
             <div class="card card-half card-tall">
                 <div class="card-header">
                     <h4>Expected Timeline</h4>
-                    <span class="status-badge status-active">
-                        Target: {{ inputParams()?.userPatients || 0 }} Patients
-                    </span>
+                    <div class="header-badges">
+                        <span class="status-badge status-active">Target: {{ inputParams()?.userDuration || 0 | number }} Days</span>
+                        <span class="status-badge status-completed">Est: {{ estimatedDuration() || 0 | number }} Days</span>
+                    </div>
                 </div>
                 <div class="card-body">
                     @if (timelineChartData(); as chartData) {
@@ -238,8 +239,28 @@
                 </div>
             </div>
 
+            <!-- Required Sites -->
+            <div class="card card-half card-tall">
+                <div class="card-header">
+                    <h4>Required Sites</h4>
+                    <div class="header-badges">
+                        <span class="status-badge status-active">Target: {{ inputParams()?.userSites || 0 | number }} Sites</span>
+                        <span class="status-badge status-completed">Est: {{ estimatedSites() || 0 | number }} Sites</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (siteChartData(); as chartData) {
+                        <div class="chart-container" style="height: 100%;">
+                            <app-bar-chart [chartData]="chartData" xAxisLabel="Patient Ranges" yAxisLabel="Required Sites" />
+                        </div>
+                    } @else {
+                        <p class="no-data">Insufficient data to generate site projections.</p>
+                    }
+                </div>
+            </div>
+
             <!-- Metric Intersection Matrix -->
-            <div class="card card-half">
+            <div class="card card-full">
                 <div class="card-header">
                     <div class="header-with-info">
                         <h4>Metric Intersection Matrix (Co-occurrence %)</h4>

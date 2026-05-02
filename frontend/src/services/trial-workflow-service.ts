@@ -387,7 +387,8 @@ export class TrialWorkflowService {
                     if (trialsInBucket.length > 0) {
                         const actualDays = Math.round(trialsInBucket.reduce((acc: number, r: MetricRow) => acc + r.timelineSlippage, 0) / trialsInBucket.length);
                         const estimatedDays = Math.round(actualDays * 0.9);
-                        timelineBuckets.push({ patientBucket: label, estimatedDays, actualDays });
+                        const avgSites = Math.round(trialsInBucket.reduce((acc: number, r: MetricRow) => acc + r.siteCount, 0) / trialsInBucket.length);
+                        timelineBuckets.push({ patientBucket: label, estimatedDays, actualDays, avgSites });
                     }
                 }
             }
