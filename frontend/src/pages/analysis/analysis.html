@@ -222,7 +222,10 @@
             <!-- Expected Timeline -->
             <div class="card card-half card-tall">
                 <div class="card-header">
-                    <h4>Expected Timeline</h4>
+                    <div class="header-with-info">
+                        <h4>Expected Timeline</h4>
+                        <app-tooltip text="Historical recruitment duration grouped by patient enrollment ranges. Each bar represents the average days similar trials took to reach those participant counts." />
+                    </div>
                     <div class="header-badges">
                         <span class="status-badge status-active">Target: {{ inputParams()?.userDuration || 0 | number }} Days</span>
                         <span class="status-badge status-completed">Est: {{ estimatedDuration() || 0 | number }} Days</span>
@@ -242,7 +245,10 @@
             <!-- Required Sites -->
             <div class="card card-half card-tall">
                 <div class="card-header">
-                    <h4>Required Sites</h4>
+                    <div class="header-with-info">
+                        <h4>Required Sites</h4>
+                        <app-tooltip text="Historical clinical site counts grouped by patient enrollment ranges. Each bar shows the average number of sites utilized by trials of this scale." />
+                    </div>
                     <div class="header-badges">
                         <span class="status-badge status-active">Target: {{ inputParams()?.userSites || 0 | number }} Sites</span>
                         <span class="status-badge status-completed">Est: {{ estimatedSites() || 0 | number }} Sites</span>
