@@ -7,34 +7,43 @@
         <div class="metadata-layout">
             <div class="section form-card trial-specifics-card">
                 <div class="form-section user-trial-section">
-                    <h3>Your Trial Specifics</h3>
-
-                    <div [formGroup]="searchForm" class="form-grid">
-                        <div class="form-group">
-                            <label for="userPatients">Patients</label>
-                            <input id="userPatients" type="number" formControlName="userPatients" placeholder="-" min="0" />
-                        </div>
-                        <div class="form-group">
-                            <label for="userSites"># of Sites</label>
-                            <input id="userSites" type="number" formControlName="userSites" placeholder="-" min="0" />
-                        </div>
-                        <div class="form-group">
-                            <label for="userInclusions"># of Inclusions</label>
-                            <input id="userInclusions" type="number" formControlName="userInclusions" placeholder="-" min="0" />
-                        </div>
-                        <div class="form-group">
-                            <label for="userExclusions"># of Exclusions</label>
-                            <input id="userExclusions" type="number" formControlName="userExclusions" placeholder="-" min="0" />
-                        </div>
-                        <div class="form-group">
-                            <label for="userOutcomes"># of Outcomes</label>
-                            <input id="userOutcomes" type="number" formControlName="userOutcomes" placeholder="-" min="0" />
-                        </div>
-                        <div class="form-group">
-                            <label for="userArms"># of Arms/Interventions</label>
-                            <input id="userArms" type="number" formControlName="userArms" placeholder="-" min="0" />
-                        </div>
+                    <div class="expandable-header" (click)="showTrialSpecifics.set(!showTrialSpecifics())">
+                        <h3>Your Trial Specifics</h3>
+                        <span class="toggle-icon" [class.collapsed]="!showTrialSpecifics()">▼</span>
                     </div>
+
+                    @if (showTrialSpecifics()) {
+                        <div [formGroup]="searchForm" class="form-grid">
+                            <div class="form-group">
+                                <label for="userPatients">Patients</label>
+                                <input id="userPatients" type="number" formControlName="userPatients" placeholder="-" min="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="userSites"># of Sites</label>
+                                <input id="userSites" type="number" formControlName="userSites" placeholder="-" min="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="userInclusions"># of Inclusions</label>
+                                <input id="userInclusions" type="number" formControlName="userInclusions" placeholder="-" min="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="userExclusions"># of Exclusions</label>
+                                <input id="userExclusions" type="number" formControlName="userExclusions" placeholder="-" min="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="userOutcomes"># of Outcomes</label>
+                                <input id="userOutcomes" type="number" formControlName="userOutcomes" placeholder="-" min="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="userArms"># of Arms/Interventions</label>
+                                <input id="userArms" type="number" formControlName="userArms" placeholder="-" min="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="userDuration">Target Duration (Days)</label>
+                                <input id="userDuration" type="number" formControlName="userDuration" placeholder="-" min="0" />
+                            </div>
+                        </div>
+                    }
                 </div>
             </div>
             
@@ -49,6 +58,7 @@
                         </div>
                         <app-auto-complete-input inputId="condition" placeholderText="e.g., Type 2 Diabetes"
                             [suggestions]="conditionMatches()" [value]="conditionValue()" [clearOnSelect]="false"
+                            hintText="↵ to accept"
                             (searchQueryChange)="onConditionSearch($event)"
                             (itemSelected)="onConditionSelected($event)" />
                     </div>
@@ -59,7 +69,7 @@
                             <app-tooltip text="Trial development stage, from early safety (Phase 1) to post-market (Phase 4)." />
                         </div>
                         <app-multi-select id="phase" formControlName="phase" 
-                            [options]="phaseOptions" placeholder="Phase" />
+                            [options]="phaseOptions" placeholder="Phase" selectedLabel="Phases" />
                     </div>
 
                     <div class="form-group">
@@ -68,7 +78,7 @@
                             <app-tooltip text="Method used to assign participants to study groups (e.g., Randomized)." />
                         </div>
                         <app-multi-select id="allocationType" formControlName="allocationType"
-                            [options]="allocationOptions" placeholder="Any" />
+                            [options]="allocationOptions" placeholder="Any" selectedLabel="Types" />
                     </div>
 
                     <div class="form-group">
@@ -77,7 +87,7 @@
                             <app-tooltip text="The strategy for assigning interventions (e.g., Parallel, Crossover)." />
                         </div>
                         <app-multi-select id="intervention" formControlName="interventionModel"
-                            [options]="interventionOptions" placeholder="Any" />
+                            [options]="interventionOptions" placeholder="Any" selectedLabel="Models" />
                     </div>
 
                     <div class="form-group">
@@ -86,7 +96,7 @@
                             <app-tooltip text="Who is unaware of group assignments (Single, Double, etc.)." />
                         </div>
                         <app-multi-select id="blinding" formControlName="blindingType"
-                            [options]="blindingOptions" placeholder="Any" />
+                            [options]="blindingOptions" placeholder="Any" selectedLabel="Types" />
                     </div>
 
                     <div class="form-group">
@@ -94,6 +104,7 @@
                         <app-keyword-selector
                             [selectedKeywords]="requiredConditions()"
                             placeholderText="e.g., Hypertension"
+                            hintText="↵ to accept"
                             (addKeyword)="onAddRequired($event)"
                             (removeKeyword)="onRemoveRequired($event)"
                         />
@@ -104,6 +115,7 @@
                         <app-keyword-selector
                             [selectedKeywords]="ineligibleConditions()"
                             placeholderText="e.g., Heart Failure"
+                            hintText="↵ to accept"
                             (addKeyword)="onAddIneligible($event)"
                             (removeKeyword)="onRemoveIneligible($event)"
                         />
@@ -219,31 +231,47 @@
                                     </th>
                                     <th class="sortable-header col-id" (click)="toggleSort('date')">
                                         Trial ID
-                                        <span class="sort-indicator" [class.active]="sortOrder().startsWith('date')">
-                                            {{ sortOrder() === 'date_asc' ? '↑' : '↓' }}
+                                        <span class="sort-icon">
+                                            @if (sortOrder().startsWith('date')) {
+                                                {{ sortOrder() === 'date_asc' ? '▲' : '▼' }}
+                                            } @else {
+                                                ▽
+                                            }
                                         </span>
                                     </th>
                                     <th class="sortable-header col-name" (click)="toggleSort('name')">
                                         <div class="header-content">
                                             Name
-                                            <span class="sort-indicator" [class.active]="sortOrder().startsWith('name')">
-                                                {{ sortOrder() === 'name_asc' ? '↑' : '↓' }}
+                                            <span class="sort-icon">
+                                                @if (sortOrder().startsWith('name')) {
+                                                    {{ sortOrder() === 'name_asc' ? '▲' : '▼' }}
+                                                } @else {
+                                                    ▽
+                                                }
                                             </span>
                                         </div>
                                     </th>
                                     <th class="sortable-header col-participants" (click)="toggleSort('enrollment')">
                                         <div class="header-content">
                                             Participants
-                                            <span class="sort-indicator" [class.active]="sortOrder().startsWith('enrollment')">
-                                                {{ sortOrder() === 'enrollment_asc' ? '↑' : '↓' }}
+                                            <span class="sort-icon">
+                                                @if (sortOrder().startsWith('enrollment')) {
+                                                    {{ sortOrder() === 'enrollment_asc' ? '▲' : '▼' }}
+                                                } @else {
+                                                    ▽
+                                                }
                                             </span>
                                         </div>
                                     </th>
                                     <th class="sortable-header col-status" (click)="toggleSort('status')">
                                         <div class="header-content">
                                             Status
-                                            <span class="sort-indicator" [class.active]="sortOrder().startsWith('status')">
-                                                {{ sortOrder() === 'status_asc' ? '↑' : '↓' }}
+                                            <span class="sort-icon">
+                                                @if (sortOrder().startsWith('status')) {
+                                                    {{ sortOrder() === 'status_asc' ? '▲' : '▼' }}
+                                                } @else {
+                                                    ▽
+                                                }
                                             </span>
                                         </div>
                                     </th>
@@ -283,6 +311,7 @@
                                     <th class="col-status">
                                         <app-multi-select 
                                             placeholder="All Statuses"
+                                            selectedLabel="Statuses"
                                             [options]="statusOptions()"
                                             [ngModel]="statusFilter()"
                                             (ngModelChange)="statusFilter.set($event)"

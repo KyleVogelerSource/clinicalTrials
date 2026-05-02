@@ -98,6 +98,7 @@ export class Dashboard implements OnInit {
     expandedTrialId = signal<string | null>(null);
     conditionMatches = signal<string[]>([]);
     conditionValue = signal('');
+    showTrialSpecifics = signal(true);
     sortOrder = signal<'date_desc' | 'date_asc' | 'enrollment_desc' | 'enrollment_asc' | 'name_asc' | 'name_desc' | 'status_asc' | 'status_desc'>('date_desc');
     startDateFilter = signal<string>('');
     endDateFilter = signal<string>('');
@@ -178,6 +179,7 @@ export class Dashboard implements OnInit {
         userOutcomes: new FormControl<number | null>(null),
         userSites: new FormControl<number | null>(null),
         userArms: new FormControl<number | null>(null),
+        userDuration: new FormControl<number | null>(null),
     });
 
     saveForm = new FormGroup({
@@ -356,7 +358,8 @@ export class Dashboard implements OnInit {
         // Sync with existing state if any
         const savedParams = this.workflowService.inputParams();
         if (savedParams) {
-            const phases = savedParams.phase ? savedParams.phase.split(' OR ') : [this.clinicalStudiesService.getDefaultPhase()];
+            // Fix: ensure we don't accidentally include empty strings or whitespace which can cause double-counts in multi-select
+            const phases = savedParams.phase ? savedParams.phase.split(' OR ').map(s => s.trim()).filter(Boolean) : [];
             const allocationArr = savedParams.allocationType ? savedParams.allocationType.split(' OR ').map(s => s.trim()).filter(Boolean) : [];
             const interventionArr = savedParams.interventionModel ? savedParams.interventionModel.split(' OR ').map(s => s.trim()).filter(Boolean) : [];
             const blindingArr = savedParams.blindingType ? savedParams.blindingType.split(' OR ').map(s => s.trim()).filter(Boolean) : [];
@@ -372,13 +375,20 @@ export class Dashboard implements OnInit {
                 userInclusions: savedParams.userInclusions,
                 userExclusions: savedParams.userExclusions,
                 userOutcomes: savedParams.userOutcomes,
-                userArms: savedParams.userArms
+                userArms: savedParams.userArms,
+                userDuration: savedParams.userDuration
             }, { emitEvent: false });
             this.conditionValue.set(savedParams.condition || '');
             this.startDateFilter.set(savedParams.startDateFrom || '');
             this.endDateFilter.set(savedParams.startDateTo || '');
             this.requiredConditions.set(savedParams.required || []);
             this.ineligibleConditions.set(savedParams.ineligible || []);
+        } else {
+            // Fresh load: Start with empty selections to align with E2E expectations 
+            // and ensure explicit user intent.
+            this.searchForm.patchValue({
+                phase: []
+            }, { emitEvent: false });
         }
 
         // Setup live search
@@ -635,6 +645,7 @@ export class Dashboard implements OnInit {
             userExclusions: values.userExclusions ?? null,
             userOutcomes: values.userOutcomes ?? null,
             userArms: values.userArms ?? null,
+            userDuration: values.userDuration ?? null,
             inclusionCriteria: [],
             exclusionCriteria: [],
 
@@ -651,7 +662,7 @@ export class Dashboard implements OnInit {
             this.workflowService.reset();
             this.searchForm.reset({
                 condition: '',
-                phase: [this.clinicalStudiesService.getDefaultPhase()],
+                phase: [],
                 allocationType: [],
                 interventionModel: [],
                 blindingType: [],
@@ -660,7 +671,8 @@ export class Dashboard implements OnInit {
                 userExclusions: null,
                 userOutcomes: null,
                 userSites: null,
-                userArms: null
+                userArms: null,
+                userDuration: null
             });
             this.conditionValue.set('');
             this.startDateFilter.set('');

@@ -312,17 +312,20 @@
     position: relative;
 }
 
-.sort-indicator {
-    font-size: 0.7rem;
-    color: #ccc;
-    display: none;
-    width: 10px;
+.sort-icon {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-left: 0.4rem;
+    font-weight: 700;
 }
 
-.sort-indicator.active {
+.sortable-header:hover .sort-icon {
     color: var(--app-teal);
-    font-weight: bold;
+}
+
+.sortable-header .sort-icon {
     display: inline-block;
+    width: auto;
 }
 
 .filter-trigger {
@@ -439,6 +442,40 @@
     padding-bottom: 0.25rem;
     font-weight: 600;
     text-align: center;
+}
+
+.expandable-header {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    cursor: pointer;
+    border-bottom: 1px solid #e1e4e8;
+    margin-bottom: 0.5rem;
+    user-select: none;
+    transition: background-color 0.2s;
+}
+
+.expandable-header:hover {
+    background-color: #f8f9fa;
+}
+
+.expandable-header h3 {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0.25rem;
+    flex: 0 1 auto;
+}
+
+.toggle-icon {
+    font-size: 0.7rem;
+    color: #586069;
+    margin-left: 0.5rem;
+    transition: transform 0.2s ease;
+    display: inline-block;
+}
+
+.toggle-icon.collapsed {
+    transform: rotate(-90deg);
 }
 
 .form-group {

@@ -20,7 +20,8 @@ export const metricNames: string[] = [
     "Collaborator Count",
     "Timeline Slippage",
     "Masking Intensity",
-    "Condition Count"
+    "Condition Count",
+    "Arm Count"
 ];
 
 export class MetricRow {
@@ -40,6 +41,7 @@ export class MetricRow {
     timelineSlippage: number = 0;
     maskingIntensity: number = 0;
     conditionCount: number = 0;
+    armCount: number = 0;
 
     // TODO: Should probably keep these nullable and later filter out points where x or y are null
     static metricExtractors: Record<string, (r:MetricRow) => number | null> = {
@@ -58,6 +60,7 @@ export class MetricRow {
         "Timeline Slippage": (r) => r.timelineSlippage,
         "Masking Intensity": (r) => r.maskingIntensity,
         "Condition Count": (r) => r.conditionCount,
+        "Arm Count": (r) => r.armCount,
     };
 }
 

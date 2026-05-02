@@ -368,7 +368,7 @@ test.describe("Dashboard search workflow", () => {
     await expect(page.getByText("Global Site Distribution")).toBeVisible();
     await expect(page.getByText("Expected Timeline")).toBeVisible();
     await expect(page.getByText("Metric Correlation Analysis")).toBeVisible();
-    await expect(page.getByText("Metric Intersection Matrix")).toBeVisible();
+    await expect(page.getByText("Metric Commonality Matrix")).toBeVisible();
     await expect(page.getByText("Benchmarked Trials Comparison")).toBeVisible();
     await expect(page.getByRole("cell", { name: "Metformin Optimization in Type 2 Diabetes" })).toBeVisible();
 

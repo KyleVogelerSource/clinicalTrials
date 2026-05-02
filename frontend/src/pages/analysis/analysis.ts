@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal } from "@angular/core";
 import { CommonModule, DatePipe } from "@angular/common";
 import { Router } from "@angular/router";
 import { FormsModule } from "@angular/forms";
@@ -17,6 +17,29 @@ import { LoadingService } from "../../services/loading.service";
 interface IntersectionRow {
     name: string;
     values: number[];
+}
+
+export interface MatrixOperators {
+    highEnrollment: '>' | '<';
+    multiSite: '>' | '<';
+    longDuration: '>' | '<';
+    manyArms: '>' | '<';
+    strictInclusions: '>' | '<';
+    manyInterventions: '>' | '<';
+    manyOutcomes: '>' | '<';
+    wideAgeSpan: '>' | '<';
+}
+
+export interface MatrixThresholds {
+    highEnrollment: number;
+    multiSite: number;
+    longDuration: number;
+    manyArms: number;
+    strictInclusions: number;
+    manyInterventions: number;
+    manyOutcomes: number;
+    wideAgeSpan: number;
+    operators: MatrixOperators;
 }
 
 interface ComparisonMetric {
@@ -58,7 +81,8 @@ export const metricDescriptions: Record<string, string> = {
     "Collaborator Count": "Number of organizations partnering with the lead sponsor.",
     "Timeline Slippage": "Difference between planned and actual completion duration in days.",
     "Masking Intensity": "Number of groups (Participants, Providers, etc.) blinded from study assignments.",
-    "Condition Count": "Number of diseases or conditions being addressed in the protocol."
+    "Condition Count": "Number of diseases or conditions being addressed in the protocol.",
+    "Arm Count": "The number of arms or interventions in the study design."
 };
 
 @Component({
@@ -93,6 +117,20 @@ export class Analysis implements OnInit {
     
     heatmapFocus = signal<[number, number] | null>(null);
 
+    private hasAutoSelected = false;
+
+    constructor() {
+        effect(() => {
+            const correlations = this.suggestedCorrelations();
+            if (correlations.length > 0 && !this.hasAutoSelected) {
+                const top = correlations[0];
+                this.dataPlotX.set(top.x);
+                this.dataPlotY.set(top.y);
+                this.hasAutoSelected = true;
+            }
+        }, { allowSignalWrites: true });
+    }
+
     abs(val: number): number {
         return Math.abs(val);
     }
@@ -117,6 +155,26 @@ export class Analysis implements OnInit {
         return date;
     });
 
+    estimatedSites = computed(() => {
+        const d = this.data();
+        const input = this.inputParams();
+        if (!d || !d.timelineBuckets || d.timelineBuckets.length === 0 || !input) return null;
+
+        const target = input.userPatients ?? 0;
+        // Find the bucket that contains our target enrollment
+        const bucket = d.timelineBuckets.find((b: any) => {
+            const label = b.patientBucket;
+            if (label.endsWith('+')) {
+                const min = parseInt(label.replace('+', ''));
+                return target >= min;
+            }
+            const [min, max] = label.split('-').map((v: string) => parseInt(v));
+            return target >= min && target < max;
+        });
+
+        return bucket ? (bucket as any).avgSites : (d.timelineBuckets[d.timelineBuckets.length - 1] as any).avgSites;
+    });
+
     // Charts Configuration
     dataPlotX = signal("Site Count");
     dataPlotY = signal("Recruitment Velocity");
@@ -135,6 +193,7 @@ export class Analysis implements OnInit {
         "Collaborator Count",
         "Masking Intensity",
         "Condition Count",
+        "Arm Count",
         "Min Age",
         "Max Age"
     ];
@@ -145,6 +204,29 @@ export class Analysis implements OnInit {
         "Timeline Slippage",
         "Total Enrollment"
     ];
+
+    projectionMode = signal<'timeline' | 'sites'>('timeline');
+
+    matrixThresholds = signal<MatrixThresholds>({
+        highEnrollment: 200,
+        multiSite: 5,
+        longDuration: 365,
+        manyArms: 2,
+        strictInclusions: 10,
+        manyInterventions: 2,
+        manyOutcomes: 5,
+        wideAgeSpan: 40,
+        operators: {
+            highEnrollment: '>',
+            multiSite: '>',
+            longDuration: '>',
+            manyArms: '>',
+            strictInclusions: '>',
+            manyInterventions: '>',
+            manyOutcomes: '>',
+            wideAgeSpan: '>'
+        }
+    });
 
     suggestedCorrelations = computed(() => {
         const trials = this.results().metricRows;
@@ -177,13 +259,22 @@ export class Analysis implements OnInit {
         const calculateBounds = (values: number[]) => {
             const sorted = [...values].sort((a, b) => a - b);
             const n = sorted.length;
+            if (n < 4) return { min: -Infinity, max: Infinity };
+
             const q1 = sorted[Math.floor(n * 0.25)];
             const q3 = sorted[Math.floor(n * 0.75)];
             let iqr = q3 - q1;
+
+            const multiplier = 6.0;
             const range = sorted[n - 1] - sorted[0];
             const floor = range * 0.05; 
             if (iqr < floor) iqr = floor;
-            return { min: q1 - 3 * iqr, max: q3 + 3 * iqr };
+
+            const p99 = sorted[Math.floor(n * 0.99)];
+            return { 
+                min: q1 - multiplier * iqr, 
+                max: Math.max(q3 + multiplier * iqr, p99) 
+            };
         };
 
         // Only pair Design Inputs (X) with Performance Outputs (Y)
@@ -261,11 +352,14 @@ export class Analysis implements OnInit {
         if (!d || !d.timelineBuckets || d.timelineBuckets.length === 0) return null;
 
         const labels = d.timelineBuckets.map(b => b.patientBucket);
-        const userEstimate = d.avgRecruitmentDays;
+        const estValue = this.estimatedDuration() ?? 0;
+        const user = this.inputParams();
+        const userTarget = user?.userDuration ?? 0;
 
         const defaultEstColor = '#193F6A';
         const defaultActColor = '#35c0c0';
-        const userLineColor = '#DC344D';
+        const cardinalLineColor = '#DC344D';
+        const userLineColor = '#088989';
 
         const datasets: BarChartDataset[] = [
             {
@@ -280,18 +374,93 @@ export class Analysis implements OnInit {
             }
         ];
 
-        if (userEstimate > 0) {
+        if (estValue > 0) {
             datasets.push({
-                label: 'Your Estimate',
+                label: 'Cardinal Estimate',
                 type: 'line',
-                data: new Array(labels.length).fill(userEstimate),
-                borderColor: userLineColor,
-                backgroundColor: userLineColor,
+                data: new Array(labels.length).fill(estValue),
+                borderColor: cardinalLineColor,
+                backgroundColor: 'transparent',
                 borderWidth: 3,
                 pointRadius: 0,
                 tension: 0,
-                order: -1
-            });
+                order: -1,
+                isTargetLine: true
+            } as any);
+        }
+
+        if (userTarget > 0) {
+            datasets.push({
+                label: 'User Target',
+                type: 'line',
+                data: new Array(labels.length).fill(userTarget),
+                borderColor: userLineColor,
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                pointRadius: 0,
+                tension: 0,
+                order: -1,
+                isTargetLine: true
+            } as any);
+        }
+
+        return {
+            labels,
+            datasets
+        };
+    });
+
+    siteChartData = computed<BarChartData | null>(() => {
+        const d = this.data();
+        if (!d || !d.timelineBuckets || d.timelineBuckets.length === 0) return null;
+
+        const labels = d.timelineBuckets.map(b => b.patientBucket);
+        const estValue = this.estimatedSites() ?? 0;
+        const user = this.inputParams();
+        const userTarget = user?.userSites ?? 0;
+
+        const defaultColor = '#193F6A';
+        const cardinalLineColor = '#DC344D';
+        const userLineColor = '#088989';
+
+        const datasets: BarChartDataset[] = [
+            {
+                label: 'Avg Sites',
+                data: d.timelineBuckets.map((b: any) => b.avgSites),
+                backgroundColor: defaultColor,
+            }
+        ];
+
+        if (estValue > 0) {
+            datasets.push({
+                label: 'Cardinal Estimate',
+                type: 'line',
+                data: new Array(labels.length).fill(estValue),
+                borderColor: cardinalLineColor,
+                backgroundColor: 'transparent',
+                borderWidth: 3,
+                pointRadius: 0,
+                tension: 0,
+                order: -1,
+                isTargetLine: true
+            } as any);
+        }
+
+        if (userTarget > 0) {
+            datasets.push({
+                label: 'User Target',
+                type: 'line',
+                data: new Array(labels.length).fill(userTarget),
+                borderColor: userLineColor,
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                pointRadius: 0,
+                tension: 0,
+                order: -1,
+                isTargetLine: true
+            } as any);
         }
 
         return {
@@ -318,21 +487,25 @@ export class Analysis implements OnInit {
             const calculateBounds = (values: number[]) => {
                 const sorted = [...values].sort((a, b) => a - b);
                 const n = sorted.length;
+                if (n < 4) return { min: -Infinity, max: Infinity };
+
                 const q1 = sorted[Math.floor(n * 0.25)];
                 const q3 = sorted[Math.floor(n * 0.75)];
                 let iqr = q3 - q1;
 
-                // Safety: If IQR is 0 (e.g. all points are 1), use a percentage of the total range
-                // to prevent the bounds from collapsing and removing all non-identical data.
+                // Use a more generous multiplier (6.0 for "Far Out" outliers)
+                // and ensure we don't chop off the top 1% of data unless it's truly extreme.
+                const multiplier = 6.0;
                 const range = sorted[n - 1] - sorted[0];
-                const floor = range * 0.05; 
+                const floor = range * 0.05;
                 if (iqr < floor) iqr = floor;
 
-                // Use 3.0 (Outer Fences) for extreme outlier detection 
-                // which is less aggressive than the standard 1.5.
-                return { min: q1 - 3 * iqr, max: q3 + 3 * iqr };
+                const p99 = sorted[Math.floor(n * 0.99)];
+                return { 
+                    min: q1 - multiplier * iqr, 
+                    max: Math.max(q3 + multiplier * iqr, p99) 
+                };
             };
-
             const xBounds = calculateBounds(dataSet.map(d => d.x));
             const yBounds = calculateBounds(dataSet.map(d => d.y));
 
@@ -356,18 +529,24 @@ export class Analysis implements OnInit {
     intersectionMatrix = computed<IntersectionRow[]>(() => {
         const trials = this.results().metricRows;
         if (!trials || trials.length === 0) return [];
+        const thresh = this.matrixThresholds();
+        const ops = thresh.operators;
+
+        const check = (val: number, threshold: number, op: '>' | '<') => 
+            op === '>' ? val > threshold : val < threshold;
 
         const rowFactors = [
-            { name: 'High Enrollment (>200)', check: (t: MetricRow) => t.totalEnrollment > 200 },
-            { name: 'Multi-Site (>5)', check: (t: MetricRow) => t.siteCount > 5 },
-            { name: 'Long Duration (>1yr)', check: (t: MetricRow) => t.timelineSlippage > 365 }
+            { name: `Enrollment ${ops.highEnrollment} ${thresh.highEnrollment}`, check: (t: MetricRow) => check(t.totalEnrollment, thresh.highEnrollment, ops.highEnrollment) },
+            { name: `Site Count ${ops.multiSite} ${thresh.multiSite}`, check: (t: MetricRow) => check(t.siteCount, thresh.multiSite, ops.multiSite) },
+            { name: `Duration ${ops.longDuration} ${thresh.longDuration}d`, check: (t: MetricRow) => check(t.timelineSlippage, thresh.longDuration, ops.longDuration) },
+            { name: `Arm Count ${ops.manyArms} ${thresh.manyArms}`, check: (t: MetricRow) => check(t.armCount, thresh.manyArms, ops.manyArms) }
         ];
 
         const colFactors = [
-            { name: 'Strict Inclusions (>10)', check: (t: MetricRow) => t.inclusionStrictness > 10 },
-            { name: 'Many Interventions (>2)', check: (t: MetricRow) => t.interventionCount > 2 },
-            { name: 'Many Outcomes (>5)', check: (t: MetricRow) => t.outcomeDensity > 5 },
-            { name: 'Wide Age Span (>40)', check: (t: MetricRow) => (t.ageSpan ?? 0) > 40 }
+            { name: `Inclusions ${ops.strictInclusions} ${thresh.strictInclusions}`, check: (t: MetricRow) => check(t.inclusionStrictness, thresh.strictInclusions, ops.strictInclusions) },
+            { name: `Interventions ${ops.manyInterventions} ${thresh.manyInterventions}`, check: (t: MetricRow) => check(t.interventionCount, thresh.manyInterventions, ops.manyInterventions) },
+            { name: `Outcomes ${ops.manyOutcomes} ${thresh.manyOutcomes}`, check: (t: MetricRow) => check(t.outcomeDensity, thresh.manyOutcomes, ops.manyOutcomes) },
+            { name: `Age Span ${ops.wideAgeSpan} ${thresh.wideAgeSpan}`, check: (t: MetricRow) => check(t.ageSpan ?? 0, thresh.wideAgeSpan, ops.wideAgeSpan) }
         ];
 
         return rowFactors.map(row => {
@@ -381,12 +560,16 @@ export class Analysis implements OnInit {
         });
     });
 
-    matrixHeaders = [
-        "Strict Inclusions (>10)",
-        "Many Interventions (>2)",
-        "Many Outcomes (>5)",
-        "Wide Age Span (>40)"
-    ];
+    matrixHeaders = computed(() => {
+        const thresh = this.matrixThresholds();
+        const ops = thresh.operators;
+        return [
+            `Inclusions ${ops.strictInclusions} ${thresh.strictInclusions}`,
+            `Interventions ${ops.manyInterventions} ${thresh.manyInterventions}`,
+            `Outcomes ${ops.manyOutcomes} ${thresh.manyOutcomes}`,
+            `Age Span ${ops.wideAgeSpan} ${thresh.wideAgeSpan}`
+        ];
+    });
 
     topSites = computed(() => this.results().topSites);
 
@@ -400,7 +583,8 @@ export class Analysis implements OnInit {
             { label: 'Inclusions', key: 'inclusionStrictness', paramKey: 'userInclusions', userVal: user?.userInclusions ?? 0 },
             { label: 'Exclusions', key: 'exclusionStrictness', paramKey: 'userExclusions', userVal: user?.userExclusions ?? 0 },
             { label: 'Outcomes', key: 'outcomeDensity', paramKey: 'userOutcomes', userVal: user?.userOutcomes ?? 0 },
-            { label: 'Sites', key: 'siteCount', paramKey: 'userSites', userVal: user?.userSites ?? 0 }
+            { label: 'Sites', key: 'siteCount', paramKey: 'userSites', userVal: user?.userSites ?? 0 },
+            { label: 'Arms', key: 'armCount', paramKey: 'userArms', userVal: user?.userArms ?? 0 }
         ];
 
         return metrics.map(m => {
@@ -591,5 +775,23 @@ export class Analysis implements OnInit {
         if (coords) {
             this.heatmapFocus.set(coords);
         }
+    }
+
+    onUpdateMatrixThreshold(key: string, value: string) {
+        const val = value === '' ? 0 : Math.max(0, parseInt(value));
+        this.matrixThresholds.update(prev => ({
+            ...prev,
+            [key]: val
+        }));
+    }
+
+    toggleMatrixOperator(key: keyof MatrixOperators) {
+        this.matrixThresholds.update(prev => ({
+            ...prev,
+            operators: {
+                ...prev.operators,
+                [key]: prev.operators[key] === '>' ? '<' : '>'
+            }
+        }));
     }
 }
