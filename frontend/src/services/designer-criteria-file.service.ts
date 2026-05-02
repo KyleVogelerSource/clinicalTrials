@@ -86,10 +86,10 @@ export function normalizeImportedCriteria(
 ): DesignModel {
   return {
     condition: typeof input.condition === "string" ? input.condition.trim() : "",
-    phase: resolveMultiOptionValue(input.phase as string[] | string, defaults.phases, PHASE_MAP),
-    allocationType: resolveMultiOptionValue(input.allocationType as string[] | string, defaults.allocations, ALLOCATION_MAP),
-    interventionModel: resolveMultiOptionValue(input.interventionModel as string[] | string, defaults.interventionModels, INTERVENTION_MODEL_MAP),
-    blindingType: resolveMultiOptionValue(input.blindingType as string[] | string, defaults.blindingTypes, BLINDING_MAP),
+    phase: resolveMultiOptionValue((input.phase as string[] | string) || defaults.phase, defaults.phases, PHASE_MAP),
+    allocationType: resolveMultiOptionValue((input.allocationType as string[] | string) || defaults.allocationType, defaults.allocations, ALLOCATION_MAP),
+    interventionModel: resolveMultiOptionValue((input.interventionModel as string[] | string), defaults.interventionModels, INTERVENTION_MODEL_MAP),
+    blindingType: resolveMultiOptionValue((input.blindingType as string[] | string) || defaults.blindingType, defaults.blindingTypes, BLINDING_MAP),
     minAge: toNullableNumber(input.minAge),
     maxAge: toNullableNumber(input.maxAge),
     sex: resolveOptionValue(input.sex as string, defaults.sexes, defaults.sex),

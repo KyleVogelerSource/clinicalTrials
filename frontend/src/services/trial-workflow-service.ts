@@ -184,6 +184,8 @@ export class TrialWorkflowService {
             ? `${firstLocation.city || ''}${firstLocation.city && firstLocation.country ? ', ' : ''}${firstLocation.country || ''}`
             : 'Unknown';
 
+        const uniqueCountries = Array.from(new Set(locations.map(loc => loc.country).filter((c): c is string => !!c)));
+
         return {
             nctId: study.protocolSection.identificationModule.nctId,
             briefTitle: study.protocolSection.identificationModule.briefTitle,
@@ -196,7 +198,8 @@ export class TrialWorkflowService {
             phase: study.protocolSection.designModule?.phases?.[0] || 'N/A',
             description: study.protocolSection.descriptionModule?.briefSummary || '',
             overallStatus: study.protocolSection.statusModule?.overallStatus || 'Unknown',
-            sites: locations.map(loc => loc.facility).filter((f): f is string => !!f)
+            sites: locations.map(loc => loc.facility).filter((f): f is string => !!f),
+            countries: uniqueCountries
         }
     }
 

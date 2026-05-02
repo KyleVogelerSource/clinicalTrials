@@ -9,6 +9,7 @@ export interface StudyTrial {
     completionDate: string;
     sponsor: string;
     sites: string[];
+    countries: string[];
     phase: string;
     description: string;
     overallStatus: string;
