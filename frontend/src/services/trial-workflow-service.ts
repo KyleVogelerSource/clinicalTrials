@@ -220,7 +220,7 @@ export class TrialWorkflowService {
         if (request) {
             const normalizedTrials = trials.map(t => this.normalizer.normalizeForBenchmark(t));
 
-            this.loadingService.show('AI is analyzing clinical trials data...');
+            this.loadingService.show('Analyzing clinical trials data...');
             this.apiService.getResults(request, normalizedTrials).pipe(
                 finalize(() => this.loadingService.hide())
             ).subscribe({
