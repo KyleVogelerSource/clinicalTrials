@@ -58,7 +58,8 @@ export const metricDescriptions: Record<string, string> = {
     "Collaborator Count": "Number of organizations partnering with the lead sponsor.",
     "Timeline Slippage": "Difference between planned and actual completion duration in days.",
     "Masking Intensity": "Number of groups (Participants, Providers, etc.) blinded from study assignments.",
-    "Condition Count": "Number of diseases or conditions being addressed in the protocol."
+    "Condition Count": "Number of diseases or conditions being addressed in the protocol.",
+    "Arm Count": "The number of arms or interventions in the study design."
 };
 
 @Component({
@@ -135,6 +136,7 @@ export class Analysis implements OnInit {
         "Collaborator Count",
         "Masking Intensity",
         "Condition Count",
+        "Arm Count",
         "Min Age",
         "Max Age"
     ];
@@ -400,7 +402,8 @@ export class Analysis implements OnInit {
             { label: 'Inclusions', key: 'inclusionStrictness', paramKey: 'userInclusions', userVal: user?.userInclusions ?? 0 },
             { label: 'Exclusions', key: 'exclusionStrictness', paramKey: 'userExclusions', userVal: user?.userExclusions ?? 0 },
             { label: 'Outcomes', key: 'outcomeDensity', paramKey: 'userOutcomes', userVal: user?.userOutcomes ?? 0 },
-            { label: 'Sites', key: 'siteCount', paramKey: 'userSites', userVal: user?.userSites ?? 0 }
+            { label: 'Sites', key: 'siteCount', paramKey: 'userSites', userVal: user?.userSites ?? 0 },
+            { label: 'Arms', key: 'armCount', paramKey: 'userArms', userVal: user?.userArms ?? 0 }
         ];
 
         return metrics.map(m => {
