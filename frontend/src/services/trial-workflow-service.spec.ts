@@ -33,6 +33,7 @@ describe('TrialWorkflowService', () => {
     userExclusions: null,
     userOutcomes: null,
     userArms: null,
+    userDuration: null,
     inclusionCriteria: [],
     exclusionCriteria: [],
   };
@@ -77,6 +78,7 @@ describe('TrialWorkflowService', () => {
         secondaryOutcomes: [{ measure: 'Weight' }],
       },
       armsInterventionsModule: {
+        armGroups: [{ armGroupLabel: 'Arm A' }, { armGroupLabel: 'Arm B' }],
         interventions: [{ name: 'Drug A' }, { name: 'Lifestyle' }],
       },
     },
@@ -174,6 +176,7 @@ describe('TrialWorkflowService', () => {
       totalEnrollment: 200,
       siteCount: 1,
       interventionCount: 2,
+      armCount: 2,
       collaboratorCount: 2,
       maskingIntensity: 2,
       conditionCount: 1,

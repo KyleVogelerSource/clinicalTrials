@@ -225,6 +225,7 @@ export class TrialWorkflowService {
                 minAge: trial.protocolSection.eligibilityModule?.minimumAge,
                 maxAge: trial.protocolSection.eligibilityModule?.maximumAge,
                 interventionCount: trial.protocolSection.armsInterventionsModule?.interventions?.length ?? 0,
+                armCount: trial.protocolSection.armsInterventionsModule?.armGroups?.length ?? 0,
                 collaboratorCount: trial.protocolSection.sponsorCollaboratorsModule?.collaborators?.length ?? 0,
                 completedDate: trial.protocolSection.statusModule?.primaryCompletionDateStruct,
                 maskingInfo: trial.protocolSection.designModule?.designInfo?.maskingInfo?.whoMasked ?? [],
@@ -354,6 +355,7 @@ export class TrialWorkflowService {
                 row.collaboratorCount = trial.collaboratorCount;
                 row.maskingIntensity = trial.maskingInfo.length;
                 row.conditionCount = trial.conditionCount;
+                row.armCount = trial.armCount;
                 return row;
             });
 
@@ -385,7 +387,8 @@ export class TrialWorkflowService {
                     if (trialsInBucket.length > 0) {
                         const actualDays = Math.round(trialsInBucket.reduce((acc: number, r: MetricRow) => acc + r.timelineSlippage, 0) / trialsInBucket.length);
                         const estimatedDays = Math.round(actualDays * 0.9);
-                        timelineBuckets.push({ patientBucket: label, estimatedDays, actualDays });
+                        const avgSites = Math.round(trialsInBucket.reduce((acc: number, r: MetricRow) => acc + r.siteCount, 0) / trialsInBucket.length);
+                        timelineBuckets.push({ patientBucket: label, estimatedDays, actualDays, avgSites });
                     }
                 }
             }
@@ -461,7 +464,8 @@ export class TrialWorkflowService {
                 { name: 'Inclusion Strictness', key: 'inclusionStrictness', invert: true },
                 { name: 'Age Span', key: 'ageSpan', invert: false },
                 { name: 'Intervention Count', key: 'interventionCount', invert: true },
-                { name: 'Outcome Density', key: 'outcomeDensity', invert: true }
+                { name: 'Outcome Density', key: 'outcomeDensity', invert: true },
+                { name: 'Arm Count', key: 'armCount', invert: true }
             ];
 
             const drivers = metricsToTest.map(m => {

@@ -38,6 +38,7 @@ describe('designer-criteria-file.service', () => {
       userExclusions: null,
       userOutcomes: null,
       userArms: null,
+      userDuration: null,
       inclusionCriteria: [],
       exclusionCriteria: [],
     }));
@@ -79,6 +80,7 @@ describe('designer-criteria-file.service', () => {
       userExclusions: null,
       userOutcomes: null,
       userArms: null,
+      userDuration: null,
       inclusionCriteria: [],
       exclusionCriteria: [],
     });
@@ -109,6 +111,7 @@ describe('designer-criteria-file.service', () => {
       userExclusions: null,
       userOutcomes: null,
       userArms: null,
+      userDuration: null,
       inclusionCriteria: [],
       exclusionCriteria: [],
     });

@@ -34,7 +34,7 @@
                 <div class="card-body">
                     <p class="stat-subtitle">Projected Days to Target Enrollment</p>
                     <div class="recruitment-velocity">
-                        {{ data()?.avgRecruitmentDays }}<span class="unit"> days</span>
+                        {{ data()?.avgRecruitmentDays | number }}<span class="unit"> days</span>
                     </div>
                     
                     <div class="drivers-list">
@@ -58,7 +58,10 @@
             <!-- Benchmark Histograms -->
             <div class="card card-full">
                 <div class="card-header">
-                    <h4>Benchmark Distribution</h4>
+                    <div class="header-with-info">
+                        <h4>Benchmark Distribution</h4>
+                        <app-tooltip text="Statistical distribution of key design metrics across all matched trials. The curve shows the historical spread, while the teal marker highlights where your proposed value sits relative to the average (z-score)." />
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="benchmarks-grid">
@@ -222,10 +225,14 @@
             <!-- Expected Timeline -->
             <div class="card card-half card-tall">
                 <div class="card-header">
-                    <h4>Expected Timeline</h4>
-                    <span class="status-badge status-active">
-                        Target: {{ inputParams()?.userPatients || 0 }} Patients
-                    </span>
+                    <div class="header-with-info">
+                        <h4>Expected Timeline</h4>
+                        <app-tooltip text="Historical recruitment duration grouped by patient enrollment ranges. Each bar represents the average days similar trials took to reach those participant counts." />
+                    </div>
+                    <div class="header-badges">
+                        <span class="status-badge status-active">Target: {{ inputParams()?.userDuration || 0 | number }} Days</span>
+                        <span class="status-badge status-completed">Est: {{ estimatedDuration() || 0 | number }} Days</span>
+                    </div>
                 </div>
                 <div class="card-body">
                     @if (timelineChartData(); as chartData) {
@@ -238,40 +245,130 @@
                 </div>
             </div>
 
-            <!-- Metric Intersection Matrix -->
-            <div class="card card-half">
+            <!-- Required Sites -->
+            <div class="card card-half card-tall">
                 <div class="card-header">
                     <div class="header-with-info">
-                        <h4>Metric Intersection Matrix (Co-occurrence %)</h4>
-                        <span class="info-icon" title="Shows the percentage of selected trials that share both metrics. Identifies common complexity drivers in similar studies.">ⓘ</span>
+                        <h4>Required Sites</h4>
+                        <app-tooltip text="Historical clinical site counts grouped by patient enrollment ranges. Each bar shows the average number of sites utilized by trials of this scale." />
+                    </div>
+                    <div class="header-badges">
+                        <span class="status-badge status-active">Target: {{ inputParams()?.userSites || 0 | number }} Sites</span>
+                        <span class="status-badge status-completed">Est: {{ estimatedSites() || 0 | number }} Sites</span>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="matrix-wrapper">
-                        <table class="matrix-table">
-                            <thead>
-                                <tr>
-                                    <th></th>
-                                    @for (header of matrixHeaders; track $index) {
-                                        <th>{{ header }}</th>
-                                    }
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @for (row of intersectionMatrix(); track $index) {
+                    @if (siteChartData(); as chartData) {
+                        <div class="chart-container" style="height: 100%;">
+                            <app-bar-chart [chartData]="chartData" xAxisLabel="Patient Ranges" yAxisLabel="Required Sites" />
+                        </div>
+                    } @else {
+                        <p class="no-data">Insufficient data to generate site projections.</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Metric Commonality Matrix -->
+            <div class="card card-full">
+                <div class="card-header">
+                    <div class="header-with-info">
+                        <h4>Metric Commonality Matrix</h4>
+                        <app-tooltip text="Shows the frequency of co-occurrence between design traits. Define your own thresholds in the left panel to see how often trials with a 'Primary Factor' (rows) also possess additional 'Complexity Traits' (columns)." />
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="matrix-layout">
+                        <div class="matrix-controls">
+                            <div class="control-column">
+                                <h5>Row Thresholds</h5>
+                                <div class="matrix-input-group">
+                                    <label title="Define target patient enrollment count">Enrollment</label>
+                                    <div class="input-with-operator">
+                                        <button class="op-toggle" (click)="toggleMatrixOperator('highEnrollment')">{{ matrixThresholds().operators['highEnrollment'] }}</button>
+                                        <input type="number" min="0" [value]="matrixThresholds().highEnrollment" (input)="onUpdateMatrixThreshold('highEnrollment', $any($event.target).value)">
+                                    </div>
+                                </div>
+                                <div class="matrix-input-group">
+                                    <label title="Define target clinical site count">Sites</label>
+                                    <div class="input-with-operator">
+                                        <button class="op-toggle" (click)="toggleMatrixOperator('multiSite')">{{ matrixThresholds().operators['multiSite'] }}</button>
+                                        <input type="number" min="0" [value]="matrixThresholds().multiSite" (input)="onUpdateMatrixThreshold('multiSite', $any($event.target).value)">
+                                    </div>
+                                </div>
+                                <div class="matrix-input-group">
+                                    <label title="Define target study duration in days">Duration (days)</label>
+                                    <div class="input-with-operator">
+                                        <button class="op-toggle" (click)="toggleMatrixOperator('longDuration')">{{ matrixThresholds().operators['longDuration'] }}</button>
+                                        <input type="number" min="0" [value]="matrixThresholds().longDuration" (input)="onUpdateMatrixThreshold('longDuration', $any($event.target).value)">
+                                    </div>
+                                </div>
+                                <div class="matrix-input-group">
+                                    <label title="Define number of study arms/interventions">Arm Count</label>
+                                    <div class="input-with-operator">
+                                        <button class="op-toggle" (click)="toggleMatrixOperator('manyArms')">{{ matrixThresholds().operators['manyArms'] }}</button>
+                                        <input type="number" min="0" [value]="matrixThresholds().manyArms" (input)="onUpdateMatrixThreshold('manyArms', $any($event.target).value)">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="control-column">
+                                <h5>Column Thresholds</h5>
+                                <div class="matrix-input-group">
+                                    <label title="Word count of inclusion criteria complexity">Inclusions</label>
+                                    <div class="input-with-operator">
+                                        <button class="op-toggle" (click)="toggleMatrixOperator('strictInclusions')">{{ matrixThresholds().operators['strictInclusions'] }}</button>
+                                        <input type="number" min="0" [value]="matrixThresholds().strictInclusions" (input)="onUpdateMatrixThreshold('strictInclusions', $any($event.target).value)">
+                                    </div>
+                                </div>
+                                <div class="matrix-input-group">
+                                    <label title="Number of unique drugs/interventions">Interventions</label>
+                                    <div class="input-with-operator">
+                                        <button class="op-toggle" (click)="toggleMatrixOperator('manyInterventions')">{{ matrixThresholds().operators['manyInterventions'] }}</button>
+                                        <input type="number" min="0" [value]="matrixThresholds().manyInterventions" (input)="onUpdateMatrixThreshold('manyInterventions', $any($event.target).value)">
+                                    </div>
+                                </div>
+                                <div class="matrix-input-group">
+                                    <label title="Count of primary/secondary outcome measures">Outcomes</label>
+                                    <div class="input-with-operator">
+                                        <button class="op-toggle" (click)="toggleMatrixOperator('manyOutcomes')">{{ matrixThresholds().operators['manyOutcomes'] }}</button>
+                                        <input type="number" min="0" [value]="matrixThresholds().manyOutcomes" (input)="onUpdateMatrixThreshold('manyOutcomes', $any($event.target).value)">
+                                    </div>
+                                </div>
+                                <div class="matrix-input-group">
+                                    <label title="Difference between max and min allowed age">Age Span</label>
+                                    <div class="input-with-operator">
+                                        <button class="op-toggle" (click)="toggleMatrixOperator('wideAgeSpan')">{{ matrixThresholds().operators['wideAgeSpan'] }}</button>
+                                        <input type="number" min="0" [value]="matrixThresholds().wideAgeSpan" (input)="onUpdateMatrixThreshold('wideAgeSpan', $any($event.target).value)">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="matrix-wrapper">
+                            <table class="matrix-table">
+                                <thead>
                                     <tr>
-                                        <td class="row-label">{{ row.name }}</td>
-                                        @for (val of row.values; track $index) {
-                                            <td>
-                                                <div class="matrix-cell" [style.background-color]="'rgba(8, 137, 137, ' + (val/100) + ')'" [class.high-val]="val > 50">
-                                                    {{ val }}%
-                                                </div>
-                                            </td>
+                                        <th></th>
+                                        @for (header of matrixHeaders(); track $index) {
+                                            <th>{{ header }}</th>
                                         }
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @for (row of intersectionMatrix(); track $index) {
+                                        <tr>
+                                            <td class="row-label">{{ row.name }}</td>
+                                            @for (val of row.values; track $index) {
+                                                <td>
+                                                    <div class="matrix-cell" [style.background-color]="'rgba(8, 137, 137, ' + (val/100) + ')'" [class.high-val]="val > 50">
+                                                        {{ val }}%
+                                                    </div>
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -298,6 +395,7 @@
                                 (ngModelChange)="visibleColumnKeys.set($event)"
                                 [options]="columnOptions"
                                 placeholder="Columns"
+                                selectedLabel="Columns"
                                 width="140px" />
                         </div>
                         <div class="comparison-search">
