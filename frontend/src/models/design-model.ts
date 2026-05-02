@@ -1,5 +1,28 @@
 import { EligibilityCriterion } from '@shared/dto/TrialResultsRequest';
 
+export interface MatrixOperators {
+    highEnrollment: '>' | '<';
+    multiSite: '>' | '<';
+    longDuration: '>' | '<';
+    manyArms: '>' | '<';
+    strictInclusions: '>' | '<';
+    manyInterventions: '>' | '<';
+    manyOutcomes: '>' | '<';
+    wideAgeSpan: '>' | '<';
+}
+
+export interface MatrixThresholds {
+    highEnrollment: number;
+    multiSite: number;
+    longDuration: number;
+    manyArms: number;
+    strictInclusions: number;
+    manyInterventions: number;
+    manyOutcomes: number;
+    wideAgeSpan: number;
+    operators: MatrixOperators;
+}
+
 export interface DesignModel {
     condition: string,
     phase: string[],
@@ -31,4 +54,7 @@ export interface DesignModel {
 
     // Refinement state
     selectedTrialIds?: string[],
+
+    // Analysis UI State
+    matrixThresholds?: MatrixThresholds;
 }

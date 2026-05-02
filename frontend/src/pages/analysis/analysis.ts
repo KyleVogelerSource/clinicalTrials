@@ -134,6 +134,15 @@ export class Analysis implements OnInit {
         effect(() => {
             const trials = this.results().metricRows;
             if (trials.length > 0 && !this.hasAutoSelectedMatrix) {
+                const existing = this.inputParams()?.matrixThresholds;
+                
+                // If we already have thresholds in the session, use them!
+                if (existing) {
+                    this.matrixThresholds.set(existing);
+                    this.hasAutoSelectedMatrix = true;
+                    return;
+                }
+
                 this.matrixThresholds.set({
                     highEnrollment: this.calculateMedian(trials.map(t => t.totalEnrollment)),
                     multiSite: this.calculateMedian(trials.map(t => t.siteCount)),
@@ -809,8 +818,19 @@ export class Analysis implements OnInit {
                 ...params,
                 [paramKey]: val
             });
+            
+            // If we updated patients, we only need local re-analysis
+            if (paramKey === 'userPatients') {
+                this.workflowService.processResultsV2(true);
+            }
         }
     }
+
+    isPatientModified = computed(() => {
+        const current = this.inputParams()?.userPatients;
+        const results = this.data()?.participantTarget;
+        return current !== undefined && results !== undefined && current !== results;
+    });
 
     onFocusSite(coords: [number, number] | null) {
         if (coords) {
@@ -820,19 +840,37 @@ export class Analysis implements OnInit {
 
     onUpdateMatrixThreshold(key: string, value: string) {
         const val = value === '' ? 0 : Math.max(0, parseInt(value));
-        this.matrixThresholds.update(prev => ({
-            ...prev,
-            [key]: val
-        }));
+        this.matrixThresholds.update(prev => {
+            const next = {
+                ...prev,
+                [key]: val
+            };
+            this.persistMatrixThresholds(next);
+            return next;
+        });
     }
 
     toggleMatrixOperator(key: keyof MatrixOperators) {
-        this.matrixThresholds.update(prev => ({
-            ...prev,
-            operators: {
-                ...prev.operators,
-                [key]: prev.operators[key] === '>' ? '<' : '>'
-            }
-        }));
+        this.matrixThresholds.update(prev => {
+            const next = {
+                ...prev,
+                operators: {
+                    ...prev.operators,
+                    [key]: prev.operators[key] === '>' ? '<' : '>'
+                }
+            };
+            this.persistMatrixThresholds(next);
+            return next;
+        });
+    }
+
+    private persistMatrixThresholds(thresholds: MatrixThresholds) {
+        const params = this.inputParams();
+        if (params) {
+            this.workflowService.setInputs({
+                ...params,
+                matrixThresholds: thresholds
+            });
+        }
     }
 }

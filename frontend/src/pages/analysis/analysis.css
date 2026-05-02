@@ -1011,6 +1011,12 @@ input:checked + .slider:before {
     font-weight: 700 !important;
 }
 
+.benchmark-input.modified-input {
+    border-color: #f59e0b !important;
+    color: #b45309 !important;
+    background-color: #fffbeb !important;
+}
+
 .benchmark-z {
     font-size: 0.75rem;
     font-weight: 700;
