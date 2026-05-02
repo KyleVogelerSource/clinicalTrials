@@ -72,6 +72,7 @@
                                     <div class="benchmark-val-editor">
                                         <label class="input-label">Proposed:</label>
                                         <input type="number" 
+                                            [class.modified-input]="b.paramKey === 'userPatients' && isPatientModified()"
                                             [value]="b.userVal" 
                                             (change)="onUpdateBenchmark(b.paramKey, $any($event.target).value)"
                                             min="0"

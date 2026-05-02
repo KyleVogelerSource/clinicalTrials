@@ -117,7 +117,13 @@ export class TrialWorkflowService {
     }
 
     setInputs(inputs : DesignModel) {
-        this.inputParams.set(this.normalizeInputs(inputs));
+        // Fix: preserve matrixThresholds if not present in new inputs (common during dashboard navigation)
+        const current = this.inputParams();
+        const next = this.normalizeInputs(inputs);
+        if (current && !next.matrixThresholds && current.matrixThresholds) {
+            next.matrixThresholds = current.matrixThresholds;
+        }
+        this.inputParams.set(next);
     }
 
     setImportNotice(message: string | null) {
@@ -198,9 +204,56 @@ export class TrialWorkflowService {
         this.processResultsV2();
     }
 
-    processResultsV2() {
-        this.loadingService.show('Analyzing clinical trials data...');
+    processResultsV2(skipAi = false) {
+        this.calculateLocalMetrics();
 
+        if (skipAi) {
+            this.loadingService.hide();
+            return;
+        }
+
+        const trials = this.selectedTrialIds().map(id => this.trialCache.get(id)).filter((t): t is ClinicalTrialStudy => !!t);
+        const request = this.createResultsRequest();
+        if (request) {
+            const normalizedTrials = trials.map(t => this.normalizer.normalizeForBenchmark(t));
+
+            this.loadingService.show('AI is analyzing clinical trials data...');
+            this.apiService.getResults(request, normalizedTrials).pipe(
+                finalize(() => this.loadingService.hide())
+            ).subscribe({
+                next: (aiResults) => {
+                    this.results.update(current => {
+                        if (aiResults.explanation?.explanation) {
+                            aiResults.overallSummary = aiResults.explanation.explanation;
+                        } else if (!aiResults.overallSummary) {
+                            aiResults.overallSummary = "Analysis completed, but no detailed summary was provided by the AI.";
+                        }
+                        if (current.trialResults) {
+                            aiResults.timelineBuckets = current.trialResults.timelineBuckets;
+                            aiResults.recruitmentByImpact = current.trialResults.recruitmentByImpact;
+                            aiResults.avgRecruitmentDays = current.trialResults.avgRecruitmentDays;
+                            aiResults.participantTarget = current.trialResults.participantTarget;
+                            aiResults.timelineRange = current.trialResults.timelineRange;
+                            aiResults.siblingCount = current.trialResults.siblingCount;
+                        }
+                        current.trialResults = aiResults;
+                        return { ...current };
+                    });
+                },
+                error: (err) => {
+                    console.error("AI Results failed", err);
+                    this.results.update(current => {
+                        if (current.trialResults) current.trialResults.overallSummary = "Failed to load detailed AI analysis.";
+                        return { ...current };
+                    });
+                }
+            });
+        } else {
+            this.loadingService.hide();
+        }
+    }
+
+    private calculateLocalMetrics() {
         const countCriteriaItems = (text: string): number => {
             if (!text) return 0;
             const lines = text.split('\n');
@@ -248,7 +301,7 @@ export class TrialWorkflowService {
         });
 
         this.results.update(current => {
-            current = new ResultsModel();
+            const newResults = new ResultsModel();
             
             const GENERIC_NAMES = new Set(['research site', 'clinical site', 'clinical research site', 'investigative site', 'study site', 'phase 1 unit', 'medical center', 'hospital', 'university', 'unknown', 'na', 'n/a']);
             
@@ -300,7 +353,7 @@ export class TrialWorkflowService {
                 bestNames.set(key, getBestName(group.names));
             });
 
-            current.siteLocations = plotData.flatMap(trial => 
+            newResults.siteLocations = plotData.flatMap(trial => 
                 trial.geoLocations.map(loc => {
                     if (!loc.geoPoint || !loc.geoPoint.lat || !loc.geoPoint.lon || !loc.facility) return null;
                     const key = `${loc.geoPoint.lat.toFixed(4)},${loc.geoPoint.lon.toFixed(4)}`;
@@ -330,12 +383,12 @@ export class TrialWorkflowService {
                     .filter(s => s.count <= 1)
                     .sort((a, b) => b.count - a.count)
                     .slice(0, 12 - top12.length);
-                current.topSites = [...top12, ...remainder];
+                newResults.topSites = [...top12, ...remainder];
             } else {
-                current.topSites = top12;
+                newResults.topSites = top12;
             }
 
-            current.metricRows = plotData.map(trial => {
+            newResults.metricRows = plotData.map(trial => {
                 const row = new MetricRow();
                 const completedDate = trial.completedDate ? Date.parse(trial.completedDate.date) : null;
                 const startDate = trial.startDate ? Date.parse(trial.startDate.date) : null;
@@ -364,7 +417,7 @@ export class TrialWorkflowService {
                 return row;
             });
 
-            const validTrials = current.metricRows.filter(r => r.timelineSlippage > 0);
+            const validTrials = newResults.metricRows.filter(r => r.timelineSlippage > 0);
             const enrollments = validTrials
                 .map((r: MetricRow) => r.totalEnrollment)
                 .sort((a: number, b: number) => a - b);
@@ -446,7 +499,7 @@ export class TrialWorkflowService {
                 const status = t.status.split('_').join(' ');
                 terminations.set(status, (terminations.get(status) || 0) + 1);
             });
-            current.terminationReasons = Array.from(terminations.entries()).map(([reason, count]) => ({ reason, count }));
+            newResults.terminationReasons = Array.from(terminations.entries()).map(([reason, count]) => ({ reason, count }));
 
             const metricsToTest = [
                 { name: 'Site Count', key: 'siteCount', invert: false },
@@ -484,62 +537,25 @@ export class TrialWorkflowService {
                 };
             });
 
-            current.trialResults = {
+            newResults.trialResults = {
+                ...current.trialResults,
                 timestamp: new Date(),
-                overallScore: 0,
-                overallSummary: 'Generating detailed analysis...',
+                overallScore: current.trialResults?.overallScore ?? 0,
+                overallSummary: current.trialResults?.overallSummary ?? 'Generating detailed analysis...',
                 totalTrialsFound: trials.length,
                 queryCondition: this.inputParams()?.condition ?? 'Selected Trials',
                 avgRecruitmentDays: estDays, 
                 participantTarget: targetEnrollment,
                 recruitmentByImpact,
                 timelineBuckets,
-                terminationReasons: current.terminationReasons,
-                generatedAt: new Date().toISOString(),
+                terminationReasons: newResults.terminationReasons,
+                generatedAt: current.trialResults?.generatedAt ?? new Date().toISOString(),
                 timelineRange: maxDays > 0 ? `${minDays} - ${maxDays}` : undefined,
                 siblingCount
-            };
+            } as any;
 
-            return current;
+            return newResults;
         });
-
-        const request = this.createResultsRequest();
-        if (request) {
-            const normalizedTrials = trials.map(t => this.normalizer.normalizeForBenchmark(t));
-
-            this.apiService.getResults(request, normalizedTrials).pipe(
-                finalize(() => this.loadingService.hide())
-            ).subscribe({
-                next: (aiResults) => {
-                    this.results.update(current => {
-                        if (aiResults.explanation?.explanation) {
-                            aiResults.overallSummary = aiResults.explanation.explanation;
-                        } else if (!aiResults.overallSummary) {
-                            aiResults.overallSummary = "Analysis completed, but no detailed summary was provided by the AI.";
-                        }
-                        if (current.trialResults) {
-                            aiResults.timelineBuckets = current.trialResults.timelineBuckets;
-                            aiResults.recruitmentByImpact = current.trialResults.recruitmentByImpact;
-                            aiResults.avgRecruitmentDays = current.trialResults.avgRecruitmentDays;
-                            aiResults.participantTarget = current.trialResults.participantTarget;
-                            aiResults.timelineRange = current.trialResults.timelineRange;
-                            aiResults.siblingCount = current.trialResults.siblingCount;
-                        }
-                        current.trialResults = aiResults;
-                        return { ...current };
-                    });
-                },
-                error: (err) => {
-                    console.error("AI Results failed", err);
-                    this.results.update(current => {
-                        if (current.trialResults) current.trialResults.overallSummary = "Failed to load detailed AI analysis.";
-                        return { ...current };
-                    });
-                }
-            });
-        } else {
-            this.loadingService.hide();
-        }
     }
 
     createResultsRequest() : TrialResultsRequest | undefined {
