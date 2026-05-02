@@ -140,6 +140,7 @@
                 <div class="card-body">
                     <div class="correlation-info-banner">
                         Explore relationships between key clinical trial metrics. Select a pair to visualize the data distribution and trend.
+                        <strong>r̂</strong> represents the correlation with statistical outliers excluded.
                     </div>
 
                     <div class="correlation-layout">
@@ -218,7 +219,7 @@
                                     </label>
 
                                     <label class="switch-control">
-                                        <span class="label-text">Exclude Outliers</span>
+                                        <span class="label-text">Exclude Outliers (r̂)</span>
                                         <div class="switch">
                                             <input type="checkbox" [checked]="excludeOutliers()" (change)="excludeOutliers.set($any($event.target).checked)">
                                             <span class="slider"></span>
@@ -235,6 +236,7 @@
                                         [xAxisLabel]="dataPlotX()" 
                                         [yAxisLabel]="dataPlotY()" 
                                         [showTrendLine]="showTrendLine()" 
+                                        [useRHatLabel]="excludeOutliers()"
                                         [exportPrefix]="`${inputParams()?.condition ?? ''} ${dataPlotX()} vs ${dataPlotY()}`" />
                                 </div>
                             }

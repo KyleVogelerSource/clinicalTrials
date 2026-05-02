@@ -1091,10 +1091,21 @@ input:checked + .slider:before {
         padding: 0;
         background-color: white;
     }
-    .heading-right, .btn-link {
+    .heading-right, .btn-link, .btn-show-more, .comparison-controls {
         display: none;
     }
     .info-grid {
         gap: 0.5in;
+    }
+    .table-wrapper {
+        max-height: none !important;
+        overflow: visible !important;
+    }
+    .card {
+        break-inside: avoid;
+        margin-bottom: 2rem;
+    }
+    .card-body {
+        padding: 0;
     }
 }
