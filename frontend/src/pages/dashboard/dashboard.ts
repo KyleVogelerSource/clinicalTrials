@@ -358,7 +358,8 @@ export class Dashboard implements OnInit {
         // Sync with existing state if any
         const savedParams = this.workflowService.inputParams();
         if (savedParams) {
-            const phases = savedParams.phase ? savedParams.phase.split(' OR ') : [this.clinicalStudiesService.getDefaultPhase()];
+            // Fix: ensure we don't accidentally include empty strings or whitespace which can cause double-counts in multi-select
+            const phases = savedParams.phase ? savedParams.phase.split(' OR ').map(s => s.trim()).filter(Boolean) : [];
             const allocationArr = savedParams.allocationType ? savedParams.allocationType.split(' OR ').map(s => s.trim()).filter(Boolean) : [];
             const interventionArr = savedParams.interventionModel ? savedParams.interventionModel.split(' OR ').map(s => s.trim()).filter(Boolean) : [];
             const blindingArr = savedParams.blindingType ? savedParams.blindingType.split(' OR ').map(s => s.trim()).filter(Boolean) : [];
@@ -382,6 +383,12 @@ export class Dashboard implements OnInit {
             this.endDateFilter.set(savedParams.startDateTo || '');
             this.requiredConditions.set(savedParams.required || []);
             this.ineligibleConditions.set(savedParams.ineligible || []);
+        } else {
+            // Fresh load: Start with empty selections to align with E2E expectations 
+            // and ensure explicit user intent.
+            this.searchForm.patchValue({
+                phase: []
+            }, { emitEvent: false });
         }
 
         // Setup live search
@@ -655,7 +662,7 @@ export class Dashboard implements OnInit {
             this.workflowService.reset();
             this.searchForm.reset({
                 condition: '',
-                phase: [this.clinicalStudiesService.getDefaultPhase()],
+                phase: [],
                 allocationType: [],
                 interventionModel: [],
                 blindingType: [],
@@ -664,7 +671,8 @@ export class Dashboard implements OnInit {
                 userExclusions: null,
                 userOutcomes: null,
                 userSites: null,
-                userArms: null
+                userArms: null,
+                userDuration: null
             });
             this.conditionValue.set('');
             this.startDateFilter.set('');
