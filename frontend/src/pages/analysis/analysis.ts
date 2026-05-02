@@ -19,6 +19,29 @@ interface IntersectionRow {
     values: number[];
 }
 
+export interface MatrixOperators {
+    highEnrollment: '>' | '<';
+    multiSite: '>' | '<';
+    longDuration: '>' | '<';
+    manyArms: '>' | '<';
+    strictInclusions: '>' | '<';
+    manyInterventions: '>' | '<';
+    manyOutcomes: '>' | '<';
+    wideAgeSpan: '>' | '<';
+}
+
+export interface MatrixThresholds {
+    highEnrollment: number;
+    multiSite: number;
+    longDuration: number;
+    manyArms: number;
+    strictInclusions: number;
+    manyInterventions: number;
+    manyOutcomes: number;
+    wideAgeSpan: number;
+    operators: MatrixOperators;
+}
+
 interface ComparisonMetric {
     key: string;
     label: string;
@@ -184,7 +207,7 @@ export class Analysis implements OnInit {
 
     projectionMode = signal<'timeline' | 'sites'>('timeline');
 
-    matrixThresholds = signal({
+    matrixThresholds = signal<MatrixThresholds>({
         highEnrollment: 200,
         multiSite: 5,
         longDuration: 365,
@@ -192,7 +215,17 @@ export class Analysis implements OnInit {
         strictInclusions: 10,
         manyInterventions: 2,
         manyOutcomes: 5,
-        wideAgeSpan: 40
+        wideAgeSpan: 40,
+        operators: {
+            highEnrollment: '>',
+            multiSite: '>',
+            longDuration: '>',
+            manyArms: '>',
+            strictInclusions: '>',
+            manyInterventions: '>',
+            manyOutcomes: '>',
+            wideAgeSpan: '>'
+        }
     });
 
     suggestedCorrelations = computed(() => {
@@ -497,19 +530,23 @@ export class Analysis implements OnInit {
         const trials = this.results().metricRows;
         if (!trials || trials.length === 0) return [];
         const thresh = this.matrixThresholds();
+        const ops = thresh.operators;
+
+        const check = (val: number, threshold: number, op: '>' | '<') => 
+            op === '>' ? val > threshold : val < threshold;
 
         const rowFactors = [
-            { name: `Enrollment > ${thresh.highEnrollment}`, check: (t: MetricRow) => t.totalEnrollment > thresh.highEnrollment },
-            { name: `Site Count > ${thresh.multiSite}`, check: (t: MetricRow) => t.siteCount > thresh.multiSite },
-            { name: `Duration > ${thresh.longDuration}d`, check: (t: MetricRow) => t.timelineSlippage > thresh.longDuration },
-            { name: `Arm Count > ${thresh.manyArms}`, check: (t: MetricRow) => t.armCount > thresh.manyArms }
+            { name: `Enrollment ${ops.highEnrollment} ${thresh.highEnrollment}`, check: (t: MetricRow) => check(t.totalEnrollment, thresh.highEnrollment, ops.highEnrollment) },
+            { name: `Site Count ${ops.multiSite} ${thresh.multiSite}`, check: (t: MetricRow) => check(t.siteCount, thresh.multiSite, ops.multiSite) },
+            { name: `Duration ${ops.longDuration} ${thresh.longDuration}d`, check: (t: MetricRow) => check(t.timelineSlippage, thresh.longDuration, ops.longDuration) },
+            { name: `Arm Count ${ops.manyArms} ${thresh.manyArms}`, check: (t: MetricRow) => check(t.armCount, thresh.manyArms, ops.manyArms) }
         ];
 
         const colFactors = [
-            { name: `Inclusions > ${thresh.strictInclusions}`, check: (t: MetricRow) => t.inclusionStrictness > thresh.strictInclusions },
-            { name: `Interventions > ${thresh.manyInterventions}`, check: (t: MetricRow) => t.interventionCount > thresh.manyInterventions },
-            { name: `Outcomes > ${thresh.manyOutcomes}`, check: (t: MetricRow) => t.outcomeDensity > thresh.manyOutcomes },
-            { name: `Age Span > ${thresh.wideAgeSpan}`, check: (t: MetricRow) => (t.ageSpan ?? 0) > thresh.wideAgeSpan }
+            { name: `Inclusions ${ops.strictInclusions} ${thresh.strictInclusions}`, check: (t: MetricRow) => check(t.inclusionStrictness, thresh.strictInclusions, ops.strictInclusions) },
+            { name: `Interventions ${ops.manyInterventions} ${thresh.manyInterventions}`, check: (t: MetricRow) => check(t.interventionCount, thresh.manyInterventions, ops.manyInterventions) },
+            { name: `Outcomes ${ops.manyOutcomes} ${thresh.manyOutcomes}`, check: (t: MetricRow) => check(t.outcomeDensity, thresh.manyOutcomes, ops.manyOutcomes) },
+            { name: `Age Span ${ops.wideAgeSpan} ${thresh.wideAgeSpan}`, check: (t: MetricRow) => check(t.ageSpan ?? 0, thresh.wideAgeSpan, ops.wideAgeSpan) }
         ];
 
         return rowFactors.map(row => {
@@ -525,11 +562,12 @@ export class Analysis implements OnInit {
 
     matrixHeaders = computed(() => {
         const thresh = this.matrixThresholds();
+        const ops = thresh.operators;
         return [
-            `Inclusions > ${thresh.strictInclusions}`,
-            `Interventions > ${thresh.manyInterventions}`,
-            `Outcomes > ${thresh.manyOutcomes}`,
-            `Age Span > ${thresh.wideAgeSpan}`
+            `Inclusions ${ops.strictInclusions} ${thresh.strictInclusions}`,
+            `Interventions ${ops.manyInterventions} ${thresh.manyInterventions}`,
+            `Outcomes ${ops.manyOutcomes} ${thresh.manyOutcomes}`,
+            `Age Span ${ops.wideAgeSpan} ${thresh.wideAgeSpan}`
         ];
     });
 
@@ -740,10 +778,20 @@ export class Analysis implements OnInit {
     }
 
     onUpdateMatrixThreshold(key: string, value: string) {
-        const val = value === '' ? 0 : parseInt(value);
+        const val = value === '' ? 0 : Math.max(0, parseInt(value));
         this.matrixThresholds.update(prev => ({
             ...prev,
             [key]: val
+        }));
+    }
+
+    toggleMatrixOperator(key: keyof MatrixOperators) {
+        this.matrixThresholds.update(prev => ({
+            ...prev,
+            operators: {
+                ...prev.operators,
+                [key]: prev.operators[key] === '>' ? '<' : '>'
+            }
         }));
     }
 }

@@ -543,8 +543,40 @@
     font-weight: 500;
 }
 
+.input-with-operator {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.op-toggle {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #193F6A;
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+
+.op-toggle:hover {
+    background: #e2e8f0;
+    border-color: #94a3b8;
+}
+
+.op-toggle:active {
+    background: #cbd5e1;
+}
+
 .matrix-input-group input {
-    width: 80px;
+    width: 60px;
     padding: 0.2rem 0.4rem;
     border: 1px solid #d1d5da;
     border-radius: 4px;

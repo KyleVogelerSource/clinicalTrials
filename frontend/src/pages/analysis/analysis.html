@@ -282,39 +282,63 @@
                             <div class="control-column">
                                 <h5>Row Thresholds</h5>
                                 <div class="matrix-input-group">
-                                    <label title="Define target patient enrollment count">Enrollment ></label>
-                                    <input type="number" min="0" [value]="matrixThresholds().highEnrollment" (input)="onUpdateMatrixThreshold('highEnrollment', $any($event.target).value)">
+                                    <label title="Define target patient enrollment count">Enrollment</label>
+                                    <div class="input-with-operator">
+                                        <button class="op-toggle" (click)="toggleMatrixOperator('highEnrollment')">{{ matrixThresholds().operators['highEnrollment'] }}</button>
+                                        <input type="number" min="0" [value]="matrixThresholds().highEnrollment" (input)="onUpdateMatrixThreshold('highEnrollment', $any($event.target).value)">
+                                    </div>
                                 </div>
                                 <div class="matrix-input-group">
-                                    <label title="Define target clinical site count">Sites ></label>
-                                    <input type="number" min="0" [value]="matrixThresholds().multiSite" (input)="onUpdateMatrixThreshold('multiSite', $any($event.target).value)">
+                                    <label title="Define target clinical site count">Sites</label>
+                                    <div class="input-with-operator">
+                                        <button class="op-toggle" (click)="toggleMatrixOperator('multiSite')">{{ matrixThresholds().operators['multiSite'] }}</button>
+                                        <input type="number" min="0" [value]="matrixThresholds().multiSite" (input)="onUpdateMatrixThreshold('multiSite', $any($event.target).value)">
+                                    </div>
                                 </div>
                                 <div class="matrix-input-group">
-                                    <label title="Define target study duration in days">Duration (days) ></label>
-                                    <input type="number" min="0" [value]="matrixThresholds().longDuration" (input)="onUpdateMatrixThreshold('longDuration', $any($event.target).value)">
+                                    <label title="Define target study duration in days">Duration (days)</label>
+                                    <div class="input-with-operator">
+                                        <button class="op-toggle" (click)="toggleMatrixOperator('longDuration')">{{ matrixThresholds().operators['longDuration'] }}</button>
+                                        <input type="number" min="0" [value]="matrixThresholds().longDuration" (input)="onUpdateMatrixThreshold('longDuration', $any($event.target).value)">
+                                    </div>
                                 </div>
                                 <div class="matrix-input-group">
-                                    <label title="Define number of study arms/interventions">Arm Count ></label>
-                                    <input type="number" min="0" [value]="matrixThresholds().manyArms" (input)="onUpdateMatrixThreshold('manyArms', $any($event.target).value)">
+                                    <label title="Define number of study arms/interventions">Arm Count</label>
+                                    <div class="input-with-operator">
+                                        <button class="op-toggle" (click)="toggleMatrixOperator('manyArms')">{{ matrixThresholds().operators['manyArms'] }}</button>
+                                        <input type="number" min="0" [value]="matrixThresholds().manyArms" (input)="onUpdateMatrixThreshold('manyArms', $any($event.target).value)">
+                                    </div>
                                 </div>
                             </div>
                             <div class="control-column">
                                 <h5>Column Thresholds</h5>
                                 <div class="matrix-input-group">
-                                    <label title="Word count of inclusion criteria complexity">Inclusions ></label>
-                                    <input type="number" min="0" [value]="matrixThresholds().strictInclusions" (input)="onUpdateMatrixThreshold('strictInclusions', $any($event.target).value)">
+                                    <label title="Word count of inclusion criteria complexity">Inclusions</label>
+                                    <div class="input-with-operator">
+                                        <button class="op-toggle" (click)="toggleMatrixOperator('strictInclusions')">{{ matrixThresholds().operators['strictInclusions'] }}</button>
+                                        <input type="number" min="0" [value]="matrixThresholds().strictInclusions" (input)="onUpdateMatrixThreshold('strictInclusions', $any($event.target).value)">
+                                    </div>
                                 </div>
                                 <div class="matrix-input-group">
-                                    <label title="Number of unique drugs/interventions">Interventions ></label>
-                                    <input type="number" min="0" [value]="matrixThresholds().manyInterventions" (input)="onUpdateMatrixThreshold('manyInterventions', $any($event.target).value)">
+                                    <label title="Number of unique drugs/interventions">Interventions</label>
+                                    <div class="input-with-operator">
+                                        <button class="op-toggle" (click)="toggleMatrixOperator('manyInterventions')">{{ matrixThresholds().operators['manyInterventions'] }}</button>
+                                        <input type="number" min="0" [value]="matrixThresholds().manyInterventions" (input)="onUpdateMatrixThreshold('manyInterventions', $any($event.target).value)">
+                                    </div>
                                 </div>
                                 <div class="matrix-input-group">
-                                    <label title="Count of primary/secondary outcome measures">Outcomes ></label>
-                                    <input type="number" min="0" [value]="matrixThresholds().manyOutcomes" (input)="onUpdateMatrixThreshold('manyOutcomes', $any($event.target).value)">
+                                    <label title="Count of primary/secondary outcome measures">Outcomes</label>
+                                    <div class="input-with-operator">
+                                        <button class="op-toggle" (click)="toggleMatrixOperator('manyOutcomes')">{{ matrixThresholds().operators['manyOutcomes'] }}</button>
+                                        <input type="number" min="0" [value]="matrixThresholds().manyOutcomes" (input)="onUpdateMatrixThreshold('manyOutcomes', $any($event.target).value)">
+                                    </div>
                                 </div>
                                 <div class="matrix-input-group">
-                                    <label title="Difference between max and min allowed age">Age Span ></label>
-                                    <input type="number" min="0" [value]="matrixThresholds().wideAgeSpan" (input)="onUpdateMatrixThreshold('wideAgeSpan', $any($event.target).value)">
+                                    <label title="Difference between max and min allowed age">Age Span</label>
+                                    <div class="input-with-operator">
+                                        <button class="op-toggle" (click)="toggleMatrixOperator('wideAgeSpan')">{{ matrixThresholds().operators['wideAgeSpan'] }}</button>
+                                        <input type="number" min="0" [value]="matrixThresholds().wideAgeSpan" (input)="onUpdateMatrixThreshold('wideAgeSpan', $any($event.target).value)">
+                                    </div>
                                 </div>
                             </div>
                         </div>
