@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal } from "@angular/core";
 import { CommonModule, DatePipe } from "@angular/common";
 import { Router } from "@angular/router";
 import { FormsModule } from "@angular/forms";
@@ -93,6 +93,20 @@ export class Analysis implements OnInit {
     descriptions = metricDescriptions;
     
     heatmapFocus = signal<[number, number] | null>(null);
+
+    private hasAutoSelected = false;
+
+    constructor() {
+        effect(() => {
+            const correlations = this.suggestedCorrelations();
+            if (correlations.length > 0 && !this.hasAutoSelected) {
+                const top = correlations[0];
+                this.dataPlotX.set(top.x);
+                this.dataPlotY.set(top.y);
+                this.hasAutoSelected = true;
+            }
+        }, { allowSignalWrites: true });
+    }
 
     abs(val: number): number {
         return Math.abs(val);
