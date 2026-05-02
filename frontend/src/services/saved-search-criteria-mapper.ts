@@ -28,6 +28,10 @@ export interface DesignerFormValue {
 
   // Refinement state
   selectedTrialIds?: string[];
+
+  // Eligibility criteria for benchmark comparison
+  inclusionCriteria?: any[];
+  exclusionCriteria?: any[];
 }
 
 export interface DesignerDefaults {

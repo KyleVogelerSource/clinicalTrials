@@ -63,6 +63,7 @@ const ALL_COMPARISON_METRICS: ComparisonMetric[] = [
     { key: 'completionDate',  label: 'Completion Date', fn: (t) => t.completionDate || '—' },
     { key: 'sponsor',         label: 'Sponsor',         fn: (t) => t.sponsor || '—' },
     { key: 'siteCount',       label: 'Sites',           fn: (t) => t.sites?.length ?? 0 },
+    { key: 'countryCount',    label: 'Countries',       fn: (t) => t.countries?.length ?? 0 },
     { key: 'conditions',      label: 'Conditions',      fn: (t) => t.conditions?.join(', ') || '—' },
 ];
 
@@ -708,7 +709,7 @@ export class Analysis implements OnInit {
     readonly allComparisonMetrics = ALL_COMPARISON_METRICS;
     readonly columnOptions: MultiSelectOption[] = ALL_COMPARISON_METRICS.map(m => ({ label: m.label, value: m.key }));
     
-    visibleColumnKeys = signal<string[]>(['phase', 'overallStatus', 'enrollmentCount', 'startDate', 'completionDate']);
+    visibleColumnKeys = signal<string[]>(['phase', 'overallStatus', 'enrollmentCount', 'countryCount', 'startDate', 'completionDate']);
     comparisonMetrics = computed(() => ALL_COMPARISON_METRICS.filter(m => this.visibleColumnKeys().includes(m.key)));
     comparisonSearch = signal('');
     comparisonSortKey = signal('');
