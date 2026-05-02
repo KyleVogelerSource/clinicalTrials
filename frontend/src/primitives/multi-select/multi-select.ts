@@ -50,7 +50,8 @@ export class MultiSelect implements ControlValueAccessor {
     onTouched: any = () => {};
 
     writeValue(value: string[] | null): void {
-        this.selectedValues.set(value || []);
+        const arr = Array.isArray(value) ? value : [];
+        this.selectedValues.set(Array.from(new Set(arr)));
     }
 
     registerOnChange(fn: any): void {
@@ -64,8 +65,6 @@ export class MultiSelect implements ControlValueAccessor {
     toggleDropdown() {
         if (!this.isOpen()) {
             this.calculatePanelPosition();
-            // Use setTimeout to avoid capturing the scroll event that might be triggered by 
-            // the click itself (e.g. if the browser or test tool auto-scrolls to the element)
             setTimeout(() => {
                 if (this.isOpen()) {
                     window.addEventListener('scroll', this.closeOnScroll, true);
@@ -117,7 +116,6 @@ export class MultiSelect implements ControlValueAccessor {
     }
 
     toggleOption(value: string, event: Event) {
-        // Prevent event from bubbling if it came from the checkbox change
         if (event.type === 'change') {
             event.stopPropagation();
         }
@@ -128,7 +126,7 @@ export class MultiSelect implements ControlValueAccessor {
         if (current.includes(value)) {
             next = current.filter(v => v !== value);
         } else {
-            next = [...current, value];
+            next = Array.from(new Set([...current, value]));
         }
         
         this.selectedValues.set(next);
@@ -141,11 +139,15 @@ export class MultiSelect implements ControlValueAccessor {
     }
 
     getTriggerText(): string {
-        const count = this.selectedValues().length;
+        const matchingValues = this.selectedValues().filter(val => 
+            this.options().some(o => o.value === val)
+        );
+        const count = matchingValues.length;
+        
         if (count === 0) return this.placeholder();
         
         if (count === 1) {
-            const val = this.selectedValues()[0];
+            const val = matchingValues[0];
             const opt = this.options().find(o => o.value === val);
             return opt ? opt.label : this.placeholder();
         }

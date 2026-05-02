@@ -8,7 +8,15 @@ import { ClinicalStudyService } from "../../services/clinical-study.service";
 import { TrialWorkflowService } from "../../services/trial-workflow-service";
 import { AuthService } from "../../services/auth.service";
 import { SavedSearchService } from "../../services/saved-search.service";
-import { mapDesignModelToSavedSearchCriteria } from "../../services/saved-search-criteria-mapper";
+import { 
+    mapDesignModelToSavedSearchCriteria, 
+    mapDesignModelToExecutionSearchRequest, 
+    resolveMultiOptionValue, 
+    PHASE_MAP, 
+    ALLOCATION_MAP, 
+    INTERVENTION_MODEL_MAP, 
+    BLINDING_MAP 
+} from "../../services/saved-search-criteria-mapper";
 import { LoadingIndicator } from "../../primitives/loading-indicator/loading-indicator";
 import { AutoCompleteInput } from "../../primitives/auto-complete-input/auto-complete-input";
 import { MultiSelect, MultiSelectOption } from "../../primitives/multi-select/multi-select";
@@ -93,7 +101,7 @@ export class Dashboard implements OnInit {
 
     // Local State
     isLoading = signal(false);
-    foundTrials = signal<StudyTrial[]>([]);
+    foundTrials = this.workflowService.foundTrials;
     isThresholdWarningDismissed = signal(false);
     expandedTrialId = signal<string | null>(null);
     conditionMatches = signal<string[]>([]);
@@ -358,18 +366,17 @@ export class Dashboard implements OnInit {
         // Sync with existing state if any
         const savedParams = this.workflowService.inputParams();
         if (savedParams) {
-            // Fix: ensure we don't accidentally include empty strings or whitespace which can cause double-counts in multi-select
-            const phases = savedParams.phase ? savedParams.phase.split(' OR ').map(s => s.trim()).filter(Boolean) : [];
-            const allocationArr = savedParams.allocationType ? savedParams.allocationType.split(' OR ').map(s => s.trim()).filter(Boolean) : [];
-            const interventionArr = savedParams.interventionModel ? savedParams.interventionModel.split(' OR ').map(s => s.trim()).filter(Boolean) : [];
-            const blindingArr = savedParams.blindingType ? savedParams.blindingType.split(' OR ').map(s => s.trim()).filter(Boolean) : [];
-            
+            const phases = this.clinicalStudiesService.getPhases();
+            const allocations = this.clinicalStudiesService.getAllocations();
+            const interventions = this.clinicalStudiesService.getInterventionModels();
+            const blindings = this.clinicalStudiesService.getMaskingTypes();
+
             this.searchForm.patchValue({
                 condition: savedParams.condition,
-                phase: phases,
-                allocationType: allocationArr,
-                interventionModel: interventionArr,
-                blindingType: blindingArr,
+                phase: resolveMultiOptionValue(savedParams.phase, phases, PHASE_MAP),
+                allocationType: resolveMultiOptionValue(savedParams.allocationType, allocations, ALLOCATION_MAP),
+                interventionModel: resolveMultiOptionValue(savedParams.interventionModel, interventions, INTERVENTION_MODEL_MAP),
+                blindingType: resolveMultiOptionValue(savedParams.blindingType, blindings, BLINDING_MAP),
                 userPatients: savedParams.userPatients,
                 userSites: savedParams.userSites,
                 userInclusions: savedParams.userInclusions,
@@ -443,18 +450,20 @@ export class Dashboard implements OnInit {
                     this.selectedTrialIds.set([]);
                 }
 
-                const request: ClinicalTrialSearchRequest = {
+                // Map execution request using centralized mapper logic
+                const request = mapDesignModelToExecutionSearchRequest({
                     condition: params.condition as string,
-                    phase: this.mapPhase(params.phase!),
-                    allocationType: this.mapAllocation(params.allocationType as string[]),
-                    interventionModel: this.mapIntervention(params.interventionModel as string[]),
-                    blindingType: this.mapBlinding(params.blindingType as string[]),
-                    startDateFrom: params.startYear || undefined,
-                    startDateTo: params.endYear || undefined,
-                    requiredConditions: params.required.length > 0 ? params.required : undefined,
-                    ineligibleConditions: params.ineligible.length > 0 ? params.ineligible : undefined,
-                    pageSize: 100
-                };
+                    phase: params.phase,
+                    allocationType: params.allocationType,
+                    interventionModel: params.interventionModel,
+                    blindingType: params.blindingType,
+                    startDateFrom: params.startYear || null,
+                    startDateTo: params.endYear || null,
+                    required: params.required,
+                    ineligible: params.ineligible
+                });
+
+                request.pageSize = 100;
 
                 return this.workflowService.searchTrialsV2(request).pipe(
                     finalize(() => this.isLoading.set(false))
@@ -464,7 +473,6 @@ export class Dashboard implements OnInit {
             next: (trials) => {
                 if (trials) {
                     this.foundTrials.set(trials);
-                    this.workflowService.foundTrials.set(trials);
                     
                     const foundIds = new Set(trials.map(t => t.nctId));
 
@@ -555,16 +563,12 @@ export class Dashboard implements OnInit {
         if (this.saveForm.invalid || !this.searchForm.valid) return;
 
         const formValues = this.searchForm.getRawValue();
-        const phaseValue = this.mapPhase(formValues.phase ?? []) || '';
-        const allocationValue = this.mapAllocation(formValues.allocationType ?? []) || '';
-        const interventionValue = this.mapIntervention(formValues.interventionModel ?? []) || null;
-        const blindingValue = this.mapBlinding(formValues.blindingType ?? []) || '';
         const criteria = mapDesignModelToSavedSearchCriteria({
             condition: formValues.condition ?? '',
-            phase: phaseValue,
-            allocationType: allocationValue,
-            interventionModel: interventionValue,
-            blindingType: blindingValue,
+            phase: formValues.phase ?? [],
+            allocationType: formValues.allocationType ?? [],
+            interventionModel: formValues.interventionModel ?? [],
+            blindingType: formValues.blindingType ?? [],
             minAge: null,
             maxAge: null,
             sex: '',
@@ -618,16 +622,12 @@ export class Dashboard implements OnInit {
     onProcess() {
         // Map form to DesignModel for existing results page compatibility
         const values = this.searchForm.value;
-        const phaseValue = this.mapPhase(values.phase ?? []) || '';
-        const allocationValue = this.mapAllocation(values.allocationType ?? []) || '';
-        const interventionValue = this.mapIntervention(values.interventionModel ?? []) || null;
-        const blindingValue = this.mapBlinding(values.blindingType ?? []) || '';
         this.workflowService.setInputs({
             condition: values.condition ?? '',
-            phase: phaseValue,
-            allocationType: allocationValue,
-            interventionModel: interventionValue,
-            blindingType: blindingValue,
+            phase: values.phase ?? [],
+            allocationType: values.allocationType ?? [],
+            interventionModel: values.interventionModel ?? [],
+            blindingType: values.blindingType ?? [],
             // Demographic defaults since they are removed from Dashboard for now
             minAge: null,
             maxAge: null,
@@ -701,7 +701,7 @@ export class Dashboard implements OnInit {
             const content = await file.text();
             const criteria = parseDesignerCriteriaFile(content, file.name, {
                 phase: this.clinicalStudiesService.getDefaultPhase(),
-                phases: this.clinicalStudiesService.getPhases(), // Re-use raw phases for import parsing
+                phases: this.clinicalStudiesService.getPhases(), 
                 allocationType: this.clinicalStudiesService.getDefaultAllocation(),
                 allocations: this.allocationOptions.map(o => o.value),
                 interventionModels: this.interventionOptions.map(o => o.value),
@@ -711,17 +711,17 @@ export class Dashboard implements OnInit {
                 sexes: this.sexOptions,
             });
 
-            const phaseArr = criteria.phase ? criteria.phase.split(' OR ') : [this.clinicalStudiesService.getDefaultPhase()];
-            const allocationArr = criteria.allocationType ? criteria.allocationType.split(' OR ').map((s: string) => s.trim()).filter(Boolean) : [];
-            const interventionArr = criteria.interventionModel ? criteria.interventionModel.split(' OR ').map((s: string) => s.trim()).filter(Boolean) : [];
-            const blindingArr = criteria.blindingType ? criteria.blindingType.split(' OR ').map((s: string) => s.trim()).filter(Boolean) : [];
+            const phases = this.clinicalStudiesService.getPhases();
+            const allocations = this.clinicalStudiesService.getAllocations();
+            const interventions = this.clinicalStudiesService.getInterventionModels();
+            const blindings = this.clinicalStudiesService.getMaskingTypes();
 
             this.searchForm.patchValue({
                 condition: criteria.condition,
-                phase: phaseArr,
-                allocationType: allocationArr,
-                interventionModel: interventionArr,
-                blindingType: blindingArr,
+                phase: resolveMultiOptionValue(criteria.phase, phases, PHASE_MAP),
+                allocationType: resolveMultiOptionValue(criteria.allocationType, allocations, ALLOCATION_MAP),
+                interventionModel: resolveMultiOptionValue(criteria.interventionModel, interventions, INTERVENTION_MODEL_MAP),
+                blindingType: resolveMultiOptionValue(criteria.blindingType, blindings, BLINDING_MAP),
                 userPatients: criteria.userPatients,
                 userSites: criteria.userSites,
                 userInclusions: criteria.userInclusions,
@@ -745,62 +745,5 @@ export class Dashboard implements OnInit {
                 input.value = '';
             }
         }
-    }
-
-    private mapPhase(phases: string[] | string): string | undefined {
-        const map: Record<string, string> = {
-            'Early Phase 1': 'EARLY_PHASE1',
-            'Phase 1': 'PHASE1',
-            'Phase 2': 'PHASE2',
-            'Phase 3': 'PHASE3',
-            'Phase 4': 'PHASE4',
-            'N/A': 'NA'
-        };
-
-        if (Array.isArray(phases)) {
-            return phases.map(p => map[p]).filter(Boolean).join(' OR ') || undefined;
-        }
-
-        return map[phases] || phases;
-    }
-
-    private mapAllocation(allocations: string[] | string | null | undefined): string | undefined {
-        const map: Record<string, string> = {
-            'Randomized': 'RANDOMIZED',
-            'Non-Randomized': 'NON_RANDOMIZED',
-            'N/A': 'NA'
-        };
-        if (!allocations) return undefined;
-        const arr = Array.isArray(allocations) ? allocations : [allocations];
-        if (arr.length === 0) return undefined;
-        return arr.map(a => map[a]).filter(Boolean).join(' OR ') || undefined;
-    }
-
-    private mapIntervention(models: string | string[] | null | undefined): string | undefined {
-        const map: Record<string, string> = {
-            'Single Group Assignment': 'SINGLE_GROUP',
-            'Parallel Assignment': 'PARALLEL',
-            'Crossover Assignment': 'CROSSOVER',
-            'Factorial Assignment': 'FACTORIAL',
-            'Sequential Assignment': 'SEQUENTIAL'
-        };
-        if (!models) return undefined;
-        const arr = Array.isArray(models) ? models : [models];
-        if (arr.length === 0) return undefined;
-        return arr.map(m => map[m]).filter(Boolean).join(' OR ') || undefined;
-    }
-
-    private mapBlinding(blindings: string[] | string | null | undefined): string | undefined {
-        const map: Record<string, string> = {
-            'None (Open Label)': 'NONE',
-            'Single': 'SINGLE',
-            'Double': 'DOUBLE',
-            'Triple': 'TRIPLE',
-            'Quadruple': 'QUADRUPLE'
-        };
-        if (!blindings) return undefined;
-        const arr = Array.isArray(blindings) ? blindings : [blindings];
-        if (arr.length === 0) return undefined;
-        return arr.map(b => map[b]).filter(Boolean).join(' OR ') || undefined;
     }
 }

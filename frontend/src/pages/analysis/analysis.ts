@@ -118,6 +118,7 @@ export class Analysis implements OnInit {
     heatmapFocus = signal<[number, number] | null>(null);
 
     private hasAutoSelected = false;
+    private hasAutoSelectedMatrix = false;
 
     constructor() {
         effect(() => {
@@ -129,6 +130,45 @@ export class Analysis implements OnInit {
                 this.hasAutoSelected = true;
             }
         }, { allowSignalWrites: true });
+
+        effect(() => {
+            const trials = this.results().metricRows;
+            if (trials.length > 0 && !this.hasAutoSelectedMatrix) {
+                this.matrixThresholds.set({
+                    highEnrollment: this.calculateMedian(trials.map(t => t.totalEnrollment)),
+                    multiSite: this.calculateMedian(trials.map(t => t.siteCount)),
+                    longDuration: this.calculateMedian(trials.map(t => t.timelineSlippage)),
+                    manyArms: this.calculateMedian(trials.map(t => t.armCount)),
+                    strictInclusions: this.calculateMedian(trials.map(t => t.inclusionStrictness)),
+                    manyInterventions: this.calculateMedian(trials.map(t => t.interventionCount)),
+                    manyOutcomes: this.calculateMedian(trials.map(t => t.outcomeDensity)),
+                    wideAgeSpan: this.calculateMedian(trials.map(t => t.ageSpan)),
+                    operators: {
+                        highEnrollment: '>',
+                        multiSite: '>',
+                        longDuration: '>',
+                        manyArms: '>',
+                        strictInclusions: '>',
+                        manyInterventions: '>',
+                        manyOutcomes: '>',
+                        wideAgeSpan: '>'
+                    }
+                });
+                this.hasAutoSelectedMatrix = true;
+            }
+        }, { allowSignalWrites: true });
+    }
+
+    private calculateMedian(values: number[]): number {
+        if (values.length === 0) return 0;
+        const filtered = values.filter(v => v !== null && v !== undefined);
+        if (filtered.length === 0) return 0;
+        const sorted = [...filtered].sort((a, b) => a - b);
+        const mid = Math.floor(sorted.length / 2);
+        if (sorted.length % 2 === 0) {
+            return Math.round((sorted[mid - 1] + sorted[mid]) / 2);
+        }
+        return Math.round(sorted[mid]);
     }
 
     abs(val: number): number {
@@ -137,8 +177,9 @@ export class Analysis implements OnInit {
 
     displayPhase = computed(() => {
         const phase = this.inputParams()?.phase;
-        if (!phase || phase === 'N/A' || phase === 'NA') return 'Any Phase';
-        return phase;
+        if (!phase || phase.length === 0) return 'Any Phase';
+        if (phase.includes('N/A') || phase.includes('NA')) return 'Any Phase';
+        return phase.join(', ');
     });
 
     estimatedDuration = computed(() => {

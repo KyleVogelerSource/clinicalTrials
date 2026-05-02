@@ -1,4 +1,5 @@
 import { DesignModel } from "../models/design-model";
+import { resolveMultiOptionValue, PHASE_MAP, ALLOCATION_MAP, INTERVENTION_MODEL_MAP, BLINDING_MAP } from "./saved-search-criteria-mapper";
 
 export interface DesignerImportDefaults {
   phase: string;
@@ -78,21 +79,20 @@ export function parseDesignerJson(content: string, defaults: DesignerImportDefau
 
   return normalizeImportedCriteria(candidate, defaults);
 }
+
 export function normalizeImportedCriteria(
   input: Partial<DesignModel>,
   defaults: DesignerImportDefaults
 ): DesignModel {
   return {
     condition: typeof input.condition === "string" ? input.condition.trim() : "",
-    phase: resolveOptionValue(input.phase, defaults.phases, defaults.phase),
-    allocationType: resolveOptionValue(input.allocationType, defaults.allocations, defaults.allocationType),
-    interventionModel: input.interventionModel
-      ? resolveOptionValue(input.interventionModel, defaults.interventionModels, input.interventionModel)
-      : null,
-    blindingType: resolveOptionValue(input.blindingType, defaults.blindingTypes, defaults.blindingType),
+    phase: resolveMultiOptionValue(input.phase as string[] | string, defaults.phases, PHASE_MAP),
+    allocationType: resolveMultiOptionValue(input.allocationType as string[] | string, defaults.allocations, ALLOCATION_MAP),
+    interventionModel: resolveMultiOptionValue(input.interventionModel as string[] | string, defaults.interventionModels, INTERVENTION_MODEL_MAP),
+    blindingType: resolveMultiOptionValue(input.blindingType as string[] | string, defaults.blindingTypes, BLINDING_MAP),
     minAge: toNullableNumber(input.minAge),
     maxAge: toNullableNumber(input.maxAge),
-    sex: resolveOptionValue(input.sex, defaults.sexes, defaults.sex),
+    sex: resolveOptionValue(input.sex as string, defaults.sexes, defaults.sex),
     required: Array.isArray(input.required)
       ? input.required.map(item => String(item).trim()).filter(Boolean)
       : [],
