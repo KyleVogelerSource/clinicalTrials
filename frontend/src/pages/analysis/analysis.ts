@@ -193,13 +193,22 @@ export class Analysis implements OnInit {
         const calculateBounds = (values: number[]) => {
             const sorted = [...values].sort((a, b) => a - b);
             const n = sorted.length;
+            if (n < 4) return { min: -Infinity, max: Infinity };
+
             const q1 = sorted[Math.floor(n * 0.25)];
             const q3 = sorted[Math.floor(n * 0.75)];
             let iqr = q3 - q1;
+
+            const multiplier = 6.0;
             const range = sorted[n - 1] - sorted[0];
             const floor = range * 0.05; 
             if (iqr < floor) iqr = floor;
-            return { min: q1 - 3 * iqr, max: q3 + 3 * iqr };
+
+            const p99 = sorted[Math.floor(n * 0.99)];
+            return { 
+                min: q1 - multiplier * iqr, 
+                max: Math.max(q3 + multiplier * iqr, p99) 
+            };
         };
 
         // Only pair Design Inputs (X) with Performance Outputs (Y)
@@ -335,21 +344,25 @@ export class Analysis implements OnInit {
             const calculateBounds = (values: number[]) => {
                 const sorted = [...values].sort((a, b) => a - b);
                 const n = sorted.length;
+                if (n < 4) return { min: -Infinity, max: Infinity };
+
                 const q1 = sorted[Math.floor(n * 0.25)];
                 const q3 = sorted[Math.floor(n * 0.75)];
                 let iqr = q3 - q1;
 
-                // Safety: If IQR is 0 (e.g. all points are 1), use a percentage of the total range
-                // to prevent the bounds from collapsing and removing all non-identical data.
+                // Use a more generous multiplier (6.0 for "Far Out" outliers)
+                // and ensure we don't chop off the top 1% of data unless it's truly extreme.
+                const multiplier = 6.0;
                 const range = sorted[n - 1] - sorted[0];
-                const floor = range * 0.05; 
+                const floor = range * 0.05;
                 if (iqr < floor) iqr = floor;
 
-                // Use 3.0 (Outer Fences) for extreme outlier detection 
-                // which is less aggressive than the standard 1.5.
-                return { min: q1 - 3 * iqr, max: q3 + 3 * iqr };
+                const p99 = sorted[Math.floor(n * 0.99)];
+                return { 
+                    min: q1 - multiplier * iqr, 
+                    max: Math.max(q3 + multiplier * iqr, p99) 
+                };
             };
-
             const xBounds = calculateBounds(dataSet.map(d => d.x));
             const yBounds = calculateBounds(dataSet.map(d => d.y));
 
