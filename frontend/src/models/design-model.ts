@@ -2,10 +2,10 @@ import { EligibilityCriterion } from '@shared/dto/TrialResultsRequest';
 
 export interface DesignModel {
     condition: string,
-    phase: string,
-    allocationType: string,
-    interventionModel: string | null,
-    blindingType: string,
+    phase: string[],
+    allocationType: string[],
+    interventionModel: string[],
+    blindingType: string[],
     minAge: number | null,
     maxAge: number | null,
     sex: string,
