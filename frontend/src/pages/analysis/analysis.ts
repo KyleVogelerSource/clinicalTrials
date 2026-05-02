@@ -288,12 +288,13 @@ export class Analysis implements OnInit {
                 type: 'line',
                 data: new Array(labels.length).fill(userEstimate),
                 borderColor: userLineColor,
-                backgroundColor: userLineColor,
+                backgroundColor: 'transparent',
                 borderWidth: 3,
                 pointRadius: 0,
                 tension: 0,
-                order: -1
-            });
+                order: -1,
+                isTargetLine: true
+            } as any);
         }
 
         return {
