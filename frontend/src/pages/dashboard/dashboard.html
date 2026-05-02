@@ -69,7 +69,7 @@
                             <app-tooltip text="Trial development stage, from early safety (Phase 1) to post-market (Phase 4)." />
                         </div>
                         <app-multi-select id="phase" formControlName="phase" 
-                            [options]="phaseOptions" placeholder="Phase" />
+                            [options]="phaseOptions" placeholder="Phase" selectedLabel="Phases" />
                     </div>
 
                     <div class="form-group">
@@ -78,7 +78,7 @@
                             <app-tooltip text="Method used to assign participants to study groups (e.g., Randomized)." />
                         </div>
                         <app-multi-select id="allocationType" formControlName="allocationType"
-                            [options]="allocationOptions" placeholder="Any" />
+                            [options]="allocationOptions" placeholder="Any" selectedLabel="Types" />
                     </div>
 
                     <div class="form-group">
@@ -87,7 +87,7 @@
                             <app-tooltip text="The strategy for assigning interventions (e.g., Parallel, Crossover)." />
                         </div>
                         <app-multi-select id="intervention" formControlName="interventionModel"
-                            [options]="interventionOptions" placeholder="Any" />
+                            [options]="interventionOptions" placeholder="Any" selectedLabel="Models" />
                     </div>
 
                     <div class="form-group">
@@ -96,7 +96,7 @@
                             <app-tooltip text="Who is unaware of group assignments (Single, Double, etc.)." />
                         </div>
                         <app-multi-select id="blinding" formControlName="blindingType"
-                            [options]="blindingOptions" placeholder="Any" />
+                            [options]="blindingOptions" placeholder="Any" selectedLabel="Types" />
                     </div>
 
                     <div class="form-group">
@@ -311,6 +311,7 @@
                                     <th class="col-status">
                                         <app-multi-select 
                                             placeholder="All Statuses"
+                                            selectedLabel="Statuses"
                                             [options]="statusOptions()"
                                             [ngModel]="statusFilter()"
                                             (ngModelChange)="statusFilter.set($event)"

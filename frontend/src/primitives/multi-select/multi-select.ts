@@ -30,6 +30,7 @@ export class MultiSelect implements ControlValueAccessor {
     inputId = input<string>('');
     options = input.required<MultiSelectOption[]>();
     placeholder = input<string>('Select options...');
+    selectedLabel = input<string>('');
     width = input<string>('100%');
 
     elementRef = inject(ElementRef);
@@ -142,12 +143,15 @@ export class MultiSelect implements ControlValueAccessor {
     getTriggerText(): string {
         const count = this.selectedValues().length;
         if (count === 0) return this.placeholder();
+        
         if (count === 1) {
             const val = this.selectedValues()[0];
             const opt = this.options().find(o => o.value === val);
             return opt ? opt.label : this.placeholder();
         }
-        return `${this.placeholder()} (${count})`;
+
+        const label = this.selectedLabel() || this.placeholder();
+        return `${label} (${count})`;
     }
 
     onDocumentClick(event: MouseEvent) {
