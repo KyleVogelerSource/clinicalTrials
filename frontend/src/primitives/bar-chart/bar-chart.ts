@@ -65,6 +65,7 @@ export class BarChart implements OnDestroy {
     xAxisLabel = input<string>('');
     yAxisLabel = input<string>('');
     grouped = input<boolean>(false);
+    exportPrefix = input<string>('');
 
     canvasRef = viewChild<ElementRef<HTMLCanvasElement>>('chartCanvas');
 
@@ -137,19 +138,28 @@ export class BarChart implements OnDestroy {
 
     exportPng(): void {
         if (!this.chart) return;
+
+        const date = new Date().toISOString().split('T')[0];
+        const prefix = this.exportPrefix();
+        const filename = `${prefix} Chart ${date}.png`;
+        
         const link = document.createElement('a');
-        link.download = 'bar-chart.png';
+        link.download = filename;
         link.href = this.chart.toBase64Image();
         link.click();
     }
 
     exportCsv(): void {
+        const date = new Date().toISOString().split('T')[0];
+        const prefix = this.exportPrefix();
+        const filename = `${prefix} Data ${date}.csv`;
+
         const data = this.chartData();
         const rows: string[] = [['Label', ...data.datasets.map(d => d.label)].join(',')];
         data.labels.forEach((label, i) => {
             rows.push([label, ...data.datasets.map(d => d.data[i] ?? '')].join(','));
         });
-        this.downloadText(rows.join('\n'), 'bar-chart.csv', 'text/csv');
+        this.downloadText(rows.join('\n'), filename, 'text/csv');
     }
 
     private downloadText(content: string, filename: string, type: string): void {

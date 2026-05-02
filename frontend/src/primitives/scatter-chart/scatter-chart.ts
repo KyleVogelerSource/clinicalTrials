@@ -37,6 +37,7 @@ export class ScatterChart implements OnDestroy {
     type = input<'scatter' | 'line'>('scatter');
     enableZoom = input<boolean>(true);
     showTrendLine = input<boolean>(false);
+    exportPrefix = input<string>('');
 
     canvasRef = viewChild<ElementRef<HTMLCanvasElement>>('chartCanvas');
 
@@ -189,13 +190,22 @@ export class ScatterChart implements OnDestroy {
 
     exportPng(): void {
         if (!this.chart) return;
+        
+        const date = new Date().toISOString().split('T')[0];
+        const prefix = this.exportPrefix();
+        const filename = `${prefix} Chart ${date}.png`;
+
         const link = document.createElement('a');
-        link.download = 'scatter-chart.png';
+        link.download = filename;
         link.href = this.chart.toBase64Image();
         link.click();
     }
 
     exportCsv(): void {
+        const date = new Date().toISOString().split('T')[0];
+        const prefix = this.exportPrefix();
+        const filename = `${prefix} Data ${date}.csv`;
+
         const data = this.chartData();
         const rows: string[] = ['Dataset,X,Y'];
         data.datasets.forEach(dataset => {
@@ -207,7 +217,7 @@ export class ScatterChart implements OnDestroy {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'scatter-chart.csv';
+        link.download = filename;
         link.click();
         URL.revokeObjectURL(url);
     }

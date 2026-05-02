@@ -81,7 +81,12 @@
                                     </div>
                                 </div>
                                 <div class="benchmark-chart">
-                                    <app-scatter-chart [chartData]="b.chartData" [showLegend]="false" type="line" [enableZoom]="false" />
+                                    <app-scatter-chart 
+                                        [chartData]="b.chartData" 
+                                        [showLegend]="false" 
+                                        type="line" 
+                                        [enableZoom]="false" 
+                                        [exportPrefix]="`${inputParams()?.condition ?? ''} ${b.label}`" />
                                 </div>
                                 <div class="benchmark-stats">
                                     Avg: {{ b.mean }} | σ: {{ b.stdDev }}
@@ -99,7 +104,10 @@
                 </div>
                 <div class="card-body heatmap-layout">
                     <div class="heatmap-container">
-                        <app-heatmap [points]="heatmapPoints()" [focusPoint]="heatmapFocus()" />
+                        <app-heatmap 
+                            [points]="heatmapPoints()" 
+                            [focusPoint]="heatmapFocus()"
+                            [condition]="inputParams()?.condition || 'Trials'" />
                     </div>
                     <div class="top-sites">
                         <h5>Top Active Sites</h5>
@@ -215,7 +223,12 @@
 
                             @if (dataPlotData(); as plotData) {
                                 <div class="chart-container" style="height: 450px;">
-                                    <app-scatter-chart [chartData]="plotData" [xAxisLabel]="dataPlotX()" [yAxisLabel]="dataPlotY()" [showTrendLine]="showTrendLine()" />
+                                    <app-scatter-chart
+                                        [chartData]="plotData" 
+                                        [xAxisLabel]="dataPlotX()" 
+                                        [yAxisLabel]="dataPlotY()" 
+                                        [showTrendLine]="showTrendLine()" 
+                                        [exportPrefix]="`${inputParams()?.condition ?? ''} ${dataPlotX()} vs ${dataPlotY()}`" />
                                 </div>
                             }
                         </div>
@@ -238,7 +251,12 @@
                 <div class="card-body">
                     @if (timelineChartData(); as chartData) {
                         <div class="chart-container" style="height: 100%;">
-                            <app-bar-chart [chartData]="chartData" xAxisLabel="Patient Ranges" yAxisLabel="Timeline (Days)" [grouped]="true" />
+                            <app-bar-chart 
+                                [chartData]="chartData" 
+                                xAxisLabel="Patient Ranges" 
+                                yAxisLabel="Timeline (Days)" 
+                                [grouped]="true"
+                                [exportPrefix]="`${inputParams()?.condition ?? ''} Estimated Timeline`" />
                         </div>
                     } @else {
                         <p class="no-data">Insufficient data to generate timeline projections.</p>
@@ -261,7 +279,11 @@
                 <div class="card-body">
                     @if (siteChartData(); as chartData) {
                         <div class="chart-container" style="height: 100%;">
-                            <app-bar-chart [chartData]="chartData" xAxisLabel="Patient Ranges" yAxisLabel="Required Sites" />
+                            <app-bar-chart 
+                            [chartData]="chartData" 
+                            xAxisLabel="Patient Ranges" 
+                            yAxisLabel="Required Sites"
+                            [exportPrefix]="`${inputParams()?.condition ?? ''} Estimated Sites`" />
                         </div>
                     } @else {
                         <p class="no-data">Insufficient data to generate site projections.</p>
