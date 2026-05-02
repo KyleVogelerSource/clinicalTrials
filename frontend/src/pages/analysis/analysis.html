@@ -273,35 +273,78 @@
                 <div class="card-header">
                     <div class="header-with-info">
                         <h4>Metric Commonality Matrix</h4>
-                        <app-tooltip text="Shows the frequency of co-occurrence between design traits. The percentage represents how often trials with a 'Primary Factor' (rows) also possess additional 'Complexity Traits' (columns)." />
+                        <app-tooltip text="Shows the frequency of co-occurrence between design traits. Define your own thresholds in the left panel to see how often trials with a 'Primary Factor' (rows) also possess additional 'Complexity Traits' (columns)." />
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="matrix-wrapper">
-                        <table class="matrix-table">
-                            <thead>
-                                <tr>
-                                    <th></th>
-                                    @for (header of matrixHeaders; track $index) {
-                                        <th>{{ header }}</th>
-                                    }
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @for (row of intersectionMatrix(); track $index) {
+                    <div class="matrix-layout">
+                        <div class="matrix-controls">
+                            <div class="control-column">
+                                <h5>Row Thresholds</h5>
+                                <div class="matrix-input-group">
+                                    <label title="Define target patient enrollment count">Enrollment ></label>
+                                    <input type="number" min="0" [value]="matrixThresholds().highEnrollment" (input)="onUpdateMatrixThreshold('highEnrollment', $any($event.target).value)">
+                                </div>
+                                <div class="matrix-input-group">
+                                    <label title="Define target clinical site count">Sites ></label>
+                                    <input type="number" min="0" [value]="matrixThresholds().multiSite" (input)="onUpdateMatrixThreshold('multiSite', $any($event.target).value)">
+                                </div>
+                                <div class="matrix-input-group">
+                                    <label title="Define target study duration in days">Duration (days) ></label>
+                                    <input type="number" min="0" [value]="matrixThresholds().longDuration" (input)="onUpdateMatrixThreshold('longDuration', $any($event.target).value)">
+                                </div>
+                                <div class="matrix-input-group">
+                                    <label title="Define number of study arms/interventions">Arm Count ></label>
+                                    <input type="number" min="0" [value]="matrixThresholds().manyArms" (input)="onUpdateMatrixThreshold('manyArms', $any($event.target).value)">
+                                </div>
+                            </div>
+                            <div class="control-column">
+                                <h5>Column Thresholds</h5>
+                                <div class="matrix-input-group">
+                                    <label title="Word count of inclusion criteria complexity">Inclusions ></label>
+                                    <input type="number" min="0" [value]="matrixThresholds().strictInclusions" (input)="onUpdateMatrixThreshold('strictInclusions', $any($event.target).value)">
+                                </div>
+                                <div class="matrix-input-group">
+                                    <label title="Number of unique drugs/interventions">Interventions ></label>
+                                    <input type="number" min="0" [value]="matrixThresholds().manyInterventions" (input)="onUpdateMatrixThreshold('manyInterventions', $any($event.target).value)">
+                                </div>
+                                <div class="matrix-input-group">
+                                    <label title="Count of primary/secondary outcome measures">Outcomes ></label>
+                                    <input type="number" min="0" [value]="matrixThresholds().manyOutcomes" (input)="onUpdateMatrixThreshold('manyOutcomes', $any($event.target).value)">
+                                </div>
+                                <div class="matrix-input-group">
+                                    <label title="Difference between max and min allowed age">Age Span ></label>
+                                    <input type="number" min="0" [value]="matrixThresholds().wideAgeSpan" (input)="onUpdateMatrixThreshold('wideAgeSpan', $any($event.target).value)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="matrix-wrapper">
+                            <table class="matrix-table">
+                                <thead>
                                     <tr>
-                                        <td class="row-label">{{ row.name }}</td>
-                                        @for (val of row.values; track $index) {
-                                            <td>
-                                                <div class="matrix-cell" [style.background-color]="'rgba(8, 137, 137, ' + (val/100) + ')'" [class.high-val]="val > 50">
-                                                    {{ val }}%
-                                                </div>
-                                            </td>
+                                        <th></th>
+                                        @for (header of matrixHeaders(); track $index) {
+                                            <th>{{ header }}</th>
                                         }
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @for (row of intersectionMatrix(); track $index) {
+                                        <tr>
+                                            <td class="row-label">{{ row.name }}</td>
+                                            @for (val of row.values; track $index) {
+                                                <td>
+                                                    <div class="matrix-cell" [style.background-color]="'rgba(8, 137, 137, ' + (val/100) + ')'" [class.high-val]="val > 50">
+                                                        {{ val }}%
+                                                    </div>
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

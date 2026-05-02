@@ -33,6 +33,7 @@ describe('TrialWorkflowService', () => {
     userExclusions: null,
     userOutcomes: null,
     userArms: null,
+    userDuration: null,
     inclusionCriteria: [],
     exclusionCriteria: [],
   };
