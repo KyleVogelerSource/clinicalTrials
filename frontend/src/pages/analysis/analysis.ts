@@ -53,6 +53,7 @@ interface ComparisonRow {
     metrics: Record<string, string | number>;
     isRanked?: boolean;
     rank?: number;
+    isExcluded?: boolean;
 }
 
 const ALL_COMPARISON_METRICS: ComparisonMetric[] = [
@@ -165,6 +166,16 @@ export class Analysis implements OnInit {
                     }
                 });
                 this.hasAutoSelectedMatrix = true;
+            }
+        }, { allowSignalWrites: true });
+
+        // Capture initial comparison trials once foundTrials is populated
+        effect(() => {
+            const allTrials = this.workflowService.foundTrials();
+            const selectedIds = this.workflowService.selectedTrialIds();
+            if (allTrials.length > 0 && selectedIds.length > 0 && this.initialComparisonTrials().length === 0) {
+                const initial = allTrials.filter(t => selectedIds.includes(t.nctId));
+                this.initialComparisonTrials.set(initial);
             }
         }, { allowSignalWrites: true });
     }
@@ -711,6 +722,7 @@ export class Analysis implements OnInit {
     readonly allComparisonMetrics = ALL_COMPARISON_METRICS;
     readonly columnOptions: MultiSelectOption[] = ALL_COMPARISON_METRICS.map(m => ({ label: m.label, value: m.key }));
     
+    initialComparisonTrials = signal<StudyTrial[]>([]);
     visibleColumnKeys = signal<string[]>(['phase', 'overallStatus', 'enrollmentCount', 'countryCount', 'startDate', 'completionDate']);
     comparisonMetrics = computed(() => ALL_COMPARISON_METRICS.filter(m => this.visibleColumnKeys().includes(m.key)));
     comparisonSearch = signal('');
@@ -728,8 +740,7 @@ export class Analysis implements OnInit {
         const rankMap = new Map<string, number>(rankedTrials.map(rt => [rt.trial.nctId, rt.rank]));
 
         const selectedIds = new Set(this.workflowService.selectedTrialIds());
-        const allTrials = this.workflowService.foundTrials();
-        const trials = allTrials.filter(t => selectedIds.has(t.nctId));
+        const trials = this.initialComparisonTrials();
 
         let rows: ComparisonRow[] = trials.map(trial => ({
             trial,
@@ -737,7 +748,8 @@ export class Analysis implements OnInit {
                 ALL_COMPARISON_METRICS.map(m => [m.key, m.fn(trial)])
             ),
             isRanked: rankMap.has(trial.nctId),
-            rank: rankMap.get(trial.nctId)
+            rank: rankMap.get(trial.nctId),
+            isExcluded: !selectedIds.has(trial.nctId)
         }));
 
         if (onlySimilar) {
@@ -773,7 +785,8 @@ export class Analysis implements OnInit {
     });
 
     ngOnInit(): void {
-        if (this.workflowService.selectedTrialIds().length === 0) {
+        const selectedIds = new Set(this.workflowService.selectedTrialIds());
+        if (selectedIds.size === 0) {
             this.router.navigate(['/']);
             return;
         }
@@ -811,6 +824,30 @@ export class Analysis implements OnInit {
             this.comparisonSortKey.set(key);
             this.comparisonSortAsc.set(true);
         }
+    }
+
+    toggleTrialInclusion(trial: StudyTrial) {
+        const currentIds = this.workflowService.selectedTrialIds();
+        let nextIds: string[];
+        if (currentIds.includes(trial.nctId)) {
+            nextIds = currentIds.filter(id => id !== trial.nctId);
+        } else {
+            nextIds = [...currentIds, trial.nctId];
+        }
+
+        // Update global selection signal
+        this.workflowService.selectedTrialIds.set(nextIds);
+
+        // PERSIST: Update the saved input params so Dashboard sees the pruned list
+        const params = this.workflowService.inputParams();
+        if (params) {
+            this.workflowService.setInputs({
+                ...params,
+                selectedTrialIds: nextIds
+            });
+        }
+
+        this.workflowService.processResultsV2(true);
     }
 
     onUpdateBenchmark(paramKey: string, value: string) {
