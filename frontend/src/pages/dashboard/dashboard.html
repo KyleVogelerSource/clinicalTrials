@@ -224,31 +224,47 @@
                                     </th>
                                     <th class="sortable-header col-id" (click)="toggleSort('date')">
                                         Trial ID
-                                        <span class="sort-indicator" [class.active]="sortOrder().startsWith('date')">
-                                            {{ sortOrder() === 'date_asc' ? '↑' : '↓' }}
+                                        <span class="sort-icon">
+                                            @if (sortOrder().startsWith('date')) {
+                                                {{ sortOrder() === 'date_asc' ? '▲' : '▼' }}
+                                            } @else {
+                                                ▽
+                                            }
                                         </span>
                                     </th>
                                     <th class="sortable-header col-name" (click)="toggleSort('name')">
                                         <div class="header-content">
                                             Name
-                                            <span class="sort-indicator" [class.active]="sortOrder().startsWith('name')">
-                                                {{ sortOrder() === 'name_asc' ? '↑' : '↓' }}
+                                            <span class="sort-icon">
+                                                @if (sortOrder().startsWith('name')) {
+                                                    {{ sortOrder() === 'name_asc' ? '▲' : '▼' }}
+                                                } @else {
+                                                    ▽
+                                                }
                                             </span>
                                         </div>
                                     </th>
                                     <th class="sortable-header col-participants" (click)="toggleSort('enrollment')">
                                         <div class="header-content">
                                             Participants
-                                            <span class="sort-indicator" [class.active]="sortOrder().startsWith('enrollment')">
-                                                {{ sortOrder() === 'enrollment_asc' ? '↑' : '↓' }}
+                                            <span class="sort-icon">
+                                                @if (sortOrder().startsWith('enrollment')) {
+                                                    {{ sortOrder() === 'enrollment_asc' ? '▲' : '▼' }}
+                                                } @else {
+                                                    ▽
+                                                }
                                             </span>
                                         </div>
                                     </th>
                                     <th class="sortable-header col-status" (click)="toggleSort('status')">
                                         <div class="header-content">
                                             Status
-                                            <span class="sort-indicator" [class.active]="sortOrder().startsWith('status')">
-                                                {{ sortOrder() === 'status_asc' ? '↑' : '↓' }}
+                                            <span class="sort-icon">
+                                                @if (sortOrder().startsWith('status')) {
+                                                    {{ sortOrder() === 'status_asc' ? '▲' : '▼' }}
+                                                } @else {
+                                                    ▽
+                                                }
                                             </span>
                                         </div>
                                     </th>
