@@ -959,6 +959,69 @@ input:checked + .slider:before {
     border-left: 4px solid #088989;
 }
 
+/* Excluded Rows */
+.comparison-table tr.excluded {
+    opacity: 0.5;
+}
+
+.comparison-table tr.excluded td:not(.action-col) {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.comparison-table tr.excluded .trial-link {
+    color: #888 !important;
+    pointer-events: none;
+    text-decoration: line-through;
+}
+
+.comparison-table tr.excluded .trial-meta-sub {
+    text-decoration: line-through;
+}
+
+.comparison-table tr.excluded .btn-toggle-inclusion {
+    text-decoration: none !important;
+}
+
+/* Action Column & Toggle Button */
+.action-col {
+    width: 40px;
+    padding: 0.6rem 0.4rem !important;
+    text-align: center;
+}
+
+.btn-toggle-inclusion {
+    background: none;
+    border: 1px solid #cbd5e1;
+    color: #64748b;
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: all 0.2s;
+    padding: 0;
+    margin: 0 auto;
+}
+
+.btn-toggle-inclusion:hover {
+    background-color: #f1f5f9;
+    border-color: #94a3b8;
+    color: #1e293b;
+}
+
+.excluded .btn-toggle-inclusion {
+    border-color: #088989;
+    color: #088989;
+}
+
+.excluded .btn-toggle-inclusion:hover {
+    background-color: #f0fdfa;
+}
+
 .switch-control.disabled {
     opacity: 0.5;
     pointer-events: none;
@@ -1091,8 +1154,11 @@ input:checked + .slider:before {
         padding: 0;
         background-color: white;
     }
-    .heading-right, .btn-link, .btn-show-more, .comparison-controls {
-        display: none;
+    .heading-right, .btn-link, .btn-show-more, .comparison-controls, .action-col, .btn-toggle-inclusion {
+        display: none !important;
+    }
+    .comparison-table tr.excluded {
+        display: none !important;
     }
     .info-grid {
         gap: 0.5in;

@@ -476,22 +476,21 @@ export class Dashboard implements OnInit {
                     
                     const foundIds = new Set(trials.map(t => t.nctId));
 
-                    // Smart Selection: 
-                    // 1. If we have explicit saved selections (from a loaded search), use those (pruned).
-                    // 2. If we are returning and already have selections, keep them (pruned).
-                    // 3. Otherwise (fresh search), auto-select all results.
+                    // Selection Logic:
+                    // 1. If we have explicit saved selections (from WorkflowService or a loaded search), use those (pruned).
+                    // 2. Otherwise (fresh search with no prior state), auto-select all results.
                     
                     const savedParams = this.workflowService.inputParams();
-                    if (savedParams?.selectedTrialIds && savedParams.selectedTrialIds.length > 0) {
+                    if (savedParams?.selectedTrialIds) {
+                        // We have explicit selections (even if empty!), use them.
                         const pruned = savedParams.selectedTrialIds.filter(id => foundIds.has(id));
                         this.selectedTrialIds.set(pruned);
-                        // Clear them from workflow service input params once applied so they don't persist across fresh searches
-                        this.workflowService.setInputs({ ...savedParams, selectedTrialIds: [] });
                     } else if (this.selectedTrialIds().length === 0) {
+                        // Truly fresh search: auto-select all
                         const allIds = trials.map(t => t.nctId);
                         this.selectedTrialIds.set(allIds);
                     } else {
-                        // Regular filter update while on the page
+                        // Filter update while already on the dashboard
                         this.selectedTrialIds.update(current => current.filter(id => foundIds.has(id)));
                     }
                 }
