@@ -88,6 +88,11 @@ export class BarChart implements OnDestroy {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        top: 24
+                    }
+                },
                 plugins: {
                     legend: { display: data.datasets.length > 1 },
                 },
