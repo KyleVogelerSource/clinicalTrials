@@ -26,7 +26,9 @@ describe("ClinicalTrialsApiClient", () => {
       overallStatus: "RECRUITING",
       phase: "PHASE2",
       studyType: "INTERVENTIONAL",
+      allocationType: "RANDOMIZED",
       interventionModel: "PARALLEL",
+      blindingType: "DOUBLE",
       primaryPurpose: "TREATMENT",
       sex: "ALL",
       healthyVolunteers: false,
@@ -44,24 +46,31 @@ describe("ClinicalTrialsApiClient", () => {
       countTotal: true,
     });
 
-    expect(url).toContain("query.term=diabetes");
+    expect(url).toContain("query.term=%28diabetes%29+AND+");
     expect(url).toContain("query.cond=Type+2+Diabetes");
     expect(url).toContain("query.intr=metformin");
     expect(url).toContain("query.spons=NIH");
     expect(url).toContain("query.invest=Smith");
     expect(url).toContain("query.locn=Boston");
     expect(url).toContain("filter.overallStatus=RECRUITING");
-    expect(url).toContain("AREA%5BPhase%5DPHASE2");
-    expect(url).toContain("AREA%5BHealthyVolunteers%5DN");
-    expect(url).toContain("AREA%5BHasResults%5DY");
-    expect(url).toContain("AREA%5BMinimumAge%5DRANGE%5B18years%2C65years%5D");
-    expect(url).toContain("AREA%5BEnrollmentCount%5DRANGE%5B100%2C500%5D");
-    expect(url).toContain("AREA%5BStartDate%5DRANGE%5B2024-01-01%2C2024-12-31%5D");
-    expect(url).toContain("AREA%5BCompletionDate%5DRANGE%5B2025-01-01%2C2026-12-31%5D");
+    expect(url).toContain("query.term=%28diabetes%29+AND+%28AREA%5BPhase%5D%28PHASE2%29+AND+AREA%5BStudyType%5D%28INTERVENTIONAL%29+AND+AREA%5BDesignInterventionModel%5D%28PARALLEL%29+AND+AREA%5BDesignAllocation%5D%28RANDOMIZED%29+AND+AREA%5BDesignMasking%5D%28DOUBLE%29+AND+AREA%5BDesignPrimaryPurpose%5D%28TREATMENT%29+AND+AREA%5BSex%5DALL+AND+AREA%5BHealthyVolunteers%5DN+AND+AREA%5BHasResults%5DY+AND+AREA%5BMinimumAge%5DRANGE%5B18years%2C65years%5D+AND+AREA%5BEnrollmentCount%5DRANGE%5B100%2C500%5D+AND+AREA%5BStartDate%5DRANGE%5B2024-01-01%2C2024-12-31%5D+AND+AREA%5BCompletionDate%5DRANGE%5B2025-01-01%2C2026-12-31%5D%29");
     expect(url).toContain("pageSize=100");
     expect(url).toContain("pageToken=next-token");
     expect(url).toContain("countTotal=true");
     expect(url).toContain("fields=ProtocolSection,DerivedSection,HasResults");
+  });
+
+  it("builds the expected ClinicalTrials.gov URL with multi-select design filters", () => {
+    const client = new ClinicalTrialsApiClient();
+
+    const url = client.buildUrl({
+      phase: "PHASE1 OR PHASE2",
+      allocationType: "RANDOMIZED OR NA",
+      interventionModel: "PARALLEL OR CROSSOVER",
+      blindingType: "SINGLE OR DOUBLE",
+    });
+
+    expect(url).toContain("query.term=AREA%5BPhase%5D%28PHASE1+OR+PHASE2%29+AND+AREA%5BDesignInterventionModel%5D%28PARALLEL+OR+CROSSOVER%29+AND+AREA%5BDesignAllocation%5D%28RANDOMIZED+OR+NA%29+AND+AREA%5BDesignMasking%5D%28SINGLE+OR+DOUBLE%29");
   });
 
   it("returns mapped studies on a successful response", async () => {
