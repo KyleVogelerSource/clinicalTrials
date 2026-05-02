@@ -168,6 +168,8 @@ export class ScatterChart implements OnDestroy {
                     },
                     y: {
                         type: 'linear',
+                        beginAtZero: true,
+                        min: 0,
                         title: {
                             display: !!this.yAxisLabel(),
                             text: this.yAxisLabel(),
