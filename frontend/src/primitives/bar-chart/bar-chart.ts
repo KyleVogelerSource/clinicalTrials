@@ -44,6 +44,8 @@ export interface BarChartDataset {
     pointRadius?: number;
     tension?: number;
     order?: number;
+    isTargetLine?: boolean;
+    borderDash?: number[];
 }
 
 export interface BarChartData {
@@ -106,6 +108,30 @@ export class BarChart implements OnDestroy {
                     },
                 },
             },
+            plugins: [
+                {
+                    id: 'fullWidthTargetLine',
+                    afterDraw: (chart) => {
+                        const { ctx, chartArea: { left, right }, scales: { y } } = chart;
+                        chart.data.datasets.forEach((dataset: any) => {
+                            if (dataset.isTargetLine && dataset.data.length > 0) {
+                                const val = dataset.data[0];
+                                const yPos = y.getPixelForValue(val);
+                                
+                                ctx.save();
+                                ctx.beginPath();
+                                ctx.lineWidth = dataset.borderWidth || 3;
+                                ctx.strokeStyle = dataset.borderColor || '#DC344D';
+                                ctx.setLineDash(dataset.borderDash || []);
+                                ctx.moveTo(left, yPos);
+                                ctx.lineTo(right, yPos);
+                                ctx.stroke();
+                                ctx.restore();
+                            }
+                        });
+                    }
+                }
+            ]
         });
     }
 
