@@ -47,18 +47,8 @@
                             <label for="condition">Disease/Condition<span style="color:var(--app-red); font-weight:bold;"> *</span></label>
                             <app-tooltip text="Search for clinical trials by disease name, symptom, or MeSH condition term." />
                         </div>
-                        @if (conditions().length > 0) {
-                            <div class="condition-chips">
-                                @for (cond of conditions(); track cond) {
-                                    <span class="condition-chip">
-                                        {{ cond }}
-                                        <button type="button" class="remove-chip" (click)="onRemoveCondition(cond)">&times;</button>
-                                    </span>
-                                }
-                            </div>
-                        }
                         <app-auto-complete-input inputId="condition" placeholderText="e.g., Type 2 Diabetes"
-                            [suggestions]="conditionMatches()" [value]="conditionValue()" [clearOnSelect]="true"
+                            [suggestions]="conditionMatches()" [value]="conditionValue()" [clearOnSelect]="false"
                             (searchQueryChange)="onConditionSearch($event)"
                             (itemSelected)="onConditionSelected($event)" />
                     </div>

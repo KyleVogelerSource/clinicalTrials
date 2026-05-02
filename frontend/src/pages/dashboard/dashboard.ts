@@ -98,7 +98,6 @@ export class Dashboard implements OnInit {
     expandedTrialId = signal<string | null>(null);
     conditionMatches = signal<string[]>([]);
     conditionValue = signal('');
-    conditions = signal<string[]>([]);
     sortOrder = signal<'date_desc' | 'date_asc' | 'enrollment_desc' | 'enrollment_asc' | 'name_asc' | 'name_desc' | 'status_asc' | 'status_desc'>('date_desc');
     startDateFilter = signal<string>('');
     endDateFilter = signal<string>('');
@@ -361,9 +360,7 @@ export class Dashboard implements OnInit {
             const allocationArr = savedParams.allocationType ? savedParams.allocationType.split(' OR ').map(s => s.trim()).filter(Boolean) : [];
             const interventionArr = savedParams.interventionModel ? savedParams.interventionModel.split(' OR ').map(s => s.trim()).filter(Boolean) : [];
             const blindingArr = savedParams.blindingType ? savedParams.blindingType.split(' OR ').map(s => s.trim()).filter(Boolean) : [];
-            const conditionList = savedParams.condition ? savedParams.condition.split(' OR ').map(s => s.trim()).filter(Boolean) : [];
-            this.conditions.set(conditionList);
-            this.conditionValue.set('');
+            
             this.searchForm.patchValue({
                 condition: savedParams.condition,
                 phase: phases,
@@ -377,6 +374,7 @@ export class Dashboard implements OnInit {
                 userOutcomes: savedParams.userOutcomes,
                 userArms: savedParams.userArms
             }, { emitEvent: false });
+            this.conditionValue.set(savedParams.condition || '');
             this.startDateFilter.set(savedParams.startDateFrom || '');
             this.endDateFilter.set(savedParams.startDateTo || '');
             this.requiredConditions.set(savedParams.required || []);
@@ -385,7 +383,7 @@ export class Dashboard implements OnInit {
 
         // Setup live search
         this.searchForm.valueChanges.pipe(
-            debounceTime(800),
+            debounceTime(300),
             // Map form values and include the year range and condition signals
             switchMap(values => {
                 const condition = values.condition;
@@ -403,7 +401,7 @@ export class Dashboard implements OnInit {
                     startYear, endYear, required, ineligible 
                 });
             }),
-            distinctUntilChanged((prev, curr) =>
+            distinctUntilChanged((prev, curr) => 
                 prev.condition === curr.condition &&
                 JSON.stringify(prev.phase) === JSON.stringify(curr.phase) &&
                 JSON.stringify(prev.allocationType) === JSON.stringify(curr.allocationType) &&
@@ -491,6 +489,9 @@ export class Dashboard implements OnInit {
     }
 
     onConditionSearch(query: string) {
+        // Update the form control value as the user types to ensure validity and search triggering
+        this.searchForm.controls.condition.setValue(query, { emitEvent: true });
+        
         if (query && query.trim().length > 0) {
             const matches = this.clinicalStudiesService.getMatchingConditions(query.trim());
             this.conditionMatches.set(matches);
@@ -500,19 +501,9 @@ export class Dashboard implements OnInit {
     }
 
     onConditionSelected(condition: string) {
-        const trimmed = condition.trim();
-        if (!trimmed) return;
-        this.conditions.update(cs => cs.includes(trimmed) ? cs : [...cs, trimmed]);
-        this.conditionValue.set('');
+        this.searchForm.controls.condition.setValue(condition, { emitEvent: true });
+        this.conditionValue.set(condition);
         this.conditionMatches.set([]);
-        const joined = this.conditions().join(' OR ');
-        this.searchForm.controls.condition.setValue(joined, { emitEvent: true });
-    }
-
-    onRemoveCondition(condition: string) {
-        this.conditions.update(cs => cs.filter(c => c !== condition));
-        const joined = this.conditions().join(' OR ');
-        this.searchForm.controls.condition.setValue(joined, { emitEvent: true });
     }
 
     toggleTrialSelection(id: string) {
@@ -670,7 +661,6 @@ export class Dashboard implements OnInit {
                 userArms: null
             });
             this.conditionValue.set('');
-            this.conditions.set([]);
             this.startDateFilter.set('');
             this.endDateFilter.set('');
             this.requiredConditions.set([]);
@@ -711,9 +701,6 @@ export class Dashboard implements OnInit {
             const allocationArr = criteria.allocationType ? criteria.allocationType.split(' OR ').map((s: string) => s.trim()).filter(Boolean) : [];
             const interventionArr = criteria.interventionModel ? criteria.interventionModel.split(' OR ').map((s: string) => s.trim()).filter(Boolean) : [];
             const blindingArr = criteria.blindingType ? criteria.blindingType.split(' OR ').map((s: string) => s.trim()).filter(Boolean) : [];
-            const conditionList = criteria.condition ? criteria.condition.split(' OR ').map((s: string) => s.trim()).filter(Boolean) : [];
-            this.conditions.set(conditionList);
-            this.conditionValue.set('');
 
             this.searchForm.patchValue({
                 condition: criteria.condition,
@@ -728,6 +715,7 @@ export class Dashboard implements OnInit {
                 userOutcomes: criteria.userOutcomes,
                 userArms: criteria.userArms
             });
+            this.conditionValue.set(criteria.condition);
             this.workflowService.setInputs(criteria);
             this.importStatus.set('success');
             this.importMessage.set(`Imported criteria from ${file.name}.`);
