@@ -995,6 +995,25 @@ input:checked + .slider:before {
     gap: 0.4rem;
 }
 
+.proposed-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.proposed-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.delta-row {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: #64748b;
+    margin-top: 1px;
+}
+
 .input-label {
     font-size: 0.75rem;
     color: #475569;

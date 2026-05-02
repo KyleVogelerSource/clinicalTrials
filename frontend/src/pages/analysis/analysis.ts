@@ -670,6 +670,7 @@ export class Analysis implements OnInit {
             ];
 
             const userZScore = stdDev === 0 ? 0 : (m.userVal - mean) / stdDev;
+            const delta = m.userVal - mean;
 
             return {
                 label: m.label,
@@ -678,6 +679,7 @@ export class Analysis implements OnInit {
                 mean: Math.round(mean * 10) / 10,
                 stdDev: Math.round(stdDev * 10) / 10,
                 zScore: Math.round(userZScore * 100) / 100,
+                delta: Math.round(delta * 10) / 10,
                 chartData: {
                     datasets: [
                         {

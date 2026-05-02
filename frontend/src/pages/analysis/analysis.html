@@ -70,14 +70,21 @@
                                 <div class="benchmark-meta">
                                     <span class="benchmark-label">{{ b.label }}</span>
                                     <div class="benchmark-val-editor">
-                                        <label class="input-label">Proposed:</label>
-                                        <input type="number" 
-                                            [class.modified-input]="b.paramKey === 'userPatients' && isPatientModified()"
-                                            [value]="b.userVal" 
-                                            (change)="onUpdateBenchmark(b.paramKey, $any($event.target).value)"
-                                            min="0"
-                                            class="benchmark-input">
-                                        <span class="benchmark-z">{{ b.zScore > 0 ? '+' : '' }}{{ b.zScore }}σ</span>
+                                        <div class="proposed-stack">
+                                            <div class="proposed-row">
+                                                <label class="input-label">Proposed:</label>
+                                                <input type="number" 
+                                                    [class.modified-input]="b.paramKey === 'userPatients' && isPatientModified()"
+                                                    [value]="b.userVal" 
+                                                    (change)="onUpdateBenchmark(b.paramKey, $any($event.target).value)"
+                                                    min="0"
+                                                    class="benchmark-input">
+                                                <span class="benchmark-z">{{ b.zScore > 0 ? '+' : '' }}{{ b.zScore }}σ</span>
+                                            </div>
+                                            <div class="delta-row" [class.negative]="b.delta < 0" [class.positive]="b.delta > 0">
+                                                {{ b.delta > 0 ? '+' : '' }}{{ b.delta | number }} {{ b.delta > 0 ? 'above' : 'below' }} avg
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="benchmark-chart">
