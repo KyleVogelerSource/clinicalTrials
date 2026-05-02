@@ -75,6 +75,7 @@ export class Heatmap implements OnDestroy {
             center: this.center(),
             zoom: this.zoom(),
             scrollWheelZoom: false,
+            preferCanvas: true,
         });
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
