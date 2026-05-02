@@ -7,34 +7,39 @@
         <div class="metadata-layout">
             <div class="section form-card trial-specifics-card">
                 <div class="form-section user-trial-section">
-                    <h3>Your Trial Specifics</h3>
-
-                    <div [formGroup]="searchForm" class="form-grid">
-                        <div class="form-group">
-                            <label for="userPatients">Patients</label>
-                            <input id="userPatients" type="number" formControlName="userPatients" placeholder="-" min="0" />
-                        </div>
-                        <div class="form-group">
-                            <label for="userSites"># of Sites</label>
-                            <input id="userSites" type="number" formControlName="userSites" placeholder="-" min="0" />
-                        </div>
-                        <div class="form-group">
-                            <label for="userInclusions"># of Inclusions</label>
-                            <input id="userInclusions" type="number" formControlName="userInclusions" placeholder="-" min="0" />
-                        </div>
-                        <div class="form-group">
-                            <label for="userExclusions"># of Exclusions</label>
-                            <input id="userExclusions" type="number" formControlName="userExclusions" placeholder="-" min="0" />
-                        </div>
-                        <div class="form-group">
-                            <label for="userOutcomes"># of Outcomes</label>
-                            <input id="userOutcomes" type="number" formControlName="userOutcomes" placeholder="-" min="0" />
-                        </div>
-                        <div class="form-group">
-                            <label for="userArms"># of Arms/Interventions</label>
-                            <input id="userArms" type="number" formControlName="userArms" placeholder="-" min="0" />
-                        </div>
+                    <div class="expandable-header" (click)="showTrialSpecifics.set(!showTrialSpecifics())">
+                        <h3>Your Trial Specifics</h3>
+                        <span class="toggle-icon" [class.collapsed]="!showTrialSpecifics()">▼</span>
                     </div>
+
+                    @if (showTrialSpecifics()) {
+                        <div [formGroup]="searchForm" class="form-grid">
+                            <div class="form-group">
+                                <label for="userPatients">Patients</label>
+                                <input id="userPatients" type="number" formControlName="userPatients" placeholder="-" min="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="userSites"># of Sites</label>
+                                <input id="userSites" type="number" formControlName="userSites" placeholder="-" min="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="userInclusions"># of Inclusions</label>
+                                <input id="userInclusions" type="number" formControlName="userInclusions" placeholder="-" min="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="userExclusions"># of Exclusions</label>
+                                <input id="userExclusions" type="number" formControlName="userExclusions" placeholder="-" min="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="userOutcomes"># of Outcomes</label>
+                                <input id="userOutcomes" type="number" formControlName="userOutcomes" placeholder="-" min="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="userArms"># of Arms/Interventions</label>
+                                <input id="userArms" type="number" formControlName="userArms" placeholder="-" min="0" />
+                            </div>
+                        </div>
+                    }
                 </div>
             </div>
             
