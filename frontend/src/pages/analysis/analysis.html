@@ -58,7 +58,10 @@
             <!-- Benchmark Histograms -->
             <div class="card card-full">
                 <div class="card-header">
-                    <h4>Benchmark Distribution</h4>
+                    <div class="header-with-info">
+                        <h4>Benchmark Distribution</h4>
+                        <app-tooltip text="Statistical distribution of key design metrics across all matched trials. The curve shows the historical spread, while the teal marker highlights where your proposed value sits relative to the average (z-score)." />
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="benchmarks-grid">
@@ -265,12 +268,12 @@
                 </div>
             </div>
 
-            <!-- Metric Intersection Matrix -->
+            <!-- Metric Commonality Matrix -->
             <div class="card card-full">
                 <div class="card-header">
                     <div class="header-with-info">
-                        <h4>Metric Intersection Matrix (Co-occurrence %)</h4>
-                        <span class="info-icon" title="Shows the percentage of selected trials that share both metrics. Identifies common complexity drivers in similar studies.">ⓘ</span>
+                        <h4>Metric Commonality Matrix</h4>
+                        <app-tooltip text="Shows the frequency of co-occurrence between design traits. The percentage represents how often trials with a 'Primary Factor' (rows) also possess additional 'Complexity Traits' (columns)." />
                     </div>
                 </div>
                 <div class="card-body">
