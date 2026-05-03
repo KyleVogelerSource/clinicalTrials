@@ -103,115 +103,6 @@ describe("CandidatePoolBuilder", () => {
     });
   });
 
-  describe("buildCandidatePool - Required conditions", () => {
-    it("should filter out studies without required condition", () => {
-      const studyWithCondition = createMockStudy("NCT001", ["diabetes"]);
-      const studyWithoutCondition = createMockStudy("NCT002", ["cancer"]);
-
-      const result = buildCandidatePool(
-        [studyWithCondition, studyWithoutCondition],
-        1,
-        { requiredConditions: ["diabetes"] }
-      );
-
-      expect(result.metadata.totalFiltered).toBe(1);
-      expect(result.trials.length).toBe(1);
-      expect(result.trials[0].nctId).toBe("NCT001");
-    });
-
-    it("should match required conditions case-insensitively", () => {
-      const study = createMockStudy("NCT001", ["Diabetes"]);
-
-      const result = buildCandidatePool([study], 1, {
-        requiredConditions: ["DIABETES"],
-      });
-
-      expect(result.trials.length).toBe(1);
-    });
-
-    it("should support partial condition matching", () => {
-      const study = createMockStudy("NCT001", ["Diabetes Mellitus Type 2"]);
-
-      const result = buildCandidatePool([study], 1, {
-        requiredConditions: ["diabetes"],
-      });
-
-      expect(result.trials.length).toBe(1);
-    });
-
-    it("should require only one matching condition from multiple", () => {
-      const study = createMockStudy("NCT001", ["diabetes", "hypertension"]);
-
-      const result = buildCandidatePool([study], 1, {
-        requiredConditions: ["heart disease", "diabetes"],
-      });
-
-      expect(result.trials.length).toBe(1);
-    });
-
-    it("should filter with empty requiredConditions array", () => {
-      const studies = createMockStudies(3);
-
-      const result = buildCandidatePool(studies, 1, { requiredConditions: [] });
-
-      expect(result.metadata.totalFiltered).toBe(0);
-      expect(result.trials.length).toBe(3);
-    });
-  });
-
-  describe("buildCandidatePool - Ineligible conditions", () => {
-    it("should filter out studies with ineligible condition", () => {
-      const validStudy = createMockStudy("NCT001", ["cancer"]);
-      const ineligibleStudy = createMockStudy("NCT002", ["pregnancy"]);
-
-      const result = buildCandidatePool(
-        [validStudy, ineligibleStudy],
-        1,
-        { ineligibleConditions: ["pregnancy"] }
-      );
-
-      expect(result.metadata.totalFiltered).toBe(1);
-      expect(result.trials.length).toBe(1);
-      expect(result.trials[0].nctId).toBe("NCT001");
-    });
-
-    it("should match ineligible conditions case-insensitively", () => {
-      const study = createMockStudy("NCT001", ["pregnancy"]);
-
-      const result = buildCandidatePool([study], 1, {
-        ineligibleConditions: ["PREGNANCY"],
-      });
-
-      expect(result.trials.length).toBe(0);
-      expect(result.metadata.totalFiltered).toBe(1);
-    });
-
-    it("should filter with partial ineligible condition match", () => {
-      const study = createMockStudy("NCT001", ["Active Pregnancy"]);
-
-      const result = buildCandidatePool([study], 1, {
-        ineligibleConditions: ["pregnancy"],
-      });
-
-      expect(result.trials.length).toBe(0);
-    });
-
-    it("should support multiple ineligible conditions", () => {
-      const study1 = createMockStudy("NCT001", ["pregnancy"]);
-      const study2 = createMockStudy("NCT002", ["liver disease"]);
-      const study3 = createMockStudy("NCT003", ["cancer"]);
-
-      const result = buildCandidatePool(
-        [study1, study2, study3],
-        1,
-        { ineligibleConditions: ["pregnancy", "liver disease"] }
-      );
-
-      expect(result.trials.length).toBe(1);
-      expect(result.trials[0].nctId).toBe("NCT003");
-    });
-  });
-
   describe("buildCandidatePool - Reference trial filtering", () => {
     it("should filter by phase when reference phase provided", () => {
       const matchingPhase = createMockStudy("NCT001", [], "PHASE 2");
@@ -379,11 +270,9 @@ describe("CandidatePoolBuilder", () => {
       const study = createMockStudy("NCT001");
       study.protocolSection.conditionsModule = { conditions: undefined };
 
-      const result = buildCandidatePool([study], 1, {
-        requiredConditions: ["cancer"],
-      });
+      const result = buildCandidatePool([study], 1);
 
-      expect(result.metadata.totalFiltered).toBe(1);
+      expect(result.trials.length).toBe(1);
     });
 
     it("should handle cap = 0", () => {
@@ -406,14 +295,12 @@ describe("CandidatePoolBuilder", () => {
     it("should handle multiple filters together", () => {
       const studies = [
         createMockStudy("NCT001", ["cancer"], "PHASE 2"),
-        createMockStudy("NCT002", ["diabetes", "pregnancy"], "PHASE 2"),
+        createMockStudy("NCT002", ["diabetes"], "PHASE 2"),
         createMockStudy("NCT003", ["cancer"], "PHASE 1"),
       ];
 
       const result = buildCandidatePool(studies, 1, {
         cap: 10,
-        requiredConditions: ["cancer"],
-        ineligibleConditions: ["pregnancy"],
         referenceTrial: { phase: "PHASE 2" },
       });
 

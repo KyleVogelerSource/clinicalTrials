@@ -114,8 +114,6 @@ export class Dashboard implements OnInit {
     sortOrder = signal<'date_desc' | 'date_asc' | 'enrollment_desc' | 'enrollment_asc' | 'name_asc' | 'name_desc' | 'status_asc' | 'status_desc'>('date_desc');
     startDateFilter = signal<string>('');
     endDateFilter = signal<string>('');
-    requiredConditions = signal<string[]>([]);
-    ineligibleConditions = signal<string[]>([]);
     
     // Save Search State
     showSavePanel = signal(false);
@@ -326,26 +324,6 @@ export class Dashboard implements OnInit {
         this.keywordFilter.update(k => k.filter(v => v !== keyword));
     }
 
-    onAddRequired(keyword: string) {
-        this.requiredConditions.update(k => [...new Set([...k, keyword])]);
-        this.searchForm.updateValueAndValidity();
-    }
-
-    onRemoveRequired(keyword: string) {
-        this.requiredConditions.update(k => k.filter(v => v !== keyword));
-        this.searchForm.updateValueAndValidity();
-    }
-
-    onAddIneligible(keyword: string) {
-        this.ineligibleConditions.update(k => [...new Set([...k, keyword])]);
-        this.searchForm.updateValueAndValidity();
-    }
-
-    onRemoveIneligible(keyword: string) {
-        this.ineligibleConditions.update(k => k.filter(v => v !== keyword));
-        this.searchForm.updateValueAndValidity();
-    }
-
     clearFilters(includeYearRange: boolean = true) {
         this.nctIdFilter.set('');
         this.nameFilter.set('');
@@ -394,8 +372,6 @@ export class Dashboard implements OnInit {
             this.conditionValue.set(savedParams.condition || '');
             this.startDateFilter.set(savedParams.startDateFrom || '');
             this.endDateFilter.set(savedParams.startDateTo || '');
-            this.requiredConditions.set(savedParams.required || []);
-            this.ineligibleConditions.set(savedParams.ineligible || []);
         } else {
             // Fresh load: Start with empty selections to align with E2E expectations 
             // and ensure explicit user intent.
@@ -417,12 +393,10 @@ export class Dashboard implements OnInit {
                 const sex = values.sex;
                 const startYear = this.startDateFilter();
                 const endYear = this.endDateFilter();
-                const required = this.requiredConditions();
-                const ineligible = this.ineligibleConditions();
 
                 return of({ 
                     condition, phase, allocationType, interventionModel, blindingType, sex,
-                    startYear, endYear, required, ineligible 
+                    startYear, endYear
                 });
             }),
             distinctUntilChanged((prev, curr) => 
@@ -433,9 +407,7 @@ export class Dashboard implements OnInit {
                 JSON.stringify(prev.blindingType) === JSON.stringify(curr.blindingType) &&
                 JSON.stringify(prev.sex) === JSON.stringify(curr.sex) &&
                 prev.startYear === curr.startYear &&
-                prev.endYear === curr.endYear &&
-                JSON.stringify(prev.required) === JSON.stringify(curr.required) &&
-                JSON.stringify(prev.ineligible) === JSON.stringify(curr.ineligible)
+                prev.endYear === curr.endYear
             ),
             switchMap(params => {
                 const conditionValid = params.condition && params.condition.trim().length >= 2;
@@ -467,9 +439,7 @@ export class Dashboard implements OnInit {
                     blindingType: params.blindingType,
                     sex: params.sex,
                     startDateFrom: params.startYear || null,
-                    startDateTo: params.endYear || null,
-                    required: params.required,
-                    ineligible: params.ineligible
+                    startDateTo: params.endYear || null
                 });
 
                 request.pageSize = 100;
@@ -580,8 +550,6 @@ export class Dashboard implements OnInit {
             minAge: null,
             maxAge: null,
             sex: formValues.sex ?? [],
-            required: this.requiredConditions(),
-            ineligible: this.ineligibleConditions(),
             startDateFrom: this.startDateFilter() || null,
             startDateTo: this.endDateFilter() || null,
             userPatients: formValues.userPatients ?? null,
@@ -640,8 +608,6 @@ export class Dashboard implements OnInit {
             minAge: null,
             maxAge: null,
             sex: mapSexValue(values.sex) ?? 'All',
-            required: this.requiredConditions(),
-            ineligible: this.ineligibleConditions(),
 
             startDateFrom: this.startDateFilter() || null,
             startDateTo: this.endDateFilter() || null,
@@ -684,8 +650,6 @@ export class Dashboard implements OnInit {
             this.conditionValue.set('');
             this.startDateFilter.set('');
             this.endDateFilter.set('');
-            this.requiredConditions.set([]);
-            this.ineligibleConditions.set([]);
             this.foundTrials.set([]);
             this.clearFilters();
         }

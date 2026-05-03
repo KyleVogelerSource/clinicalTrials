@@ -116,8 +116,6 @@ describe('SavedSearches', () => {
         minAge: 18,
         maxAge: 65,
         sex: 'Female',
-        requiredConditions: ['Hypertension'],
-        ineligibleConditions: ['Heart Failure'],
       },
     });
 expect(mockWorkflowService.setInputs).toHaveBeenCalledWith(expect.objectContaining({

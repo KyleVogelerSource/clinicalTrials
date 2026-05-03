@@ -26,8 +26,6 @@ export interface ClinicalTrialSearchRequest {
   pageSize?: number;
   pageToken?: string;
   countTotal?: boolean;
-  requiredConditions?: string[];
-  ineligibleConditions?: string[];
 
   // User Trial Specifics
   userPatients?: number | null;

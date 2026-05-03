@@ -255,44 +255,6 @@ describe("ClinicalTrialsService", () => {
       expect(result.metadata.totalFiltered).toBeGreaterThan(0);
     });
 
-    it("should apply required conditions filter", async () => {
-      const request: ClinicalTrialSearchRequest = { term: "cancer" };
-      const studyWithCondition = createMockStudy("NCT001", ["diabetes"]);
-      const studyWithoutCondition = createMockStudy("NCT002", ["asthma"]);
-
-      mockClient.searchStudies.mockResolvedValue({
-        totalCount: 2,
-        studies: [studyWithCondition, studyWithoutCondition],
-      });
-
-      const result = await searchAndBuildCandidatePool(
-        request,
-        { requiredConditions: ["diabetes"] },
-        client
-      );
-
-      expect(result.metadata.totalFiltered).toBeGreaterThan(0);
-    });
-
-    it("should apply ineligible conditions filter", async () => {
-      const request: ClinicalTrialSearchRequest = { term: "cancer" };
-      const validStudy = createMockStudy("NCT001", ["cancer"]);
-      const invalidStudy = createMockStudy("NCT002", ["pregnancy"]);
-
-      mockClient.searchStudies.mockResolvedValue({
-        totalCount: 2,
-        studies: [validStudy, invalidStudy],
-      });
-
-      const result = await searchAndBuildCandidatePool(
-        request,
-        { ineligibleConditions: ["pregnancy"] },
-        client
-      );
-
-      expect(result.metadata.totalFiltered).toBeGreaterThan(0);
-    });
-
     it("should track metadata correctly", async () => {
       const request: ClinicalTrialSearchRequest = { term: "cancer" };
       const studies = Array.from({ length: 25 }, (_, i) => createMockStudy(`NCT${String(i + 1).padStart(6, "0")}`));
