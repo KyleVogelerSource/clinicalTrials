@@ -10,6 +10,7 @@ import { CustomSelect } from "../../primitives/custom-select/custom-select";
 import { MultiSelect, MultiSelectOption } from "../../primitives/multi-select/multi-select";
 import { Heatmap } from "../../primitives/heatmap/heatmap";
 import { Tooltip } from "../../primitives/tooltip/tooltip";
+import { LoadingIndicator } from "../../primitives/loading-indicator/loading-indicator";
 import { metricNames, MetricRow } from "../../models/results-model";
 import { StudyTrial } from "../../models/study-trial";
 import { LoadingService } from "../../services/loading.service";
@@ -53,6 +54,7 @@ interface ComparisonRow {
     metrics: Record<string, string | number>;
     isRanked?: boolean;
     rank?: number;
+    isExcluded?: boolean;
 }
 
 const ALL_COMPARISON_METRICS: ComparisonMetric[] = [
@@ -63,6 +65,7 @@ const ALL_COMPARISON_METRICS: ComparisonMetric[] = [
     { key: 'completionDate',  label: 'Completion Date', fn: (t) => t.completionDate || '—' },
     { key: 'sponsor',         label: 'Sponsor',         fn: (t) => t.sponsor || '—' },
     { key: 'siteCount',       label: 'Sites',           fn: (t) => t.sites?.length ?? 0 },
+    { key: 'countryCount',    label: 'Countries',       fn: (t) => t.countries?.length ?? 0 },
     { key: 'conditions',      label: 'Conditions',      fn: (t) => t.conditions?.join(', ') || '—' },
 ];
 
@@ -99,6 +102,7 @@ export const metricDescriptions: Record<string, string> = {
         MultiSelect,
         Heatmap,
         Tooltip,
+        LoadingIndicator,
         DatePipe
     ],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -111,6 +115,8 @@ export class Analysis implements OnInit {
     results = this.workflowService.results;
     inputParams = this.workflowService.inputParams;
     selectedTrialIds = this.workflowService.selectedTrialIds;
+    isAILoading = this.workflowService.isAILoading;
+    today = new Date();
     
     data = computed(() => this.results().trialResults);
     descriptions = metricDescriptions;
@@ -118,6 +124,7 @@ export class Analysis implements OnInit {
     heatmapFocus = signal<[number, number] | null>(null);
 
     private hasAutoSelected = false;
+    private hasAutoSelectedMatrix = false;
 
     constructor() {
         effect(() => {
@@ -129,6 +136,64 @@ export class Analysis implements OnInit {
                 this.hasAutoSelected = true;
             }
         }, { allowSignalWrites: true });
+
+        effect(() => {
+            const trials = this.results().metricRows;
+            if (trials.length > 0 && !this.hasAutoSelectedMatrix) {
+                const existing = this.inputParams()?.matrixThresholds;
+                
+                // If we already have thresholds in the session, use them!
+                if (existing) {
+                    this.matrixThresholds.set(existing);
+                    this.hasAutoSelectedMatrix = true;
+                    return;
+                }
+
+                this.matrixThresholds.set({
+                    highEnrollment: this.calculateMedian(trials.map(t => t.totalEnrollment)),
+                    multiSite: this.calculateMedian(trials.map(t => t.siteCount)),
+                    longDuration: this.calculateMedian(trials.map(t => t.timelineSlippage)),
+                    manyArms: this.calculateMedian(trials.map(t => t.armCount)),
+                    strictInclusions: this.calculateMedian(trials.map(t => t.inclusionStrictness)),
+                    manyInterventions: this.calculateMedian(trials.map(t => t.interventionCount)),
+                    manyOutcomes: this.calculateMedian(trials.map(t => t.outcomeDensity)),
+                    wideAgeSpan: this.calculateMedian(trials.map(t => t.ageSpan)),
+                    operators: {
+                        highEnrollment: '>',
+                        multiSite: '>',
+                        longDuration: '>',
+                        manyArms: '>',
+                        strictInclusions: '>',
+                        manyInterventions: '>',
+                        manyOutcomes: '>',
+                        wideAgeSpan: '>'
+                    }
+                });
+                this.hasAutoSelectedMatrix = true;
+            }
+        }, { allowSignalWrites: true });
+
+        // Capture initial comparison trials once foundTrials is populated
+        effect(() => {
+            const allTrials = this.workflowService.foundTrials();
+            const selectedIds = this.workflowService.selectedTrialIds();
+            if (allTrials.length > 0 && selectedIds.length > 0 && this.initialComparisonTrials().length === 0) {
+                const initial = allTrials.filter(t => selectedIds.includes(t.nctId));
+                this.initialComparisonTrials.set(initial);
+            }
+        }, { allowSignalWrites: true });
+    }
+
+    private calculateMedian(values: number[]): number {
+        if (values.length === 0) return 0;
+        const filtered = values.filter(v => v !== null && v !== undefined);
+        if (filtered.length === 0) return 0;
+        const sorted = [...filtered].sort((a, b) => a - b);
+        const mid = Math.floor(sorted.length / 2);
+        if (sorted.length % 2 === 0) {
+            return Math.round((sorted[mid - 1] + sorted[mid]) / 2);
+        }
+        return Math.round(sorted[mid]);
     }
 
     abs(val: number): number {
@@ -137,8 +202,9 @@ export class Analysis implements OnInit {
 
     displayPhase = computed(() => {
         const phase = this.inputParams()?.phase;
-        if (!phase || phase === 'N/A' || phase === 'NA') return 'Any Phase';
-        return phase;
+        if (!phase || phase.length === 0) return 'Any Phase';
+        if (phase.includes('N/A') || phase.includes('NA')) return 'Any Phase';
+        return phase.join(', ');
     });
 
     estimatedDuration = computed(() => {
@@ -619,6 +685,7 @@ export class Analysis implements OnInit {
             ];
 
             const userZScore = stdDev === 0 ? 0 : (m.userVal - mean) / stdDev;
+            const delta = m.userVal - mean;
 
             return {
                 label: m.label,
@@ -627,6 +694,7 @@ export class Analysis implements OnInit {
                 mean: Math.round(mean * 10) / 10,
                 stdDev: Math.round(stdDev * 10) / 10,
                 zScore: Math.round(userZScore * 100) / 100,
+                delta: Math.round(delta * 10) / 10,
                 chartData: {
                     datasets: [
                         {
@@ -658,7 +726,8 @@ export class Analysis implements OnInit {
     readonly allComparisonMetrics = ALL_COMPARISON_METRICS;
     readonly columnOptions: MultiSelectOption[] = ALL_COMPARISON_METRICS.map(m => ({ label: m.label, value: m.key }));
     
-    visibleColumnKeys = signal<string[]>(['phase', 'overallStatus', 'enrollmentCount', 'startDate', 'completionDate']);
+    initialComparisonTrials = signal<StudyTrial[]>([]);
+    visibleColumnKeys = signal<string[]>(['phase', 'overallStatus', 'enrollmentCount', 'countryCount', 'startDate', 'completionDate']);
     comparisonMetrics = computed(() => ALL_COMPARISON_METRICS.filter(m => this.visibleColumnKeys().includes(m.key)));
     comparisonSearch = signal('');
     comparisonSortKey = signal('');
@@ -675,8 +744,7 @@ export class Analysis implements OnInit {
         const rankMap = new Map<string, number>(rankedTrials.map(rt => [rt.trial.nctId, rt.rank]));
 
         const selectedIds = new Set(this.workflowService.selectedTrialIds());
-        const allTrials = this.workflowService.foundTrials();
-        const trials = allTrials.filter(t => selectedIds.has(t.nctId));
+        const trials = this.initialComparisonTrials();
 
         let rows: ComparisonRow[] = trials.map(trial => ({
             trial,
@@ -684,7 +752,8 @@ export class Analysis implements OnInit {
                 ALL_COMPARISON_METRICS.map(m => [m.key, m.fn(trial)])
             ),
             isRanked: rankMap.has(trial.nctId),
-            rank: rankMap.get(trial.nctId)
+            rank: rankMap.get(trial.nctId),
+            isExcluded: !selectedIds.has(trial.nctId)
         }));
 
         if (onlySimilar) {
@@ -720,7 +789,8 @@ export class Analysis implements OnInit {
     });
 
     ngOnInit(): void {
-        if (this.workflowService.selectedTrialIds().length === 0) {
+        const selectedIds = new Set(this.workflowService.selectedTrialIds());
+        if (selectedIds.size === 0) {
             this.router.navigate(['/']);
             return;
         }
@@ -760,6 +830,30 @@ export class Analysis implements OnInit {
         }
     }
 
+    toggleTrialInclusion(trial: StudyTrial) {
+        const currentIds = this.workflowService.selectedTrialIds();
+        let nextIds: string[];
+        if (currentIds.includes(trial.nctId)) {
+            nextIds = currentIds.filter(id => id !== trial.nctId);
+        } else {
+            nextIds = [...currentIds, trial.nctId];
+        }
+
+        // Update global selection signal
+        this.workflowService.selectedTrialIds.set(nextIds);
+
+        // PERSIST: Update the saved input params so Dashboard sees the pruned list
+        const params = this.workflowService.inputParams();
+        if (params) {
+            this.workflowService.setInputs({
+                ...params,
+                selectedTrialIds: nextIds
+            });
+        }
+
+        this.workflowService.processResultsV2(true);
+    }
+
     onUpdateBenchmark(paramKey: string, value: string) {
         const val = value === '' ? null : parseInt(value);
         const params = this.inputParams();
@@ -768,8 +862,19 @@ export class Analysis implements OnInit {
                 ...params,
                 [paramKey]: val
             });
+            
+            // If we updated patients, we only need local re-analysis
+            if (paramKey === 'userPatients') {
+                this.workflowService.processResultsV2(true);
+            }
         }
     }
+
+    isPatientModified = computed(() => {
+        const current = this.inputParams()?.userPatients;
+        const results = this.data()?.participantTarget;
+        return current !== undefined && results !== undefined && current !== results;
+    });
 
     onFocusSite(coords: [number, number] | null) {
         if (coords) {
@@ -779,19 +884,37 @@ export class Analysis implements OnInit {
 
     onUpdateMatrixThreshold(key: string, value: string) {
         const val = value === '' ? 0 : Math.max(0, parseInt(value));
-        this.matrixThresholds.update(prev => ({
-            ...prev,
-            [key]: val
-        }));
+        this.matrixThresholds.update(prev => {
+            const next = {
+                ...prev,
+                [key]: val
+            };
+            this.persistMatrixThresholds(next);
+            return next;
+        });
     }
 
     toggleMatrixOperator(key: keyof MatrixOperators) {
-        this.matrixThresholds.update(prev => ({
-            ...prev,
-            operators: {
-                ...prev.operators,
-                [key]: prev.operators[key] === '>' ? '<' : '>'
-            }
-        }));
+        this.matrixThresholds.update(prev => {
+            const next = {
+                ...prev,
+                operators: {
+                    ...prev.operators,
+                    [key]: prev.operators[key] === '>' ? '<' : '>'
+                }
+            };
+            this.persistMatrixThresholds(next);
+            return next;
+        });
+    }
+
+    private persistMatrixThresholds(thresholds: MatrixThresholds) {
+        const params = this.inputParams();
+        if (params) {
+            this.workflowService.setInputs({
+                ...params,
+                matrixThresholds: thresholds
+            });
+        }
     }
 }

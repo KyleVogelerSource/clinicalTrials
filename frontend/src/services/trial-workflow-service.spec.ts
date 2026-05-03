@@ -9,6 +9,10 @@ describe('TrialWorkflowService', () => {
   let service: TrialWorkflowService;
   let clinicalStudyService: {
     searchStudies: ReturnType<typeof vi.fn>;
+    getPhases: ReturnType<typeof vi.fn>;
+    getAllocations: ReturnType<typeof vi.fn>;
+    getInterventionModels: ReturnType<typeof vi.fn>;
+    getMaskingTypes: ReturnType<typeof vi.fn>;
   };
   let resultsApiService: {
     getResults: ReturnType<typeof vi.fn>;
@@ -16,10 +20,10 @@ describe('TrialWorkflowService', () => {
 
   const designModel = {
     condition: 'Type 2 Diabetes',
-    phase: 'Phase 2',
-    allocationType: 'Randomized',
-    interventionModel: 'Parallel Assignment',
-    blindingType: 'Double',
+    phase: ['Phase 2'],
+    allocationType: ['Randomized'],
+    interventionModel: ['Parallel Assignment'],
+    blindingType: ['Double'],
     minAge: 18,
     maxAge: 65,
     sex: 'All',
@@ -87,6 +91,10 @@ describe('TrialWorkflowService', () => {
   beforeEach(() => {
     clinicalStudyService = {
       searchStudies: vi.fn(),
+      getPhases: vi.fn().mockReturnValue(['Phase 1', 'Phase 2', 'Phase 3']),
+      getAllocations: vi.fn().mockReturnValue(['Randomized', 'Non-Randomized', 'N/A']),
+      getInterventionModels: vi.fn().mockReturnValue(['Single Group Assignment', 'Parallel Assignment']),
+      getMaskingTypes: vi.fn().mockReturnValue(['None (Open Label)', 'Single', 'Double', 'Triple', 'Quadruple']),
     };
     resultsApiService = {
       getResults: vi.fn(),

@@ -5,7 +5,7 @@
         <div class="heading-left">
             <button class="btn btn-prominent" (click)="onBack()">← Back to Design</button>
             <h2>Feasibility Report: {{ inputParams()?.condition || 'Selected Trials' }}</h2>
-            <p class="meta-info">Generated on {{ data()?.timestamp | date:'medium' }} • {{ displayPhase() }}</p>
+            <p class="meta-info">Generated on {{ (data()?.timestamp || today) | date:'medium' }} • {{ displayPhase() }}</p>
         </div>
         <div class="heading-right">
             <button class="btn btn-prominent" (click)="onPrint()">Print</button>
@@ -18,10 +18,19 @@
             
             <!-- Viability Score -->
             <div class="card card-large">
+                <div class="card-header">
+                    <h4>Summary</h4>
+                </div>
                 <div class="card-body">
                     <div class="viability-summary">
-                        <h5>Summary</h5>
-                        <p>{{ data()?.overallSummary }}</p>
+                        @if (isAILoading()) {
+                            <div class="local-loader">
+                                <app-loading-indicator [visible]="true" />
+                                <span class="loader-text">Generating analysis summary...</span>
+                            </div>
+                        } @else {
+                            <p>{{ data()?.overallSummary }}</p>
+                        }
                     </div>
                 </div>
             </div>
@@ -39,18 +48,25 @@
                     
                     <div class="drivers-list">
                         <h5>Top Recruitment Drivers</h5>
-                        <ul>
-                            @for (driver of data()?.recruitmentByImpact; track $index) {
-                                <li>
-                                    <span class="driver-label">{{ driver.label }}</span>
-                                    <span class="driver-impact" [class.positive]="driver.correlation! > 0" [class.negative]="driver.correlation! < 0">
-                                        {{ driver.impactText }} (r = {{ driver.correlation!.toFixed(2) }})
-                                    </span>
-                                </li>
-                                } @empty {
-                                <li class="no-drivers-msg">No statistically significant drivers found for the selected trials.</li>
-                                }
-                                </ul>
+                        @if (isAILoading()) {
+                            <div class="local-loader-inline">
+                                <app-loading-indicator [visible]="true" />
+                                <span class="loader-text">Analyzing drivers...</span>
+                            </div>
+                        } @else {
+                            <ul>
+                                @for (driver of data()?.recruitmentByImpact; track $index) {
+                                    <li>
+                                        <span class="driver-label">{{ driver.label }}</span>
+                                        <span class="driver-impact" [class.positive]="driver.correlation! > 0" [class.negative]="driver.correlation! < 0">
+                                            {{ driver.impactText }} (r = {{ driver.correlation!.toFixed(2) }})
+                                        </span>
+                                    </li>
+                                    } @empty {
+                                    <li class="no-drivers-msg">No statistically significant drivers found for the selected trials.</li>
+                                    }
+                            </ul>
+                        }
                     </div>
                 </div>
             </div>
@@ -70,17 +86,30 @@
                                 <div class="benchmark-meta">
                                     <span class="benchmark-label">{{ b.label }}</span>
                                     <div class="benchmark-val-editor">
-                                        <label class="input-label">Proposed:</label>
-                                        <input type="number" 
-                                            [value]="b.userVal" 
-                                            (change)="onUpdateBenchmark(b.paramKey, $any($event.target).value)"
-                                            min="0"
-                                            class="benchmark-input">
-                                        <span class="benchmark-z">{{ b.zScore > 0 ? '+' : '' }}{{ b.zScore }}σ</span>
+                                        <div class="proposed-stack">
+                                            <div class="proposed-row">
+                                                <label class="input-label">Proposed:</label>
+                                                <input type="number" 
+                                                    [class.modified-input]="b.paramKey === 'userPatients' && isPatientModified()"
+                                                    [value]="b.userVal" 
+                                                    (change)="onUpdateBenchmark(b.paramKey, $any($event.target).value)"
+                                                    min="0"
+                                                    class="benchmark-input">
+                                                <span class="benchmark-z">{{ b.zScore > 0 ? '+' : '' }}{{ b.zScore }}σ</span>
+                                            </div>
+                                            <div class="delta-row" [class.negative]="b.delta < 0" [class.positive]="b.delta > 0">
+                                                {{ b.delta > 0 ? '+' : '' }}{{ b.delta | number }} {{ b.delta > 0 ? 'above' : 'below' }} avg
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="benchmark-chart">
-                                    <app-scatter-chart [chartData]="b.chartData" [showLegend]="false" type="line" [enableZoom]="false" />
+                                    <app-scatter-chart 
+                                        [chartData]="b.chartData" 
+                                        [showLegend]="false" 
+                                        type="line" 
+                                        [enableZoom]="false" 
+                                        [exportPrefix]="`${inputParams()?.condition ?? ''} ${b.label}`" />
                                 </div>
                                 <div class="benchmark-stats">
                                     Avg: {{ b.mean }} | σ: {{ b.stdDev }}
@@ -98,7 +127,10 @@
                 </div>
                 <div class="card-body heatmap-layout">
                     <div class="heatmap-container">
-                        <app-heatmap [points]="heatmapPoints()" [focusPoint]="heatmapFocus()" />
+                        <app-heatmap 
+                            [points]="heatmapPoints()" 
+                            [focusPoint]="heatmapFocus()"
+                            [condition]="inputParams()?.condition || 'Trials'" />
                     </div>
                     <div class="top-sites">
                         <h5>Top Active Sites</h5>
@@ -124,6 +156,7 @@
                 <div class="card-body">
                     <div class="correlation-info-banner">
                         Explore relationships between key clinical trial metrics. Select a pair to visualize the data distribution and trend.
+                        <strong>r̂</strong> represents the correlation with statistical outliers excluded.
                     </div>
 
                     <div class="correlation-layout">
@@ -202,7 +235,7 @@
                                     </label>
 
                                     <label class="switch-control">
-                                        <span class="label-text">Exclude Outliers</span>
+                                        <span class="label-text">Exclude Outliers (r̂)</span>
                                         <div class="switch">
                                             <input type="checkbox" [checked]="excludeOutliers()" (change)="excludeOutliers.set($any($event.target).checked)">
                                             <span class="slider"></span>
@@ -214,7 +247,13 @@
 
                             @if (dataPlotData(); as plotData) {
                                 <div class="chart-container" style="height: 450px;">
-                                    <app-scatter-chart [chartData]="plotData" [xAxisLabel]="dataPlotX()" [yAxisLabel]="dataPlotY()" [showTrendLine]="showTrendLine()" />
+                                    <app-scatter-chart
+                                        [chartData]="plotData" 
+                                        [xAxisLabel]="dataPlotX()" 
+                                        [yAxisLabel]="dataPlotY()" 
+                                        [showTrendLine]="showTrendLine()" 
+                                        [useRHatLabel]="excludeOutliers()"
+                                        [exportPrefix]="`${inputParams()?.condition ?? ''} ${dataPlotX()} vs ${dataPlotY()}`" />
                                 </div>
                             }
                         </div>
@@ -237,7 +276,12 @@
                 <div class="card-body">
                     @if (timelineChartData(); as chartData) {
                         <div class="chart-container" style="height: 100%;">
-                            <app-bar-chart [chartData]="chartData" xAxisLabel="Patient Ranges" yAxisLabel="Timeline (Days)" [grouped]="true" />
+                            <app-bar-chart 
+                                [chartData]="chartData" 
+                                xAxisLabel="Patient Ranges" 
+                                yAxisLabel="Timeline (Days)" 
+                                [grouped]="true"
+                                [exportPrefix]="`${inputParams()?.condition ?? ''} Estimated Timeline`" />
                         </div>
                     } @else {
                         <p class="no-data">Insufficient data to generate timeline projections.</p>
@@ -260,7 +304,11 @@
                 <div class="card-body">
                     @if (siteChartData(); as chartData) {
                         <div class="chart-container" style="height: 100%;">
-                            <app-bar-chart [chartData]="chartData" xAxisLabel="Patient Ranges" yAxisLabel="Required Sites" />
+                            <app-bar-chart 
+                            [chartData]="chartData" 
+                            xAxisLabel="Patient Ranges" 
+                            yAxisLabel="Required Sites"
+                            [exportPrefix]="`${inputParams()?.condition ?? ''} Estimated Sites`" />
                         </div>
                     } @else {
                         <p class="no-data">Insufficient data to generate site projections.</p>
@@ -413,6 +461,7 @@
                         <table class="comparison-table">
                             <thead>
                                 <tr>
+                                    <th class="action-col"></th>
                                     <th class="trial-col">Trial</th>
                                     @for (metric of comparisonMetrics(); track metric.key) {
                                         <th
@@ -434,7 +483,19 @@
                             </thead>
                             <tbody>
                                 @for (row of comparisonRows(); track row.trial.nctId) {
-                                    <tr [class.ranked-trial]="row.isRanked">
+                                    <tr 
+                                        [class.ranked-trial]="row.isRanked"
+                                        [class.excluded]="row.isExcluded"
+                                    >
+                                        <td class="action-col">
+                                            <button 
+                                                class="btn-toggle-inclusion"
+                                                (click)="toggleTrialInclusion(row.trial)"
+                                                [title]="row.isExcluded ? 'Restore Trial' : 'Remove Trial'"
+                                            >
+                                                {{ row.isExcluded ? '↺' : '✕' }}
+                                            </button>
+                                        </td>
                                         <td class="trial-name-cell">
                                             <a
                                                 [href]="'https://clinicaltrials.gov/study/' + row.trial.nctId"
@@ -449,7 +510,7 @@
                                     </tr>
                                 } @empty {
                                     <tr>
-                                        <td [attr.colspan]="comparisonMetrics().length + 1" class="no-results">
+                                        <td [attr.colspan]="comparisonMetrics().length + 2" class="no-results">
                                             No trials match your search.
                                         </td>
                                     </tr>

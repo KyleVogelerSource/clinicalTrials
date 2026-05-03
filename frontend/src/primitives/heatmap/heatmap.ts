@@ -29,6 +29,7 @@ export interface HeatPoint {
 })
 export class Heatmap implements OnDestroy {
     points = input.required<HeatPoint[]>();
+    condition = input<string>('Trials');
     zoom = input<number>(2);
     center = input<[number, number]>([20, 0]); // Default to a global view
     focusPoint = input<[number, number] | null>(null);
@@ -75,7 +76,13 @@ export class Heatmap implements OnDestroy {
             center: this.center(),
             zoom: this.zoom(),
             scrollWheelZoom: false,
+            preferCanvas: true,
+            zoomControl: false,
         });
+
+        L.control.zoom({
+            position: 'topright'
+        }).addTo(this.map);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
@@ -174,8 +181,13 @@ export class Heatmap implements OnDestroy {
         leafletImage(this.map, (err: Error | null, canvas: HTMLCanvasElement) => {
             this.exporting.set(false);
             if (err || !canvas) return;
+
+            const date = new Date().toISOString().split('T')[0];
+            const cond = this.condition();
+            const filename = `${cond} Heatmap ${date}.png`;
+
             const link = document.createElement('a');
-            link.download = 'heatmap.png';
+            link.download = filename;
             link.href = canvas.toDataURL('image/png');
             link.click();
         });
