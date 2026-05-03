@@ -38,7 +38,8 @@
               "leaflet",
               "leaflet.heat",
               "leaflet-image",
-              "hammerjs"
+              "hammerjs",
+              "xlsx"
             ]
           },
           "configurations": {
