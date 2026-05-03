@@ -120,17 +120,15 @@ describe('SavedSearches', () => {
         ineligibleConditions: ['Heart Failure'],
       },
     });
-
-    expect(mockWorkflowService.setInputs).toHaveBeenCalledWith(expect.objectContaining({
-      condition: 'Diabetes',
-      phase: 'Phase 3',
-      allocationType: 'Randomized',
-      interventionModel: 'Parallel Assignment',
-      blindingType: 'Double',
-      minAge: 18,
-      maxAge: 65,
-      sex: 'Female',
-    }));
+expect(mockWorkflowService.setInputs).toHaveBeenCalledWith(expect.objectContaining({
+  condition: 'Diabetes',
+  phase: ['Phase 3'],
+  allocationType: ['Randomized'],
+  interventionModel: ['Parallel Assignment'],
+  blindingType: ['Double'],
+  minAge: 18,
+  maxAge: 65,
+}));
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/']);
   });
 
@@ -158,9 +156,9 @@ describe('SavedSearches', () => {
 
     expect(mockWorkflowService.setInputs).toHaveBeenCalledWith(expect.objectContaining({
       condition: 'Diabetes',
-      phase: 'Phase 2',
-      allocationType: 'N/A',
-      blindingType: 'None (Open Label)',
+      phase: ['Phase 2'],
+      allocationType: [],
+      blindingType: [],
     }));
   });
 
@@ -184,15 +182,15 @@ describe('SavedSearches', () => {
         sex: 'female',
       },
     });
-
-    expect(mockWorkflowService.setInputs).toHaveBeenCalledWith(expect.objectContaining({
-      condition: 'diabetes type 2',
-      phase: 'Phase 3',
-      allocationType: 'Randomized',
-      interventionModel: 'Parallel Assignment',
-      blindingType: 'Double',
-      sex: 'Female',
-    }));
+expect(mockWorkflowService.setInputs).toHaveBeenCalledWith(expect.objectContaining({
+  condition: 'diabetes type 2',
+  phase: ['Phase 3'],
+  allocationType: ['Randomized'],
+  interventionModel: ['Parallel Assignment'],
+  blindingType: ['Double'],
+  minAge: null,
+  maxAge: null,
+}));
   });
 
   it('deletes an owned saved search after confirmation', () => {

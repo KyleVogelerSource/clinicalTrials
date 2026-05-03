@@ -37,6 +37,8 @@ export class ScatterChart implements OnDestroy {
     type = input<'scatter' | 'line'>('scatter');
     enableZoom = input<boolean>(true);
     showTrendLine = input<boolean>(false);
+    useRHatLabel = input<boolean>(false);
+    exportPrefix = input<string>('');
 
     canvasRef = viewChild<ElementRef<HTMLCanvasElement>>('chartCanvas');
 
@@ -88,11 +90,12 @@ export class ScatterChart implements OnDestroy {
             const points = data.datasets[0].data.filter(p => p.x != null && p.y != null);
             if (points.length >= 2) {
                 const { linePoints, r } = this.computeTrendLine(points);
+                const rLabel = this.useRHatLabel() ? 'r̂' : 'r';
                 chartData = {
                     datasets: [
                         ...data.datasets,
                         {
-                            label: `Trend (r = ${r.toFixed(2)})`,
+                            label: `Trend (${rLabel} = ${r.toFixed(2)})`,
                             type: 'line' as any,
                             data: linePoints,
                             borderColor: '#DC344D',
@@ -112,6 +115,11 @@ export class ScatterChart implements OnDestroy {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        top: 24
+                    }
+                },
                 elements: {
                     line: {
                         tension: 0.4
@@ -189,13 +197,22 @@ export class ScatterChart implements OnDestroy {
 
     exportPng(): void {
         if (!this.chart) return;
+        
+        const date = new Date().toISOString().split('T')[0];
+        const prefix = this.exportPrefix();
+        const filename = `${prefix} Chart ${date}.png`;
+
         const link = document.createElement('a');
-        link.download = 'scatter-chart.png';
+        link.download = filename;
         link.href = this.chart.toBase64Image();
         link.click();
     }
 
     exportCsv(): void {
+        const date = new Date().toISOString().split('T')[0];
+        const prefix = this.exportPrefix();
+        const filename = `${prefix} Data ${date}.csv`;
+
         const data = this.chartData();
         const rows: string[] = ['Dataset,X,Y'];
         data.datasets.forEach(dataset => {
@@ -207,7 +224,7 @@ export class ScatterChart implements OnDestroy {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'scatter-chart.csv';
+        link.download = filename;
         link.click();
         URL.revokeObjectURL(url);
     }

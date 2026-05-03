@@ -9,26 +9,9 @@ import { DesignModel } from "../models/design-model";
 import { StudyTrial } from "../models/study-trial";
 import { ClinicalTrialStudy } from "@shared/dto/ClinicalTrialStudiesResponse";
 import { MetricRow, ResultsModel } from "../models/results-model";
-import { mapDesignModelToExecutionSearchRequest } from "./saved-search-criteria-mapper";
+import { mapDesignModelToExecutionSearchRequest, resolveMultiOptionValue, mapMultiValue, PHASE_MAP, ALLOCATION_MAP, INTERVENTION_MODEL_MAP, BLINDING_MAP } from "./saved-search-criteria-mapper";
 import { HeatPoint } from "../primitives/heatmap/heatmap";
 import { TrialNormalizer } from "./trial-normalizer.service";
-
-const PHASE_MAP: Record<string, string> = {
-    'Early Phase 1': 'EARLY_PHASE1',
-    'Phase 1': 'PHASE1',
-    'Phase 2': 'PHASE2',
-    'Phase 3': 'PHASE3',
-    'Phase 4': 'PHASE4',
-    'N/A': 'NA'
-};
-
-const INTERVENTION_MODEL_MAP: Record<string, string> = {
-    'Single Group Assignment': 'SINGLE_GROUP',
-    'Parallel Assignment': 'PARALLEL',
-    'Crossover Assignment': 'CROSSOVER',
-    'Factorial Assignment': 'FACTORIAL',
-    'Sequential Assignment': 'SEQUENTIAL'
-};
 
 /**
  * Contains local state for user's input
@@ -57,6 +40,7 @@ export class TrialWorkflowService {
     // Results state
     selectedTrialIds = signal<string[]>([]);
     results = signal<ResultsModel>(new ResultsModel());
+    isAILoading = signal(false);
 
     constructor() {
         this.restoreSession();
@@ -81,7 +65,9 @@ export class TrialWorkflowService {
 
         if (storedInputs) {
             try {
-                this.inputParams.set(JSON.parse(storedInputs));
+                const rawInputs = JSON.parse(storedInputs);
+                const normalized = this.normalizeInputs(rawInputs);
+                this.inputParams.set(normalized);
                 if (storedSelections) {
                     this.selectedTrialIds.set(JSON.parse(storedSelections));
                 }
@@ -93,6 +79,29 @@ export class TrialWorkflowService {
                 this.reset();
             }
         }
+    }
+
+    private normalizeInputs(inputs: any): DesignModel {
+        const phases = this.clinicalStudyService.getPhases();
+        const allocations = this.clinicalStudyService.getAllocations();
+        const interventions = this.clinicalStudyService.getInterventionModels();
+        const blindings = this.clinicalStudyService.getMaskingTypes();
+
+        return {
+            ...inputs,
+            // Ensure all multi-select fields are normalized arrays and deduplicated
+            phase: resolveMultiOptionValue(inputs.phase, phases, PHASE_MAP),
+            allocationType: resolveMultiOptionValue(inputs.allocationType, allocations, ALLOCATION_MAP),
+            interventionModel: resolveMultiOptionValue(inputs.interventionModel, interventions, INTERVENTION_MODEL_MAP),
+            blindingType: resolveMultiOptionValue(inputs.blindingType, blindings, BLINDING_MAP),
+            
+            // Ensure criteria arrays exist
+            inclusionCriteria: inputs.inclusionCriteria || [],
+            exclusionCriteria: inputs.exclusionCriteria || [],
+            required: inputs.required || [],
+            ineligible: inputs.ineligible || [],
+            selectedTrialIds: inputs.selectedTrialIds || []
+        };
     }
 
     reset() {
@@ -109,7 +118,13 @@ export class TrialWorkflowService {
     }
 
     setInputs(inputs : DesignModel) {
-        this.inputParams.set(inputs);
+        // Fix: preserve matrixThresholds if not present in new inputs (common during dashboard navigation)
+        const current = this.inputParams();
+        const next = this.normalizeInputs(inputs);
+        if (current && !next.matrixThresholds && current.matrixThresholds) {
+            next.matrixThresholds = current.matrixThresholds;
+        }
+        this.inputParams.set(next);
     }
 
     setImportNotice(message: string | null) {
@@ -120,13 +135,18 @@ export class TrialWorkflowService {
         const input = this.inputParams();
         if (!input) return;
 
-        const request: ClinicalTrialSearchRequest = {
-            ...mapDesignModelToExecutionSearchRequest(input, {
-                phaseByLabel: PHASE_MAP,
-                interventionModelByLabel: INTERVENTION_MODEL_MAP,
-            }),
-            pageSize: 100
-        };
+        // Strict validation: condition and phase are required for a valid search
+        const hasCondition = input.condition && input.condition.trim().length >= 2;
+        const hasPhase = input.phase && input.phase.length > 0;
+
+        if (!hasCondition || !hasPhase) {
+            console.warn("Skipping search: missing or incomplete criteria", { hasCondition, hasPhase });
+            this.foundTrials.set([]);
+            return;
+        }
+
+        const request = mapDesignModelToExecutionSearchRequest(input);
+        request.pageSize = 100;
 
         this.loadingService.show('Searching for matching trials...');
         this.clinicalStudyService.searchStudies(request).subscribe({
@@ -139,6 +159,7 @@ export class TrialWorkflowService {
             error: (err) => {
                 console.error("Failed to search trials:", err);
                 this.loadingService.hide();
+                this.foundTrials.set([]);
             }
         });
 
@@ -164,6 +185,8 @@ export class TrialWorkflowService {
             ? `${firstLocation.city || ''}${firstLocation.city && firstLocation.country ? ', ' : ''}${firstLocation.country || ''}`
             : 'Unknown';
 
+        const uniqueCountries = Array.from(new Set(locations.map(loc => loc.country).filter((c): c is string => !!c)));
+
         return {
             nctId: study.protocolSection.identificationModule.nctId,
             briefTitle: study.protocolSection.identificationModule.briefTitle,
@@ -176,7 +199,8 @@ export class TrialWorkflowService {
             phase: study.protocolSection.designModule?.phases?.[0] || 'N/A',
             description: study.protocolSection.descriptionModule?.briefSummary || '',
             overallStatus: study.protocolSection.statusModule?.overallStatus || 'Unknown',
-            sites: locations.map(loc => loc.facility).filter((f): f is string => !!f)
+            sites: locations.map(loc => loc.facility).filter((f): f is string => !!f),
+            countries: uniqueCountries
         }
     }
 
@@ -184,18 +208,66 @@ export class TrialWorkflowService {
         this.processResultsV2();
     }
 
-    processResultsV2() {
-        this.loadingService.show('Analyzing clinical trials data...');
+    processResultsV2(skipAi = false) {
+        this.calculateLocalMetrics();
 
+        // Hide the global loader after local metrics are calculated so the page can render
+        this.loadingService.hide();
+
+        if (skipAi) {
+            return;
+        }
+
+        const trials = this.selectedTrialIds().map(id => this.trialCache.get(id)).filter((t): t is ClinicalTrialStudy => !!t);
+        const request = this.createResultsRequest();
+        if (request) {
+            const normalizedTrials = trials.map(t => this.normalizer.normalizeForBenchmark(t));
+
+            this.isAILoading.set(true);
+            this.apiService.getResults(request, normalizedTrials).pipe(
+                finalize(() => {
+                    this.isAILoading.set(false);
+                    this.loadingService.hide(); // Double check it's hidden
+                })
+            ).subscribe({
+                next: (aiResults) => {
+                    this.results.update(current => {
+                        if (aiResults.explanation?.explanation) {
+                            aiResults.overallSummary = aiResults.explanation.explanation;
+                        } else if (!aiResults.overallSummary) {
+                            aiResults.overallSummary = "Analysis completed, but no detailed summary was provided by the AI.";
+                        }
+                        if (current.trialResults) {
+                            aiResults.timelineBuckets = current.trialResults.timelineBuckets;
+                            aiResults.recruitmentByImpact = current.trialResults.recruitmentByImpact;
+                            aiResults.avgRecruitmentDays = current.trialResults.avgRecruitmentDays;
+                            aiResults.participantTarget = current.trialResults.participantTarget;
+                            aiResults.timelineRange = current.trialResults.timelineRange;
+                            aiResults.siblingCount = current.trialResults.siblingCount;
+                        }
+                        current.trialResults = aiResults;
+                        return { ...current };
+                    });
+                },
+                error: (err) => {
+                    console.error("AI Results failed", err);
+                    this.results.update(current => {
+                        if (current.trialResults) current.trialResults.overallSummary = "Failed to load detailed AI analysis.";
+                        return { ...current };
+                    });
+                }
+            });
+        }
+    }
+
+    private calculateLocalMetrics() {
         const countCriteriaItems = (text: string): number => {
             if (!text) return 0;
-            // Split by lines and look for markers like "-", "*", "1.", etc. at the start of non-empty lines
             const lines = text.split('\n');
             const criteriaLines = lines.filter(line => {
                 const trimmed = line.trim();
                 return trimmed.startsWith('-') || trimmed.startsWith('*') || /^\d+\./.test(trimmed);
             });
-            // If no clear markers, fallback to non-empty lines but cap it to avoid huge numbers
             return criteriaLines.length > 0 ? criteriaLines.length : lines.filter(l => l.trim().length > 5).length;
         };
 
@@ -236,9 +308,8 @@ export class TrialWorkflowService {
         });
 
         this.results.update(current => {
-            current = new ResultsModel();
+            const newResults = new ResultsModel();
             
-            // --- Improved Site Naming & Aggregation Logic ---
             const GENERIC_NAMES = new Set(['research site', 'clinical site', 'clinical research site', 'investigative site', 'study site', 'phase 1 unit', 'medical center', 'hospital', 'university', 'unknown', 'na', 'n/a']);
             
             const isGeneric = (name: string): boolean => {
@@ -260,7 +331,6 @@ export class TrialWorkflowService {
                 })[0];
             };
 
-            // Map: key (geo-coords or lowercase name) -> { names: Set, count: number, coords: [lat, lon], locationStr: string }
             const siteGroups = new Map<string, { names: Set<string>, count: number, coords: [number, number] | null, locationStr: string }>();
 
             plotData.forEach(trial => {
@@ -269,7 +339,6 @@ export class TrialWorkflowService {
                     
                     const lat = loc.geoPoint?.lat;
                     const lon = loc.geoPoint?.lon;
-                    // Use a slightly rounded geo-key to group nearby entries that might be slightly offset
                     const geoKey = (lat && lon) ? `${lat.toFixed(4)},${lon.toFixed(4)}` : null;
                     const key = geoKey || loc.facility.toLowerCase().trim();
 
@@ -286,14 +355,12 @@ export class TrialWorkflowService {
                 });
             });
 
-            // Pre-calculate best names for each key to use in heatmap and topSites
             const bestNames = new Map<string, string>();
             siteGroups.forEach((group, key) => {
                 bestNames.set(key, getBestName(group.names));
             });
 
-            // 1. Heatmap Points
-            current.siteLocations = plotData.flatMap(trial => 
+            newResults.siteLocations = plotData.flatMap(trial => 
                 trial.geoLocations.map(loc => {
                     if (!loc.geoPoint || !loc.geoPoint.lat || !loc.geoPoint.lon || !loc.facility) return null;
                     const key = `${loc.geoPoint.lat.toFixed(4)},${loc.geoPoint.lon.toFixed(4)}`;
@@ -307,7 +374,6 @@ export class TrialWorkflowService {
                 }).filter((loc): loc is HeatPoint => !!loc)
             );
 
-            // 2. Top Sites (Table)
             const siteEntries = Array.from(siteGroups.entries()).map(([key, group]) => ({
                 name: bestNames.get(key)!,
                 count: group.count,
@@ -324,13 +390,12 @@ export class TrialWorkflowService {
                     .filter(s => s.count <= 1)
                     .sort((a, b) => b.count - a.count)
                     .slice(0, 12 - top12.length);
-                current.topSites = [...top12, ...remainder];
+                newResults.topSites = [...top12, ...remainder];
             } else {
-                current.topSites = top12;
+                newResults.topSites = top12;
             }
 
-            // Metric Rows
-            current.metricRows = plotData.map(trial => {
+            newResults.metricRows = plotData.map(trial => {
                 const row = new MetricRow();
                 const completedDate = trial.completedDate ? Date.parse(trial.completedDate.date) : null;
                 const startDate = trial.startDate ? Date.parse(trial.startDate.date) : null;
@@ -359,10 +424,7 @@ export class TrialWorkflowService {
                 return row;
             });
 
-            // Calculate derived results for charts
-            const validTrials = current.metricRows.filter(r => r.timelineSlippage > 0);
-
-            // Expected Timeline binning logic
+            const validTrials = newResults.metricRows.filter(r => r.timelineSlippage > 0);
             const enrollments = validTrials
                 .map((r: MetricRow) => r.totalEnrollment)
                 .sort((a: number, b: number) => a - b);
@@ -393,7 +455,6 @@ export class TrialWorkflowService {
                 }
             }
 
-            // Sibling-Adjusted Timeline (Overall Duration)
             const design = this.inputParams();
             const targetEnrollment = design?.userPatients ?? 0;
             let adjustedVelocity = 0;
@@ -401,31 +462,23 @@ export class TrialWorkflowService {
             let siblingCount = 0;
 
             if (targetEnrollment > 0 && validTrials.length > 0) {
-                // Try to find structural siblings (±50% enrollment)
                 let siblings = validTrials.filter(r => 
                     r.totalEnrollment >= targetEnrollment * 0.5 && 
                     r.totalEnrollment <= targetEnrollment * 1.5
                 );
-
-                // Fallback: if too few siblings, widen the net
                 if (siblings.length < 3) {
                     siblings = validTrials.filter(r => 
                         r.totalEnrollment >= targetEnrollment * 0.25 && 
                         r.totalEnrollment <= targetEnrollment * 4
                     );
                 }
-
-                // Ultimate fallback: all valid trials
                 if (siblings.length < 3) {
                     siblings = validTrials;
                 }
-
                 siblingCount = siblings.length;
                 const velocities = siblings.map(s => s.recruitmentVelocity);
                 const sum = velocities.reduce((a, b) => a + b, 0);
                 adjustedVelocity = sum / siblings.length;
-
-                // Calculate StdDev for range
                 if (siblings.length > 1) {
                     const avg = adjustedVelocity;
                     const squareDiffs = velocities.map(v => Math.pow(v - avg, 2));
@@ -434,7 +487,6 @@ export class TrialWorkflowService {
                 }
             }
 
-            // Global avg as fallback if target enrollment is missing or no siblings
             const globalTotalDays = validTrials.reduce((acc: number, r: MetricRow) => acc + r.timelineSlippage, 0);
             const globalTotalEnrollmentVal = validTrials.reduce((acc: number, r: MetricRow) => acc + r.totalEnrollment, 0);
             const globalVelocity = globalTotalEnrollmentVal > 0 ? globalTotalEnrollmentVal / globalTotalDays : 0;
@@ -442,7 +494,6 @@ export class TrialWorkflowService {
             const finalVelocity = adjustedVelocity > 0 ? adjustedVelocity : globalVelocity;
             const estDays = targetEnrollment > 0 && finalVelocity > 0 ? Math.round(targetEnrollment / finalVelocity) : 0;
             
-            // Range based on std dev
             let minDays = 0;
             let maxDays = 0;
             if (estDays > 0 && velocityStdDev > 0 && finalVelocity > velocityStdDev) {
@@ -450,15 +501,13 @@ export class TrialWorkflowService {
                 maxDays = Math.round(targetEnrollment / (finalVelocity - velocityStdDev));
             }
 
-            // Termination distribution for report
             const terminations = new Map<string, number>();
             plotData.forEach(t => {
                 const status = t.status.split('_').join(' ');
                 terminations.set(status, (terminations.get(status) || 0) + 1);
             });
-            current.terminationReasons = Array.from(terminations.entries()).map(([reason, count]) => ({ reason, count }));
+            newResults.terminationReasons = Array.from(terminations.entries()).map(([reason, count]) => ({ reason, count }));
 
-            // Driver Analysis
             const metricsToTest = [
                 { name: 'Site Count', key: 'siteCount', invert: false },
                 { name: 'Inclusion Strictness', key: 'inclusionStrictness', invert: true },
@@ -495,66 +544,25 @@ export class TrialWorkflowService {
                 };
             });
 
-            current.trialResults = {
+            newResults.trialResults = {
+                ...current.trialResults,
                 timestamp: new Date(),
-                overallScore: 0,
-                overallSummary: 'Generating detailed analysis...',
+                overallScore: current.trialResults?.overallScore ?? 0,
+                overallSummary: current.trialResults?.overallSummary ?? 'Generating detailed analysis...',
                 totalTrialsFound: trials.length,
                 queryCondition: this.inputParams()?.condition ?? 'Selected Trials',
-                avgRecruitmentDays: estDays, // Refactored to represent estimated duration in days
+                avgRecruitmentDays: estDays, 
                 participantTarget: targetEnrollment,
                 recruitmentByImpact,
                 timelineBuckets,
-                terminationReasons: current.terminationReasons,
-                generatedAt: new Date().toISOString(),
-                // Pass range info for UI
+                terminationReasons: newResults.terminationReasons,
+                generatedAt: current.trialResults?.generatedAt ?? new Date().toISOString(),
                 timelineRange: maxDays > 0 ? `${minDays} - ${maxDays}` : undefined,
                 siblingCount
-            };
+            } as any;
 
-            return current;
+            return newResults;
         });
-
-        const request = this.createResultsRequest();
-        if (request) {
-            const normalizedTrials = trials.map(t => this.normalizer.normalizeForBenchmark(t));
-
-            this.apiService.getResults(request, normalizedTrials).pipe(
-                finalize(() => this.loadingService.hide())
-            ).subscribe({
-                next: (aiResults) => {
-                    this.results.update(current => {
-                        // Map the new AI explanation to the overallSummary field
-                        if (aiResults.explanation?.explanation) {
-                            aiResults.overallSummary = aiResults.explanation.explanation;
-                        } else if (!aiResults.overallSummary) {
-                            aiResults.overallSummary = "Analysis completed, but no detailed summary was provided by the AI.";
-                        }
-
-                        // Preserve locally calculated data
-                        if (current.trialResults) {
-                            aiResults.timelineBuckets = current.trialResults.timelineBuckets;
-                            aiResults.recruitmentByImpact = current.trialResults.recruitmentByImpact;
-                            aiResults.avgRecruitmentDays = current.trialResults.avgRecruitmentDays;
-                            aiResults.participantTarget = current.trialResults.participantTarget;
-                            aiResults.timelineRange = current.trialResults.timelineRange;
-                            aiResults.siblingCount = current.trialResults.siblingCount;
-                        }
-                        current.trialResults = aiResults;
-                        return { ...current };
-                    });
-                },
-                error: (err) => {
-                    console.error("AI Results failed", err);
-                    this.results.update(current => {
-                        if (current.trialResults) current.trialResults.overallSummary = "Failed to load detailed AI analysis.";
-                        return { ...current };
-                    });
-                }
-            });
-        } else {
-            this.loadingService.hide();
-        }
     }
 
     createResultsRequest() : TrialResultsRequest | undefined {
@@ -564,10 +572,10 @@ export class TrialWorkflowService {
         
         const request: TrialResultsRequest = {
             condition: input.condition ?? null,
-            phase: input.phase ?? null,
-            allocationType: input.allocationType ?? null,
-            interventionModel: input.interventionModel ?? null,
-            blindingType: input.blindingType ?? null,
+            phase: mapMultiValue(input.phase) ?? null,
+            allocationType: mapMultiValue(input.allocationType) ?? null,
+            interventionModel: mapMultiValue(input.interventionModel) ?? null,
+            blindingType: mapMultiValue(input.blindingType) ?? null,
             minAge: input.minAge ?? null,
             maxAge: input.maxAge ?? null,
             sex: input.sex ?? null,

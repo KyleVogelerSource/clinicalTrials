@@ -10,10 +10,10 @@ describe('saved-search-criteria-mapper', () => {
     expect(
       mapDesignModelToSavedSearchCriteria({
         condition: 'Diabetes',
-        phase: 'Phase 3',
-        allocationType: 'Randomized',
-        interventionModel: 'Parallel Assignment',
-        blindingType: 'Double',
+        phase: ['Phase 3'],
+        allocationType: ['Randomized'],
+        interventionModel: ['Parallel Assignment'],
+        blindingType: ['Double'],
         minAge: 18,
         maxAge: 65,
         sex: 'Female',
@@ -21,6 +21,8 @@ describe('saved-search-criteria-mapper', () => {
         ineligible: ['Heart Failure'],
         startDateFrom: '2022',
         startDateTo: '2025',
+        inclusionCriteria: [],
+        exclusionCriteria: [],
       })
     ).toEqual({
       condition: 'Diabetes',
@@ -70,10 +72,10 @@ describe('saved-search-criteria-mapper', () => {
       )
     ).toEqual({
       condition: 'Diabetes',
-      phase: 'Phase 2',
-      allocationType: 'N/A',
-      interventionModel: null,
-      blindingType: 'None (Open Label)',
+      phase: ['Phase 2'],
+      allocationType: [],
+      interventionModel: [],
+      blindingType: [],
       minAge: null,
       maxAge: null,
       sex: 'All',
@@ -119,10 +121,10 @@ describe('saved-search-criteria-mapper', () => {
       )
     ).toEqual({
       condition: 'diabetes type 2',
-      phase: 'Phase 3',
-      allocationType: 'Randomized',
-      interventionModel: 'Parallel Assignment',
-      blindingType: 'Double',
+      phase: ['Phase 3'],
+      allocationType: ['Randomized'],
+      interventionModel: ['Parallel Assignment'],
+      blindingType: ['Double'],
       minAge: null,
       maxAge: null,
       sex: 'Female',
@@ -148,27 +150,35 @@ describe('saved-search-criteria-mapper', () => {
       mapDesignModelToExecutionSearchRequest(
         {
           condition: 'Diabetes',
-          phase: 'Phase 3',
-          allocationType: 'Randomized',
-          interventionModel: 'Parallel Assignment',
-          blindingType: 'Double',
+          phase: ['Phase 3'],
+          allocationType: ['Randomized'],
+          interventionModel: ['Parallel Assignment'],
+          blindingType: ['Double'],
+          minAge: 18,
+          maxAge: 65,
           sex: 'Female',
           required: ['Hypertension'],
           ineligible: ['Heart Failure'],
           startDateFrom: '2022',
           startDateTo: '2025',
+          inclusionCriteria: [],
+          exclusionCriteria: [],
         },
         {
           phaseByLabel: { 'Phase 3': 'PHASE3' },
           interventionModelByLabel: { 'Parallel Assignment': 'PARALLEL' },
+          allocationByLabel: { 'Randomized': 'RANDOMIZED' },
+          blindingByLabel: { 'Double': 'DOUBLE' }
         }
       )
     ).toEqual({
       condition: 'Diabetes',
       phase: 'PHASE3',
-      allocationType: 'Randomized',
+      allocationType: 'RANDOMIZED',
       interventionModel: 'PARALLEL',
-      blindingType: 'Double',
+      blindingType: 'DOUBLE',
+      minAge: 18,
+      maxAge: 65,
       sex: 'Female',
       requiredConditions: ['Hypertension'],
       ineligibleConditions: ['Heart Failure'],
