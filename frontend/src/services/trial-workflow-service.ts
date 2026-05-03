@@ -40,6 +40,7 @@ export class TrialWorkflowService {
     // Results state
     selectedTrialIds = signal<string[]>([]);
     results = signal<ResultsModel>(new ResultsModel());
+    isAILoading = signal(false);
 
     constructor() {
         this.restoreSession();
@@ -210,8 +211,10 @@ export class TrialWorkflowService {
     processResultsV2(skipAi = false) {
         this.calculateLocalMetrics();
 
+        // Hide the global loader after local metrics are calculated so the page can render
+        this.loadingService.hide();
+
         if (skipAi) {
-            this.loadingService.hide();
             return;
         }
 
@@ -220,9 +223,12 @@ export class TrialWorkflowService {
         if (request) {
             const normalizedTrials = trials.map(t => this.normalizer.normalizeForBenchmark(t));
 
-            this.loadingService.show('Analyzing clinical trials data...');
+            this.isAILoading.set(true);
             this.apiService.getResults(request, normalizedTrials).pipe(
-                finalize(() => this.loadingService.hide())
+                finalize(() => {
+                    this.isAILoading.set(false);
+                    this.loadingService.hide(); // Double check it's hidden
+                })
             ).subscribe({
                 next: (aiResults) => {
                     this.results.update(current => {
@@ -251,8 +257,6 @@ export class TrialWorkflowService {
                     });
                 }
             });
-        } else {
-            this.loadingService.hide();
         }
     }
 

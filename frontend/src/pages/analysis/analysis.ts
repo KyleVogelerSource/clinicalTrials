@@ -10,6 +10,7 @@ import { CustomSelect } from "../../primitives/custom-select/custom-select";
 import { MultiSelect, MultiSelectOption } from "../../primitives/multi-select/multi-select";
 import { Heatmap } from "../../primitives/heatmap/heatmap";
 import { Tooltip } from "../../primitives/tooltip/tooltip";
+import { LoadingIndicator } from "../../primitives/loading-indicator/loading-indicator";
 import { metricNames, MetricRow } from "../../models/results-model";
 import { StudyTrial } from "../../models/study-trial";
 import { LoadingService } from "../../services/loading.service";
@@ -101,6 +102,7 @@ export const metricDescriptions: Record<string, string> = {
         MultiSelect,
         Heatmap,
         Tooltip,
+        LoadingIndicator,
         DatePipe
     ],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -113,6 +115,8 @@ export class Analysis implements OnInit {
     results = this.workflowService.results;
     inputParams = this.workflowService.inputParams;
     selectedTrialIds = this.workflowService.selectedTrialIds;
+    isAILoading = this.workflowService.isAILoading;
+    today = new Date();
     
     data = computed(() => this.results().trialResults);
     descriptions = metricDescriptions;
