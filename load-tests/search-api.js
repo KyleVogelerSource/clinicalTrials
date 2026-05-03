@@ -27,8 +27,6 @@ const candidatePoolPayload = JSON.stringify({
   minAge: 18,
   maxAge: 75,
   sex: "ALL",
-  requiredConditions: ["Type 2 Diabetes"],
-  ineligibleConditions: [],
   pageSize: 25,
   cap: 10,
 });

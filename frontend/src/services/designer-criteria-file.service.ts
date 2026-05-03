@@ -93,12 +93,6 @@ export function normalizeImportedCriteria(
     minAge: toNullableNumber(input.minAge),
     maxAge: toNullableNumber(input.maxAge),
     sex: resolveOptionValue(input.sex as string, defaults.sexes, defaults.sex),
-    required: Array.isArray(input.required)
-      ? input.required.map(item => String(item).trim()).filter(Boolean)
-      : [],
-    ineligible: Array.isArray(input.ineligible)
-      ? input.ineligible.map(item => String(item).trim()).filter(Boolean)
-      : [],
 
     startDateFrom: typeof input.startDateFrom === "string" ? input.startDateFrom.trim() : null,
     startDateTo: typeof input.startDateTo === "string" ? input.startDateTo.trim() : null,
@@ -110,7 +104,6 @@ export function normalizeImportedCriteria(
     userExclusions: toNullableNumber(input.userExclusions),
     userOutcomes: toNullableNumber(input.userOutcomes),
     userArms: toNullableNumber(input.userArms),
-    userDuration: toNullableNumber(input.userDuration),
 
     // Eligibility criteria for benchmark comparison
     inclusionCriteria: Array.isArray(input.inclusionCriteria) ? input.inclusionCriteria : [],

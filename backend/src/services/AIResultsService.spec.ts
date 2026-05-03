@@ -15,8 +15,6 @@ describe("generateAIResults", () => {
     minAge: 18,
     maxAge: 65,
     sex: "All",
-    requiredConditions: [],
-    ineligibleConditions: [],
     selectedTrialIds: ["NCT0001"],
     inclusionCriteria: [],
     exclusionCriteria: [],

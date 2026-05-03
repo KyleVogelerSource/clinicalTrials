@@ -55,8 +55,6 @@ test.describe("Saved searches", () => {
               minAge: 18,
               maxAge: 65,
               sex: "female",
-              requiredConditions: ["hypertension"],
-              ineligibleConditions: ["heart failure"],
               startDateFrom: "2020",
               startDateTo: "2024",
             },
@@ -88,8 +86,6 @@ test.describe("Saved searches", () => {
     await expect(page.locator("#blinding .selected-text")).toHaveText("Double");
     await expect(page.locator("#startYear")).toHaveValue("2020");
     await expect(page.locator("#endYear")).toHaveValue("2024");
-    await expect(page.getByText("hypertension")).toBeVisible();
-    await expect(page.getByText("heart failure")).toBeVisible();
   });
 
   test("deletes an owned saved search from the saved-searches page", async ({ page }) => {
