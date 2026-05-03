@@ -9,7 +9,7 @@ export interface DesignerFormValue {
   blindingType?: string[] | string | null;
   minAge?: number | null;
   maxAge?: number | null;
-  sex?: string | null;
+  sex?: string[] | string | null;
   required?: string[] | null;
   ineligible?: string[] | null;
 
@@ -76,18 +76,26 @@ export const BLINDING_MAP: Record<string, string> = {
     'Quadruple': 'QUADRUPLE'
 };
 
+export const SEX_MAP: Record<string, string> = {
+    'Male': 'MALE',
+    'Female': 'FEMALE',
+    'All': 'ALL'
+};
+
 export interface SearchExecutionMappings {
   phaseByLabel: Record<string, string>;
   interventionModelByLabel: Record<string, string>;
   allocationByLabel?: Record<string, string>;
   blindingByLabel?: Record<string, string>;
+  sexByLabel?: Record<string, string>;
 }
 
 export const EXECUTION_MAPPINGS: SearchExecutionMappings = {
     phaseByLabel: PHASE_MAP,
     interventionModelByLabel: INTERVENTION_MODEL_MAP,
     allocationByLabel: ALLOCATION_MAP,
-    blindingByLabel: BLINDING_MAP
+    blindingByLabel: BLINDING_MAP,
+    sexByLabel: SEX_MAP
 };
 
 export function resolveOptionValue(
@@ -160,6 +168,29 @@ export function mapMultiValue(
     return labels.join(' OR ');
 }
 
+export function mapSexValue(
+    value: string[] | string | undefined | null,
+    mapping?: Record<string, string>
+): string | undefined {
+    if (!value) return undefined;
+    const labels = resolveMultiOptionValue(value, undefined, undefined);
+    if (labels.length === 0) return undefined;
+
+    // If both Male and Female (or 'All') are selected, return 'ALL'
+    const hasMale = labels.some(l => l.toLowerCase() === 'male');
+    const hasFemale = labels.some(l => l.toLowerCase() === 'female');
+    const hasAll = labels.some(l => l.toLowerCase() === 'all');
+
+    if (hasAll || (hasMale && hasFemale)) {
+        return mapping ? (mapping['All'] ?? 'ALL') : 'All';
+    }
+
+    if (hasMale) return mapping ? (mapping['Male'] ?? 'MALE') : 'Male';
+    if (hasFemale) return mapping ? (mapping['Female'] ?? 'FEMALE') : 'Female';
+
+    return undefined;
+}
+
 export function mapDesignModelToSavedSearchCriteria(
   input: DesignerFormValue
 ): ClinicalTrialSearchRequest {
@@ -171,7 +202,7 @@ export function mapDesignModelToSavedSearchCriteria(
     blindingType: mapMultiValue(input.blindingType),
     ...(input.minAge != null ? { minAge: input.minAge } : {}),
     ...(input.maxAge != null ? { maxAge: input.maxAge } : {}),
-    ...(input.sex ? { sex: input.sex } : {}),
+    sex: mapSexValue(input.sex),
     ...(input.required?.length ? { requiredConditions: input.required } : {}),
     ...(input.ineligible?.length ? { ineligibleConditions: input.ineligible } : {}),
     
@@ -202,7 +233,8 @@ export function mapDesignModelToExecutionSearchRequest(
     phase: mapMultiValue(input.phase, mappings.phaseByLabel),
     interventionModel: mapMultiValue(input.interventionModel, mappings.interventionModelByLabel),
     allocationType: mapMultiValue(input.allocationType, mappings.allocationByLabel),
-    blindingType: mapMultiValue(input.blindingType, mappings.blindingByLabel)
+    blindingType: mapMultiValue(input.blindingType, mappings.blindingByLabel),
+    sex: mapSexValue(input.sex, mappings.sexByLabel)
   };
 }
 

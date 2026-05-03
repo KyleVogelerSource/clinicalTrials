@@ -126,13 +126,26 @@ describe('TrialWorkflowService', () => {
 
     service.searchTrials();
 
-    expect(clinicalStudyService.searchStudies).toHaveBeenCalledWith(expect.objectContaining({
+    expect(clinicalStudyService.searchStudies).toHaveBeenCalledWith({
       condition: 'Type 2 Diabetes',
       phase: 'PHASE2',
+      allocationType: 'RANDOMIZED',
       interventionModel: 'PARALLEL',
-      sex: 'All',
+      blindingType: 'DOUBLE',
+      sex: 'ALL',
       pageSize: 100,
-    }));
+      minAge: 18,
+      maxAge: 65,
+      requiredConditions: ['Obesity'],
+      ineligibleConditions: ['Pregnancy'],
+      selectedTrialIds: [],
+      userArms: null,
+      userExclusions: null,
+      userInclusions: null,
+      userOutcomes: null,
+      userPatients: null,
+      userSites: null,
+    });
     expect(service.foundTrials()).toEqual([
       expect.objectContaining({
         nctId: 'NCT100',

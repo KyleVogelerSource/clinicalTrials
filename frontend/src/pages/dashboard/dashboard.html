@@ -96,6 +96,15 @@
                     </div>
 
                     <div class="form-group">
+                        <div class="label-with-tooltip">
+                            <label for="sex">Participant Sex</label>
+                            <app-tooltip text="Biological sex of participants (Male, Female, or All)." />
+                        </div>
+                        <app-multi-select id="sex" formControlName="sex"
+                            [options]="sexOptions" placeholder="Any" selectedLabel="Sexes" />
+                    </div>
+
+                    <div class="form-group">
                         <label>Required Conditions</label>
                         <app-keyword-selector
                             [selectedKeywords]="requiredConditions()"
