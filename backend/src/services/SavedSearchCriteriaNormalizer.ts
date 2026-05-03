@@ -26,8 +26,6 @@ const LOWERCASE_FIELDS = new Set([
   "blindingType",
   "primaryPurpose",
   "sex",
-  "requiredConditions",
-  "ineligibleConditions",
 ]);
 
 function normalizeScalar(key: string, value: unknown): JsonValue | undefined {

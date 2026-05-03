@@ -7,8 +7,6 @@ const DEFAULT_POOL_CAP = 15;
 export interface PoolBuilderConfig {
     cap?: number;
     referenceTrial?: ReferenceTrial;
-    requiredConditions?: string[];
-    ineligibleConditions?: string[];
 }
 
 export function buildCandidatePool(studies: ClinicalTrialStudy[], totalPagesFetched: number, config: PoolBuilderConfig = {}): CandidatePool {
@@ -70,28 +68,6 @@ function getFilterReason(study: ClinicalTrialStudy, ref?: ReferenceTrial, config
     const criteria = p.eligibilityModule?.eligibilityCriteria;
     if (!criteria || criteria.trim() === "") return "missing_eligibility_criteria";
 
-    if (config.requiredConditions && config.requiredConditions.length > 0) {
-        const studyConditions = (p.conditionsModule?.conditions ?? []).map((c: string) =>
-            c.toLowerCase()
-        );
-        const required = config.requiredConditions.map((c) => c.toLowerCase());
-        const satisfied = required.some((rc) =>
-            studyConditions.some((sc: string) => sc.includes(rc))
-        );
-        if (!satisfied) return "required_condition_not_met";
-    }
-
-    if (config.ineligibleConditions && config.ineligibleConditions.length > 0) {
-        const studyConditions = (p.conditionsModule?.conditions ?? []).map((c: string) =>
-            c.toLowerCase()
-        );
-        const ineligible = config.ineligibleConditions.map((c) => c.toLowerCase());
-        const hasIneligible = ineligible.some((ic) =>
-            studyConditions.some((sc: string) => sc.includes(ic))
-        );
-        if (hasIneligible) return "ineligible_condition_present";
-    }
-
     if (!ref) return null;
 
     if (ref.phase) {
@@ -140,8 +116,6 @@ function buildFilteredRecord(study: ClinicalTrialStudy, reason: FilterReason, re
         study_type_mismatch: `Study type does not match reference (${ref?.studyType})`,
         sex_incompatible: `Sex eligibility incompatible with reference (${ref?.sex})`,
         no_condition_overlap: `No condition overlap with reference (${ref?.conditions?.join(", ")})`,
-        required_condition_not_met: `Trial does not match any required condition (${config.requiredConditions?.join(", ")})`,
-        ineligible_condition_present: `Trial lists an ineligible condition (${config.ineligibleConditions?.join(", ")})`,
     };
 
     return {

@@ -420,13 +420,10 @@ export class Analysis implements OnInit {
 
         const labels = d.timelineBuckets.map(b => b.patientBucket);
         const estValue = this.estimatedDuration() ?? 0;
-        const user = this.inputParams();
-        const userTarget = user?.userDuration ?? 0;
 
         const defaultEstColor = '#193F6A';
         const defaultActColor = '#35c0c0';
         const cardinalLineColor = '#DC344D';
-        const userLineColor = '#088989';
 
         const datasets: BarChartDataset[] = [
             {
@@ -449,22 +446,6 @@ export class Analysis implements OnInit {
                 borderColor: cardinalLineColor,
                 backgroundColor: 'transparent',
                 borderWidth: 3,
-                pointRadius: 0,
-                tension: 0,
-                order: -1,
-                isTargetLine: true
-            } as any);
-        }
-
-        if (userTarget > 0) {
-            datasets.push({
-                label: 'User Target',
-                type: 'line',
-                data: new Array(labels.length).fill(userTarget),
-                borderColor: userLineColor,
-                backgroundColor: 'transparent',
-                borderWidth: 2,
-                borderDash: [5, 5],
                 pointRadius: 0,
                 tension: 0,
                 order: -1,

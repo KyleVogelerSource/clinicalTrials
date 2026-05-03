@@ -30,10 +30,7 @@ interface DatabaseConstraintError extends Error {
   constraint?: string;
 }
 
-type RuntimeCriteria = ClinicalTrialSearchRequest & {
-  required?: string[];
-  ineligible?: string[];
-};
+type RuntimeCriteria = ClinicalTrialSearchRequest;
 
 const PHASE_LABEL_MAP: Record<string, string> = {
   "Early Phase 1": "EARLY_PHASE1",
@@ -88,13 +85,6 @@ function parseCriteriaJson(value: ClinicalTrialSearchRequest | string): Clinical
 
 function normalizeCriteriaForExecution(criteria: RuntimeCriteria): ClinicalTrialSearchRequest {
   const normalized: ClinicalTrialSearchRequest = { ...criteria };
-
-  if (criteria.requiredConditions === undefined && Array.isArray(criteria.required)) {
-    normalized.requiredConditions = criteria.required;
-  }
-  if (criteria.ineligibleConditions === undefined && Array.isArray(criteria.ineligible)) {
-    normalized.ineligibleConditions = criteria.ineligible;
-  }
 
   if (typeof criteria.phase === "string") {
     const phase = criteria.phase.trim();

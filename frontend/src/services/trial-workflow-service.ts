@@ -98,8 +98,6 @@ export class TrialWorkflowService {
             // Ensure criteria arrays exist
             inclusionCriteria: inputs.inclusionCriteria || [],
             exclusionCriteria: inputs.exclusionCriteria || [],
-            required: inputs.required || [],
-            ineligible: inputs.ineligible || [],
             selectedTrialIds: inputs.selectedTrialIds || []
         };
     }
@@ -579,8 +577,6 @@ export class TrialWorkflowService {
             minAge: input.minAge ?? null,
             maxAge: input.maxAge ?? null,
             sex: input.sex ?? null,
-            requiredConditions: input.required ?? [],
-            ineligibleConditions: input.ineligible ?? [],
             selectedTrialIds: this.selectedTrialIds(),
             inclusionCriteria: input.inclusionCriteria ?? [],
             exclusionCriteria: input.exclusionCriteria ?? [],

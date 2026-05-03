@@ -11,11 +11,13 @@ import { SavedSearchService } from "../../services/saved-search.service";
 import { 
     mapDesignModelToSavedSearchCriteria, 
     mapDesignModelToExecutionSearchRequest, 
-    resolveMultiOptionValue, 
+    resolveMultiOptionValue,
+    mapSexValue,
     PHASE_MAP, 
     ALLOCATION_MAP, 
     INTERVENTION_MODEL_MAP, 
-    BLINDING_MAP 
+    BLINDING_MAP,
+    SEX_MAP
 } from "../../services/saved-search-criteria-mapper";
 import { LoadingIndicator } from "../../primitives/loading-indicator/loading-indicator";
 import { AutoCompleteInput } from "../../primitives/auto-complete-input/auto-complete-input";
@@ -65,7 +67,9 @@ export class Dashboard implements OnInit {
     allocationOptions: MultiSelectOption[] = this.clinicalStudiesService.getAllocations().map(a => ({ label: a, value: a }));
     interventionOptions: MultiSelectOption[] = this.clinicalStudiesService.getInterventionModels().map(m => ({ label: m, value: m }));
     blindingOptions: MultiSelectOption[] = this.clinicalStudiesService.getMaskingTypes().map(b => ({ label: b, value: b }));
-    sexOptions = this.clinicalStudiesService.getSexes();
+    sexOptions: MultiSelectOption[] = this.clinicalStudiesService.getSexes()
+        .filter(s => s !== 'All') // We use Male + Female to represent All in multi-select
+        .map(s => ({ label: s, value: s }));
 
     // Tooltip Descriptions
     phaseDescriptions: Record<string, string> = {
@@ -110,8 +114,6 @@ export class Dashboard implements OnInit {
     sortOrder = signal<'date_desc' | 'date_asc' | 'enrollment_desc' | 'enrollment_asc' | 'name_asc' | 'name_desc' | 'status_asc' | 'status_desc'>('date_desc');
     startDateFilter = signal<string>('');
     endDateFilter = signal<string>('');
-    requiredConditions = signal<string[]>([]);
-    ineligibleConditions = signal<string[]>([]);
     
     // Save Search State
     showSavePanel = signal(false);
@@ -179,6 +181,7 @@ export class Dashboard implements OnInit {
         allocationType: new FormControl<string[]>([]),
         interventionModel: new FormControl<string[]>([]),
         blindingType: new FormControl<string[]>([]),
+        sex: new FormControl<string[]>(['Male', 'Female']), // Default to both
         
         // User Trial Specifics (not sent to search)
         userPatients: new FormControl<number | null>(null),
@@ -187,7 +190,6 @@ export class Dashboard implements OnInit {
         userOutcomes: new FormControl<number | null>(null),
         userSites: new FormControl<number | null>(null),
         userArms: new FormControl<number | null>(null),
-        userDuration: new FormControl<number | null>(null),
     });
 
     saveForm = new FormGroup({
@@ -322,26 +324,6 @@ export class Dashboard implements OnInit {
         this.keywordFilter.update(k => k.filter(v => v !== keyword));
     }
 
-    onAddRequired(keyword: string) {
-        this.requiredConditions.update(k => [...new Set([...k, keyword])]);
-        this.searchForm.updateValueAndValidity();
-    }
-
-    onRemoveRequired(keyword: string) {
-        this.requiredConditions.update(k => k.filter(v => v !== keyword));
-        this.searchForm.updateValueAndValidity();
-    }
-
-    onAddIneligible(keyword: string) {
-        this.ineligibleConditions.update(k => [...new Set([...k, keyword])]);
-        this.searchForm.updateValueAndValidity();
-    }
-
-    onRemoveIneligible(keyword: string) {
-        this.ineligibleConditions.update(k => k.filter(v => v !== keyword));
-        this.searchForm.updateValueAndValidity();
-    }
-
     clearFilters(includeYearRange: boolean = true) {
         this.nctIdFilter.set('');
         this.nameFilter.set('');
@@ -371,25 +353,25 @@ export class Dashboard implements OnInit {
             const interventions = this.clinicalStudiesService.getInterventionModels();
             const blindings = this.clinicalStudiesService.getMaskingTypes();
 
+            const sex = resolveMultiOptionValue(savedParams.sex, ['Male', 'Female'], SEX_MAP);
+
             this.searchForm.patchValue({
                 condition: savedParams.condition,
                 phase: resolveMultiOptionValue(savedParams.phase, phases, PHASE_MAP),
                 allocationType: resolveMultiOptionValue(savedParams.allocationType, allocations, ALLOCATION_MAP),
                 interventionModel: resolveMultiOptionValue(savedParams.interventionModel, interventions, INTERVENTION_MODEL_MAP),
                 blindingType: resolveMultiOptionValue(savedParams.blindingType, blindings, BLINDING_MAP),
+                sex: (sex.includes('All') || sex.length === 0) ? ['Male', 'Female'] : sex,
                 userPatients: savedParams.userPatients,
                 userSites: savedParams.userSites,
                 userInclusions: savedParams.userInclusions,
                 userExclusions: savedParams.userExclusions,
                 userOutcomes: savedParams.userOutcomes,
-                userArms: savedParams.userArms,
-                userDuration: savedParams.userDuration
+                userArms: savedParams.userArms
             }, { emitEvent: false });
             this.conditionValue.set(savedParams.condition || '');
             this.startDateFilter.set(savedParams.startDateFrom || '');
             this.endDateFilter.set(savedParams.startDateTo || '');
-            this.requiredConditions.set(savedParams.required || []);
-            this.ineligibleConditions.set(savedParams.ineligible || []);
         } else {
             // Fresh load: Start with empty selections to align with E2E expectations 
             // and ensure explicit user intent.
@@ -408,14 +390,13 @@ export class Dashboard implements OnInit {
                 const allocationType = values.allocationType;
                 const interventionModel = values.interventionModel;
                 const blindingType = values.blindingType;
+                const sex = values.sex;
                 const startYear = this.startDateFilter();
                 const endYear = this.endDateFilter();
-                const required = this.requiredConditions();
-                const ineligible = this.ineligibleConditions();
 
                 return of({ 
-                    condition, phase, allocationType, interventionModel, blindingType, 
-                    startYear, endYear, required, ineligible 
+                    condition, phase, allocationType, interventionModel, blindingType, sex,
+                    startYear, endYear
                 });
             }),
             distinctUntilChanged((prev, curr) => 
@@ -424,10 +405,9 @@ export class Dashboard implements OnInit {
                 JSON.stringify(prev.allocationType) === JSON.stringify(curr.allocationType) &&
                 JSON.stringify(prev.interventionModel) === JSON.stringify(curr.interventionModel) &&
                 JSON.stringify(prev.blindingType) === JSON.stringify(curr.blindingType) &&
+                JSON.stringify(prev.sex) === JSON.stringify(curr.sex) &&
                 prev.startYear === curr.startYear &&
-                prev.endYear === curr.endYear &&
-                JSON.stringify(prev.required) === JSON.stringify(curr.required) &&
-                JSON.stringify(prev.ineligible) === JSON.stringify(curr.ineligible)
+                prev.endYear === curr.endYear
             ),
             switchMap(params => {
                 const conditionValid = params.condition && params.condition.trim().length >= 2;
@@ -457,10 +437,9 @@ export class Dashboard implements OnInit {
                     allocationType: params.allocationType,
                     interventionModel: params.interventionModel,
                     blindingType: params.blindingType,
+                    sex: params.sex,
                     startDateFrom: params.startYear || null,
-                    startDateTo: params.endYear || null,
-                    required: params.required,
-                    ineligible: params.ineligible
+                    startDateTo: params.endYear || null
                 });
 
                 request.pageSize = 100;
@@ -570,9 +549,7 @@ export class Dashboard implements OnInit {
             blindingType: formValues.blindingType ?? [],
             minAge: null,
             maxAge: null,
-            sex: '',
-            required: this.requiredConditions(),
-            ineligible: this.ineligibleConditions(),
+            sex: formValues.sex ?? [],
             startDateFrom: this.startDateFilter() || null,
             startDateTo: this.endDateFilter() || null,
             userPatients: formValues.userPatients ?? null,
@@ -630,9 +607,7 @@ export class Dashboard implements OnInit {
             // Demographic defaults since they are removed from Dashboard for now
             minAge: null,
             maxAge: null,
-            sex: '',
-            required: this.requiredConditions(),
-            ineligible: this.ineligibleConditions(),
+            sex: mapSexValue(values.sex) ?? 'All',
 
             startDateFrom: this.startDateFilter() || null,
             startDateTo: this.endDateFilter() || null,
@@ -644,7 +619,6 @@ export class Dashboard implements OnInit {
             userExclusions: values.userExclusions ?? null,
             userOutcomes: values.userOutcomes ?? null,
             userArms: values.userArms ?? null,
-            userDuration: values.userDuration ?? null,
             inclusionCriteria: [],
             exclusionCriteria: [],
 
@@ -665,19 +639,17 @@ export class Dashboard implements OnInit {
                 allocationType: [],
                 interventionModel: [],
                 blindingType: [],
+                sex: ['Male', 'Female'],
                 userPatients: null,
                 userInclusions: null,
                 userExclusions: null,
                 userOutcomes: null,
                 userSites: null,
-                userArms: null,
-                userDuration: null
+                userArms: null
             });
             this.conditionValue.set('');
             this.startDateFilter.set('');
             this.endDateFilter.set('');
-            this.requiredConditions.set([]);
-            this.ineligibleConditions.set([]);
             this.foundTrials.set([]);
             this.clearFilters();
         }
@@ -707,7 +679,7 @@ export class Dashboard implements OnInit {
                 blindingType: this.clinicalStudiesService.getDefaultMaskingType(),
                 blindingTypes: this.blindingOptions.map(o => o.value),
                 sex: this.clinicalStudiesService.getDefaultSex(),
-                sexes: this.sexOptions,
+                sexes: this.sexOptions.map(o => o.value),
             });
 
             const phases = this.clinicalStudiesService.getPhases();
@@ -715,12 +687,15 @@ export class Dashboard implements OnInit {
             const interventions = this.clinicalStudiesService.getInterventionModels();
             const blindings = this.clinicalStudiesService.getMaskingTypes();
 
+            const sex = resolveMultiOptionValue(criteria.sex, ['Male', 'Female'], SEX_MAP);
+
             this.searchForm.patchValue({
                 condition: criteria.condition,
                 phase: resolveMultiOptionValue(criteria.phase, phases, PHASE_MAP),
                 allocationType: resolveMultiOptionValue(criteria.allocationType, allocations, ALLOCATION_MAP),
                 interventionModel: resolveMultiOptionValue(criteria.interventionModel, interventions, INTERVENTION_MODEL_MAP),
                 blindingType: resolveMultiOptionValue(criteria.blindingType, blindings, BLINDING_MAP),
+                sex: (sex.includes('All') || sex.length === 0) ? ['Male', 'Female'] : sex,
                 userPatients: criteria.userPatients,
                 userSites: criteria.userSites,
                 userInclusions: criteria.userInclusions,

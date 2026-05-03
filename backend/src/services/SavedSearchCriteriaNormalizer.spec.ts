@@ -11,17 +11,13 @@ describe("SavedSearchCriteriaNormalizer", () => {
       condition: "  Diabetes  ",
       phase: " PHASE3 ",
       sponsor: "",
-      requiredConditions: [" hypertension ", "diabetes", ""],
-      ineligibleConditions: ["COPD", " asthma "],
       minAge: 18,
     });
 
     expect(normalized).toEqual({
       condition: "diabetes",
-      ineligibleConditions: ["asthma", "copd"],
       minAge: 18,
       phase: "phase3",
-      requiredConditions: ["diabetes", "hypertension"],
     });
   });
 
@@ -42,13 +38,11 @@ describe("SavedSearchCriteriaNormalizer", () => {
   it("produces the same canonical key for equivalent criteria", () => {
     const left = {
       condition: "Diabetes",
-      requiredConditions: ["hypertension", "obesity"],
       sex: "ALL",
     };
 
     const right = {
       sex: " all ",
-      requiredConditions: ["obesity", "hypertension"],
       condition: " diabetes ",
     };
 
