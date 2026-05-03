@@ -10,8 +10,6 @@ export interface DesignerFormValue {
   minAge?: number | null;
   maxAge?: number | null;
   sex?: string[] | string | null;
-  required?: string[] | null;
-  ineligible?: string[] | null;
 
   // Year range filters
   startDateFrom?: string | null;
@@ -203,8 +201,6 @@ export function mapDesignModelToSavedSearchCriteria(
     ...(input.minAge != null ? { minAge: input.minAge } : {}),
     ...(input.maxAge != null ? { maxAge: input.maxAge } : {}),
     sex: mapSexValue(input.sex),
-    ...(input.required?.length ? { requiredConditions: input.required } : {}),
-    ...(input.ineligible?.length ? { ineligibleConditions: input.ineligible } : {}),
     
     ...(input.startDateFrom ? { startDateFrom: input.startDateFrom } : {}),
     ...(input.startDateTo ? { startDateTo: input.startDateTo } : {}),
@@ -251,8 +247,6 @@ export function mapSavedSearchCriteriaToDesignModel(
     minAge: criteria.minAge ?? null,
     maxAge: criteria.maxAge ?? null,
     sex: resolveOptionValue(criteria.sex, defaults.sexes, defaults.sex),
-    required: criteria.requiredConditions ?? [],
-    ineligible: criteria.ineligibleConditions ?? [],
 
     startDateFrom: criteria.startDateFrom ?? null,
     startDateTo: criteria.startDateTo ?? null,

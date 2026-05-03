@@ -7,8 +7,6 @@ export interface TrialResultsRequest {
     minAge: number | null;
     maxAge: number | null;
     sex: string | null;
-    requiredConditions: string[];
-    ineligibleConditions: string[];
     selectedTrialIds: string[];
     inclusionCriteria: EligibilityCriterion[];
     exclusionCriteria: EligibilityCriterion[];

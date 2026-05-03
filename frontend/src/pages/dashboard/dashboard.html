@@ -105,28 +105,6 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Required Conditions</label>
-                        <app-keyword-selector
-                            [selectedKeywords]="requiredConditions()"
-                            placeholderText="e.g., Hypertension"
-                            hintText="↵ to accept"
-                            (addKeyword)="onAddRequired($event)"
-                            (removeKeyword)="onRemoveRequired($event)"
-                        />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Ineligible Conditions</label>
-                        <app-keyword-selector
-                            [selectedKeywords]="ineligibleConditions()"
-                            placeholderText="e.g., Heart Failure"
-                            hintText="↵ to accept"
-                            (addKeyword)="onAddIneligible($event)"
-                            (removeKeyword)="onRemoveIneligible($event)"
-                        />
-                    </div>
-
-                    <div class="form-group">
                         <label>Year Range</label>
                         <div class="year-range-inputs">
                             <input id="startYear" type="number" placeholder="From" min="1990" max="2030"

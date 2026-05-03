@@ -86,10 +86,6 @@ function buildProposedSynopsisFromRequest(request: TrialResultsRequest): string 
         parts.push(`Age Range: ${ageRange}`);
     }
 
-    if (request.requiredConditions?.length) {
-        parts.push(`Required Conditions: ${request.requiredConditions.join(", ")}`);
-    }
-
     return parts.join("\n");
 }
 
