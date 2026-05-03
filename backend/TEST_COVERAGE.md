@@ -15,7 +15,6 @@ Tests the validation logic for clinical trial search requests.
 - Enrollment range validation (minEnrollment <= maxEnrollment)
 - Date format validation (YYYY, YYYY-MM, YYYY-MM-DD)
 - Date range validation (from <= to)
-- Array field validation (requiredConditions, ineligibleConditions)
 - Complex multi-field validation scenarios
 - Edge cases (special characters, Unicode, very large numbers)
 
@@ -27,8 +26,6 @@ Tests the trial filtering, normalization, and pool building logic.
 **Coverage includes:**
 - Pool cap behavior (default 15, custom caps)
 - Filtering by missing data (phase, enrollment, eligibility criteria)
-- Required conditions filtering (with case-insensitive matching)
-- Ineligible conditions filtering
 - Reference trial filtering (phase, study type, sex, conditions)
 - Trial normalization and sorting
 - Capping and exclusion logic
