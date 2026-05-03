@@ -51,8 +51,6 @@ const payload = JSON.stringify({
   minAge: 18,
   maxAge: 75,
   sex: "ALL",
-  requiredConditions: ["Type 2 Diabetes"],
-  ineligibleConditions: [],
   selectedTrialIds: [],
   inclusionCriteria: [{ description: "Adults with Type 2 Diabetes" }],
   exclusionCriteria: [{ description: "Severe renal impairment" }],

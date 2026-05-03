@@ -34,7 +34,7 @@ describe("SavedSearchService", () => {
           owner_username: "",
           name: "Diabetes Search",
           description: null,
-          criteria_json: { condition: "diabetes", requiredConditions: ["hypertension"] },
+          criteria_json: { condition: "diabetes" },
           visibility: "private",
           created_at: "2026-04-10T00:00:00.000Z",
           updated_at: "2026-04-10T00:00:00.000Z",
@@ -51,7 +51,6 @@ describe("SavedSearchService", () => {
       description: null,
       criteriaJson: {
         condition: " Diabetes ",
-        requiredConditions: [" hypertension "],
       },
       visibility: "private",
     });
