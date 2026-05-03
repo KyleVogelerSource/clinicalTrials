@@ -1149,6 +1149,35 @@ input:checked + .slider:before {
     }
 }
 
+/* Localized Loaders */
+.local-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: #64748b;
+    gap: 1rem;
+}
+
+.local-loader-inline {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    color: #64748b;
+}
+
+.loader-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.local-loader app-loading-indicator,
+.local-loader-inline app-loading-indicator {
+    transform: scale(0.6);
+}
+
 @media print {
     .container {
         padding: 0;

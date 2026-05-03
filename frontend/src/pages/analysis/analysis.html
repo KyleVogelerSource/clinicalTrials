@@ -5,7 +5,7 @@
         <div class="heading-left">
             <button class="btn btn-prominent" (click)="onBack()">← Back to Design</button>
             <h2>Feasibility Report: {{ inputParams()?.condition || 'Selected Trials' }}</h2>
-            <p class="meta-info">Generated on {{ data()?.timestamp | date:'medium' }} • {{ displayPhase() }}</p>
+            <p class="meta-info">Generated on {{ (data()?.timestamp || today) | date:'medium' }} • {{ displayPhase() }}</p>
         </div>
         <div class="heading-right">
             <button class="btn btn-prominent" (click)="onPrint()">Print</button>
@@ -18,10 +18,19 @@
             
             <!-- Viability Score -->
             <div class="card card-large">
+                <div class="card-header">
+                    <h4>Summary</h4>
+                </div>
                 <div class="card-body">
                     <div class="viability-summary">
-                        <h5>Summary</h5>
-                        <p>{{ data()?.overallSummary }}</p>
+                        @if (isAILoading()) {
+                            <div class="local-loader">
+                                <app-loading-indicator [visible]="true" />
+                                <span class="loader-text">Generating analysis summary...</span>
+                            </div>
+                        } @else {
+                            <p>{{ data()?.overallSummary }}</p>
+                        }
                     </div>
                 </div>
             </div>
@@ -39,18 +48,25 @@
                     
                     <div class="drivers-list">
                         <h5>Top Recruitment Drivers</h5>
-                        <ul>
-                            @for (driver of data()?.recruitmentByImpact; track $index) {
-                                <li>
-                                    <span class="driver-label">{{ driver.label }}</span>
-                                    <span class="driver-impact" [class.positive]="driver.correlation! > 0" [class.negative]="driver.correlation! < 0">
-                                        {{ driver.impactText }} (r = {{ driver.correlation!.toFixed(2) }})
-                                    </span>
-                                </li>
-                                } @empty {
-                                <li class="no-drivers-msg">No statistically significant drivers found for the selected trials.</li>
-                                }
-                                </ul>
+                        @if (isAILoading()) {
+                            <div class="local-loader-inline">
+                                <app-loading-indicator [visible]="true" />
+                                <span class="loader-text">Analyzing drivers...</span>
+                            </div>
+                        } @else {
+                            <ul>
+                                @for (driver of data()?.recruitmentByImpact; track $index) {
+                                    <li>
+                                        <span class="driver-label">{{ driver.label }}</span>
+                                        <span class="driver-impact" [class.positive]="driver.correlation! > 0" [class.negative]="driver.correlation! < 0">
+                                            {{ driver.impactText }} (r = {{ driver.correlation!.toFixed(2) }})
+                                        </span>
+                                    </li>
+                                    } @empty {
+                                    <li class="no-drivers-msg">No statistically significant drivers found for the selected trials.</li>
+                                    }
+                            </ul>
+                        }
                     </div>
                 </div>
             </div>
