@@ -758,7 +758,6 @@ export class Analysis implements OnInit {
         XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
             ['Field', 'Value'],
             ['Condition', d.queryCondition ?? ''],
-            ['Overall Viability Score', d.overallScore ?? ''],
             ['Total Trials Found', d.totalTrialsFound ?? ''],
             ['Avg Recruitment Days', d.avgRecruitmentDays ?? ''],
             ['Participant Target', d.participantTarget ?? ''],
@@ -805,6 +804,23 @@ export class Analysis implements OnInit {
             const headers = ['Reason', 'Count'];
             const rows = d.terminationReasons.map((r: any) => [r.reason, r.count]);
             XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers, ...rows]), 'Termination Reasons');
+        }
+
+        // Sheet 7: Similar Trials
+        const ranked = d.rankedTrials ?? [];
+        if (ranked.length > 0) {
+            const headers = ['Rank', 'NCT ID', 'Title', 'Phase', 'Status', 'Enrollment', 'Sponsor', 'Similarity Score'];
+            const rows = ranked.map((rt: any) => [
+                rt.rank,
+                rt.trial.nctId,
+                rt.trial.briefTitle,
+                rt.trial.phase ?? '',
+                rt.trial.overallStatus ?? '',
+                rt.trial.enrollmentCount ?? '',
+                rt.trial.sponsor ?? '',
+                rt.similarityScore ?? ''
+            ]);
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers, ...rows]), 'Similar Trials');
         }
 
         XLSX.writeFile(wb, `feasibility-report-${new Date().getTime()}.xlsx`);
