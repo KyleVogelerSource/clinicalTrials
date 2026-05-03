@@ -1,3 +1,4 @@
+import * as XLSX from 'xlsx';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal } from "@angular/core";
 import { CommonModule, DatePipe } from "@angular/common";
 import { Router } from "@angular/router";
@@ -815,6 +816,84 @@ export class Analysis implements OnInit {
         a.download = `feasibility-report-${new Date().getTime()}.json`;
         a.click();
         URL.revokeObjectURL(url);
+    }
+
+    onExportExcel(): void {
+        const d = this.data();
+        if (!d) return;
+
+        const wb = XLSX.utils.book_new();
+
+        // Sheet 1: Summary
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+            ['Field', 'Value'],
+            ['Condition', d.queryCondition ?? ''],
+            ['Total Trials Found', d.totalTrialsFound ?? ''],
+            ['Avg Recruitment Days', d.avgRecruitmentDays ?? ''],
+            ['Participant Target', d.participantTarget ?? ''],
+            ['Timeline Range', (d as any).timelineRange ?? ''],
+            ['Generated At', d.generatedAt ?? ''],
+        ]), 'Summary');
+
+        // Sheet 2: Comparison Table
+        const trials = this.comparisonRows();
+        if (trials.length > 0) {
+            const headers = ['NCT ID', 'Title', ...ALL_COMPARISON_METRICS.map(m => m.label)];
+            const rows = trials.map(row => [
+                row.trial.nctId,
+                row.trial.briefTitle,
+                ...ALL_COMPARISON_METRICS.map(m => row.metrics[m.key] ?? '')
+            ]);
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers, ...rows]), 'Comparison Table');
+        }
+
+        // Sheet 3: Benchmark Distribution
+        const benchmarks = this.benchmarks();
+        if (benchmarks.length > 0) {
+            const headers = ['Metric', 'Your Value', 'Benchmark Mean', 'Std Dev', 'Z-Score'];
+            const rows = benchmarks.map(b => [b.label, b.userVal, b.mean, b.stdDev, b.zScore]);
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers, ...rows]), 'Benchmark Distribution');
+        }
+
+        // Sheet 4: Recruitment Impact
+        if (d.recruitmentByImpact?.length) {
+            const headers = ['Driver', 'Avg Recruitment Days', 'Participant Count', 'Correlation'];
+            const rows = d.recruitmentByImpact.map((r: any) => [r.label, r.avgDays, r.participantCount, r.correlation ?? '']);
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers, ...rows]), 'Recruitment Impact');
+        }
+
+        // Sheet 5: Timeline Buckets
+        if (d.timelineBuckets?.length) {
+            const headers = ['Patient Bucket', 'Estimated Days', 'Actual Days', 'Avg Sites'];
+            const rows = d.timelineBuckets.map((b: any) => [b.patientBucket, b.estimatedDays, b.actualDays, b.avgSites ?? '']);
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers, ...rows]), 'Timeline Buckets');
+        }
+
+        // Sheet 6: Termination Reasons
+        if (d.terminationReasons?.length) {
+            const headers = ['Reason', 'Count'];
+            const rows = d.terminationReasons.map((r: any) => [r.reason, r.count]);
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers, ...rows]), 'Termination Reasons');
+        }
+
+        // Sheet 7: Similar Trials
+        const ranked = d.rankedTrials ?? [];
+        if (ranked.length > 0) {
+            const headers = ['Rank', 'NCT ID', 'Title', 'Phase', 'Status', 'Enrollment', 'Sponsor', 'Similarity Score'];
+            const rows = ranked.map((rt: any) => [
+                rt.rank,
+                rt.trial.nctId,
+                rt.trial.briefTitle,
+                rt.trial.phase ?? '',
+                rt.trial.overallStatus ?? '',
+                rt.trial.enrollmentCount ?? '',
+                rt.trial.sponsor ?? '',
+                rt.similarityScore ?? ''
+            ]);
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers, ...rows]), 'Similar Trials');
+        }
+
+        XLSX.writeFile(wb, `feasibility-report-${new Date().getTime()}.xlsx`);
     }
 
     onComparisonSearch(event: Event) {
