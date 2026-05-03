@@ -187,7 +187,6 @@ export class Dashboard implements OnInit {
         userOutcomes: new FormControl<number | null>(null),
         userSites: new FormControl<number | null>(null),
         userArms: new FormControl<number | null>(null),
-        userDuration: new FormControl<number | null>(null),
     });
 
     saveForm = new FormGroup({
@@ -382,8 +381,7 @@ export class Dashboard implements OnInit {
                 userInclusions: savedParams.userInclusions,
                 userExclusions: savedParams.userExclusions,
                 userOutcomes: savedParams.userOutcomes,
-                userArms: savedParams.userArms,
-                userDuration: savedParams.userDuration
+                userArms: savedParams.userArms
             }, { emitEvent: false });
             this.conditionValue.set(savedParams.condition || '');
             this.startDateFilter.set(savedParams.startDateFrom || '');
@@ -644,7 +642,6 @@ export class Dashboard implements OnInit {
             userExclusions: values.userExclusions ?? null,
             userOutcomes: values.userOutcomes ?? null,
             userArms: values.userArms ?? null,
-            userDuration: values.userDuration ?? null,
             inclusionCriteria: [],
             exclusionCriteria: [],
 
@@ -670,8 +667,7 @@ export class Dashboard implements OnInit {
                 userExclusions: null,
                 userOutcomes: null,
                 userSites: null,
-                userArms: null,
-                userDuration: null
+                userArms: null
             });
             this.conditionValue.set('');
             this.startDateFilter.set('');

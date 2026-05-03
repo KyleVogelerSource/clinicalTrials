@@ -110,7 +110,6 @@ export function normalizeImportedCriteria(
     userExclusions: toNullableNumber(input.userExclusions),
     userOutcomes: toNullableNumber(input.userOutcomes),
     userArms: toNullableNumber(input.userArms),
-    userDuration: toNullableNumber(input.userDuration),
 
     // Eligibility criteria for benchmark comparison
     inclusionCriteria: Array.isArray(input.inclusionCriteria) ? input.inclusionCriteria : [],
