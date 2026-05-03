@@ -46,7 +46,6 @@ export interface DesignModel {
     userExclusions: number | null,
     userOutcomes: number | null,
     userArms: number | null,
-    userDuration: number | null,
 
     // Eligibility criteria for benchmark comparison
     inclusionCriteria: EligibilityCriterion[],
