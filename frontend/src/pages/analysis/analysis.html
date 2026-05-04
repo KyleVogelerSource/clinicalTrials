@@ -87,7 +87,13 @@
                         @for (b of benchmarks(); track b.label) {
                             <div class="benchmark-item">
                                 <div class="benchmark-meta">
-                                    <span class="benchmark-label">{{ b.label }}</span>
+                                    <div class="benchmark-info">
+                                        <span class="benchmark-label">{{ b.label }}</span>
+                                        <div class="benchmark-stats">
+                                            Avg: {{ b.mean }} | σ: {{ b.stdDev }}
+                                        </div>
+                                    </div>
+                                    
                                     <div class="benchmark-val-editor">
                                         <div class="proposed-stack">
                                             <div class="proposed-row">
@@ -98,9 +104,10 @@
                                                     (change)="onUpdateBenchmark(b.paramKey, $any($event.target).value)"
                                                     min="0"
                                                     class="benchmark-input">
-                                                <span class="benchmark-z">{{ b.zScore > 0 ? '+' : '' }}{{ b.zScore }}σ</span>
                                             </div>
-                                            <div class="delta-row" [class.negative]="b.delta < 0" [class.positive]="b.delta > 0">
+                                            <div class="delta-row">
+                                                {{ b.zScore > 0 ? '+' : '' }}{{ b.zScore }}σ
+                                                /
                                                 {{ b.delta > 0 ? '+' : '' }}{{ b.delta | number }} {{ b.delta > 0 ? 'above' : 'below' }} avg
                                             </div>
                                         </div>
@@ -113,9 +120,6 @@
                                         type="line" 
                                         [enableZoom]="false" 
                                         [exportPrefix]="`${inputParams()?.condition ?? ''} ${b.label}`" />
-                                </div>
-                                <div class="benchmark-stats">
-                                    Avg: {{ b.mean }} | σ: {{ b.stdDev }}
                                 </div>
                             </div>
                         }
