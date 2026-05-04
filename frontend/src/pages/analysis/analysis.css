@@ -27,6 +27,10 @@
     margin: 0;
 }
 
+.similar-trials {
+    color: #088989;
+}
+
 .heading-right {
     display: flex;
     gap: 0.5rem;
