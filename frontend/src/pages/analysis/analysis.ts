@@ -853,6 +853,8 @@ export class Analysis implements OnInit {
     }
 
     onExport() {
+        this.loadingService.show("Exporting...");
+
         const json = JSON.stringify(this.data(), null, 2);
         const blob = new Blob([json], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -860,12 +862,18 @@ export class Analysis implements OnInit {
         a.href = url;
         a.download = `feasibility-report-${new Date().getTime()}.json`;
         a.click();
-        URL.revokeObjectURL(url);
+
+        setTimeout(() => {
+            URL.revokeObjectURL(url);
+            this.loadingService.hide();
+        }, 100);
     }
 
     onExportExcel(): void {
         const d = this.data();
         if (!d) return;
+
+        this.loadingService.show("Exporting...");
 
         const wb = XLSX.utils.book_new();
 
@@ -938,7 +946,10 @@ export class Analysis implements OnInit {
             XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers, ...rows]), 'Similar Trials');
         }
 
-        XLSX.writeFile(wb, `feasibility-report-${new Date().getTime()}.xlsx`);
+        setTimeout(() => {
+            XLSX.writeFile(wb, `feasibility-report-${new Date().getTime()}.xlsx`);
+            this.loadingService.hide();
+        }, 100);
     }
 
     onComparisonSearch(event: Event) {

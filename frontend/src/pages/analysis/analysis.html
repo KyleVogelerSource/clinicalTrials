@@ -8,9 +8,9 @@
             <p class="meta-info">Generated on {{ (data()?.timestamp || today) | date:'medium' }} • {{ displayPhase() }}</p>
         </div>
         <div class="heading-right">
-            <button class="btn btn-prominent" (click)="onPrint()">Print</button>
-            <button class="btn btn-primary btn-prominent" (click)="onExport()">Export JSON</button>
-            <button class="btn btn-secondary btn-prominent" (click)="onExportExcel()">Export Excel</button>
+            <button class="btn btn-prominent" (click)="onPrint()" [disabled]="this.isAILoading()">Print</button>
+            <button class="btn btn-prominent" (click)="onExport()" [disabled]="this.isAILoading()">Export JSON</button>
+            <button class="btn btn-prominent" (click)="onExportExcel()" [disabled]="this.isAILoading()">Export Excel</button>
         </div>
     </div>
 
