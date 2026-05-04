@@ -261,6 +261,7 @@ export class Analysis implements OnInit {
     dataPlotY = signal("Recruitment Velocity");
     showTrendLine = signal(true);
     excludeOutliers = signal(false);
+    showOnlySimilarDataPlot = signal(false);
     showAllCorrelations = signal(false);
     metricNamesList = metricNames;
 
@@ -311,8 +312,18 @@ export class Analysis implements OnInit {
     });
 
     suggestedCorrelations = computed(() => {
-        const trials = this.results().metricRows;
+        let trials = this.results().metricRows;
         if (!trials || trials.length < 2) return [];
+
+        const onlySimilar = this.showOnlySimilarDataPlot();
+        const rankedTrials = this.data()?.rankedTrials || [];
+        const rankedIds = new Set(rankedTrials.map(rt => rt.trial.nctId));
+
+        if (onlySimilar && rankedIds.size > 0) {
+            trials = trials.filter(m => rankedIds.has(m.id));
+        }
+
+        if (trials.length < 2) return [];
 
         const correlations: {x: string, y: string, r: number, rHat: number}[] = [];
 
@@ -401,6 +412,23 @@ export class Analysis implements OnInit {
         const all = this.suggestedCorrelations();
         if (this.showAllCorrelations()) return all;
         return all.filter(c => Math.abs(c.r) >= 0.1);
+    });
+
+    recruitmentDrivers = computed(() => {
+        const correlations = this.suggestedCorrelations();
+        if (correlations.length === 0) return [];
+
+        // Focus on correlations with Recruitment Velocity (Y axis)
+        const relevant = correlations
+            .filter(c => c.y === 'Recruitment Velocity' && Math.abs(c.r) >= 0.05)
+            .sort((a, b) => Math.abs(b.r) - Math.abs(a.r))
+            .slice(0, 3);
+
+        return relevant.map(c => ({
+            label: c.x,
+            correlation: c.r,
+            impactText: c.r > 0 ? 'Speeds up recruitment' : 'Slows down recruitment'
+        }));
     });
 
     viabilityColor = computed(() => {
@@ -534,8 +562,16 @@ export class Analysis implements OnInit {
     });
 
     dataPlotData = computed<ScatterChartData | null>(() => {
-        const metrics = this.results().metricRows;
+        let metrics = this.results().metricRows;
         if (!metrics) return null;
+
+        const onlySimilar = this.showOnlySimilarDataPlot();
+        const rankedTrials = this.data()?.rankedTrials || [];
+        const rankedIds = new Set(rankedTrials.map(rt => rt.trial.nctId));
+
+        if (onlySimilar && rankedIds.size > 0) {
+            metrics = metrics.filter(m => rankedIds.has(m.id));
+        }
         
         const getX = MetricRow.metricExtractors[this.dataPlotX()];
         const getY = MetricRow.metricExtractors[this.dataPlotY()];
