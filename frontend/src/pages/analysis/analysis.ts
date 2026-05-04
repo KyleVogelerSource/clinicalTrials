@@ -124,6 +124,18 @@ export class Analysis implements OnInit {
     
     heatmapFocus = signal<[number, number] | null>(null);
 
+    currentCorrelation = computed(() => {
+        const x = this.dataPlotX();
+        const y = this.dataPlotY();
+        return this.suggestedCorrelations().find(c => c.x === x && c.y === y);
+    });
+
+    shouldShowRHat = computed(() => {
+        const corr = this.currentCorrelation();
+        if (!corr) return false;
+        return this.excludeOutliers() && corr.r.toFixed(2) !== corr.rHat.toFixed(2);
+    });
+
     timelineBlurb = computed(() => {
         const d = this.data();
         if (!d) return '';
