@@ -44,30 +44,25 @@
                 <div class="card-body">
                     <p class="stat-subtitle">Projected Days to Target Enrollment</p>
                     <div class="recruitment-velocity">
-                        {{ data()?.avgRecruitmentDays | number }}<span class="unit"> days</span>
+                        {{ data()?.estimatedDurationDays | number }}<span class="unit"> days</span>
                     </div>
                     
+                    <p class="timeline-blurb">{{ timelineBlurb() }}</p>
+
                     <div class="drivers-list">
                         <h5>Top Recruitment Drivers</h5>
-                        @if (isAILoading()) {
-                            <div class="local-loader-inline">
-                                <app-loading-indicator [visible]="true" />
-                                <span class="loader-text">Analyzing drivers...</span>
-                            </div>
-                        } @else {
-                            <ul>
-                                @for (driver of data()?.recruitmentByImpact; track $index) {
-                                    <li>
-                                        <span class="driver-label">{{ driver.label }}</span>
-                                        <span class="driver-impact" [class.positive]="driver.correlation! > 0" [class.negative]="driver.correlation! < 0">
-                                            {{ driver.impactText }} (r = {{ driver.correlation!.toFixed(2) }})
-                                        </span>
-                                    </li>
-                                    } @empty {
-                                    <li class="no-drivers-msg">No statistically significant drivers found for the selected trials.</li>
-                                    }
-                            </ul>
-                        }
+                        <ul>
+                            @for (driver of data()?.recruitmentByImpact; track $index) {
+                                <li class="driver-item" (click)="onSelectDriver(driver.label)">
+                                    <span class="driver-label">{{ driver.label }}</span>
+                                    <span class="driver-impact" [class.positive]="driver.correlation! > 0" [class.negative]="driver.correlation! < 0">
+                                        {{ driver.impactText }} (r = {{ driver.correlation!.toFixed(2) }})
+                                    </span>
+                                </li>
+                                } @empty {
+                                <li class="no-drivers-msg">No statistically significant drivers found for the selected trials.</li>
+                                }
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -148,7 +143,7 @@
             </div>
 
             <!-- Metric Correlation Analysis -->
-            <div class="card card-full">
+            <div class="card card-full" id="data-correlation-plot">
                 <div class="card-header">
                     <div class="header-with-info">
                         <h4>Metric Correlation Analysis</h4>

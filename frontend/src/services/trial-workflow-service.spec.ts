@@ -163,7 +163,7 @@ describe('TrialWorkflowService', () => {
       totalTrialsFound: 1,
       queryCondition: 'Type 2 Diabetes',
       terminationReasons: [],
-      avgRecruitmentDays: 100,
+      estimatedDurationDays: 100,
       participantTarget: 200,
       recruitmentByImpact: [],
       timelineBuckets: [],

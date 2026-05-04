@@ -124,6 +124,20 @@ export class Analysis implements OnInit {
     
     heatmapFocus = signal<[number, number] | null>(null);
 
+    timelineBlurb = computed(() => {
+        const d = this.data();
+        if (!d) return '';
+        const count = d.siblingCount ?? 0;
+        const target = d.participantTarget ?? 0;
+        const velocity = d.avgRecruitmentVelocity ?? 0;
+        const velocityStr = velocity > 0 ? `~${velocity.toFixed(2)} patients/day` : (velocity === 0 ? '0.00 patients/day' : 'N/A');
+        
+        if (count > 0) {
+            return `Based on ${count} similar historical trials with an average velocity of ${velocityStr}, targeting ${target.toLocaleString()} participants.`;
+        }
+        return `Based on the average velocity of all matched trials (${velocityStr}).`;
+    });
+
     private hasAutoSelected = false;
     private hasAutoSelectedMatrix = false;
 
@@ -210,8 +224,8 @@ export class Analysis implements OnInit {
 
     estimatedDuration = computed(() => {
         const d = this.data();
-        if (!d || d.avgRecruitmentDays <= 0) return null;
-        return d.avgRecruitmentDays;
+        if (!d || d.estimatedDurationDays <= 0) return null;
+        return d.estimatedDurationDays;
     });
 
     estimatedCompletionDate = computed(() => {
@@ -812,7 +826,7 @@ export class Analysis implements OnInit {
             ['Field', 'Value'],
             ['Condition', d.queryCondition ?? ''],
             ['Total Trials Found', d.totalTrialsFound ?? ''],
-            ['Avg Recruitment Days', d.avgRecruitmentDays ?? ''],
+            ['Avg Recruitment Days', d.estimatedDurationDays ?? ''],
             ['Participant Target', d.participantTarget ?? ''],
             ['Timeline Range', (d as any).timelineRange ?? ''],
             ['Generated At', d.generatedAt ?? ''],
@@ -941,6 +955,19 @@ export class Analysis implements OnInit {
     onFocusSite(coords: [number, number] | null) {
         if (coords) {
             this.heatmapFocus.set(coords);
+        }
+    }
+
+    onSelectDriver(label: string) {
+        if (this.designInputs.includes(label)) {
+            this.dataPlotX.set(label);
+            this.dataPlotY.set("Recruitment Velocity");
+            
+            // Wait for signal cycle then scroll
+            setTimeout(() => {
+                const el = document.getElementById('data-correlation-plot');
+                el?.scrollIntoView({ behavior: 'smooth' });
+            }, 50);
         }
     }
 
