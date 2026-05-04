@@ -17,7 +17,7 @@ export const mockTrialResultsResponse: TrialResultsResponse = {
         { reason: "Regulatory Issue", count: 8 },
         { reason: "Other", count: 23 },
     ],
-    avgRecruitmentDays: 487,
+    estimatedDurationDays: 487,
     participantTarget: 240,
     recruitmentByImpact: [
         { label: "High Impact", avgDays: 312, participantCount: 187 },

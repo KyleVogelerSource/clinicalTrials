@@ -22,10 +22,7 @@ import {
 import { LoadingIndicator } from "../../primitives/loading-indicator/loading-indicator";
 import { AutoCompleteInput } from "../../primitives/auto-complete-input/auto-complete-input";
 import { MultiSelect, MultiSelectOption } from "../../primitives/multi-select/multi-select";
-import { KeywordSelector } from "../../primitives/keyword-selector/keyword-selector";
 import { Tooltip } from "../../primitives/tooltip/tooltip";
-import { StudyTrial } from "../../models/study-trial";
-import { ClinicalTrialSearchRequest } from "@shared/dto/ClinicalTrialSearchRequest";
 import { PermissionService } from "../../services/permission.service";
 import { ACTION_NAMES } from "@shared/auth/action-names";
 import { parseDesignerCriteriaFile } from "../../services/designer-criteria-file.service";
@@ -43,7 +40,6 @@ import { LoadingService } from "../../services/loading.service";
         LoadingIndicator,
         AutoCompleteInput,
         MultiSelect,
-        KeywordSelector,
         Tooltip,
         DecimalPipe,
         DatePipe
@@ -460,16 +456,18 @@ export class Dashboard implements OnInit {
                     // 2. Otherwise (fresh search with no prior state), auto-select all results.
                     
                     const savedParams = this.workflowService.inputParams();
-                    if (savedParams?.selectedTrialIds) {
-                        // We have explicit selections (even if empty!), use them.
+                    const isReturning = savedParams?.condition === this.searchForm.value.condition;
+
+                    if (isReturning && savedParams?.selectedTrialIds && savedParams.selectedTrialIds.length > 0) {
+                        // We are returning to the same condition and have existing selections: use them.
                         const pruned = savedParams.selectedTrialIds.filter(id => foundIds.has(id));
                         this.selectedTrialIds.set(pruned);
-                    } else if (this.selectedTrialIds().length === 0) {
-                        // Truly fresh search: auto-select all
+                    } else if (this.selectedTrialIds().length === 0 || !isReturning) {
+                        // Fresh search or no existing selections: auto-select all
                         const allIds = trials.map(t => t.nctId);
                         this.selectedTrialIds.set(allIds);
                     } else {
-                        // Filter update while already on the dashboard
+                        // Filter update while already on the dashboard for the same condition
                         this.selectedTrialIds.update(current => current.filter(id => foundIds.has(id)));
                     }
                 }
@@ -660,9 +658,9 @@ export class Dashboard implements OnInit {
     }
 
     async onImportFile(event: Event) {
-        if (!this.canImportCriteria()) {
-            return;
-        }
+        // if (!this.canImportCriteria()) {
+        //     return;
+        // }
 
         const input = event.target as HTMLInputElement | null;
         const file = input?.files?.[0];

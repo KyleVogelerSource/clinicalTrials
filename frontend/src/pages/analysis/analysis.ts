@@ -83,7 +83,7 @@ export const metricDescriptions: Record<string, string> = {
     "Max Age": "The maximum allowed age of participants.",
     "Intervention Count": "Number of unique drugs, devices, or procedures being tested.",
     "Collaborator Count": "Number of organizations partnering with the lead sponsor.",
-    "Timeline Slippage": "Difference between planned and actual completion duration in days.",
+    "Duration (Days)": "Total duration between trial start and primary completion in days.",
     "Masking Intensity": "Number of groups (Participants, Providers, etc.) blinded from study assignments.",
     "Condition Count": "Number of diseases or conditions being addressed in the protocol.",
     "Arm Count": "The number of arms or interventions in the study design."
@@ -124,6 +124,32 @@ export class Analysis implements OnInit {
     
     heatmapFocus = signal<[number, number] | null>(null);
 
+    currentCorrelation = computed(() => {
+        const x = this.dataPlotX();
+        const y = this.dataPlotY();
+        return this.suggestedCorrelations().find(c => c.x === x && c.y === y);
+    });
+
+    shouldShowRHat = computed(() => {
+        const corr = this.currentCorrelation();
+        if (!corr) return false;
+        return this.excludeOutliers() && corr.r.toFixed(2) !== corr.rHat.toFixed(2);
+    });
+
+    timelineBlurb = computed(() => {
+        const d = this.data();
+        if (!d) return '';
+        const count = d.siblingCount ?? 0;
+        const target = d.participantTarget ?? 0;
+        const velocity = d.avgRecruitmentVelocity ?? 0;
+        const velocityStr = velocity > 0 ? `~${velocity.toFixed(2)} patients/day` : (velocity === 0 ? '0.00 patients/day' : 'N/A');
+        
+        if (count > 0) {
+            return `Based on ${count} similar historical trials with an average velocity of ${velocityStr}, targeting ${target.toLocaleString()} participants.`;
+        }
+        return `Based on the average velocity of all matched trials (${velocityStr}).`;
+    });
+
     private hasAutoSelected = false;
     private hasAutoSelectedMatrix = false;
 
@@ -153,7 +179,7 @@ export class Analysis implements OnInit {
                 this.matrixThresholds.set({
                     highEnrollment: this.calculateMedian(trials.map(t => t.totalEnrollment)),
                     multiSite: this.calculateMedian(trials.map(t => t.siteCount)),
-                    longDuration: this.calculateMedian(trials.map(t => t.timelineSlippage)),
+                    longDuration: this.calculateMedian(trials.map(t => t.duration)),
                     manyArms: this.calculateMedian(trials.map(t => t.armCount)),
                     strictInclusions: this.calculateMedian(trials.map(t => t.inclusionStrictness)),
                     manyInterventions: this.calculateMedian(trials.map(t => t.interventionCount)),
@@ -210,8 +236,8 @@ export class Analysis implements OnInit {
 
     estimatedDuration = computed(() => {
         const d = this.data();
-        if (!d || d.avgRecruitmentDays <= 0) return null;
-        return d.avgRecruitmentDays;
+        if (!d || d.estimatedDurationDays <= 0) return null;
+        return d.estimatedDurationDays;
     });
 
     estimatedCompletionDate = computed(() => {
@@ -247,10 +273,12 @@ export class Analysis implements OnInit {
     dataPlotY = signal("Recruitment Velocity");
     showTrendLine = signal(true);
     excludeOutliers = signal(false);
+    showOnlySimilarDataPlot = signal(false);
     showAllCorrelations = signal(false);
     metricNamesList = metricNames;
 
     readonly designInputs = [
+        "Total Enrollment",
         "Site Count",
         "Inclusion Strictness",
         "Exclusion Strictness",
@@ -268,7 +296,7 @@ export class Analysis implements OnInit {
     readonly performanceOutputs = [
         "Recruitment Velocity",
         "Site Efficiency",
-        "Timeline Slippage",
+        "Duration (Days)",
         "Total Enrollment"
     ];
 
@@ -296,8 +324,18 @@ export class Analysis implements OnInit {
     });
 
     suggestedCorrelations = computed(() => {
-        const trials = this.results().metricRows;
+        let trials = this.results().metricRows;
         if (!trials || trials.length < 2) return [];
+
+        const onlySimilar = this.showOnlySimilarDataPlot();
+        const rankedTrials = this.data()?.rankedTrials || [];
+        const rankedIds = new Set(rankedTrials.map(rt => rt.trial.nctId));
+
+        if (onlySimilar && rankedIds.size > 0) {
+            trials = trials.filter(m => rankedIds.has(m.id));
+        }
+
+        if (trials.length < 2) return [];
 
         const correlations: {x: string, y: string, r: number, rHat: number}[] = [];
 
@@ -307,7 +345,8 @@ export class Analysis implements OnInit {
             "Age Span|Min Age", "Min Age|Age Span",
             "Max Age|Min Age", "Min Age|Max Age",
             "Total Enrollment|Site Efficiency", "Site Efficiency|Total Enrollment",
-            "Site Count|Site Efficiency", "Site Efficiency|Site Count"
+            "Site Count|Site Efficiency", "Site Efficiency|Site Count",
+            "Total Enrollment|Total Enrollment"
         ]);
 
         const calculateR = (pts: {x: number, y: number}[]) => {
@@ -385,6 +424,23 @@ export class Analysis implements OnInit {
         const all = this.suggestedCorrelations();
         if (this.showAllCorrelations()) return all;
         return all.filter(c => Math.abs(c.r) >= 0.1);
+    });
+
+    recruitmentDrivers = computed(() => {
+        const correlations = this.suggestedCorrelations();
+        if (correlations.length === 0) return [];
+
+        // Focus on correlations with Recruitment Velocity (Y axis)
+        const relevant = correlations
+            .filter(c => c.y === 'Recruitment Velocity' && Math.abs(c.r) >= 0.05)
+            .sort((a, b) => Math.abs(b.r) - Math.abs(a.r))
+            .slice(0, 3);
+
+        return relevant.map(c => ({
+            label: c.x,
+            correlation: c.r,
+            impactText: c.r > 0 ? 'Speeds up recruitment' : 'Slows down recruitment'
+        }));
     });
 
     viabilityColor = computed(() => {
@@ -518,8 +574,16 @@ export class Analysis implements OnInit {
     });
 
     dataPlotData = computed<ScatterChartData | null>(() => {
-        const metrics = this.results().metricRows;
+        let metrics = this.results().metricRows;
         if (!metrics) return null;
+
+        const onlySimilar = this.showOnlySimilarDataPlot();
+        const rankedTrials = this.data()?.rankedTrials || [];
+        const rankedIds = new Set(rankedTrials.map(rt => rt.trial.nctId));
+
+        if (onlySimilar && rankedIds.size > 0) {
+            metrics = metrics.filter(m => rankedIds.has(m.id));
+        }
         
         const getX = MetricRow.metricExtractors[this.dataPlotX()];
         const getY = MetricRow.metricExtractors[this.dataPlotY()];
@@ -586,7 +650,7 @@ export class Analysis implements OnInit {
         const rowFactors = [
             { name: `Enrollment ${ops.highEnrollment} ${thresh.highEnrollment}`, check: (t: MetricRow) => check(t.totalEnrollment, thresh.highEnrollment, ops.highEnrollment) },
             { name: `Site Count ${ops.multiSite} ${thresh.multiSite}`, check: (t: MetricRow) => check(t.siteCount, thresh.multiSite, ops.multiSite) },
-            { name: `Duration ${ops.longDuration} ${thresh.longDuration}d`, check: (t: MetricRow) => check(t.timelineSlippage, thresh.longDuration, ops.longDuration) },
+            { name: `Duration ${ops.longDuration} ${thresh.longDuration}d`, check: (t: MetricRow) => check(t.duration, thresh.longDuration, ops.longDuration) },
             { name: `Arm Count ${ops.manyArms} ${thresh.manyArms}`, check: (t: MetricRow) => check(t.armCount, thresh.manyArms, ops.manyArms) }
         ];
 
@@ -789,6 +853,8 @@ export class Analysis implements OnInit {
     }
 
     onExport() {
+        this.loadingService.show("Exporting...");
+
         const json = JSON.stringify(this.data(), null, 2);
         const blob = new Blob([json], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -796,12 +862,18 @@ export class Analysis implements OnInit {
         a.href = url;
         a.download = `feasibility-report-${new Date().getTime()}.json`;
         a.click();
-        URL.revokeObjectURL(url);
+
+        setTimeout(() => {
+            URL.revokeObjectURL(url);
+            this.loadingService.hide();
+        }, 100);
     }
 
     onExportExcel(): void {
         const d = this.data();
         if (!d) return;
+
+        this.loadingService.show("Exporting...");
 
         const wb = XLSX.utils.book_new();
 
@@ -810,7 +882,7 @@ export class Analysis implements OnInit {
             ['Field', 'Value'],
             ['Condition', d.queryCondition ?? ''],
             ['Total Trials Found', d.totalTrialsFound ?? ''],
-            ['Avg Recruitment Days', d.avgRecruitmentDays ?? ''],
+            ['Avg Recruitment Days', d.estimatedDurationDays ?? ''],
             ['Participant Target', d.participantTarget ?? ''],
             ['Timeline Range', (d as any).timelineRange ?? ''],
             ['Generated At', d.generatedAt ?? ''],
@@ -874,7 +946,10 @@ export class Analysis implements OnInit {
             XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers, ...rows]), 'Similar Trials');
         }
 
-        XLSX.writeFile(wb, `feasibility-report-${new Date().getTime()}.xlsx`);
+        setTimeout(() => {
+            XLSX.writeFile(wb, `feasibility-report-${new Date().getTime()}.xlsx`);
+            this.loadingService.hide();
+        }, 100);
     }
 
     onComparisonSearch(event: Event) {
@@ -939,6 +1014,19 @@ export class Analysis implements OnInit {
     onFocusSite(coords: [number, number] | null) {
         if (coords) {
             this.heatmapFocus.set(coords);
+        }
+    }
+
+    onSelectDriver(label: string) {
+        if (this.designInputs.includes(label)) {
+            this.dataPlotX.set(label);
+            this.dataPlotY.set("Recruitment Velocity");
+            
+            // Wait for signal cycle then scroll
+            setTimeout(() => {
+                const el = document.getElementById('data-correlation-plot');
+                el?.scrollIntoView({ behavior: 'smooth' });
+            }, 50);
         }
     }
 

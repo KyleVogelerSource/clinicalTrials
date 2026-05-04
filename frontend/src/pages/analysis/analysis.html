@@ -8,9 +8,9 @@
             <p class="meta-info">Generated on {{ (data()?.timestamp || today) | date:'medium' }} • {{ displayPhase() }}</p>
         </div>
         <div class="heading-right">
-            <button class="btn btn-prominent" (click)="onPrint()">Print</button>
-            <button class="btn btn-primary btn-prominent" (click)="onExport()">Export JSON</button>
-            <button class="btn btn-secondary btn-prominent" (click)="onExportExcel()">Export Excel</button>
+            <button class="btn btn-prominent" (click)="onPrint()" [disabled]="this.isAILoading()">Print</button>
+            <button class="btn btn-prominent" (click)="onExport()" [disabled]="this.isAILoading()">Export JSON</button>
+            <button class="btn btn-prominent" (click)="onExportExcel()" [disabled]="this.isAILoading()">Export Excel</button>
         </div>
     </div>
 
@@ -44,9 +44,11 @@
                 <div class="card-body">
                     <p class="stat-subtitle">Projected Days to Target Enrollment</p>
                     <div class="recruitment-velocity">
-                        {{ data()?.avgRecruitmentDays | number }}<span class="unit"> days</span>
+                        {{ data()?.estimatedDurationDays | number }}<span class="unit"> days</span>
                     </div>
                     
+                    <p class="timeline-blurb">{{ timelineBlurb() }}</p>
+
                     <div class="drivers-list">
                         <h5>Top Recruitment Drivers</h5>
                         @if (isAILoading()) {
@@ -56,11 +58,11 @@
                             </div>
                         } @else {
                             <ul>
-                                @for (driver of data()?.recruitmentByImpact; track $index) {
-                                    <li>
+                                @for (driver of recruitmentDrivers(); track $index) {
+                                    <li class="driver-item" (click)="onSelectDriver(driver.label)">
                                         <span class="driver-label">{{ driver.label }}</span>
-                                        <span class="driver-impact" [class.positive]="driver.correlation! > 0" [class.negative]="driver.correlation! < 0">
-                                            {{ driver.impactText }} (r = {{ driver.correlation!.toFixed(2) }})
+                                        <span class="driver-impact" [class.positive]="driver.correlation > 0" [class.negative]="driver.correlation < 0">
+                                            {{ driver.impactText }} (r = {{ driver.correlation.toFixed(2) }})
                                         </span>
                                     </li>
                                     } @empty {
@@ -85,7 +87,13 @@
                         @for (b of benchmarks(); track b.label) {
                             <div class="benchmark-item">
                                 <div class="benchmark-meta">
-                                    <span class="benchmark-label">{{ b.label }}</span>
+                                    <div class="benchmark-info">
+                                        <span class="benchmark-label">{{ b.label }}</span>
+                                        <div class="benchmark-stats">
+                                            Avg: {{ b.mean }} | σ: {{ b.stdDev }}
+                                        </div>
+                                    </div>
+                                    
                                     <div class="benchmark-val-editor">
                                         <div class="proposed-stack">
                                             <div class="proposed-row">
@@ -96,9 +104,10 @@
                                                     (change)="onUpdateBenchmark(b.paramKey, $any($event.target).value)"
                                                     min="0"
                                                     class="benchmark-input">
-                                                <span class="benchmark-z">{{ b.zScore > 0 ? '+' : '' }}{{ b.zScore }}σ</span>
                                             </div>
-                                            <div class="delta-row" [class.negative]="b.delta < 0" [class.positive]="b.delta > 0">
+                                            <div class="delta-row">
+                                                {{ b.zScore > 0 ? '+' : '' }}{{ b.zScore }}σ
+                                                /
                                                 {{ b.delta > 0 ? '+' : '' }}{{ b.delta | number }} {{ b.delta > 0 ? 'above' : 'below' }} avg
                                             </div>
                                         </div>
@@ -111,9 +120,6 @@
                                         type="line" 
                                         [enableZoom]="false" 
                                         [exportPrefix]="`${inputParams()?.condition ?? ''} ${b.label}`" />
-                                </div>
-                                <div class="benchmark-stats">
-                                    Avg: {{ b.mean }} | σ: {{ b.stdDev }}
                                 </div>
                             </div>
                         }
@@ -148,7 +154,7 @@
             </div>
 
             <!-- Metric Correlation Analysis -->
-            <div class="card card-full">
+            <div class="card card-full" id="data-correlation-plot">
                 <div class="card-header">
                     <div class="header-with-info">
                         <h4>Metric Correlation Analysis</h4>
@@ -192,7 +198,10 @@
                                                 <td class="r-value">
                                                     <div class="r-comparison">
                                                         <span class="r-orig" [title]="'Original Correlation'">r = {{ c.r.toFixed(2) }}</span>
-                                                        <span class="r-hat" [title]="'Correlation with Outliers Excluded'">r̂ = {{ c.rHat.toFixed(2) }}</span>
+                                                        @if (c.r.toFixed(2) !== c.rHat.toFixed(2)) {
+                                                            <span class="r-hat" [title]="'Correlation with Outliers Excluded'">r̂ = {{ c.rHat.toFixed(2) }}</span>
+                                                        }
+
                                                     </div>
                                                 </td>
                                             </tr>
@@ -226,6 +235,18 @@
                                 </div>
 
                                 <div class="toggle-group">
+                                    <label class="switch-control" [class.disabled]="!(data()?.rankedTrials?.length)">
+                                        <span class="label-text">Show Only <span class="similar-trials">Similar</span> Trials</span>
+                                        <div class="switch">
+                                            <input type="checkbox" 
+                                                   [checked]="showOnlySimilarDataPlot()" 
+                                                   (change)="showOnlySimilarDataPlot.set($any($event.target).checked)"
+                                                   [disabled]="!(data()?.rankedTrials?.length)">
+                                            <span class="slider"></span>
+                                        </div>
+                                        <span class="status-text">{{ showOnlySimilarDataPlot() ? 'On' : 'Off' }}</span>
+                                    </label>
+
                                     <label class="switch-control">
                                         <span class="label-text">Trend Line</span>
                                         <div class="switch">
@@ -253,7 +274,7 @@
                                         [xAxisLabel]="dataPlotX()" 
                                         [yAxisLabel]="dataPlotY()" 
                                         [showTrendLine]="showTrendLine()" 
-                                        [useRHatLabel]="excludeOutliers()"
+                                        [useRHatLabel]="shouldShowRHat()"
                                         [exportPrefix]="`${inputParams()?.condition ?? ''} ${dataPlotX()} vs ${dataPlotY()}`" />
                                 </div>
                             }
@@ -427,7 +448,7 @@
                     <h4>Benchmarked Trials Comparison</h4>
                     <div class="comparison-controls">
                         <label class="switch-control" [class.disabled]="!(data()?.rankedTrials?.length)">
-                            <span class="label-text">Show Only Similar Trials</span>
+                            <span class="label-text">Show Only <span class="similar-trials">Similar</span> Trials</span>
                             <div class="switch">
                                 <input type="checkbox" 
                                        [checked]="showOnlySimilarTrials()" 

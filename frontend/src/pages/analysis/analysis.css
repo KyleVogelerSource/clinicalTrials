@@ -27,6 +27,10 @@
     margin: 0;
 }
 
+.similar-trials {
+    color: #088989;
+}
+
 .heading-right {
     display: flex;
     gap: 0.5rem;
@@ -1046,6 +1050,13 @@ input:checked + .slider:before {
     align-items: baseline;
 }
 
+.benchmark-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    color: #193F6A;
+}
+
 .benchmark-label {
     font-size: 0.85rem;
     font-weight: 700;
@@ -1071,9 +1082,9 @@ input:checked + .slider:before {
 }
 
 .delta-row {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     font-weight: 500;
-    color: #64748b;
+    color: #088989;
     margin-top: 1px;
 }
 
@@ -1203,4 +1214,31 @@ input:checked + .slider:before {
     .card-body {
         padding: 0;
     }
+}
+
+/* Recruitment Drivers & Timeline Blurb */
+.timeline-blurb {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin: 0.5rem 0 1rem 0;
+    line-height: 1.4;
+    font-style: italic;
+    padding-left: 4px;
+    border-left: 2px solid #e2e8f0;
+}
+
+.driver-item {
+    cursor: pointer;
+    padding: 4px 6px;
+    margin-left: -6px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.driver-item:hover {
+    background-color: #f1f5f9;
+}
+
+.driver-item:active {
+    background-color: #e2e8f0;
 }

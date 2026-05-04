@@ -20,7 +20,7 @@ export interface TrialResultsResponse {
   totalTrialsFound: number;
   queryCondition: string | null;
   terminationReasons: TerminationReasonBar[];
-  avgRecruitmentDays: number;
+  estimatedDurationDays: number;
   participantTarget: number;
   recruitmentByImpact: RecruitmentImpactBar[];
   timelineBuckets: TimelineBar[];

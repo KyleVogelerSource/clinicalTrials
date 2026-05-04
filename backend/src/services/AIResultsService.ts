@@ -13,7 +13,7 @@ const RESPONSE_SCHEMA = {
         "totalTrialsFound",
         "queryCondition",
         "terminationReasons",
-        "avgRecruitmentDays",
+        "estimatedDurationDays",
         "participantTarget",
         "recruitmentByImpact",
         "timelineBuckets",
@@ -33,7 +33,7 @@ const RESPONSE_SCHEMA = {
                 },
             },
         },
-        avgRecruitmentDays: { type: "number", minimum: 0 },
+        estimatedDurationDays: { type: "number", minimum: 0 },
         participantTarget: { type: "number", minimum: 0 },
         recruitmentByImpact: {
             type: "array",

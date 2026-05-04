@@ -130,12 +130,12 @@
                         <button class="btn btn-secondary action-btn" (click)="onToggleSavePanel()" [disabled]="!searchForm.valid">Save Search</button>
                     }
                     
-                    @if (canImportCriteria()) {
+                    <!-- @if (canImportCriteria()) { -->
                         <label class="btn btn-secondary action-btn import-label" for="criteriaImport" title="Import search criteria JSON">
                             Import JSON
                         </label>
                         <input id="criteriaImport" type="file" class="visually-hidden" accept=".json,application/json" (change)="onImportFile($event)">
-                    }
+                    <!-- } -->
                 </div>
             </div>
         </div>
