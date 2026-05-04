@@ -368,23 +368,6 @@ export class TrialWorkflowService {
                 return best;
             };
 
-            const getBestName_backup = (names: string[]): string => {
-                if (names.length === 0) return 'Clinical Site';
-                const validNames = names.filter(n => !isGeneric(n));
-                if (validNames.length === 0) return names[0] || 'Clinical Site';
-
-                const IDEAL_MIN = 25;
-                const IDEAL_MAX = 40;
-
-                return [...validNames].sort((a, b) => {
-                    const getDist = (s: string) => {
-                        if (s.length >= IDEAL_MIN && s.length <= IDEAL_MAX) return 0;
-                        return Math.min(Math.abs(s.length - IDEAL_MIN), Math.abs(s.length - IDEAL_MAX));
-                    };
-                    return getDist(a) - getDist(b);
-                })[0];
-            };
-
             const siteGroups = new Map<string, { names: string[], count: number, coords: [number, number] | null, locationStr: string }>();
 
             plotData.forEach(trial => {
