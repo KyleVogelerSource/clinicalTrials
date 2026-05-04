@@ -399,7 +399,7 @@ export class TrialWorkflowService {
                 const startDate = trial.startDate ? Date.parse(trial.startDate.date) : null;
                 if (completedDate && startDate) {
                     const diff = (completedDate - startDate) / (1000 * 60 * 60 * 24);
-                    row.timelineSlippage = diff;
+                    row.duration = diff;
                     if (diff > 0) row.recruitmentVelocity = trial.totalEnrollment / diff;
                 }
                 if (trial.maxAge) row.maxAge = parseInt(trial.maxAge);
@@ -422,7 +422,7 @@ export class TrialWorkflowService {
                 return row;
             });
 
-            const validTrials = newResults.metricRows.filter(r => r.timelineSlippage > 0);
+            const validTrials = newResults.metricRows.filter(r => r.duration > 0);
             const enrollments = validTrials
                 .map((r: MetricRow) => r.totalEnrollment)
                 .sort((a: number, b: number) => a - b);
@@ -445,7 +445,7 @@ export class TrialWorkflowService {
                     const label = max === Infinity ? `${min}+` : `${min}-${max}`;
                     const trialsInBucket = validTrials.filter((r: MetricRow) => r.totalEnrollment >= min && (max === Infinity ? true : r.totalEnrollment < max));
                     if (trialsInBucket.length > 0) {
-                        const actualDays = Math.round(trialsInBucket.reduce((acc: number, r: MetricRow) => acc + r.timelineSlippage, 0) / trialsInBucket.length);
+                        const actualDays = Math.round(trialsInBucket.reduce((acc: number, r: MetricRow) => acc + r.duration, 0) / trialsInBucket.length);
                         const estimatedDays = Math.round(actualDays * 0.9);
                         const avgSites = Math.round(trialsInBucket.reduce((acc: number, r: MetricRow) => acc + r.siteCount, 0) / trialsInBucket.length);
                         timelineBuckets.push({ patientBucket: label, estimatedDays, actualDays, avgSites });
@@ -485,7 +485,7 @@ export class TrialWorkflowService {
                 }
             }
 
-            const globalTotalDays = validTrials.reduce((acc: number, r: MetricRow) => acc + r.timelineSlippage, 0);
+            const globalTotalDays = validTrials.reduce((acc: number, r: MetricRow) => acc + r.duration, 0);
             const globalTotalEnrollmentVal = validTrials.reduce((acc: number, r: MetricRow) => acc + r.totalEnrollment, 0);
             const globalVelocity = globalTotalEnrollmentVal > 0 ? globalTotalEnrollmentVal / globalTotalDays : 0;
             

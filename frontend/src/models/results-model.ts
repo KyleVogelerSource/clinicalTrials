@@ -18,7 +18,7 @@ export const metricNames: string[] = [
     "Max Age",
     "Intervention Count",
     "Collaborator Count",
-    "Timeline Slippage",
+    "Duration (Days)",
     "Masking Intensity",
     "Condition Count",
     "Arm Count"
@@ -38,7 +38,7 @@ export class MetricRow {
     maxAge: number = 0;
     interventionCount: number = 0;
     collaboratorCount: number = 0;
-    timelineSlippage: number = 0;
+    duration: number = 0;
     maskingIntensity: number = 0;
     conditionCount: number = 0;
     armCount: number = 0;
@@ -57,7 +57,7 @@ export class MetricRow {
         "Max Age": (r) => r.maxAge,
         "Intervention Count": (r) => r.interventionCount,
         "Collaborator Count": (r) => r.collaboratorCount,
-        "Timeline Slippage": (r) => r.timelineSlippage,
+        "Duration (Days)": (r) => r.duration,
         "Masking Intensity": (r) => r.maskingIntensity,
         "Condition Count": (r) => r.conditionCount,
         "Arm Count": (r) => r.armCount,
