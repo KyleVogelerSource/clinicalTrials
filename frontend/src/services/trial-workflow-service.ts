@@ -516,9 +516,16 @@ export class TrialWorkflowService {
                 { name: 'Arm Count', key: 'armCount', invert: true }
             ];
 
+            // If we have AI ranked (similar) trials, prioritize them for driver correlation analysis
+            // to ensure consistency between the driver summary and the focused visualization.
+            const rankedNctIds = new Set((current.trialResults?.rankedTrials || []).map(rt => rt.trial.nctId));
+            const driverDataTrials = rankedNctIds.size > 0 
+                ? validTrials.filter(r => rankedNctIds.has(r.id))
+                : validTrials;
+
             const drivers = metricsToTest.map(m => {
-                const values = validTrials.map((r: MetricRow) => (r as any)[m.key] as number);
-                const velocities = validTrials.map((r: MetricRow) => r.recruitmentVelocity);
+                const values = driverDataTrials.map((r: MetricRow) => (r as any)[m.key] as number);
+                const velocities = driverDataTrials.map((r: MetricRow) => r.recruitmentVelocity);
                 const n = values.length;
                 if (n < 2) return { name: m.name, correlation: 0, key: m.key, invert: m.invert };
                 const sumX = values.reduce((a: number, b: number) => a + b, 0);
@@ -545,6 +552,7 @@ export class TrialWorkflowService {
 
             newResults.trialResults = {
                 ...current.trialResults,
+                rankedTrials: [], // Clear ranked trials until fresh AI results arrive
                 timestamp: new Date(),
                 overallScore: current.trialResults?.overallScore ?? 0,
                 overallSummary: current.trialResults?.overallSummary ?? 'Generating detailed analysis...',

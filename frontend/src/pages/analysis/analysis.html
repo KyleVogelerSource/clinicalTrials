@@ -51,18 +51,25 @@
 
                     <div class="drivers-list">
                         <h5>Top Recruitment Drivers</h5>
-                        <ul>
-                            @for (driver of data()?.recruitmentByImpact; track $index) {
-                                <li class="driver-item" (click)="onSelectDriver(driver.label)">
-                                    <span class="driver-label">{{ driver.label }}</span>
-                                    <span class="driver-impact" [class.positive]="driver.correlation! > 0" [class.negative]="driver.correlation! < 0">
-                                        {{ driver.impactText }} (r = {{ driver.correlation!.toFixed(2) }})
-                                    </span>
-                                </li>
-                                } @empty {
-                                <li class="no-drivers-msg">No statistically significant drivers found for the selected trials.</li>
-                                }
-                        </ul>
+                        @if (isAILoading()) {
+                            <div class="local-loader-inline">
+                                <app-loading-indicator [visible]="true" />
+                                <span class="loader-text">Analyzing drivers...</span>
+                            </div>
+                        } @else {
+                            <ul>
+                                @for (driver of recruitmentDrivers(); track $index) {
+                                    <li class="driver-item" (click)="onSelectDriver(driver.label)">
+                                        <span class="driver-label">{{ driver.label }}</span>
+                                        <span class="driver-impact" [class.positive]="driver.correlation > 0" [class.negative]="driver.correlation < 0">
+                                            {{ driver.impactText }} (r = {{ driver.correlation.toFixed(2) }})
+                                        </span>
+                                    </li>
+                                    } @empty {
+                                    <li class="no-drivers-msg">No statistically significant drivers found for the selected trials.</li>
+                                    }
+                            </ul>
+                        }
                     </div>
                 </div>
             </div>
@@ -221,6 +228,18 @@
                                 </div>
 
                                 <div class="toggle-group">
+                                    <label class="switch-control" [class.disabled]="!(data()?.rankedTrials?.length)">
+                                        <span class="label-text">Show Only Similar Trials</span>
+                                        <div class="switch">
+                                            <input type="checkbox" 
+                                                   [checked]="showOnlySimilarDataPlot()" 
+                                                   (change)="showOnlySimilarDataPlot.set($any($event.target).checked)"
+                                                   [disabled]="!(data()?.rankedTrials?.length)">
+                                            <span class="slider"></span>
+                                        </div>
+                                        <span class="status-text">{{ showOnlySimilarDataPlot() ? 'On' : 'Off' }}</span>
+                                    </label>
+
                                     <label class="switch-control">
                                         <span class="label-text">Trend Line</span>
                                         <div class="switch">
