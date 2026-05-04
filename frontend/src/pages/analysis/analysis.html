@@ -194,7 +194,10 @@
                                                 <td class="r-value">
                                                     <div class="r-comparison">
                                                         <span class="r-orig" [title]="'Original Correlation'">r = {{ c.r.toFixed(2) }}</span>
-                                                        <span class="r-hat" [title]="'Correlation with Outliers Excluded'">r̂ = {{ c.rHat.toFixed(2) }}</span>
+                                                        @if (c.r.toFixed(2) !== c.rHat.toFixed(2)) {
+                                                            <span class="r-hat" [title]="'Correlation with Outliers Excluded'">r̂ = {{ c.rHat.toFixed(2) }}</span>
+                                                        }
+
                                                     </div>
                                                 </td>
                                             </tr>
@@ -267,7 +270,7 @@
                                         [xAxisLabel]="dataPlotX()" 
                                         [yAxisLabel]="dataPlotY()" 
                                         [showTrendLine]="showTrendLine()" 
-                                        [useRHatLabel]="excludeOutliers()"
+                                        [useRHatLabel]="shouldShowRHat()"
                                         [exportPrefix]="`${inputParams()?.condition ?? ''} ${dataPlotX()} vs ${dataPlotY()}`" />
                                 </div>
                             }
