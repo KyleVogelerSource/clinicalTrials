@@ -108,5 +108,6 @@ export function normalizeImportedCriteria(
     // Eligibility criteria for benchmark comparison
     inclusionCriteria: Array.isArray(input.inclusionCriteria) ? input.inclusionCriteria : [],
     exclusionCriteria: Array.isArray(input.exclusionCriteria) ? input.exclusionCriteria : [],
+    selectedTrialIds: Array.isArray(input.selectedTrialIds) ? input.selectedTrialIds : [],
   };
 }
