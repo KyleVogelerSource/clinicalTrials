@@ -236,7 +236,7 @@
 
                                 <div class="toggle-group">
                                     <label class="switch-control" [class.disabled]="!(data()?.rankedTrials?.length)">
-                                        <span class="label-text">Show Only Similar Trials</span>
+                                        <span class="label-text">Show Only <span class="similar-trials">Similar</span> Trials</span>
                                         <div class="switch">
                                             <input type="checkbox" 
                                                    [checked]="showOnlySimilarDataPlot()" 
@@ -448,7 +448,7 @@
                     <h4>Benchmarked Trials Comparison</h4>
                     <div class="comparison-controls">
                         <label class="switch-control" [class.disabled]="!(data()?.rankedTrials?.length)">
-                            <span class="label-text">Show Only Similar Trials</span>
+                            <span class="label-text">Show Only <span class="similar-trials">Similar</span> Trials</span>
                             <div class="switch">
                                 <input type="checkbox" 
                                        [checked]="showOnlySimilarTrials()" 
