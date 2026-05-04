@@ -656,9 +656,9 @@ export class Dashboard implements OnInit {
     }
 
     async onImportFile(event: Event) {
-        if (!this.canImportCriteria()) {
-            return;
-        }
+        // if (!this.canImportCriteria()) {
+        //     return;
+        // }
 
         const input = event.target as HTMLInputElement | null;
         const file = input?.files?.[0];
