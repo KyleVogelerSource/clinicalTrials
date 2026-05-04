@@ -318,19 +318,74 @@ export class TrialWorkflowService {
                 return false;
             };
 
-            const getBestName = (names: Set<string>): string => {
-                const list = Array.from(names);
-                if (list.length === 0) return 'Clinical Site';
-                return list.sort((a, b) => {
-                    const aG = isGeneric(a);
-                    const bG = isGeneric(b);
-                    if (aG && !bG) return 1;
-                    if (!aG && bG) return -1;
-                    return b.length - a.length;
+            const getBestName = (names: string[]): string => {
+                if (names.length === 0) return 'Clinical Site';
+                
+                const validNames = names.filter(n => !isGeneric(n));
+                if (validNames.length === 0) return names[0] || 'Clinical Site';
+
+                // Frequency of words across all names to identify the 'consensus' terms
+                // We weight words from shorter, more likely "real" names higher than words in long messages
+                const wordFreq = new Map<string, number>();
+                validNames.forEach(name => {
+                    const words = name.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(w => w.length > 1);
+                    const weight = name.length > 80 ? 0.1 : name.length > 60 ? 0.3 : 1.0;
+                    words.forEach(word => {
+                        wordFreq.set(word, (wordFreq.get(word) || 0) + weight);
+                    });
+                });
+
+                // Score each unique name based on consensus words and length
+                const uniqueNames = Array.from(new Set(validNames));
+                let best = uniqueNames[0];
+                let maxScore = -1;
+
+                uniqueNames.forEach(name => {
+                    const words = name.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(w => w.length > 1);
+                    if (words.length === 0) return;
+                    
+                    let score = words.reduce((acc, word) => acc + (wordFreq.get(word) || 0), 0);
+                    
+                    // Normalize by word count to favor pure consensus names over those with extra non-consensus words
+                    score = score / words.length;
+
+                    // Length penalty to avoid verbose 'more info' messages
+                    if (name.length > 80) {
+                        score *= 0.05;
+                    } else if (name.length > 60) {
+                        score *= 0.2;
+                    } else if (name.length > 45) {
+                        score *= 0.6;
+                    }
+
+                    // Tie-breaker: favor shorter names if scores are very close
+                    if (score > maxScore || (Math.abs(score - maxScore) < 0.01 && name.length < best.length)) {
+                        maxScore = score;
+                        best = name;
+                    }
+                });
+
+                return best;
+            };
+
+            const getBestName_backup = (names: string[]): string => {
+                if (names.length === 0) return 'Clinical Site';
+                const validNames = names.filter(n => !isGeneric(n));
+                if (validNames.length === 0) return names[0] || 'Clinical Site';
+
+                const IDEAL_MIN = 25;
+                const IDEAL_MAX = 40;
+
+                return [...validNames].sort((a, b) => {
+                    const getDist = (s: string) => {
+                        if (s.length >= IDEAL_MIN && s.length <= IDEAL_MAX) return 0;
+                        return Math.min(Math.abs(s.length - IDEAL_MIN), Math.abs(s.length - IDEAL_MAX));
+                    };
+                    return getDist(a) - getDist(b);
                 })[0];
             };
 
-            const siteGroups = new Map<string, { names: Set<string>, count: number, coords: [number, number] | null, locationStr: string }>();
+            const siteGroups = new Map<string, { names: string[], count: number, coords: [number, number] | null, locationStr: string }>();
 
             plotData.forEach(trial => {
                 trial.geoLocations.forEach(loc => {
@@ -342,13 +397,13 @@ export class TrialWorkflowService {
                     const key = geoKey || loc.facility.toLowerCase().trim();
 
                     const group = siteGroups.get(key) || { 
-                        names: new Set<string>(), 
+                        names: [] as string[], 
                         count: 0, 
                         coords: (lat && lon) ? [lat, lon] : null,
                         locationStr: `${loc.city || ''}${loc.city && loc.country ? ', ' : ''}${loc.country || ''}`
                     };
                     
-                    group.names.add(loc.facility);
+                    group.names.push(loc.facility);
                     group.count++;
                     siteGroups.set(key, group);
                 });
@@ -373,11 +428,16 @@ export class TrialWorkflowService {
                 }).filter((loc): loc is HeatPoint => !!loc)
             );
 
-            const siteEntries = Array.from(siteGroups.entries()).map(([key, group]) => ({
-                name: bestNames.get(key)!,
-                count: group.count,
-                coords: group.coords
-            }));
+            const siteEntries = Array.from(siteGroups.entries()).map(([key, group]) => {
+                const baseName = bestNames.get(key)!;
+                const locStr = group.locationStr;
+                const fullName = (locStr && !baseName.includes(locStr)) ? `${baseName} (${locStr})` : baseName;
+                return {
+                    name: fullName,
+                    count: group.count,
+                    coords: group.coords
+                };
+            });
 
             const top12 = siteEntries
                 .filter(s => s.count > 1)
