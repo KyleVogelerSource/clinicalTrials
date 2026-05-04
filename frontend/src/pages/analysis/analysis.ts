@@ -83,7 +83,7 @@ export const metricDescriptions: Record<string, string> = {
     "Max Age": "The maximum allowed age of participants.",
     "Intervention Count": "Number of unique drugs, devices, or procedures being tested.",
     "Collaborator Count": "Number of organizations partnering with the lead sponsor.",
-    "Timeline Slippage": "Difference between planned and actual completion duration in days.",
+    "Duration (Days)": "Total duration between trial start and primary completion in days.",
     "Masking Intensity": "Number of groups (Participants, Providers, etc.) blinded from study assignments.",
     "Condition Count": "Number of diseases or conditions being addressed in the protocol.",
     "Arm Count": "The number of arms or interventions in the study design."
@@ -153,7 +153,7 @@ export class Analysis implements OnInit {
                 this.matrixThresholds.set({
                     highEnrollment: this.calculateMedian(trials.map(t => t.totalEnrollment)),
                     multiSite: this.calculateMedian(trials.map(t => t.siteCount)),
-                    longDuration: this.calculateMedian(trials.map(t => t.timelineSlippage)),
+                    longDuration: this.calculateMedian(trials.map(t => t.duration)),
                     manyArms: this.calculateMedian(trials.map(t => t.armCount)),
                     strictInclusions: this.calculateMedian(trials.map(t => t.inclusionStrictness)),
                     manyInterventions: this.calculateMedian(trials.map(t => t.interventionCount)),
@@ -251,6 +251,7 @@ export class Analysis implements OnInit {
     metricNamesList = metricNames;
 
     readonly designInputs = [
+        "Total Enrollment",
         "Site Count",
         "Inclusion Strictness",
         "Exclusion Strictness",
@@ -268,7 +269,7 @@ export class Analysis implements OnInit {
     readonly performanceOutputs = [
         "Recruitment Velocity",
         "Site Efficiency",
-        "Timeline Slippage",
+        "Duration (Days)",
         "Total Enrollment"
     ];
 
@@ -307,7 +308,8 @@ export class Analysis implements OnInit {
             "Age Span|Min Age", "Min Age|Age Span",
             "Max Age|Min Age", "Min Age|Max Age",
             "Total Enrollment|Site Efficiency", "Site Efficiency|Total Enrollment",
-            "Site Count|Site Efficiency", "Site Efficiency|Site Count"
+            "Site Count|Site Efficiency", "Site Efficiency|Site Count",
+            "Total Enrollment|Total Enrollment"
         ]);
 
         const calculateR = (pts: {x: number, y: number}[]) => {
@@ -586,7 +588,7 @@ export class Analysis implements OnInit {
         const rowFactors = [
             { name: `Enrollment ${ops.highEnrollment} ${thresh.highEnrollment}`, check: (t: MetricRow) => check(t.totalEnrollment, thresh.highEnrollment, ops.highEnrollment) },
             { name: `Site Count ${ops.multiSite} ${thresh.multiSite}`, check: (t: MetricRow) => check(t.siteCount, thresh.multiSite, ops.multiSite) },
-            { name: `Duration ${ops.longDuration} ${thresh.longDuration}d`, check: (t: MetricRow) => check(t.timelineSlippage, thresh.longDuration, ops.longDuration) },
+            { name: `Duration ${ops.longDuration} ${thresh.longDuration}d`, check: (t: MetricRow) => check(t.duration, thresh.longDuration, ops.longDuration) },
             { name: `Arm Count ${ops.manyArms} ${thresh.manyArms}`, check: (t: MetricRow) => check(t.armCount, thresh.manyArms, ops.manyArms) }
         ];
 
