@@ -163,7 +163,7 @@ describe('TrialWorkflowService', () => {
       totalTrialsFound: 1,
       queryCondition: 'Type 2 Diabetes',
       terminationReasons: [],
-      avgRecruitmentDays: 100,
+      estimatedDurationDays: 100,
       participantTarget: 200,
       recruitmentByImpact: [],
       timelineBuckets: [],
@@ -198,6 +198,73 @@ describe('TrialWorkflowService', () => {
       conditionCount: 1,
     }));
     expect(service.results().trialResults?.overallScore).toBe(77);
+  });
+
+  it('selects the best site name using consensus and length penalty', () => {
+    // Two trials with sites at the exact same coordinates but different names
+    const study1 = {
+      ...study,
+      protocolSection: {
+        ...study.protocolSection,
+        identificationModule: { nctId: 'NCT_SITE_1', briefTitle: 'Trial 1' },
+        contactsLocationsModule: {
+          locations: [
+            {
+              facility: 'Boston Medical Center',
+              city: 'Boston',
+              country: 'USA',
+              geoPoint: { lat: 42.36, lon: -71.05 },
+            },
+          ],
+        },
+      }
+    } as any;
+
+    const study2 = {
+      ...study,
+      protocolSection: {
+        ...study.protocolSection,
+        identificationModule: { nctId: 'NCT_SITE_2', briefTitle: 'Trial 2' },
+        contactsLocationsModule: {
+          locations: [
+            {
+              facility: 'BMC Health System - For more information about our clinical trials program please visit our website at bmc.org/research',
+              city: 'Boston',
+              country: 'USA',
+              geoPoint: { lat: 42.36, lon: -71.05 },
+            },
+            {
+              facility: 'Boston Medical Center Research',
+              city: 'Boston',
+              country: 'USA',
+              geoPoint: { lat: 42.36, lon: -71.05 },
+            }
+          ],
+        },
+      }
+    } as any;
+
+    clinicalStudyService.searchStudies.mockReturnValue(of({
+      totalCount: 2,
+      studies: [study1, study2],
+    }));
+    resultsApiService.getResults.mockReturnValue(of({}));
+    
+    service.setInputs(designModel);
+    service.searchTrials();
+    service.selectedTrialIds.set(['NCT_SITE_1', 'NCT_SITE_2']);
+
+    service.processResults();
+
+    const siteLocations = service.results().siteLocations;
+    // Both trials point to the same 42.36, -71.05 coordinate
+    // Names available: "Boston Medical Center", "BMC Health System - For more information...", "Boston Medical Center Research"
+    // "Boston Medical Center" and "Boston Medical Center Research" share words "Boston", "Medical", "Center".
+    // "Boston Medical Center" should win due to consensus and better length than the verbose one.
+    
+    const bmcLocation = siteLocations.find(l => l.latitude === 42.36 && l.longitude === -71.05);
+    expect(bmcLocation?.label).toBe('Boston Medical Center');
+    expect(bmcLocation?.label).not.toContain('For more information');
   });
 
   it('returns undefined from createResultsRequest when no input exists', () => {
