@@ -238,10 +238,11 @@ export class TrialWorkflowService {
                         if (current.trialResults) {
                             aiResults.timelineBuckets = current.trialResults.timelineBuckets;
                             aiResults.recruitmentByImpact = current.trialResults.recruitmentByImpact;
-                            aiResults.avgRecruitmentDays = current.trialResults.avgRecruitmentDays;
+                            aiResults.estimatedDurationDays = current.trialResults.estimatedDurationDays;
                             aiResults.participantTarget = current.trialResults.participantTarget;
                             aiResults.timelineRange = current.trialResults.timelineRange;
                             aiResults.siblingCount = current.trialResults.siblingCount;
+                            aiResults.avgRecruitmentVelocity = (current.trialResults as any).avgRecruitmentVelocity;
                         }
                         current.trialResults = aiResults;
                         return { ...current };
@@ -549,16 +550,16 @@ export class TrialWorkflowService {
                 overallSummary: current.trialResults?.overallSummary ?? 'Generating detailed analysis...',
                 totalTrialsFound: trials.length,
                 queryCondition: this.inputParams()?.condition ?? 'Selected Trials',
-                avgRecruitmentDays: estDays, 
+                estimatedDurationDays: estDays, 
                 participantTarget: targetEnrollment,
                 recruitmentByImpact,
                 timelineBuckets,
                 terminationReasons: newResults.terminationReasons,
                 generatedAt: current.trialResults?.generatedAt ?? new Date().toISOString(),
                 timelineRange: maxDays > 0 ? `${minDays} - ${maxDays}` : undefined,
-                siblingCount
+                siblingCount,
+                avgRecruitmentVelocity: finalVelocity
             } as any;
-
             return newResults;
         });
     }

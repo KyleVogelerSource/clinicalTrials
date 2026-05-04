@@ -52,7 +52,7 @@ describe("generateAIResults", () => {
         content: [
           {
             type: "text",
-            text: '```json\n{"overallScore":88,"totalTrialsFound":1,"queryCondition":"Type 2 Diabetes","terminationReasons":[],"avgRecruitmentDays":120,"participantTarget":120,"recruitmentByImpact":[],"timelineBuckets":[],"generatedAt":"2026-04-17T00:00:00.000Z"}\n```',
+            text: '```json\n{"overallScore":88,"totalTrialsFound":1,"queryCondition":"Type 2 Diabetes","terminationReasons":[],"estimatedDurationDays":120,"participantTarget":120,"recruitmentByImpact":[],"timelineBuckets":[],"generatedAt":"2026-04-17T00:00:00.000Z"}\n```',
           },
         ],
       }),
