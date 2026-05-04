@@ -77,6 +77,7 @@ describe('designer-criteria-file.service', () => {
       userArms: null,
       inclusionCriteria: [],
       exclusionCriteria: [],
+      selectedTrialIds: [],
     });
   });
 
@@ -105,6 +106,7 @@ describe('designer-criteria-file.service', () => {
       userArms: null,
       inclusionCriteria: [],
       exclusionCriteria: [],
+      selectedTrialIds: [],
     });
   });
 });

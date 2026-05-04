@@ -456,16 +456,18 @@ export class Dashboard implements OnInit {
                     // 2. Otherwise (fresh search with no prior state), auto-select all results.
                     
                     const savedParams = this.workflowService.inputParams();
-                    if (savedParams?.selectedTrialIds) {
-                        // We have explicit selections (even if empty!), use them.
+                    const isReturning = savedParams?.condition === this.searchForm.value.condition;
+
+                    if (isReturning && savedParams?.selectedTrialIds && savedParams.selectedTrialIds.length > 0) {
+                        // We are returning to the same condition and have existing selections: use them.
                         const pruned = savedParams.selectedTrialIds.filter(id => foundIds.has(id));
                         this.selectedTrialIds.set(pruned);
-                    } else if (this.selectedTrialIds().length === 0) {
-                        // Truly fresh search: auto-select all
+                    } else if (this.selectedTrialIds().length === 0 || !isReturning) {
+                        // Fresh search or no existing selections: auto-select all
                         const allIds = trials.map(t => t.nctId);
                         this.selectedTrialIds.set(allIds);
                     } else {
-                        // Filter update while already on the dashboard
+                        // Filter update while already on the dashboard for the same condition
                         this.selectedTrialIds.update(current => current.filter(id => foundIds.has(id)));
                     }
                 }
