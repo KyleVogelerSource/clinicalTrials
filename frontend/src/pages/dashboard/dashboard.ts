@@ -22,10 +22,7 @@ import {
 import { LoadingIndicator } from "../../primitives/loading-indicator/loading-indicator";
 import { AutoCompleteInput } from "../../primitives/auto-complete-input/auto-complete-input";
 import { MultiSelect, MultiSelectOption } from "../../primitives/multi-select/multi-select";
-import { KeywordSelector } from "../../primitives/keyword-selector/keyword-selector";
 import { Tooltip } from "../../primitives/tooltip/tooltip";
-import { StudyTrial } from "../../models/study-trial";
-import { ClinicalTrialSearchRequest } from "@shared/dto/ClinicalTrialSearchRequest";
 import { PermissionService } from "../../services/permission.service";
 import { ACTION_NAMES } from "@shared/auth/action-names";
 import { parseDesignerCriteriaFile } from "../../services/designer-criteria-file.service";
@@ -43,7 +40,6 @@ import { LoadingService } from "../../services/loading.service";
         LoadingIndicator,
         AutoCompleteInput,
         MultiSelect,
-        KeywordSelector,
         Tooltip,
         DecimalPipe,
         DatePipe

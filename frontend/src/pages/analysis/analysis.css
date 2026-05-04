@@ -1046,6 +1046,13 @@ input:checked + .slider:before {
     align-items: baseline;
 }
 
+.benchmark-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    color: #193F6A;
+}
+
 .benchmark-label {
     font-size: 0.85rem;
     font-weight: 700;
@@ -1071,9 +1078,9 @@ input:checked + .slider:before {
 }
 
 .delta-row {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     font-weight: 500;
-    color: #64748b;
+    color: #088989;
     margin-top: 1px;
 }
 
