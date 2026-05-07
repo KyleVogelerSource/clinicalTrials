@@ -29,7 +29,7 @@ export class MetricRow {
     totalEnrollment: number = 0;
     siteCount: number = 0;
     recruitmentVelocity: number = 0;
-    inclusionStrictness: number = 0; // aka Eligibility criteria count
+    inclusionStrictness: number = 0; // Count of inclusion criteria items
     exclusionStrictness: number = 0;
     siteEfficiency: number = 0;
     outcomeDensity: number = 0;

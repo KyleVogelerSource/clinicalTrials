@@ -243,6 +243,13 @@ export class TrialWorkflowService {
                             aiResults.timelineRange = current.trialResults.timelineRange;
                             aiResults.siblingCount = current.trialResults.siblingCount;
                             aiResults.avgRecruitmentVelocity = (current.trialResults as any).avgRecruitmentVelocity;
+
+                            // Preserve all local benchmark targets
+                            aiResults.siteCountTarget = current.trialResults.siteCountTarget;
+                            aiResults.inclusionTarget = current.trialResults.inclusionTarget;
+                            aiResults.exclusionTarget = current.trialResults.exclusionTarget;
+                            aiResults.outcomeTarget = current.trialResults.outcomeTarget;
+                            aiResults.armTarget = current.trialResults.armTarget;
                         }
                         current.trialResults = aiResults;
                         return { ...current };
@@ -518,12 +525,49 @@ export class TrialWorkflowService {
                     siblings = validTrials;
                 }
                 siblingCount = siblings.length;
-                const velocities = siblings.map(s => s.recruitmentVelocity);
-                const sum = velocities.reduce((a, b) => a + b, 0);
-                adjustedVelocity = sum / siblings.length;
+
+                // Identify Active Secondary Inputs for Weighting
+                const activeInputs: { key: keyof MetricRow, userVal: number }[] = [];
+                if ((design?.userSites ?? 0) > 0) activeInputs.push({ key: 'siteCount', userVal: design!.userSites! });
+                if ((design?.userInclusions ?? 0) > 0) activeInputs.push({ key: 'inclusionStrictness', userVal: design!.userInclusions! });
+                if ((design?.userExclusions ?? 0) > 0) activeInputs.push({ key: 'exclusionStrictness', userVal: design!.userExclusions! });
+                if ((design?.userOutcomes ?? 0) > 0) activeInputs.push({ key: 'outcomeDensity', userVal: design!.userOutcomes! });
+                if ((design?.userArms ?? 0) > 0) activeInputs.push({ key: 'armCount', userVal: design!.userArms! });
+
+                // Calculate Weights and Weighted Velocity
+                let totalWeightedVelocity = 0;
+                let totalWeight = 0;
+
+                siblings.forEach(trial => {
+                    let trialWeight = 1.0;
+
+                    if (activeInputs.length > 0) {
+                        let metricWeightSum = 0;
+                        activeInputs.forEach(input => {
+                            const trialVal = (trial as any)[input.key] as number;
+                            // Calculate percentage difference, capped at 1.0 (100% off)
+                            // We use the user's value as the baseline for "relevance"
+                            const percentDiff = Math.min(1.0, Math.abs(trialVal - input.userVal) / input.userVal);
+                            // Convert difference to a similarity score (1.0 = exact match, 0.0 = completely different)
+                            metricWeightSum += (1.0 - percentDiff);
+                        });
+                        
+                        const avgMetricWeight = metricWeightSum / activeInputs.length;
+                        
+                        // Apply soft floor (0.2) so vastly different trials still contribute slightly to stability
+                        trialWeight = Math.max(0.2, avgMetricWeight);
+                    }
+
+                    totalWeightedVelocity += (trial.recruitmentVelocity * trialWeight);
+                    totalWeight += trialWeight;
+                });
+
+                // Final weighted average velocity
+                adjustedVelocity = totalWeight > 0 ? (totalWeightedVelocity / totalWeight) : 0;
+
                 if (siblings.length > 1) {
                     const avg = adjustedVelocity;
-                    const squareDiffs = velocities.map(v => Math.pow(v - avg, 2));
+                    const squareDiffs = siblings.map(v => Math.pow(v.recruitmentVelocity - avg, 2));
                     const avgSquareDiff = squareDiffs.reduce((a, b) => a + b, 0) / squareDiffs.length;
                     velocityStdDev = Math.sqrt(avgSquareDiff);
                 }
@@ -595,7 +639,6 @@ export class TrialWorkflowService {
 
             newResults.trialResults = {
                 ...current.trialResults,
-                rankedTrials: [], // Clear ranked trials until fresh AI results arrive
                 timestamp: new Date(),
                 overallScore: current.trialResults?.overallScore ?? 0,
                 overallSummary: current.trialResults?.overallSummary ?? 'Generating detailed analysis...',
@@ -603,6 +646,14 @@ export class TrialWorkflowService {
                 queryCondition: this.inputParams()?.condition ?? 'Selected Trials',
                 estimatedDurationDays: estDays, 
                 participantTarget: targetEnrollment,
+
+                // Track the proposed values used for this analysis run
+                siteCountTarget: design?.userSites ?? 0,
+                inclusionTarget: design?.userInclusions ?? 0,
+                exclusionTarget: design?.userExclusions ?? 0,
+                outcomeTarget: design?.userOutcomes ?? 0,
+                armTarget: design?.userArms ?? 0,
+
                 recruitmentByImpact,
                 timelineBuckets,
                 terminationReasons: newResults.terminationReasons,
