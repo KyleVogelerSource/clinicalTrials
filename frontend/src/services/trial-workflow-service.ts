@@ -243,6 +243,13 @@ export class TrialWorkflowService {
                             aiResults.timelineRange = current.trialResults.timelineRange;
                             aiResults.siblingCount = current.trialResults.siblingCount;
                             aiResults.avgRecruitmentVelocity = (current.trialResults as any).avgRecruitmentVelocity;
+
+                            // Preserve all local benchmark targets
+                            aiResults.siteCountTarget = current.trialResults.siteCountTarget;
+                            aiResults.inclusionTarget = current.trialResults.inclusionTarget;
+                            aiResults.exclusionTarget = current.trialResults.exclusionTarget;
+                            aiResults.outcomeTarget = current.trialResults.outcomeTarget;
+                            aiResults.armTarget = current.trialResults.armTarget;
                         }
                         current.trialResults = aiResults;
                         return { ...current };
@@ -632,7 +639,6 @@ export class TrialWorkflowService {
 
             newResults.trialResults = {
                 ...current.trialResults,
-                rankedTrials: [], // Clear ranked trials until fresh AI results arrive
                 timestamp: new Date(),
                 overallScore: current.trialResults?.overallScore ?? 0,
                 overallSummary: current.trialResults?.overallSummary ?? 'Generating detailed analysis...',
