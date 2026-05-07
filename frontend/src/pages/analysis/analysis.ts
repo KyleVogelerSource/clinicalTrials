@@ -346,6 +346,7 @@ export class Analysis implements OnInit {
             "Max Age|Min Age", "Min Age|Max Age",
             "Total Enrollment|Site Efficiency", "Site Efficiency|Total Enrollment",
             "Site Count|Site Efficiency", "Site Efficiency|Site Count",
+            "Total Enrollment|Recruitment Velocity", "Recruitment Velocity|Total Enrollment",
             "Total Enrollment|Total Enrollment"
         ]);
 
