@@ -640,6 +640,14 @@ export class TrialWorkflowService {
                 queryCondition: this.inputParams()?.condition ?? 'Selected Trials',
                 estimatedDurationDays: estDays, 
                 participantTarget: targetEnrollment,
+
+                // Track the proposed values used for this analysis run
+                siteCountTarget: design?.userSites ?? 0,
+                inclusionTarget: design?.userInclusions ?? 0,
+                exclusionTarget: design?.userExclusions ?? 0,
+                outcomeTarget: design?.userOutcomes ?? 0,
+                armTarget: design?.userArms ?? 0,
+
                 recruitmentByImpact,
                 timelineBuckets,
                 terminationReasons: newResults.terminationReasons,
