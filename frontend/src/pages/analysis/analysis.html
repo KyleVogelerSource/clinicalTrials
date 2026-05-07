@@ -99,7 +99,7 @@
                                             <div class="proposed-row">
                                                 <label class="input-label">Proposed:</label>
                                                 <input type="number" 
-                                                    [class.modified-input]="b.paramKey === 'userPatients' && isPatientModified()"
+                                                    [class.modified-input]="isMetricModified(b.paramKey)"
                                                     [value]="b.userVal" 
                                                     (change)="onUpdateBenchmark(b.paramKey, $any($event.target).value)"
                                                     min="0"
@@ -382,7 +382,7 @@
                             <div class="control-column">
                                 <h5>Column Thresholds</h5>
                                 <div class="matrix-input-group">
-                                    <label title="Word count of inclusion criteria complexity">Inclusions</label>
+                                    <label title="Count of inclusion criteria items">Inclusions</label>
                                     <div class="input-with-operator">
                                         <button class="op-toggle" (click)="toggleMatrixOperator('strictInclusions')">{{ matrixThresholds().operators['strictInclusions'] }}</button>
                                         <input type="number" min="0" [value]="matrixThresholds().strictInclusions" (input)="onUpdateMatrixThreshold('strictInclusions', $any($event.target).value)">

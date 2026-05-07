@@ -30,6 +30,14 @@ export interface TrialResultsResponse {
     queryCondition: string | null;
     estimatedDurationDays: number;
     participantTarget: number;
+    
+    // Proposed values used for the last local analysis run
+    siteCountTarget?: number;
+    inclusionTarget?: number;
+    exclusionTarget?: number;
+    outcomeTarget?: number;
+    armTarget?: number;
+
     avgRecruitmentVelocity?: number;
     recruitmentByImpact: RecruitmentImpactBar[];
     timelineBuckets: TimelineBar[];

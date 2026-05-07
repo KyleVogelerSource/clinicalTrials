@@ -74,8 +74,8 @@ export const metricDescriptions: Record<string, string> = {
     "Total Enrollment": "The total number of participants planned for the study.",
     "Site Count": "The number of clinical site facilities participating in the trial.",
     "Recruitment Velocity": "The speed of enrollment measured in participants per day.",
-    "Inclusion Strictness": "Word count of inclusion criteria; higher numbers imply more complex enrollment.",
-    "Exclusion Strictness": "Word count of exclusion criteria; higher numbers imply more restrictive disqualifiers.",
+    "Inclusion Strictness": "Count of inclusion criteria items.",
+    "Exclusion Strictness": "Count of exclusion criteria items.",
     "Site Efficiency": "Ratio of total enrollment to site count (participants per site).",
     "Outcome Density": "Total count of primary and secondary outcome measures.",
     "Age Span": "The difference between maximum and minimum eligibility age.",
@@ -346,6 +346,7 @@ export class Analysis implements OnInit {
             "Max Age|Min Age", "Min Age|Max Age",
             "Total Enrollment|Site Efficiency", "Site Efficiency|Total Enrollment",
             "Site Count|Site Efficiency", "Site Efficiency|Site Count",
+            "Total Enrollment|Recruitment Velocity", "Recruitment Velocity|Total Enrollment",
             "Total Enrollment|Total Enrollment"
         ]);
 
@@ -998,18 +999,37 @@ export class Analysis implements OnInit {
                 [paramKey]: val
             });
             
-            // If we updated patients, we only need local re-analysis
-            if (paramKey === 'userPatients') {
-                this.workflowService.processResultsV2(true);
-            }
+            // Trigger local re-analysis for any benchmark update to ensure
+            // the weighted recruitment velocity and estimated duration stay in sync.
+            this.workflowService.processResultsV2(true);
         }
     }
 
-    isPatientModified = computed(() => {
-        const current = this.inputParams()?.userPatients;
-        const results = this.data()?.participantTarget;
-        return current !== undefined && results !== undefined && current !== results;
-    });
+    isMetricModified(paramKey: string): boolean {
+        const current = (this.inputParams() as any)?.[paramKey];
+        const data = this.data();
+        if (!data) return false;
+
+        if (paramKey === 'userPatients') {
+            return current !== undefined && data.participantTarget !== undefined && current !== data.participantTarget;
+        }
+        if (paramKey === 'userSites') {
+            return current !== undefined && data.siteCountTarget !== undefined && current !== data.siteCountTarget;
+        }
+        if (paramKey === 'userInclusions') {
+            return current !== undefined && data.inclusionTarget !== undefined && current !== data.inclusionTarget;
+        }
+        if (paramKey === 'userExclusions') {
+            return current !== undefined && data.exclusionTarget !== undefined && current !== data.exclusionTarget;
+        }
+        if (paramKey === 'userOutcomes') {
+            return current !== undefined && data.outcomeTarget !== undefined && current !== data.outcomeTarget;
+        }
+        if (paramKey === 'userArms') {
+            return current !== undefined && data.armTarget !== undefined && current !== data.armTarget;
+        }
+        return false;
+    }
 
     onFocusSite(coords: [number, number] | null) {
         if (coords) {
