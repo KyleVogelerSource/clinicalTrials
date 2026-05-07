@@ -99,7 +99,7 @@
                                             <div class="proposed-row">
                                                 <label class="input-label">Proposed:</label>
                                                 <input type="number" 
-                                                    [class.modified-input]="b.paramKey === 'userPatients' && isPatientModified()"
+                                                    [class.modified-input]="isMetricModified(b.paramKey)"
                                                     [value]="b.userVal" 
                                                     (change)="onUpdateBenchmark(b.paramKey, $any($event.target).value)"
                                                     min="0"

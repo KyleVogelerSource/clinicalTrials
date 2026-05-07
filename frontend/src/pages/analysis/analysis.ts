@@ -999,18 +999,37 @@ export class Analysis implements OnInit {
                 [paramKey]: val
             });
             
-            // If we updated patients, we only need local re-analysis
-            if (paramKey === 'userPatients') {
-                this.workflowService.processResultsV2(true);
-            }
+            // Trigger local re-analysis for any benchmark update to ensure
+            // the weighted recruitment velocity and estimated duration stay in sync.
+            this.workflowService.processResultsV2(true);
         }
     }
 
-    isPatientModified = computed(() => {
-        const current = this.inputParams()?.userPatients;
-        const results = this.data()?.participantTarget;
-        return current !== undefined && results !== undefined && current !== results;
-    });
+    isMetricModified(paramKey: string): boolean {
+        const current = (this.inputParams() as any)?.[paramKey];
+        const data = this.data();
+        if (!data) return false;
+
+        if (paramKey === 'userPatients') {
+            return current !== undefined && data.participantTarget !== undefined && current !== data.participantTarget;
+        }
+        if (paramKey === 'userSites') {
+            return current !== undefined && data.siteCountTarget !== undefined && current !== data.siteCountTarget;
+        }
+        if (paramKey === 'userInclusions') {
+            return current !== undefined && data.inclusionTarget !== undefined && current !== data.inclusionTarget;
+        }
+        if (paramKey === 'userExclusions') {
+            return current !== undefined && data.exclusionTarget !== undefined && current !== data.exclusionTarget;
+        }
+        if (paramKey === 'userOutcomes') {
+            return current !== undefined && data.outcomeTarget !== undefined && current !== data.outcomeTarget;
+        }
+        if (paramKey === 'userArms') {
+            return current !== undefined && data.armTarget !== undefined && current !== data.armTarget;
+        }
+        return false;
+    }
 
     onFocusSite(coords: [number, number] | null) {
         if (coords) {
