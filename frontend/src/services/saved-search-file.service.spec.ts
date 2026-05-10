@@ -65,8 +65,49 @@ describe('saved-search-file.service', () => {
     ]);
   });
 
+  it('builds imported designer search names from condition only or fallback', () => {
+    expect(parseSavedSearchesImportJson(JSON.stringify({
+      format: 'clinicaltrials-designer-criteria',
+      criteria: { condition: '  Asthma  ' },
+    }))[0].name).toBe('Asthma');
+
+    expect(parseSavedSearchesImportJson(JSON.stringify({
+      format: 'clinicaltrials-designer-criteria',
+      criteria: { sponsor: 'NIH' },
+    }))[0].name).toBe('Imported Search');
+  });
+
+  it('parses bare saved-search arrays and stringifies descriptions', () => {
+    expect(parseSavedSearchesImportJson(JSON.stringify([
+      {
+        name: 'Bare Import',
+        description: 123,
+        visibility: 'shared',
+        criteriaJson: { condition: 'Asthma' },
+      },
+    ]))).toEqual([
+      {
+        name: 'Bare Import',
+        description: '123',
+        visibility: 'shared',
+        criteriaJson: { condition: 'Asthma' },
+      },
+    ]);
+  });
+
   it('rejects invalid saved-search import files', () => {
     expect(() => parseSavedSearchesImportJson(JSON.stringify({ searches: [] })))
       .toThrow('Saved search import requires a non-empty searches array.');
+  });
+
+  it('rejects malformed designer criteria and incomplete saved searches', () => {
+    expect(() => parseSavedSearchesImportJson(JSON.stringify({
+      format: 'clinicaltrials-designer-criteria',
+      criteria: null,
+    }))).toThrow('Designer criteria import requires a criteria object.');
+
+    expect(() => parseSavedSearchesImportJson(JSON.stringify({
+      searches: [{ name: 'Missing Criteria', visibility: 'private' }],
+    }))).toThrow('Each imported saved search must include name, criteriaJson, and visibility.');
   });
 });
