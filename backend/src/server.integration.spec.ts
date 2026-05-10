@@ -89,6 +89,20 @@ describe("Server functional API tests", () => {
     expect((res.body as Record<string, unknown>).error).toBe("Bad Gateway");
   });
 
+  it("maps unexpected search errors to 500", async () => {
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    searchClinicalTrialsMock.mockRejectedValueOnce(new Error("unexpected"));
+
+    const res = await invokeExpressApp(app, {
+      method: "POST",
+      url: "/api/clinical-trials/search",
+      body: { term: "oncology" },
+    });
+
+    expect(res.status).toBe(500);
+    expect(consoleErrorSpy).toHaveBeenCalledWith("Unexpected error in POST /api/clinical-trials/search:", expect.any(Error));
+  });
+
   it("returns clinical trials payload on success", async () => {
     searchClinicalTrialsMock.mockResolvedValueOnce({
       totalCount: 1,

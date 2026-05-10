@@ -42,6 +42,28 @@ describe('ClinicalStudyService', () => {
     expect(results).toEqual([]);
   });
 
+  it('should return empty condition matches for null or empty input', () => {
+    expect(service.getMatchingConditions(null)).toEqual([]);
+    expect(service.getMatchingConditions('')).toEqual([]);
+  });
+
+  it('should return matching conditions for valid condition input', () => {
+    const results = service.getMatchingConditions('Diabetes');
+    expect(results.length).toBeGreaterThan(0);
+    expect(results.some((result) => result.toLowerCase().includes('diabetes'))).toBe(true);
+  });
+
+  it('should expose static trial design option lists and defaults', () => {
+    expect(service.getInterventionModels().length).toBeGreaterThan(0);
+    expect(service.getMaskingTypes()).toContain(service.getDefaultMaskingType());
+    expect(service.getMaskingRoles().length).toBeGreaterThan(0);
+    expect(service.getPrimaryPurposes().length).toBeGreaterThan(0);
+    expect(service.getAllocations()).toContain(service.getDefaultAllocation());
+    expect(service.getEnrollmentTypes().length).toBeGreaterThan(0);
+    expect(service.getPhases()).toContain(service.getDefaultPhase());
+    expect(service.getSexes()).toContain(service.getDefaultSex());
+  });
+
   it('should return max 10 results', () => {
     const results = service.getSuggestedKeywords('a');
     expect(results.length).toBeLessThanOrEqual(10);
@@ -89,5 +111,16 @@ describe('ClinicalStudyService', () => {
 
     expect(result.studies.length).toBe(maxPages);
     expect(mockHttpClient.post).toHaveBeenCalledTimes(maxPages);
+  });
+
+  it('should return bundled mock trials for local workflows', () => {
+    const trials = service.getMockTrials();
+
+    expect(trials.length).toBeGreaterThan(10);
+    expect(trials[0]).toEqual(expect.objectContaining({
+      nctId: 'NCT00000001',
+      conditions: expect.arrayContaining(['Type 2 Diabetes']),
+      sites: expect.any(Array),
+    }));
   });
 });
