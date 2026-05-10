@@ -18,9 +18,9 @@ export function buildCandidatePool(studies: ClinicalTrialStudy[], totalPagesFetc
     const valid: ClinicalTrialStudy[] = [];
 
     for (const study of studies) {
-        const reason = getFilterReason(study, ref, config);
+        const reason = getFilterReason(study, ref);
         if (reason) {
-            filtered.push(buildFilteredRecord(study, reason, ref, config));
+            filtered.push(buildFilteredRecord(study, reason, ref));
         } else {
             valid.push(study);
         }
@@ -56,7 +56,7 @@ export function buildCandidatePool(studies: ClinicalTrialStudy[], totalPagesFetc
     return { trials, metadata };
 }
 
-function getFilterReason(study: ClinicalTrialStudy, ref?: ReferenceTrial, config: PoolBuilderConfig = {}): FilterReason | null {
+function getFilterReason(study: ClinicalTrialStudy, ref?: ReferenceTrial): FilterReason | null {
     const p = study.protocolSection;
 
     const phases = p.designModule?.phases;
@@ -105,7 +105,7 @@ function isSexCompatible(referenceSex: string, studySex: string): boolean {
     return referenceSex === studySex;
 }
 
-function buildFilteredRecord(study: ClinicalTrialStudy, reason: FilterReason, ref?: ReferenceTrial, config: PoolBuilderConfig = {}): FilteredRecord {
+function buildFilteredRecord(study: ClinicalTrialStudy, reason: FilterReason, ref?: ReferenceTrial): FilteredRecord {
     const id = study.protocolSection.identificationModule;
 
     const detailMap: Partial<Record<FilterReason, string>> = {
@@ -147,4 +147,3 @@ function compareDates(a: string | null, b: string | null): number {
     if (!b) return -1;
     return a.localeCompare(b);
 }
-
