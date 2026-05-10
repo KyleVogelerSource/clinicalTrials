@@ -307,6 +307,44 @@ describe("CandidatePoolBuilder", () => {
       // Should have at least filtered some studies
       expect(result.metadata.totalFiltered).toBeGreaterThanOrEqual(0);
     });
+
+    it("should sort by newest start date first and then enrollment distance when dates tie", () => {
+      const older = createMockStudy("NCT_OLDER");
+      older.protocolSection.statusModule = { startDateStruct: { date: "2020-01" } } as any;
+      older.protocolSection.designModule!.enrollmentInfo = { count: 100 };
+
+      const newerFarEnrollment = createMockStudy("NCT_NEWER_FAR");
+      newerFarEnrollment.protocolSection.statusModule = { startDateStruct: { date: "2024-01" } } as any;
+      newerFarEnrollment.protocolSection.designModule!.enrollmentInfo = { count: 1000 };
+
+      const newerNearEnrollment = createMockStudy("NCT_NEWER_NEAR");
+      newerNearEnrollment.protocolSection.statusModule = { startDateStruct: { date: "2024-01" } } as any;
+      newerNearEnrollment.protocolSection.designModule!.enrollmentInfo = { count: 220 };
+
+      const result = buildCandidatePool(
+        [older, newerFarEnrollment, newerNearEnrollment],
+        1,
+        { referenceTrial: { enrollmentCount: 200 } }
+      );
+
+      expect(result.trials.map((trial) => trial.nctId)).toEqual([
+        "NCT_NEWER_NEAR",
+        "NCT_NEWER_FAR",
+        "NCT_OLDER",
+      ]);
+    });
+
+    it("documents current sort order for undated trials", () => {
+      const dated = createMockStudy("NCT_DATED");
+      dated.protocolSection.statusModule = { startDateStruct: { date: "2024-01" } } as any;
+
+      const undated = createMockStudy("NCT_UNDATED");
+      undated.protocolSection.statusModule = {} as any;
+
+      const result = buildCandidatePool([undated, dated], 1);
+
+      expect(result.trials.map((trial) => trial.nctId)).toEqual(["NCT_UNDATED", "NCT_DATED"]);
+    });
   });
 });
 

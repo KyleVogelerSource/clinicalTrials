@@ -59,4 +59,42 @@ describe("SavedSearchCriteriaNormalizer", () => {
       })
     ).toBe(JSON.stringify({ condition: "asthma" }));
   });
+
+  it("normalizes arrays by trimming, lowercasing configured fields, dropping unsupported values, and sorting", () => {
+    const normalized = normalizeSavedSearchCriteria({
+      condition: ["  Beta  ", "", "alpha", 42, false, { bad: true }] as unknown as string[],
+      selectedTrialIds: [" NCT2 ", "NCT1"],
+    });
+
+    expect(normalized).toEqual({
+      condition: ["alpha", "beta", 42, false],
+      selectedTrialIds: ["NCT1", "NCT2"],
+    });
+  });
+
+  it("keeps booleans and numbers, removes nulls and unsupported scalar values, and sorts object keys", () => {
+    const normalized = normalizeSavedSearchCriteria({
+      maxAge: null,
+      minAge: 18,
+      hasResults: true,
+      condition: " Asthma ",
+      location: { bad: true } as unknown as string,
+    });
+
+    expect(Object.keys(normalized)).toEqual(["condition", "hasResults", "minAge"]);
+    expect(normalized).toEqual({
+      condition: "asthma",
+      hasResults: true,
+      minAge: 18,
+    });
+  });
+
+  it("drops arrays that normalize to no supported values", () => {
+    expect(
+      normalizeSavedSearchCriteria({
+        selectedTrialIds: ["", "   ", { bad: true }] as unknown as string[],
+        condition: "cancer",
+      })
+    ).toEqual({ condition: "cancer" });
+  });
 });
