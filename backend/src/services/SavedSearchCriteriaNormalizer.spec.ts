@@ -4,6 +4,7 @@ import {
   normalizeSavedSearchCriteria,
   toStableCriteriaJson,
 } from "./SavedSearchCriteriaNormalizer";
+import type { ClinicalTrialSearchRequest } from "../dto/ClinicalTrialSearchRequest";
 
 describe("SavedSearchCriteriaNormalizer", () => {
   it("normalizes trimmed strings, removes empties, and sorts arrays", () => {
@@ -61,10 +62,12 @@ describe("SavedSearchCriteriaNormalizer", () => {
   });
 
   it("normalizes arrays by trimming, lowercasing configured fields, dropping unsupported values, and sorting", () => {
-    const normalized = normalizeSavedSearchCriteria({
+    const criteria = {
       condition: ["  Beta  ", "", "alpha", 42, false, { bad: true }] as unknown as string[],
       selectedTrialIds: [" NCT2 ", "NCT1"],
-    });
+    } as unknown as ClinicalTrialSearchRequest;
+
+    const normalized = normalizeSavedSearchCriteria(criteria);
 
     expect(normalized).toEqual({
       condition: ["alpha", "beta", 42, false],
@@ -73,13 +76,15 @@ describe("SavedSearchCriteriaNormalizer", () => {
   });
 
   it("keeps booleans and numbers, removes nulls and unsupported scalar values, and sorts object keys", () => {
-    const normalized = normalizeSavedSearchCriteria({
+    const criteria = {
       maxAge: null,
       minAge: 18,
       hasResults: true,
       condition: " Asthma ",
       location: { bad: true } as unknown as string,
-    });
+    } as unknown as ClinicalTrialSearchRequest;
+
+    const normalized = normalizeSavedSearchCriteria(criteria);
 
     expect(Object.keys(normalized)).toEqual(["condition", "hasResults", "minAge"]);
     expect(normalized).toEqual({
