@@ -310,15 +310,15 @@ describe("CandidatePoolBuilder", () => {
 
     it("should sort by newest start date first and then enrollment distance when dates tie", () => {
       const older = createMockStudy("NCT_OLDER");
-      older.protocolSection.statusModule = { startDateStruct: { date: "2020-01" } } as any;
+      older.protocolSection.statusModule = { startDateStruct: { date: "2020-01" } };
       older.protocolSection.designModule!.enrollmentInfo = { count: 100 };
 
       const newerFarEnrollment = createMockStudy("NCT_NEWER_FAR");
-      newerFarEnrollment.protocolSection.statusModule = { startDateStruct: { date: "2024-01" } } as any;
+      newerFarEnrollment.protocolSection.statusModule = { startDateStruct: { date: "2024-01" } };
       newerFarEnrollment.protocolSection.designModule!.enrollmentInfo = { count: 1000 };
 
       const newerNearEnrollment = createMockStudy("NCT_NEWER_NEAR");
-      newerNearEnrollment.protocolSection.statusModule = { startDateStruct: { date: "2024-01" } } as any;
+      newerNearEnrollment.protocolSection.statusModule = { startDateStruct: { date: "2024-01" } };
       newerNearEnrollment.protocolSection.designModule!.enrollmentInfo = { count: 220 };
 
       const result = buildCandidatePool(
@@ -336,10 +336,10 @@ describe("CandidatePoolBuilder", () => {
 
     it("documents current sort order for undated trials", () => {
       const dated = createMockStudy("NCT_DATED");
-      dated.protocolSection.statusModule = { startDateStruct: { date: "2024-01" } } as any;
+      dated.protocolSection.statusModule = { startDateStruct: { date: "2024-01" } };
 
       const undated = createMockStudy("NCT_UNDATED");
-      undated.protocolSection.statusModule = {} as any;
+      undated.protocolSection.statusModule = {};
 
       const result = buildCandidatePool([undated, dated], 1);
 
