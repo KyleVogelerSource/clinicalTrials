@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Express } from "express";
+import type { Express, NextFunction, Request, Response } from "express";
 import { invokeExpressApp } from "./test/expressHarness";
 
 const mocks = vi.hoisted(() => ({
@@ -90,7 +90,11 @@ describe("Server saved search and compare route integration tests", () => {
       req.user = { userId: 42, username: "alice" };
       next();
     });
-    mocks.requireAction.mockImplementation(() => (_req, _res, next) => next());
+    mocks.requireAction.mockImplementation(() => (
+      _req: Request,
+      _res: Response,
+      next: NextFunction
+    ) => next());
     mocks.userHasAction.mockResolvedValue(true);
     ({ app } = await import("./server"));
   });
