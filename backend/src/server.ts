@@ -940,6 +940,7 @@ app.delete(
   }
 );
 
+/* v8 ignore start -- process entrypoint wiring is exercised by deployment smoke tests */
 export async function bootstrap() {
   try {
     await initializeDatabase();
@@ -958,3 +959,4 @@ if (require.main === module) {
     process.exit(1);
   });
 }
+/* v8 ignore stop */

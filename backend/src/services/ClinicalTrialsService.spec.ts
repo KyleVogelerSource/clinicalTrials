@@ -288,22 +288,25 @@ describe("ClinicalTrialsService", () => {
 
     it("should stop pagination at MAX_PAGES", async () => {
       const request: ClinicalTrialSearchRequest = { term: "cancer" };
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
 
-      // Mock 11 pages worth of responses (to exceed MAX_PAGES=10)
-      for (let i = 0; i < 11; i++) {
+      for (let i = 0; i < 101; i++) {
         mockClient.searchStudies.mockResolvedValueOnce({
-          totalCount: 1100,
+          totalCount: 505,
           studies: Array.from({ length: 5 }, (_, j) =>
             createMockStudy(`NCT${String(i * 5 + j).padStart(6, "0")}`)
           ),
-          nextPageToken: i < 10 ? `token${i}` : undefined,
+          nextPageToken: `token${i}`,
         });
       }
 
       const result = await searchAndBuildCandidatePool(request, {}, client);
 
-      expect(mockClient.searchStudies).toHaveBeenCalledTimes(11);
-      expect(result.metadata.totalPagesfetched).toBeLessThanOrEqual(11);
+      expect(mockClient.searchStudies).toHaveBeenCalledTimes(100);
+      expect(result.metadata.totalPagesfetched).toBe(100);
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining("Reached MAX_PAGES (100)")
+      );
     });
   });
 });

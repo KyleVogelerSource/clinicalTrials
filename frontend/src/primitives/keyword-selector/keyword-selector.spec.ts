@@ -45,11 +45,29 @@ describe('KeywordSelector', () => {
         expect(component.suggestions()).toEqual([]);
     });
 
+    it('should clear suggestions when query is whitespace only', () => {
+        component.onSearchQueryChange('test');
+
+        component.onSearchQueryChange('   ');
+
+        expect(component.suggestions()).toEqual([]);
+    });
+
     it('should emit addKeyword when onSelectSuggestion is called', () => {
         const emitSpy = vi.spyOn(component.addKeyword, 'emit');
         component.onSelectSuggestion('new tag');
         expect(emitSpy).toHaveBeenCalledWith('new tag');
         expect(component.suggestions()).toEqual([]);
+    });
+
+    it('should trim selected suggestions and ignore blank selections', () => {
+        const emitSpy = vi.spyOn(component.addKeyword, 'emit');
+
+        component.onSelectSuggestion('  trimmed tag  ');
+        component.onSelectSuggestion('   ');
+
+        expect(emitSpy).toHaveBeenCalledTimes(1);
+        expect(emitSpy).toHaveBeenCalledWith('trimmed tag');
     });
 
     it('should emit removeKeyword when onRemove is called', () => {
@@ -64,5 +82,30 @@ describe('KeywordSelector', () => {
         
         const autoControl = fixture.debugElement.query(By.directive(AutoCompleteInput));
         expect(autoControl.componentInstance.suggestions()).toEqual(['sugar', 'salt']);
+    });
+
+    it('should render selected keyword tags and remove from tag button clicks', () => {
+        const emitSpy = vi.spyOn(component.removeKeyword, 'emit');
+        fixture.componentRef.setInput('selectedKeywords', ['diabetes', 'asthma']);
+        fixture.detectChanges();
+
+        const tags = Array.from(fixture.nativeElement.querySelectorAll('.tag') as NodeListOf<HTMLElement>);
+        expect(tags.map((tag) => tag.textContent?.trim())).toEqual(['diabetes ×', 'asthma ×']);
+
+        (tags[1].querySelector('.remove-btn') as HTMLButtonElement).click();
+
+        expect(emitSpy).toHaveBeenCalledWith('asthma');
+    });
+
+    it('should pass input configuration to the auto-complete primitive', () => {
+        fixture.componentRef.setInput('inputId', 'criteria-keywords');
+        fixture.componentRef.setInput('placeholderText', 'Add keyword');
+        fixture.componentRef.setInput('hintText', 'Press Enter');
+        fixture.detectChanges();
+
+        const autoControl = fixture.debugElement.query(By.directive(AutoCompleteInput)).componentInstance;
+        expect(autoControl.inputId()).toBe('criteria-keywords');
+        expect(autoControl.placeholderText()).toBe('Add keyword');
+        expect(autoControl.hintText()).toBe('Press Enter');
     });
 });
