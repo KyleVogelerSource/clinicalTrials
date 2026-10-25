@@ -70,6 +70,40 @@ describe('PostgresClient.initializeDatabase', () => {
     });
   });
 
+  it('does not create the built-in admin account in production without ADMIN_PASSWORD', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('ADMIN_PASSWORD', '');
+    try {
+      const { initializeDatabase } = await import('./PostgresClient');
+      await initializeDatabase();
+
+      expect(queryMock).not.toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO users (username, password_hash, first_name, last_name)'),
+        expect.anything()
+      );
+      expect(hashMock).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it('uses ADMIN_PASSWORD for the built-in admin account when set', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('ADMIN_PASSWORD', 'a-strong-password');
+    try {
+      const { initializeDatabase } = await import('./PostgresClient');
+      await initializeDatabase();
+
+      expect(hashMock).toHaveBeenCalledWith('a-strong-password', 12);
+      expect(queryMock).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO users (username, password_hash, first_name, last_name)'),
+        ['admin', 'hashed-admin-password', 'Super', 'Admin']
+      );
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   afterEach(() => {
     for (const [key, value] of Object.entries(originalEnv)) {
       if (value === undefined) {

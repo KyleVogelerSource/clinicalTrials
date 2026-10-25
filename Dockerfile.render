@@ -1,0 +1,32 @@
+# Single-service image for Render: the Express backend also serves the built
+# Angular frontend, so the whole site lives at one URL (no CORS, one domain).
+# Build context is the repo root. Used by render.yaml.
+
+# --- Build the Angular frontend (needs ../shared for the @shared/* imports) ---
+FROM node:20-alpine AS frontend-build
+WORKDIR /build
+COPY shared ./shared
+COPY frontend/package.json frontend/package-lock.json ./frontend/
+RUN cd frontend && npm ci
+COPY frontend ./frontend
+RUN cd frontend && npm run build -- --configuration production
+
+# --- Compile the TypeScript backend ---
+FROM node:20-alpine AS backend-build
+WORKDIR /build/backend
+COPY backend/package.json backend/package-lock.json ./
+RUN npm ci
+COPY backend ./
+RUN npm run build
+
+# --- Runtime image ---
+FROM node:20-alpine
+WORKDIR /app
+ENV NODE_ENV=production
+COPY backend/package.json backend/package-lock.json ./
+RUN npm ci --omit=dev
+COPY --from=backend-build /build/backend/dist ./dist
+COPY --from=frontend-build /build/frontend/dist/frontend/browser ./public
+# Render injects PORT at runtime; the server falls back to 3000 locally.
+EXPOSE 3000
+CMD ["node", "dist/server.js"]

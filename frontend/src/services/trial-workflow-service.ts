@@ -257,8 +257,12 @@ export class TrialWorkflowService {
                 },
                 error: (err) => {
                     console.error("AI Results failed", err);
+                    const status = (err as { status?: number })?.status;
+                    const message = status === 401 || status === 403
+                        ? "AI analysis is limited to approved accounts. Sign in with an account that has AI access to see it."
+                        : "Failed to load detailed AI analysis.";
                     this.results.update(current => {
-                        if (current.trialResults) current.trialResults.overallSummary = "Failed to load detailed AI analysis.";
+                        if (current.trialResults) current.trialResults.overallSummary = message;
                         return { ...current };
                     });
                 }

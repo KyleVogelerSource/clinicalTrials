@@ -1,12 +1,9 @@
 name: Deploy Frontend
 
+# Legacy AWS deployment. The AWS environment no longer exists; the site now
+# deploys to Render automatically from render.yaml. Kept for manual use only.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'frontend/**'
-      - 'shared/**'
-      - '.github/workflows/deploy-frontend.yml'
+  workflow_dispatch:
 
 permissions:
   id-token: write
