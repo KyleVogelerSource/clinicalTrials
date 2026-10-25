@@ -28,8 +28,17 @@ export interface TrialResultsResponse {
     overallSummary: string | null;
     totalTrialsFound: number;
     queryCondition: string | null;
-    avgRecruitmentDays: number;
+    estimatedDurationDays: number;
     participantTarget: number;
+    
+    // Proposed values used for the last local analysis run
+    siteCountTarget?: number;
+    inclusionTarget?: number;
+    exclusionTarget?: number;
+    outcomeTarget?: number;
+    armTarget?: number;
+
+    avgRecruitmentVelocity?: number;
     recruitmentByImpact: RecruitmentImpactBar[];
     timelineBuckets: TimelineBar[];
     

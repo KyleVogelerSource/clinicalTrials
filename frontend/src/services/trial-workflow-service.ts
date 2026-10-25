@@ -98,8 +98,6 @@ export class TrialWorkflowService {
             // Ensure criteria arrays exist
             inclusionCriteria: inputs.inclusionCriteria || [],
             exclusionCriteria: inputs.exclusionCriteria || [],
-            required: inputs.required || [],
-            ineligible: inputs.ineligible || [],
             selectedTrialIds: inputs.selectedTrialIds || []
         };
     }
@@ -240,10 +238,18 @@ export class TrialWorkflowService {
                         if (current.trialResults) {
                             aiResults.timelineBuckets = current.trialResults.timelineBuckets;
                             aiResults.recruitmentByImpact = current.trialResults.recruitmentByImpact;
-                            aiResults.avgRecruitmentDays = current.trialResults.avgRecruitmentDays;
+                            aiResults.estimatedDurationDays = current.trialResults.estimatedDurationDays;
                             aiResults.participantTarget = current.trialResults.participantTarget;
                             aiResults.timelineRange = current.trialResults.timelineRange;
                             aiResults.siblingCount = current.trialResults.siblingCount;
+                            aiResults.avgRecruitmentVelocity = (current.trialResults as any).avgRecruitmentVelocity;
+
+                            // Preserve all local benchmark targets
+                            aiResults.siteCountTarget = current.trialResults.siteCountTarget;
+                            aiResults.inclusionTarget = current.trialResults.inclusionTarget;
+                            aiResults.exclusionTarget = current.trialResults.exclusionTarget;
+                            aiResults.outcomeTarget = current.trialResults.outcomeTarget;
+                            aiResults.armTarget = current.trialResults.armTarget;
                         }
                         current.trialResults = aiResults;
                         return { ...current };
@@ -323,19 +329,57 @@ export class TrialWorkflowService {
                 return false;
             };
 
-            const getBestName = (names: Set<string>): string => {
-                const list = Array.from(names);
-                if (list.length === 0) return 'Clinical Site';
-                return list.sort((a, b) => {
-                    const aG = isGeneric(a);
-                    const bG = isGeneric(b);
-                    if (aG && !bG) return 1;
-                    if (!aG && bG) return -1;
-                    return b.length - a.length;
-                })[0];
+            const getBestName = (names: string[]): string => {
+                if (names.length === 0) return 'Clinical Site';
+                
+                const validNames = names.filter(n => !isGeneric(n));
+                if (validNames.length === 0) return names[0] || 'Clinical Site';
+
+                // Frequency of words across all names to identify the 'consensus' terms
+                // We weight words from shorter, more likely "real" names higher than words in long messages
+                const wordFreq = new Map<string, number>();
+                validNames.forEach(name => {
+                    const words = name.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(w => w.length > 1);
+                    const weight = name.length > 80 ? 0.1 : name.length > 60 ? 0.3 : 1.0;
+                    words.forEach(word => {
+                        wordFreq.set(word, (wordFreq.get(word) || 0) + weight);
+                    });
+                });
+
+                // Score each unique name based on consensus words and length
+                const uniqueNames = Array.from(new Set(validNames));
+                let best = uniqueNames[0];
+                let maxScore = -1;
+
+                uniqueNames.forEach(name => {
+                    const words = name.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(w => w.length > 1);
+                    if (words.length === 0) return;
+                    
+                    let score = words.reduce((acc, word) => acc + (wordFreq.get(word) || 0), 0);
+                    
+                    // Normalize by word count to favor pure consensus names over those with extra non-consensus words
+                    score = score / words.length;
+
+                    // Length penalty to avoid verbose 'more info' messages
+                    if (name.length > 80) {
+                        score *= 0.05;
+                    } else if (name.length > 60) {
+                        score *= 0.2;
+                    } else if (name.length > 45) {
+                        score *= 0.6;
+                    }
+
+                    // Tie-breaker: favor shorter names if scores are very close
+                    if (score > maxScore || (Math.abs(score - maxScore) < 0.01 && name.length < best.length)) {
+                        maxScore = score;
+                        best = name;
+                    }
+                });
+
+                return best;
             };
 
-            const siteGroups = new Map<string, { names: Set<string>, count: number, coords: [number, number] | null, locationStr: string }>();
+            const siteGroups = new Map<string, { names: string[], count: number, coords: [number, number] | null, locationStr: string }>();
 
             plotData.forEach(trial => {
                 trial.geoLocations.forEach(loc => {
@@ -347,13 +391,13 @@ export class TrialWorkflowService {
                     const key = geoKey || loc.facility.toLowerCase().trim();
 
                     const group = siteGroups.get(key) || { 
-                        names: new Set<string>(), 
+                        names: [] as string[], 
                         count: 0, 
                         coords: (lat && lon) ? [lat, lon] : null,
                         locationStr: `${loc.city || ''}${loc.city && loc.country ? ', ' : ''}${loc.country || ''}`
                     };
                     
-                    group.names.add(loc.facility);
+                    group.names.push(loc.facility);
                     group.count++;
                     siteGroups.set(key, group);
                 });
@@ -378,11 +422,16 @@ export class TrialWorkflowService {
                 }).filter((loc): loc is HeatPoint => !!loc)
             );
 
-            const siteEntries = Array.from(siteGroups.entries()).map(([key, group]) => ({
-                name: bestNames.get(key)!,
-                count: group.count,
-                coords: group.coords
-            }));
+            const siteEntries = Array.from(siteGroups.entries()).map(([key, group]) => {
+                const baseName = bestNames.get(key)!;
+                const locStr = group.locationStr;
+                const fullName = (locStr && !baseName.includes(locStr)) ? `${baseName} (${locStr})` : baseName;
+                return {
+                    name: fullName,
+                    count: group.count,
+                    coords: group.coords
+                };
+            });
 
             const top12 = siteEntries
                 .filter(s => s.count > 1)
@@ -405,7 +454,7 @@ export class TrialWorkflowService {
                 const startDate = trial.startDate ? Date.parse(trial.startDate.date) : null;
                 if (completedDate && startDate) {
                     const diff = (completedDate - startDate) / (1000 * 60 * 60 * 24);
-                    row.timelineSlippage = diff;
+                    row.duration = diff;
                     if (diff > 0) row.recruitmentVelocity = trial.totalEnrollment / diff;
                 }
                 if (trial.maxAge) row.maxAge = parseInt(trial.maxAge);
@@ -428,7 +477,7 @@ export class TrialWorkflowService {
                 return row;
             });
 
-            const validTrials = newResults.metricRows.filter(r => r.timelineSlippage > 0);
+            const validTrials = newResults.metricRows.filter(r => r.duration > 0);
             const enrollments = validTrials
                 .map((r: MetricRow) => r.totalEnrollment)
                 .sort((a: number, b: number) => a - b);
@@ -451,7 +500,7 @@ export class TrialWorkflowService {
                     const label = max === Infinity ? `${min}+` : `${min}-${max}`;
                     const trialsInBucket = validTrials.filter((r: MetricRow) => r.totalEnrollment >= min && (max === Infinity ? true : r.totalEnrollment < max));
                     if (trialsInBucket.length > 0) {
-                        const actualDays = Math.round(trialsInBucket.reduce((acc: number, r: MetricRow) => acc + r.timelineSlippage, 0) / trialsInBucket.length);
+                        const actualDays = Math.round(trialsInBucket.reduce((acc: number, r: MetricRow) => acc + r.duration, 0) / trialsInBucket.length);
                         const estimatedDays = Math.round(actualDays * 0.9);
                         const avgSites = Math.round(trialsInBucket.reduce((acc: number, r: MetricRow) => acc + r.siteCount, 0) / trialsInBucket.length);
                         timelineBuckets.push({ patientBucket: label, estimatedDays, actualDays, avgSites });
@@ -480,18 +529,55 @@ export class TrialWorkflowService {
                     siblings = validTrials;
                 }
                 siblingCount = siblings.length;
-                const velocities = siblings.map(s => s.recruitmentVelocity);
-                const sum = velocities.reduce((a, b) => a + b, 0);
-                adjustedVelocity = sum / siblings.length;
+
+                // Identify Active Secondary Inputs for Weighting
+                const activeInputs: { key: keyof MetricRow, userVal: number }[] = [];
+                if ((design?.userSites ?? 0) > 0) activeInputs.push({ key: 'siteCount', userVal: design!.userSites! });
+                if ((design?.userInclusions ?? 0) > 0) activeInputs.push({ key: 'inclusionStrictness', userVal: design!.userInclusions! });
+                if ((design?.userExclusions ?? 0) > 0) activeInputs.push({ key: 'exclusionStrictness', userVal: design!.userExclusions! });
+                if ((design?.userOutcomes ?? 0) > 0) activeInputs.push({ key: 'outcomeDensity', userVal: design!.userOutcomes! });
+                if ((design?.userArms ?? 0) > 0) activeInputs.push({ key: 'armCount', userVal: design!.userArms! });
+
+                // Calculate Weights and Weighted Velocity
+                let totalWeightedVelocity = 0;
+                let totalWeight = 0;
+
+                siblings.forEach(trial => {
+                    let trialWeight = 1.0;
+
+                    if (activeInputs.length > 0) {
+                        let metricWeightSum = 0;
+                        activeInputs.forEach(input => {
+                            const trialVal = (trial as any)[input.key] as number;
+                            // Calculate percentage difference, capped at 1.0 (100% off)
+                            // We use the user's value as the baseline for "relevance"
+                            const percentDiff = Math.min(1.0, Math.abs(trialVal - input.userVal) / input.userVal);
+                            // Convert difference to a similarity score (1.0 = exact match, 0.0 = completely different)
+                            metricWeightSum += (1.0 - percentDiff);
+                        });
+                        
+                        const avgMetricWeight = metricWeightSum / activeInputs.length;
+                        
+                        // Apply soft floor (0.2) so vastly different trials still contribute slightly to stability
+                        trialWeight = Math.max(0.2, avgMetricWeight);
+                    }
+
+                    totalWeightedVelocity += (trial.recruitmentVelocity * trialWeight);
+                    totalWeight += trialWeight;
+                });
+
+                // Final weighted average velocity
+                adjustedVelocity = totalWeight > 0 ? (totalWeightedVelocity / totalWeight) : 0;
+
                 if (siblings.length > 1) {
                     const avg = adjustedVelocity;
-                    const squareDiffs = velocities.map(v => Math.pow(v - avg, 2));
+                    const squareDiffs = siblings.map(v => Math.pow(v.recruitmentVelocity - avg, 2));
                     const avgSquareDiff = squareDiffs.reduce((a, b) => a + b, 0) / squareDiffs.length;
                     velocityStdDev = Math.sqrt(avgSquareDiff);
                 }
             }
 
-            const globalTotalDays = validTrials.reduce((acc: number, r: MetricRow) => acc + r.timelineSlippage, 0);
+            const globalTotalDays = validTrials.reduce((acc: number, r: MetricRow) => acc + r.duration, 0);
             const globalTotalEnrollmentVal = validTrials.reduce((acc: number, r: MetricRow) => acc + r.totalEnrollment, 0);
             const globalVelocity = globalTotalEnrollmentVal > 0 ? globalTotalEnrollmentVal / globalTotalDays : 0;
             
@@ -521,9 +607,16 @@ export class TrialWorkflowService {
                 { name: 'Arm Count', key: 'armCount', invert: true }
             ];
 
+            // If we have AI ranked (similar) trials, prioritize them for driver correlation analysis
+            // to ensure consistency between the driver summary and the focused visualization.
+            const rankedNctIds = new Set((current.trialResults?.rankedTrials || []).map(rt => rt.trial.nctId));
+            const driverDataTrials = rankedNctIds.size > 0 
+                ? validTrials.filter(r => rankedNctIds.has(r.id))
+                : validTrials;
+
             const drivers = metricsToTest.map(m => {
-                const values = validTrials.map((r: MetricRow) => (r as any)[m.key] as number);
-                const velocities = validTrials.map((r: MetricRow) => r.recruitmentVelocity);
+                const values = driverDataTrials.map((r: MetricRow) => (r as any)[m.key] as number);
+                const velocities = driverDataTrials.map((r: MetricRow) => r.recruitmentVelocity);
                 const n = values.length;
                 if (n < 2) return { name: m.name, correlation: 0, key: m.key, invert: m.invert };
                 const sumX = values.reduce((a: number, b: number) => a + b, 0);
@@ -555,16 +648,24 @@ export class TrialWorkflowService {
                 overallSummary: current.trialResults?.overallSummary ?? 'Generating detailed analysis...',
                 totalTrialsFound: trials.length,
                 queryCondition: this.inputParams()?.condition ?? 'Selected Trials',
-                avgRecruitmentDays: estDays, 
+                estimatedDurationDays: estDays, 
                 participantTarget: targetEnrollment,
+
+                // Track the proposed values used for this analysis run
+                siteCountTarget: design?.userSites ?? 0,
+                inclusionTarget: design?.userInclusions ?? 0,
+                exclusionTarget: design?.userExclusions ?? 0,
+                outcomeTarget: design?.userOutcomes ?? 0,
+                armTarget: design?.userArms ?? 0,
+
                 recruitmentByImpact,
                 timelineBuckets,
                 terminationReasons: newResults.terminationReasons,
                 generatedAt: current.trialResults?.generatedAt ?? new Date().toISOString(),
                 timelineRange: maxDays > 0 ? `${minDays} - ${maxDays}` : undefined,
-                siblingCount
+                siblingCount,
+                avgRecruitmentVelocity: finalVelocity
             } as any;
-
             return newResults;
         });
     }
@@ -583,8 +684,6 @@ export class TrialWorkflowService {
             minAge: input.minAge ?? null,
             maxAge: input.maxAge ?? null,
             sex: input.sex ?? null,
-            requiredConditions: input.required ?? [],
-            ineligibleConditions: input.ineligible ?? [],
             selectedTrialIds: this.selectedTrialIds(),
             inclusionCriteria: input.inclusionCriteria ?? [],
             exclusionCriteria: input.exclusionCriteria ?? [],

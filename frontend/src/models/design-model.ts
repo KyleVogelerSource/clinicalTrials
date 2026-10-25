@@ -32,8 +32,6 @@ export interface DesignModel {
     minAge: number | null,
     maxAge: number | null,
     sex: string,
-    required: string[],
-    ineligible: string[],
 
     // Year range filters
     startDateFrom?: string | null,
@@ -46,7 +44,6 @@ export interface DesignModel {
     userExclusions: number | null,
     userOutcomes: number | null,
     userArms: number | null,
-    userDuration: number | null,
 
     // Eligibility criteria for benchmark comparison
     inclusionCriteria: EligibilityCriterion[],

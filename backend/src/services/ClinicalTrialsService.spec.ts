@@ -255,44 +255,6 @@ describe("ClinicalTrialsService", () => {
       expect(result.metadata.totalFiltered).toBeGreaterThan(0);
     });
 
-    it("should apply required conditions filter", async () => {
-      const request: ClinicalTrialSearchRequest = { term: "cancer" };
-      const studyWithCondition = createMockStudy("NCT001", ["diabetes"]);
-      const studyWithoutCondition = createMockStudy("NCT002", ["asthma"]);
-
-      mockClient.searchStudies.mockResolvedValue({
-        totalCount: 2,
-        studies: [studyWithCondition, studyWithoutCondition],
-      });
-
-      const result = await searchAndBuildCandidatePool(
-        request,
-        { requiredConditions: ["diabetes"] },
-        client
-      );
-
-      expect(result.metadata.totalFiltered).toBeGreaterThan(0);
-    });
-
-    it("should apply ineligible conditions filter", async () => {
-      const request: ClinicalTrialSearchRequest = { term: "cancer" };
-      const validStudy = createMockStudy("NCT001", ["cancer"]);
-      const invalidStudy = createMockStudy("NCT002", ["pregnancy"]);
-
-      mockClient.searchStudies.mockResolvedValue({
-        totalCount: 2,
-        studies: [validStudy, invalidStudy],
-      });
-
-      const result = await searchAndBuildCandidatePool(
-        request,
-        { ineligibleConditions: ["pregnancy"] },
-        client
-      );
-
-      expect(result.metadata.totalFiltered).toBeGreaterThan(0);
-    });
-
     it("should track metadata correctly", async () => {
       const request: ClinicalTrialSearchRequest = { term: "cancer" };
       const studies = Array.from({ length: 25 }, (_, i) => createMockStudy(`NCT${String(i + 1).padStart(6, "0")}`));
@@ -326,22 +288,25 @@ describe("ClinicalTrialsService", () => {
 
     it("should stop pagination at MAX_PAGES", async () => {
       const request: ClinicalTrialSearchRequest = { term: "cancer" };
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
 
-      // Mock 11 pages worth of responses (to exceed MAX_PAGES=10)
-      for (let i = 0; i < 11; i++) {
+      for (let i = 0; i < 101; i++) {
         mockClient.searchStudies.mockResolvedValueOnce({
-          totalCount: 1100,
+          totalCount: 505,
           studies: Array.from({ length: 5 }, (_, j) =>
             createMockStudy(`NCT${String(i * 5 + j).padStart(6, "0")}`)
           ),
-          nextPageToken: i < 10 ? `token${i}` : undefined,
+          nextPageToken: `token${i}`,
         });
       }
 
       const result = await searchAndBuildCandidatePool(request, {}, client);
 
-      expect(mockClient.searchStudies).toHaveBeenCalledTimes(11);
-      expect(result.metadata.totalPagesfetched).toBeLessThanOrEqual(11);
+      expect(mockClient.searchStudies).toHaveBeenCalledTimes(100);
+      expect(result.metadata.totalPagesfetched).toBe(100);
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining("Reached MAX_PAGES (100)")
+      );
     });
   });
 });

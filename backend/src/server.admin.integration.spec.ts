@@ -124,6 +124,18 @@ describe("Server admin API tests", () => {
       expect(roleMissing.status).toBe(404);
       expect(duplicate.status).toBe(409);
     });
+
+    it("returns 500 for unexpected assignment errors", async () => {
+      assignUserRoleMock.mockRejectedValueOnce(new Error("db failed"));
+
+      const res = await invokeExpressApp(app, {
+        method: "POST",
+        url: "/api/admin/user-roles",
+        body: { userId: 1, roleId: 2 },
+      });
+
+      expect(res.status).toBe(500);
+    });
   });
 
   describe("DELETE /api/admin/role-actions/:roleId/:actionId", () => {
@@ -159,6 +171,17 @@ describe("Server admin API tests", () => {
 
       expect(res.status).toBe(404);
     });
+
+    it("returns 500 for unexpected delete errors", async () => {
+      deleteRoleActionMock.mockRejectedValueOnce(new Error("db failed"));
+
+      const res = await invokeExpressApp(app, {
+        method: "DELETE",
+        url: "/api/admin/role-actions/2/8",
+      });
+
+      expect(res.status).toBe(500);
+    });
   });
 
   describe("DELETE /api/admin/user-roles/:userId/:roleId", () => {
@@ -193,6 +216,17 @@ describe("Server admin API tests", () => {
       });
 
       expect(res.status).toBe(404);
+    });
+
+    it("returns 500 for unexpected delete errors", async () => {
+      deleteUserRoleMock.mockRejectedValueOnce(new Error("db failed"));
+
+      const res = await invokeExpressApp(app, {
+        method: "DELETE",
+        url: "/api/admin/user-roles/3/2",
+      });
+
+      expect(res.status).toBe(500);
     });
   });
 });

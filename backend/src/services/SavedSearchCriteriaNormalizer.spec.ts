@@ -4,6 +4,7 @@ import {
   normalizeSavedSearchCriteria,
   toStableCriteriaJson,
 } from "./SavedSearchCriteriaNormalizer";
+import type { ClinicalTrialSearchRequest } from "../dto/ClinicalTrialSearchRequest";
 
 describe("SavedSearchCriteriaNormalizer", () => {
   it("normalizes trimmed strings, removes empties, and sorts arrays", () => {
@@ -11,17 +12,13 @@ describe("SavedSearchCriteriaNormalizer", () => {
       condition: "  Diabetes  ",
       phase: " PHASE3 ",
       sponsor: "",
-      requiredConditions: [" hypertension ", "diabetes", ""],
-      ineligibleConditions: ["COPD", " asthma "],
       minAge: 18,
     });
 
     expect(normalized).toEqual({
       condition: "diabetes",
-      ineligibleConditions: ["asthma", "copd"],
       minAge: 18,
       phase: "phase3",
-      requiredConditions: ["diabetes", "hypertension"],
     });
   });
 
@@ -42,13 +39,11 @@ describe("SavedSearchCriteriaNormalizer", () => {
   it("produces the same canonical key for equivalent criteria", () => {
     const left = {
       condition: "Diabetes",
-      requiredConditions: ["hypertension", "obesity"],
       sex: "ALL",
     };
 
     const right = {
       sex: " all ",
-      requiredConditions: ["obesity", "hypertension"],
       condition: " diabetes ",
     };
 
@@ -64,5 +59,47 @@ describe("SavedSearchCriteriaNormalizer", () => {
         minAge: undefined,
       })
     ).toBe(JSON.stringify({ condition: "asthma" }));
+  });
+
+  it("normalizes arrays by trimming, lowercasing configured fields, dropping unsupported values, and sorting", () => {
+    const criteria = {
+      condition: ["  Beta  ", "", "alpha", 42, false, { bad: true }] as unknown as string[],
+      selectedTrialIds: [" NCT2 ", "NCT1"],
+    } as unknown as ClinicalTrialSearchRequest;
+
+    const normalized = normalizeSavedSearchCriteria(criteria);
+
+    expect(normalized).toEqual({
+      condition: ["alpha", "beta", 42, false],
+      selectedTrialIds: ["NCT1", "NCT2"],
+    });
+  });
+
+  it("keeps booleans and numbers, removes nulls and unsupported scalar values, and sorts object keys", () => {
+    const criteria = {
+      maxAge: null,
+      minAge: 18,
+      hasResults: true,
+      condition: " Asthma ",
+      location: { bad: true } as unknown as string,
+    } as unknown as ClinicalTrialSearchRequest;
+
+    const normalized = normalizeSavedSearchCriteria(criteria);
+
+    expect(Object.keys(normalized)).toEqual(["condition", "hasResults", "minAge"]);
+    expect(normalized).toEqual({
+      condition: "asthma",
+      hasResults: true,
+      minAge: 18,
+    });
+  });
+
+  it("drops arrays that normalize to no supported values", () => {
+    expect(
+      normalizeSavedSearchCriteria({
+        selectedTrialIds: ["", "   ", { bad: true }] as unknown as string[],
+        condition: "cancer",
+      })
+    ).toEqual({ condition: "cancer" });
   });
 });

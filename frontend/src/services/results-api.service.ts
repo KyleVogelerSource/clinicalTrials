@@ -4,7 +4,6 @@ import { TrialResultsRequest } from '@shared/dto/TrialResultsRequest';
 import { TrialResultsResponse } from '@shared/dto/TrialResultsResponse';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../environments/environment';
-import { StudyTrial } from '../models/study-trial';
 
 @Injectable({ providedIn: 'root' })
 export class ResultsApiService {
