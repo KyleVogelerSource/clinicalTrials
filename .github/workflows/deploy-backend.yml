@@ -1,13 +1,9 @@
 name: Deploy Backend
 
+# Legacy AWS deployment. The AWS environment no longer exists; the site now
+# deploys to Render automatically from render.yaml. Kept for manual use only.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'backend/**'
-      - 'shared/**'
-      - '.github/workflows/deploy-backend.yml'
 
 permissions:
   id-token: write

@@ -51,6 +51,19 @@ describe("Server functional API tests", () => {
     expect((res.body as Record<string, unknown>).message).toBe("API is running");
   });
 
+  it.each(["/api/clinical-trials/results", "/api/clinical-trials/benchmark"])(
+    "rejects unauthenticated requests to AI endpoint %s",
+    async (url) => {
+      const res = await invokeExpressApp(app, {
+        method: "POST",
+        url,
+        body: { trials: [{ nctId: "NCT00000001" }] },
+      });
+
+      expect(res.status).toBe(401);
+    }
+  );
+
   it("returns validation errors for invalid search payload", async () => {
     const res = await invokeExpressApp(app, {
       method: "POST",

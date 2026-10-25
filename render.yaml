@@ -1,0 +1,52 @@
+# Render Blueprint: one web service (backend + frontend) and one Postgres database.
+# Create it from the Render dashboard: New > Blueprint > pick this repo.
+# Plan IDs: web 0.5c-512mb (Starter, ~$7/mo, never sleeps); db 0.1c-256mb (~$6/mo + storage).
+
+services:
+  - type: web
+    name: cardinaltrials
+    runtime: docker
+    region: virginia
+    plan: 0.5c-512mb
+    dockerfilePath: ./Dockerfile.render
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - backend/**
+        - frontend/**
+        - shared/**
+        - Dockerfile.render
+        - render.yaml
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cardinaltrials-db
+          property: connectionString
+      # Render's internal database connection does not use SSL.
+      - key: DB_SSL
+        value: "false"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: LOG_LEVEL
+        value: info
+      # Secrets: Render asks you to paste these when the Blueprint is first created.
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: VOYAGE_API_KEY
+        sync: false
+      # Password for the built-in "admin" account (has every permission). Choose a strong one.
+      - key: ADMIN_PASSWORD
+        sync: false
+
+databases:
+  - name: cardinaltrials-db
+    databaseName: clinicaltrials
+    user: clinicaltrials
+    region: virginia
+    plan: 0.1c-256mb
+    diskSizeGB: 5
+    postgresMajorVersion: "16"

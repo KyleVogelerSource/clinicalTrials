@@ -11,6 +11,8 @@ import { normalizeTrialStudy } from "./services/TrialNormalizer";
 import { ClinicalTrialStudy } from "./dto/ClinicalTrialStudiesResponse";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
+import fs from "fs";
+import path from "path";
 import { initializeDatabase, isDatabaseConnected, probeDatabaseConnection } from "./storage/PostgresClient";
 import { registerUser, loginUser } from "./auth/AuthService";
 import { authenticateToken, AuthenticatedRequest, requireAction, userHasAction } from "./auth/authMiddleware";
@@ -179,7 +181,14 @@ app.get("/api/clinical-trials/empty-response", (_req: Request, res: Response) =>
 });
 
 // POST /api/clinical-trials/results — AI-powered analysis of selected trials
-app.post("/api/clinical-trials/results", async (req: Request, res: Response) => {
+// AI endpoints call paid model APIs, so they require a signed-in user with the
+// trial_benchmarking permission (granted via a role on the Admin page).
+app.post(
+  "/api/clinical-trials/results",
+  requireDatabaseConnection,
+  authenticateToken,
+  requireAction("trial_benchmarking"),
+  async (req: Request, res: Response) => {
   const { trials, ...request } = req.body as TrialResultsRequest & { trials?: NormalizedTrial[] };
 
   if (!Array.isArray(trials) || trials.length === 0) {
@@ -252,7 +261,12 @@ function sanitizeTrial(t: Partial<NormalizedTrial>): NormalizedTrial {
 // POST /api/clinical-trials/benchmark
 // Accepts the user's scenario request and a pre-built candidate pool.
 // Returns Top-K trials ranked by cosine similarity to the proposed design.
-app.post("/api/clinical-trials/benchmark", async (req: Request, res: Response) => {
+app.post(
+  "/api/clinical-trials/benchmark",
+  requireDatabaseConnection,
+  authenticateToken,
+  requireAction("trial_benchmarking"),
+  async (req: Request, res: Response) => {
   const { trials, proposedTrial, topK, ...request } = req.body as TrialResultsRequest & {
     trials?: NormalizedTrial[];
     proposedTrial?: NormalizedTrial;
@@ -941,6 +955,22 @@ app.delete(
     }
   }
 );
+
+// Serve the built Angular frontend when it is bundled into the same image
+// (Render deployment, see Dockerfile.render). Must stay after all /api routes.
+const frontendDistDir = process.env.FRONTEND_DIST_DIR ?? path.join(__dirname, "..", "public");
+const frontendIndexFile = path.join(frontendDistDir, "index.html");
+if (fs.existsSync(frontendIndexFile)) {
+  app.use(express.static(frontendDistDir, { index: false, maxAge: "1h" }));
+  // Single-page app fallback: any non-API GET returns index.html so Angular routing works on refresh.
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (req.method !== "GET" || req.path.startsWith("/api")) {
+      next();
+      return;
+    }
+    res.sendFile(frontendIndexFile);
+  });
+}
 
 export async function bootstrap() {
   try {

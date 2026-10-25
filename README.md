@@ -177,6 +177,60 @@ Windows PowerShell:
 docker compose down --volumes
 ```
 
+## Deploy to Render (Current Hosting)
+
+The live site (cardinaltrials.com) runs on [Render](https://render.com). Everything Render needs is in two files at the repo root:
+
+- `render.yaml` - a Render "Blueprint" describing one web service and one PostgreSQL database.
+- `Dockerfile.render` - builds the Angular frontend and the Express backend into a single image. The backend serves the frontend, so the whole site lives at one URL and the frontend calls the API on the same origin.
+
+Approximate cost: about $7/month for the web service (Starter, never sleeps) plus about $6/month for the database and a little for storage.
+
+### 1. Get the Code Onto `main`
+
+Render deploys from the GitHub repo's default branch. Merge the Render changes into `main` and push.
+
+### 2. Create the Blueprint
+
+1. Sign in at https://dashboard.render.com and connect your GitHub account.
+2. Click `New` > `Blueprint`.
+3. Pick the `clinicalTrials` repository. Render finds `render.yaml` automatically.
+4. When asked, paste the values for `ANTHROPIC_API_KEY` and `VOYAGE_API_KEY`, and choose a strong `ADMIN_PASSWORD` (the password for the built-in `admin` account). Everything else (database connection, `JWT_SECRET`) is filled in by Render.
+5. Click `Apply`. Render creates the database first, then builds and starts the web service. The first build takes several minutes.
+
+### 3. Check That It Works
+
+Open the service in the Render dashboard and click its `.onrender.com` URL. Then check:
+
+```text
+https://YOUR-SERVICE.onrender.com/api/debug/status
+```
+
+`databaseConnected` should be `true`. If it is not, open the service's `Logs` tab.
+
+### 4. Control Who Can Use the AI Analysis
+
+The AI endpoints call paid model APIs, so only signed-in users with the `trial_benchmarking` permission can use them. Everyone else can still search trials and see the non-AI parts of the report.
+
+1. Sign in on the site as `admin` with your `ADMIN_PASSWORD`, then open the `Admin` page.
+2. Under `Roles`, create a role such as `ai-access`.
+3. Under `Role Actions`, assign the `trial_benchmarking` action to that role.
+4. Under `Users`, create your own account (or register it from the site), then under `User Roles` assign it the `ai-access` role.
+
+Only accounts with that role can run AI analysis. In production, the `admin` account is only created when `ADMIN_PASSWORD` is set.
+
+### 5. Connect cardinaltrials.com
+
+1. In the web service, open `Settings` > `Custom Domains` and add `cardinaltrials.com` and `www.cardinaltrials.com`.
+2. Render shows the DNS records to create. Add exactly those records at the company where the domain is registered.
+3. Click `Verify` in Render. Render issues the HTTPS certificate automatically once DNS is correct (this can take from minutes to a few hours).
+
+### 6. Deploying Updates
+
+Every push to `main` that touches `backend/`, `frontend/`, `shared/`, `Dockerfile.render`, or `render.yaml` redeploys automatically. API keys can be changed under the service's `Environment` tab.
+
+The AWS/Terraform instructions below are kept for reference only; that environment no longer exists, and the AWS deploy workflows now run only when started manually.
+
 ## Deploy to AWS With Terraform
 
 Terraform is the tool used by this repository to create the cloud infrastructure. In plain English, Terraform reads the files in the `terraform/` folder and creates the AWS services needed to run the app online.

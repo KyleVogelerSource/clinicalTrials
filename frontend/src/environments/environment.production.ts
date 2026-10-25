@@ -1,4 +1,5 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://ppjtwpmmjp.us-east-1.awsapprunner.com',
+  // Empty = same origin: the backend serves the built frontend (see render.yaml).
+  apiBaseUrl: '',
 };
