@@ -110,21 +110,6 @@ export function validateSearchRequest(
     }
   }
 
-  if (req.requiredConditions !== undefined) {
-    if (!Array.isArray(req.requiredConditions)) {
-      errors.push({ field: "requiredConditions", message: "requiredConditions must be an array of strings." });
-    } else if (req.requiredConditions.some((c: string) => typeof c !== "string" || c.trim() === "")) {
-      errors.push({ field: "requiredConditions", message: "Each entry in requiredConditions must be a non-empty string." });
-    }
-  }
-  if (req.ineligibleConditions !== undefined) {
-    if (!Array.isArray(req.ineligibleConditions)) {
-      errors.push({ field: "ineligibleConditions", message: "ineligibleConditions must be an array of strings." });
-    } else if (req.ineligibleConditions.some((c: string) => typeof c !== "string" || c.trim() === "")) {
-      errors.push({ field: "ineligibleConditions", message: "Each entry in ineligibleConditions must be a non-empty string." });
-    }
-  }
-
   if (req.startDateFrom && req.startDateTo && req.startDateFrom > req.startDateTo) {
     errors.push({
       field: "startDateFrom / startDateTo",

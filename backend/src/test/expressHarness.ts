@@ -1,3 +1,4 @@
+/* v8 ignore file -- test-only harness internals are not production behavior */
 import { Readable, Writable } from "node:stream";
 
 type HeaderValue = string | string[] | number | undefined;

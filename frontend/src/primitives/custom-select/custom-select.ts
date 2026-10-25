@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, ElementRef, inject, signal, forwardRef, DestroyRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, ElementRef, inject, signal, forwardRef, DestroyRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
@@ -58,7 +58,7 @@ export class CustomSelect implements ControlValueAccessor {
         this.onTouched = fn;
     }
 
-    setDisabledState?(isDisabled: boolean): void {
+    setDisabledState?(_isDisabled: boolean): void {
         // Handle disabled state if needed
     }
 

@@ -295,63 +295,6 @@ describe("ClinicalTrialSearchValidator", () => {
     });
   });
 
-  describe("Conditions array validation", () => {
-    it("should fail when requiredConditions is not an array", () => {
-      const req = {
-        term: "cancer",
-        requiredConditions: "diabetes",
-      } as unknown as ClinicalTrialSearchRequest;
-      const result = validateSearchRequest(req);
-      expect(result.valid).toBe(false);
-    });
-
-    it("should fail when requiredConditions contains empty strings", () => {
-      const req: ClinicalTrialSearchRequest = {
-        term: "cancer",
-        requiredConditions: ["", "  "],
-      };
-      const result = validateSearchRequest(req);
-      expect(result.valid).toBe(false);
-    });
-
-    it("should pass when requiredConditions is valid", () => {
-      const req: ClinicalTrialSearchRequest = {
-        term: "cancer",
-        requiredConditions: ["diabetes", "hypertension"],
-      };
-      const result = validateSearchRequest(req);
-      expect(result.valid).toBe(true);
-    });
-
-    it("should fail when ineligibleConditions is not an array", () => {
-      const req = {
-        term: "cancer",
-        ineligibleConditions: "pregnancy",
-      } as unknown as ClinicalTrialSearchRequest;
-      const result = validateSearchRequest(req);
-      expect(result.valid).toBe(false);
-    });
-
-    it("should pass when ineligibleConditions is valid", () => {
-      const req: ClinicalTrialSearchRequest = {
-        term: "cancer",
-        ineligibleConditions: ["pregnancy", "liver disease"],
-      };
-      const result = validateSearchRequest(req);
-      expect(result.valid).toBe(true);
-    });
-
-    it("should pass with empty arrays", () => {
-      const req: ClinicalTrialSearchRequest = {
-        term: "cancer",
-        requiredConditions: [],
-        ineligibleConditions: [],
-      };
-      const result = validateSearchRequest(req);
-      expect(result.valid).toBe(true);
-    });
-  });
-
   describe("Complex validation scenarios", () => {
     it("should report multiple errors", () => {
       const req: ClinicalTrialSearchRequest = {
@@ -385,8 +328,6 @@ describe("ClinicalTrialSearchValidator", () => {
         minEnrollment: 10,
         maxEnrollment: 1000,
         startDateFrom: "2020",
-        requiredConditions: ["diabetes"],
-        ineligibleConditions: ["pregnancy"],
       };
       const result = validateSearchRequest(req);
       expect(result.valid).toBe(true);

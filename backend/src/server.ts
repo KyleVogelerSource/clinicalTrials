@@ -134,7 +134,7 @@ app.post("/api/clinical-trials/search", async (req: Request, res: Response) => {
 
 //POST /api/clinical-trials/candidate-pool
 app.post("/api/clinical-trials/candidate-pool", async (req: Request, res: Response) => {
-  const { cap, referenceTrial, requiredConditions, ineligibleConditions, ...searchRequest } =
+  const { cap, referenceTrial, ...searchRequest } =
     req.body as ClinicalTrialSearchRequest & {
       cap?: number;
       referenceTrial?: ReferenceTrial;
@@ -154,8 +154,6 @@ app.post("/api/clinical-trials/candidate-pool", async (req: Request, res: Respon
     const pool = await searchAndBuildCandidatePool(searchRequest, {
       cap,
       referenceTrial,
-      requiredConditions,
-      ineligibleConditions,
     });
     res.status(200).json(pool);
   } catch (err) {
@@ -972,6 +970,7 @@ if (fs.existsSync(frontendIndexFile)) {
   });
 }
 
+/* v8 ignore start -- process entrypoint wiring is exercised by deployment smoke tests */
 export async function bootstrap() {
   try {
     await initializeDatabase();
@@ -990,3 +989,4 @@ if (require.main === module) {
     process.exit(1);
   });
 }
+/* v8 ignore stop */

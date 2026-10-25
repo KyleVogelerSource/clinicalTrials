@@ -7,8 +7,6 @@ const DEFAULT_POOL_CAP = 15;
 export interface PoolBuilderConfig {
     cap?: number;
     referenceTrial?: ReferenceTrial;
-    requiredConditions?: string[];
-    ineligibleConditions?: string[];
 }
 
 export function buildCandidatePool(studies: ClinicalTrialStudy[], totalPagesFetched: number, config: PoolBuilderConfig = {}): CandidatePool {
@@ -20,9 +18,9 @@ export function buildCandidatePool(studies: ClinicalTrialStudy[], totalPagesFetc
     const valid: ClinicalTrialStudy[] = [];
 
     for (const study of studies) {
-        const reason = getFilterReason(study, ref, config);
+        const reason = getFilterReason(study, ref);
         if (reason) {
-            filtered.push(buildFilteredRecord(study, reason, ref, config));
+            filtered.push(buildFilteredRecord(study, reason, ref));
         } else {
             valid.push(study);
         }
@@ -58,7 +56,7 @@ export function buildCandidatePool(studies: ClinicalTrialStudy[], totalPagesFetc
     return { trials, metadata };
 }
 
-function getFilterReason(study: ClinicalTrialStudy, ref?: ReferenceTrial, config: PoolBuilderConfig = {}): FilterReason | null {
+function getFilterReason(study: ClinicalTrialStudy, ref?: ReferenceTrial): FilterReason | null {
     const p = study.protocolSection;
 
     const phases = p.designModule?.phases;
@@ -69,28 +67,6 @@ function getFilterReason(study: ClinicalTrialStudy, ref?: ReferenceTrial, config
 
     const criteria = p.eligibilityModule?.eligibilityCriteria;
     if (!criteria || criteria.trim() === "") return "missing_eligibility_criteria";
-
-    if (config.requiredConditions && config.requiredConditions.length > 0) {
-        const studyConditions = (p.conditionsModule?.conditions ?? []).map((c: string) =>
-            c.toLowerCase()
-        );
-        const required = config.requiredConditions.map((c) => c.toLowerCase());
-        const satisfied = required.some((rc) =>
-            studyConditions.some((sc: string) => sc.includes(rc))
-        );
-        if (!satisfied) return "required_condition_not_met";
-    }
-
-    if (config.ineligibleConditions && config.ineligibleConditions.length > 0) {
-        const studyConditions = (p.conditionsModule?.conditions ?? []).map((c: string) =>
-            c.toLowerCase()
-        );
-        const ineligible = config.ineligibleConditions.map((c) => c.toLowerCase());
-        const hasIneligible = ineligible.some((ic) =>
-            studyConditions.some((sc: string) => sc.includes(ic))
-        );
-        if (hasIneligible) return "ineligible_condition_present";
-    }
 
     if (!ref) return null;
 
@@ -129,7 +105,7 @@ function isSexCompatible(referenceSex: string, studySex: string): boolean {
     return referenceSex === studySex;
 }
 
-function buildFilteredRecord(study: ClinicalTrialStudy, reason: FilterReason, ref?: ReferenceTrial, config: PoolBuilderConfig = {}): FilteredRecord {
+function buildFilteredRecord(study: ClinicalTrialStudy, reason: FilterReason, ref?: ReferenceTrial): FilteredRecord {
     const id = study.protocolSection.identificationModule;
 
     const detailMap: Partial<Record<FilterReason, string>> = {
@@ -140,8 +116,6 @@ function buildFilteredRecord(study: ClinicalTrialStudy, reason: FilterReason, re
         study_type_mismatch: `Study type does not match reference (${ref?.studyType})`,
         sex_incompatible: `Sex eligibility incompatible with reference (${ref?.sex})`,
         no_condition_overlap: `No condition overlap with reference (${ref?.conditions?.join(", ")})`,
-        required_condition_not_met: `Trial does not match any required condition (${config.requiredConditions?.join(", ")})`,
-        ineligible_condition_present: `Trial lists an ineligible condition (${config.ineligibleConditions?.join(", ")})`,
     };
 
     return {
@@ -173,4 +147,3 @@ function compareDates(a: string | null, b: string | null): number {
     if (!b) return -1;
     return a.localeCompare(b);
 }
-

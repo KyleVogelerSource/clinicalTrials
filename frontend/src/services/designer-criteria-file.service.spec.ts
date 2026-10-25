@@ -3,6 +3,7 @@ import {
   buildDesignerExportJson,
   normalizeImportedCriteria,
   parseDesignerCriteriaFile,
+  parseDesignerJson,
 } from './designer-criteria-file.service';
 
 describe('designer-criteria-file.service', () => {
@@ -28,8 +29,6 @@ describe('designer-criteria-file.service', () => {
       minAge: 18,
       maxAge: 65,
       sex: 'Female',
-      required: ['Hypertension'],
-      ineligible: ['Heart Failure'],
       startDateFrom: '2020',
       startDateTo: '2025',
       userPatients: null,
@@ -38,7 +37,6 @@ describe('designer-criteria-file.service', () => {
       userExclusions: null,
       userOutcomes: null,
       userArms: null,
-      userDuration: null,
       inclusionCriteria: [],
       exclusionCriteria: [],
     }));
@@ -70,8 +68,6 @@ describe('designer-criteria-file.service', () => {
       minAge: null,
       maxAge: null,
       sex: 'Female',
-      required: [],
-      ineligible: [],
       startDateFrom: '2020',
       startDateTo: '2024',
       userPatients: null,
@@ -80,9 +76,9 @@ describe('designer-criteria-file.service', () => {
       userExclusions: null,
       userOutcomes: null,
       userArms: null,
-      userDuration: null,
       inclusionCriteria: [],
       exclusionCriteria: [],
+      selectedTrialIds: [],
     });
   });
 
@@ -101,8 +97,6 @@ describe('designer-criteria-file.service', () => {
       minAge: null,
       maxAge: null,
       sex: 'All',
-      required: [],
-      ineligible: [],
       startDateFrom: null,
       startDateTo: null,
       userPatients: null,
@@ -111,9 +105,41 @@ describe('designer-criteria-file.service', () => {
       userExclusions: null,
       userOutcomes: null,
       userArms: null,
-      userDuration: null,
       inclusionCriteria: [],
       exclusionCriteria: [],
+      selectedTrialIds: [],
     });
+  });
+
+  it('parses raw designer JSON without an envelope', () => {
+    expect(parseDesignerJson(JSON.stringify({
+      condition: ' Asthma ',
+      phase: ['phase 2', 'phase 2'],
+      allocationType: ['randomized'],
+      interventionModel: ['single group assignment'],
+      blindingType: ['double'],
+      minAge: '18',
+      maxAge: 'bad',
+      sex: 'unknown',
+      userPatients: '250',
+      userSites: '',
+      inclusionCriteria: [{ description: 'Adults' }],
+      exclusionCriteria: [{ description: 'Pregnancy' }],
+      selectedTrialIds: ['NCT1'],
+    }), defaults)).toEqual(expect.objectContaining({
+      condition: 'Asthma',
+      phase: ['Phase 2'],
+      allocationType: ['Randomized'],
+      interventionModel: ['Single Group Assignment'],
+      blindingType: ['Double'],
+      minAge: 18,
+      maxAge: null,
+      sex: 'unknown',
+      userPatients: 250,
+      userSites: null,
+      inclusionCriteria: [{ description: 'Adults' }],
+      exclusionCriteria: [{ description: 'Pregnancy' }],
+      selectedTrialIds: ['NCT1'],
+    }));
   });
 });
