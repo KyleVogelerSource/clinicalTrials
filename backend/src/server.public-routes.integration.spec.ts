@@ -28,6 +28,21 @@ vi.mock("./services/AiProviderStatusService", () => ({
   getAiProviderStatuses: mocks.getAiProviderStatuses,
 }));
 
+// The AI endpoints require a signed-in user with trial_benchmarking. These tests
+// cover route behavior for an authorized user; server.integration.spec.ts checks
+// that unauthenticated requests are rejected.
+vi.mock("./auth/authMiddleware", async () => {
+  const actual = await vi.importActual<typeof import("./auth/authMiddleware")>("./auth/authMiddleware");
+  return {
+    ...actual,
+    authenticateToken: (req: { user?: unknown }, _res: unknown, next: () => void) => {
+      req.user = { userId: 1, username: "tester" };
+      next();
+    },
+    requireAction: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+  };
+});
+
 vi.mock("./storage/PostgresClient", () => ({
   initializeDatabase: vi.fn().mockResolvedValue(undefined),
   isDatabaseConnected: mocks.isDatabaseConnected,
