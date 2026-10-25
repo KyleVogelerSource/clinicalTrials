@@ -22,12 +22,21 @@ const defaultDbSslEnabled = process.env.NODE_ENV === "production";
 const dbSslEnabled = parseBoolean(process.env.DB_SSL, defaultDbSslEnabled);
 const dbSslRejectUnauthorized = parseBoolean(process.env.DB_SSL_REJECT_UNAUTHORIZED, false);
 
+// Hosts such as Render provide a single DATABASE_URL connection string.
+// When it is set, it takes precedence over the individual DB_* variables.
+const databaseUrl = process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL) : null;
+const dbHost = databaseUrl?.hostname || process.env.DB_HOST || "postgres";
+const dbPort = Number(databaseUrl?.port || process.env.DB_PORT || 5432);
+const dbName = (databaseUrl ? decodeURIComponent(databaseUrl.pathname.replace(/^\//, "")) : "") || process.env.DB_NAME || "clinicaltrials";
+const dbUser = (databaseUrl ? decodeURIComponent(databaseUrl.username) : "") || process.env.DB_USER || "clinicaltrials";
+const dbPassword = (databaseUrl ? decodeURIComponent(databaseUrl.password) : "") || process.env.DB_PASSWORD || "clinicaltrials";
+
 const pool = new Pool({
-  host: process.env.DB_HOST ?? "postgres",
-  port: Number(process.env.DB_PORT ?? 5432),
-  database: process.env.DB_NAME ?? "clinicaltrials",
-  user: process.env.DB_USER ?? "clinicaltrials",
-  password: process.env.DB_PASSWORD ?? "clinicaltrials",
+  host: dbHost,
+  port: dbPort,
+  database: dbName,
+  user: dbUser,
+  password: dbPassword,
   ssl: dbSslEnabled
     ? {
       rejectUnauthorized: dbSslRejectUnauthorized,
@@ -69,10 +78,10 @@ interface DatabaseConnectionDiagnostics {
 }
 
 const dbConfiguration = {
-  host: process.env.DB_HOST ?? "postgres",
-  port: Number(process.env.DB_PORT ?? 5432),
-  database: process.env.DB_NAME ?? "clinicaltrials",
-  user: process.env.DB_USER ?? "clinicaltrials",
+  host: dbHost,
+  port: dbPort,
+  database: dbName,
+  user: dbUser,
   ssl: {
     enabled: dbSslEnabled,
     rejectUnauthorized: dbSslEnabled ? dbSslRejectUnauthorized : undefined,
@@ -263,7 +272,6 @@ export async function initializeDatabase() {
         ON saved_search_snapshots(run_id)
     `);
 
-    const adminPasswordHash = await bcrypt.hash("admin", 12);
 
     const superAdminRoleResult = await pool.query(
       `INSERT INTO roles (name)
@@ -321,6 +329,21 @@ export async function initializeDatabase() {
         actionResults.map((result) => result.rows[0].id),
       ]
     );
+
+    // The built-in "admin" account gets every permission. Its password comes from
+    // ADMIN_PASSWORD. Locally it falls back to "admin"; in production the account
+    // is not created/reset unless ADMIN_PASSWORD is set, so no default login exists.
+    const adminPassword = process.env.ADMIN_PASSWORD
+      || (process.env.NODE_ENV === "production" ? null : "admin");
+
+    if (!adminPassword) {
+      console.warn("ADMIN_PASSWORD is not set; skipping creation of the built-in admin account.");
+      markDatabaseConnected();
+      console.log("PostgreSQL connected and ACL schema initialized.");
+      return;
+    }
+
+    const adminPasswordHash = await bcrypt.hash(adminPassword, 12);
 
     const adminUserResult = await pool.query(
       `INSERT INTO users (username, password_hash, first_name, last_name)

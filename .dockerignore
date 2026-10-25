@@ -1,0 +1,14 @@
+# Applies to builds that use the repo root as context (Dockerfile.render).
+**/node_modules
+**/dist
+**/coverage
+**/.env
+**/.env.*
+!**/.env.sample
+.git
+terraform
+reports
+load-tests
+resources
+frontend/e2e
+*.md
