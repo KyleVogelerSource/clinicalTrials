@@ -80,7 +80,7 @@ The Express server (`backend/src/server.ts`) runs on port 3000. Current endpoint
 - `GET/POST /api/admin/*` — user/role management (requires `user_roles` permission)
 - `POST /api/clinical-trials/search` — calls ClinicalTrials.gov API with validation
 - `POST /api/clinical-trials/candidate-pool` — builds candidate pool
-- `POST /api/clinical-trials/results` — calls `AIResultsService` (Anthropic claude-sonnet-4-20250514), returns feasibility score, timeline buckets, recruitment impact breakdown, and termination reasons
+- `POST /api/clinical-trials/results` — calls `AIResultsService` (Anthropic claude-sonnet-5-5), returns feasibility score, timeline buckets, recruitment impact breakdown, and termination reasons
 
 ### Page flow
 The app follows a two-step workflow managed by `TrialWorkflowService`:

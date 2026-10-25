@@ -1,5 +1,5 @@
 const anthropicApiUrl = "https://api.anthropic.com/v1/messages";
-const anthropicModel = "claude-sonnet-4-20250514";
+const anthropicModel = "claude-sonnet-5-5";
 const voyageApiUrl = "https://api.voyageai.com/v1/embeddings";
 const voyageModel = "voyage-3";
 const timeoutMs = 10000;

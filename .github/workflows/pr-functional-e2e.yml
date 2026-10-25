@@ -45,7 +45,7 @@ jobs:
 
   frontend-e2e:
     name: frontend-e2e
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # pinned: e2e selection tests fail on the Ubuntu 26 runner image (Oct 2026)
 
     defaults:
       run:
