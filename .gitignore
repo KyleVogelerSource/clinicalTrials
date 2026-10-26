@@ -8,3 +8,12 @@ npm-debug.log
 resources/MeSH/desc2026.xml
 terraform/environments/dev/.terraform
 terraform/environments/dev/.terraform.lock.hcl
+
+# Terraform state and variables contain secrets; never commit
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+
+# Presentation working files
+presentation/
